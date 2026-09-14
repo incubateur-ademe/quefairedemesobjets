@@ -1,6 +1,34 @@
 {% extends base_template %}
+{% load l10n %}
+
+{% block title %}Solutions à proximité{% endblock %}
 
 {% block main %}
-    <turbo-frame id="assistant-solutions">
-    </turbo-frame>
+    <div class="qfa-ecran">
+        {% comment %}
+        Bandeau de tête (30141:8705) : retour vers la fiche en rappelant le
+        geste choisi, puis le champ d'adresse qui relance la recherche.
+        {% endcomment %}
+        <div class="qfa-panneau">
+            <a class="qfa-changer-geste" href="{{ url_fiche }}">
+                <span class="qfa-changer-geste__retour" aria-hidden="true"></span>
+                <span class="qfa-changer-geste__icones">
+                    {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+                </span>
+                {{ libelle_geste }}
+            </a>
+
+            <form action="" method="get" data-controller="assistant-soumission"
+                  data-action="assistant-combobox:choisi->assistant-soumission#soumettre">
+                <input type="hidden" name="objet" value="{{ parcours.objet }}">
+                <input type="hidden" name="slug" value="{{ slug }}">
+                <input type="hidden" name="geste" value="{{ geste }}">
+                {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise %}
+            </form>
+        </div>
+
+        {% include "ui/components/assistant/carte.html" with objet=slug %}
+
+        {% include "ui/components/assistant/footer.html" %}
+    </div>
 {% endblock main %}

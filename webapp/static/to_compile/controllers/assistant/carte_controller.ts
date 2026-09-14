@@ -7,7 +7,11 @@ import {
   type Lieu,
   type Zone,
 } from "../../js/assistant/lieux_visibles"
-import { elementPinpoint, type CouleursPinpoint } from "../../js/assistant/pinpoint"
+import {
+  elementAdresse,
+  elementPinpoint,
+  type CouleursPinpoint,
+} from "../../js/assistant/pinpoint"
 import type { Map as CarteMapLibre, Marker } from "maplibre-gl"
 
 type Mesure = { serveur: number; total: number; lieux: number }
@@ -18,6 +22,9 @@ function dureeServeur(entete: string | null): number {
   return correspondance ? Number(correspondance[1]) : 0
 }
 
+/** Marque remplacée par l'uuid du lieu dans l'URL modèle fournie par le gabarit. */
+const GABARIT_UUID = "__uuid__"
+
 const DELAI_STABILISATION_MS = 1000
 const ZOOM_MINIMUM = 9
 
@@ -27,8 +34,10 @@ export default class extends Controller<HTMLElement> {
     url: String,
     geste: String,
     objet: String,
+    urlLieu: String,
     longitude: Number,
     latitude: Number,
+    adressePrecise: Boolean,
   }
   static outlets = ["assistant-chrono"]
   static debounces = [{ name: "rafraichir", wait: DELAI_STABILISATION_MS }]
@@ -40,8 +49,10 @@ export default class extends Controller<HTMLElement> {
   declare urlValue: string
   declare gesteValue: string
   declare objetValue: string
+  declare urlLieuValue: string
   declare longitudeValue: number
   declare latitudeValue: number
+  declare adressePreciseValue: boolean
 
   private carte: CarteMapLibre | null = null
   private Marqueur!: typeof Marker
@@ -77,7 +88,24 @@ export default class extends Controller<HTMLElement> {
     // un `moveend`, qui déclencherait un second chargement identique au
     // premier, une seconde plus tard.
     this.carte.on("moveend", () => this.rafraichir())
+    this.#poserAdresse()
     await this.#charger()
+  }
+
+  /**
+   * Punaise rouge de l'adresse saisie.
+   *
+   * Posée une seule fois, jamais déplacée ensuite (#3356 §4) : elle marque là
+   * où l'usager a dit se trouver, pas le centre courant de la carte. Absente
+   * pour une commune, qui n'a pas de position à montrer — le centre
+   * géographique de « Lyon » induirait en erreur.
+   */
+  #poserAdresse() {
+    if (!this.carte || !this.adressePreciseValue) return
+
+    new this.Marqueur({ element: elementAdresse(this.#couleurs()), anchor: "center" })
+      .setLngLat([this.longitudeValue, this.latitudeValue])
+      .addTo(this.carte)
   }
 
   disconnect() {
@@ -176,9 +204,8 @@ export default class extends Controller<HTMLElement> {
     for (const lieu of this.lieux) {
       if (this.marqueurs.has(lieu.uuid)) continue
 
-      const element = elementPinpoint(lieu, this.#couleurs(), this.gesteValue)
-      element.addEventListener("click", () =>
-        this.dispatch("lieuChoisi", { detail: { lieu } }),
+      const element = elementPinpoint(lieu, this.#couleurs(), this.gesteValue, (uuid) =>
+        this.urlLieuValue.replace(GABARIT_UUID, uuid),
       )
 
       const marqueur = new this.Marqueur({ element, anchor: "bottom" })

@@ -7,11 +7,17 @@
     data-assistant-carte-geste-value="{{ geste }}"
     data-assistant-carte-objet-value="{{ objet|default:'' }}"
     {% comment %}
+    URL modèle : le contrôleur y remplace `__uuid__`. Construire l'URL côté
+    gabarit évite de coder le chemin en dur dans le JavaScript.
+    {% endcomment %}
+    data-assistant-carte-url-lieu-value="{% url 'assistant:lieu' uuid='__uuid__' %}{% if parametres_lieu %}?{{ parametres_lieu }}{% endif %}"
+    {% comment %}
     `unlocalize` est indispensable : la locale française formate les décimaux
     avec une virgule, que Number() lit comme NaN.
     {% endcomment %}
     data-assistant-carte-longitude-value="{{ longitude|unlocalize }}"
     data-assistant-carte-latitude-value="{{ latitude|unlocalize }}"
+    data-assistant-carte-adresse-precise-value="{{ adresse_precise|yesno:'true,false' }}"
     style="--qfa-geste-couleur: {{ couleur_geste }}"
 >
     <div

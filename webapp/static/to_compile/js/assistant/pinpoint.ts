@@ -18,9 +18,14 @@ export function elementPinpoint(
   lieu: Lieu,
   couleurs: CouleursPinpoint,
   geste: string,
+  urlDuLieu?: (uuid: string) => string,
 ): HTMLElement {
-  const element = document.createElement("button")
-  element.type = "button"
+  // Un lien plutôt qu'un bouton : la destination est une autre page. Il reste
+  // ouvrable dans un nouvel onglet, et fonctionne sans JavaScript.
+  const element = document.createElement("a")
+  // La fiche d'un lieu est un écran à part entière (maquette 30141:9303), avec
+  // son propre bouton de retour : le lien navigue, il n'alimente pas un frame.
+  if (urlDuLieu) element.href = urlDuLieu(lieu.uuid)
   element.className = "qfa-pinpoint"
   element.dataset.uuid = lieu.uuid
   element.dataset.geste = geste

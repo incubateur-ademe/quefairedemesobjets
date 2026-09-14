@@ -11,6 +11,7 @@ from assistant.lieu import gestes_de, infos_pratiques_de, propose_le_bonus
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
 from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.models.action import GroupeAction
 
 from .mixins import TurboFrameMixin
 
@@ -65,7 +66,61 @@ class ProduitView(TurboFrameMixin, DetailView):
 
 
 class SolutionsView(TurboFrameMixin, TemplateView):
+    """Écran carte : les lieux proposant le geste choisi, autour de l'adresse.
+
+    La carte ne reçoit pas de lieux au rendu : elle les demande elle-même en
+    GeoJSON une fois la toile prête, et les redemande à chaque déplacement
+    (#3356). Les servir ici les figerait au premier affichage.
+    """
+
     template_name = "ui/pages/assistant/solutions.html"
+
+    def get_context_data(self, **kwargs):
+        parcours = Parcours.depuis(self.request.GET)
+        geste = (self.request.GET.get("geste") or "").strip()
+        slug = (self.request.GET.get("slug") or "").strip()
+        groupe = GroupeAction.objects.filter(code=geste).first()
+
+        longitude, latitude = _position_de(parcours)
+        return super().get_context_data(
+            parcours=parcours,
+            geste=geste,
+            # L'endpoint GeoJSON attend le slug de la fiche, pas le libellé
+            # saisi : c'est lui qui porte les sous-catégories.
+            slug=slug,
+            libelle_geste=(groupe.libelle_court or groupe.libelle) if groupe else "",
+            couleur_geste=groupe.couleur if groupe else "",
+            url_fiche=self._url_fiche(parcours),
+            # Le lien d'une punaise emporte le parcours : sans lui, « Revenir
+            # aux solutions » perdrait le geste et l'adresse.
+            parametres_lieu=urlencode(
+                {**parcours.en_parametres(), "geste": geste, "slug": slug}
+            ),
+            longitude=longitude,
+            latitude=latitude,
+            # La punaise rouge n'apparaît que pour une adresse précise (#3356).
+            adresse_precise=parcours.precise and parcours.localise,
+            **kwargs,
+        )
+
+    def _url_fiche(self, parcours: Parcours) -> str:
+        """Retour vers la fiche de l'objet, ou l'accueil si on ne sait plus lequel."""
+        slug = (self.request.GET.get("slug") or "").strip()
+        parametres = urlencode(parcours.en_parametres())
+        if not slug:
+            return f"{reverse('assistant:home')}?{parametres}"
+        destination = reverse("assistant:produit", kwargs={"slug": slug})
+        return f"{destination}?{parametres}"
+
+
+# Centre par défaut : la France entière, quand l'adresse n'a pas été géocodée.
+CENTRE_PAR_DEFAUT = (2.3488, 48.8534)
+
+
+def _position_de(parcours: Parcours) -> tuple[float, float]:
+    if parcours.localise:
+        return parcours.longitude, parcours.latitude
+    return CENTRE_PAR_DEFAUT
 
 
 class LieuView(TurboFrameMixin, DetailView):
@@ -80,9 +135,19 @@ class LieuView(TurboFrameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         parcours = Parcours.depuis(self.request.GET)
+        # Le retour vers les solutions doit retrouver le geste et l'objet, que
+        # le parcours seul ne porte pas.
+        retour = {
+            **parcours.en_parametres(),
+            **{
+                cle: valeur
+                for cle in ("geste", "slug")
+                if (valeur := (self.request.GET.get(cle) or "").strip())
+            },
+        }
         return super().get_context_data(
             parcours=parcours,
-            parametres=urlencode(parcours.en_parametres()),
+            parametres=urlencode(retour),
             infos_pratiques=infos_pratiques_de(self.object),
             bonus_reparation=propose_le_bonus(self.object),
             gestes=gestes_de(self.object),

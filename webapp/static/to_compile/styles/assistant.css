@@ -64,7 +64,7 @@ body {
 
   --qfa-bonus-couleur: var(--qfa-geste-reparation);
   --qfa-bonus-pastille: #efcb3a; /* yellow-tournesol-850 */
-  --qfa-adresse-usager: #c9191e;
+  --qfa-adresse-usager: #e1000f; /* red-marianne, cf. maquette carte */
 
   /* Fonds pastel des étiquettes de geste. */
   --qfa-geste-reparation-fond: #dffdf7; /* green-menthe-975 */
@@ -102,15 +102,13 @@ body {
   --qfa-rayon: var(--qfa-rayon-md);
 }
 
+/* 450 px de haut et toute la largeur, comme la maquette (30141:9028). */
 .qfa-carte {
   position: relative;
   display: flex;
   flex-direction: column;
-  /* Hauteur bornée : sans elle, `flex: 1` sur la toile la laisse grandir
-     jusqu'à la hauteur du document, et la carte sort de l'écran. */
-  height: 100%;
-  max-height: 70vh;
-  min-height: 400px;
+  width: 100%;
+  height: 450px;
 }
 
 .qfa-carte__toile {
@@ -958,4 +956,28 @@ turbo-frame {
   -webkit-mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain
     no-repeat;
   mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain no-repeat;
+}
+
+/* Punaise de l'adresse saisie : un disque rouge cerné de blanc, et non une
+   goutte comme les lieux (maquette 30141:9028, « pin rouge »). La forme
+   distingue d'un coup d'œil « vous » des solutions. */
+.qfa-pinpoint--adresse {
+  width: 50px;
+  height: 50px;
+}
+
+.qfa-pinpoint--adresse::before,
+.qfa-pinpoint--adresse::after {
+  -webkit-mask: none;
+  mask: none;
+}
+
+.qfa-pinpoint--adresse::before {
+  background: url("../images/assistant/ui/adresse-cercle.svg") center / contain
+    no-repeat;
+}
+
+.qfa-pinpoint--adresse::after {
+  inset: 9px;
+  background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
 }
