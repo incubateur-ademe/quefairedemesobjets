@@ -1,9 +1,11 @@
 import logging
 
 import polars as pl
+from sentence_transformers import SentenceTransformer
+
 from ml_deduplication.modeling.xgboost.blocking import block_df
 from ml_deduplication.modeling.xgboost.features_engineering import generate_features
-from sentence_transformers import SentenceTransformer
+from ml_deduplication.modeling.xgboost.schema import OPTIMIZED_SCHEMA
 
 logger = logging.getLogger(__name__)
 
@@ -100,18 +102,7 @@ def preprocess_features(
         .alias("adresse_clean_vector")
     )
 
-    optimized_schema = {
-        "cluster_id": pl.Categorical,
-        "cluster_id_split": pl.Categorical,
-        "example_type": pl.Categorical,
-        "naf_principal": pl.Categorical,
-        "public_accueilli": pl.Categorical,
-        "reprise": pl.Categorical,
-        "latitude": pl.Float32,
-        "longitude": pl.Float32,
-        "code_commune_insee": pl.Categorical,
-        "split": pl.Categorical,
-    }
+    optimized_schema = OPTIMIZED_SCHEMA
     df_features_preprocessed = df_features_preprocessed.with_columns(
         pl.col(k).cast(v)
         for k, v in optimized_schema.items()

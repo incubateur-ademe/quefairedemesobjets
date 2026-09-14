@@ -8,10 +8,14 @@ import argparse
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import polars as pl
+from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 from ml_deduplication.modeling.splink.splink_model import (
     BusinessRulesSplink,
     create_ducbdb_backend,
@@ -20,9 +24,6 @@ from ml_deduplication.training.splink.splink_config import (
     BLOCKING_PARENT_ID,
     BUSINESS_RULES_FRAGMENT,
 )
-from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
-from tqdm.contrib.logging import logging_redirect_tqdm
 
 logging.basicConfig(
     format="%(asctime)s | %(name)s | %(message)s", level=logging.DEBUG, force=True
@@ -111,7 +112,7 @@ def main():
     # Generate run ID
     run_id = (
         args.run_id
-        or f"inference_{datetime.strftime(datetime.now(timezone.utc), '%Y%m%dT%H%M%S')}"
+        or f"inference_{datetime.strftime(datetime.now(UTC), '%Y%m%dT%H%M%S')}"
     )
 
     # Step 1: Query acteurs from database

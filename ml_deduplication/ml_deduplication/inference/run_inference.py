@@ -7,12 +7,15 @@ builds features, runs clustering, and outputs results.
 import argparse
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
 import polars as pl
 import psycopg
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
+
 from ml_deduplication.dataset.features_creation import preprocess_features_dataset
 from ml_deduplication.modeling.dedupe.model import BusinessRulesStaticDedupe
 from ml_deduplication.modeling.dedupe.xgb_model import BusinessRulesStaticXGBoost
@@ -25,8 +28,6 @@ from ml_deduplication.training.utils import (
     partition_to_dict,
     partition_to_results_dict,
 )
-from tqdm import tqdm
-from tqdm.contrib.logging import tqdm_logging_redirect
 
 logging.basicConfig(
     format="%(asctime)s | %(name)s | %(message)s", level=logging.DEBUG, force=True
@@ -216,7 +217,7 @@ def main():
     # Generate run ID
     run_id = (
         args.run_id
-        or f"inference_{datetime.strftime(datetime.now(timezone.utc), '%Y%m%dT%H%M%S')}"
+        or f"inference_{datetime.strftime(datetime.now(UTC), '%Y%m%dT%H%M%S')}"
     )
 
     # Step 1: Load the saved model

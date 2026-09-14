@@ -2,12 +2,16 @@ import argparse
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
 import polars as pl
 from altair import Chart
+from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
+from tqdm.contrib.logging import tqdm_logging_redirect
+
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import (
     pairwise_metrics_from_clusters,
@@ -25,9 +29,6 @@ from ml_deduplication.training.utils import (
     stringify_params_list,
     transform_cluster_df_to_dict,
 )
-from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
-from tqdm.contrib.logging import tqdm_logging_redirect
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s | %(filename)s | %(message)s", force=True
@@ -229,7 +230,7 @@ if __name__ == "__main__":
         logger.error("Dataset not found: %s", args.dataset_path)
         raise SystemExit(1)
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%d_%H%M")
+    timestamp = datetime.now(UTC).strftime("%Y_%m_%d_%H%M")
     # Ensure log directory exists
     log_dir: Path = args.log_dir / f"training_{args.mode}_{timestamp}"
     log_dir.mkdir(parents=True, exist_ok=True)

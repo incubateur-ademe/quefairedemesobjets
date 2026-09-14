@@ -39,6 +39,9 @@ notebooks = [
     "ipywidgets>=8.1.8",
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["ml_deduplication"]
+
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13"]
 build-backend = "uv_build"

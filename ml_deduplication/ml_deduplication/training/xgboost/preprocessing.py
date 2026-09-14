@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 
 import polars as pl
+from sentence_transformers import SentenceTransformer
+
 from ml_deduplication.modeling.xgboost.model import (
     DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
     DEFAULT_SHOULD_BE_EQUAL_FIELDS,
@@ -9,7 +11,6 @@ from ml_deduplication.modeling.xgboost.model import (
 from ml_deduplication.modeling.xgboost.preprocessing import preprocess_entities_df
 from ml_deduplication.training.settings import RANDOM_SEED
 from ml_deduplication.training.utils import assign_kfolds
-from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 

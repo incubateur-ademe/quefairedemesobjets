@@ -10,10 +10,11 @@ from statistics import mean
 import duckdb
 import polars as pl
 from altair import Chart
-from ml_deduplication.modeling.splink.schemas import SCHEMA_CLUSTERS, SCHEMA_PREDS
-from ml_deduplication.training.utils import split_train_dev
 from sentence_transformers import SentenceTransformer
 from splink import DuckDBAPI, Linker, SettingsCreator
+
+from ml_deduplication.modeling.splink.schemas import SCHEMA_CLUSTERS, SCHEMA_PREDS
+from ml_deduplication.training.utils import split_train_dev
 
 logger = logging.getLogger(__name__)
 

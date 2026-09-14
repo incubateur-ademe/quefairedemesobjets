@@ -2,7 +2,7 @@ import argparse
 import json
 import logging
 from collections.abc import Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from pickle import dump
 from typing import Any
@@ -10,6 +10,10 @@ from typing import Any
 from sentence_transformers import SentenceTransformer  # isort: skip
 import numpy as np
 import polars as pl
+from sklearn.metrics import (
+    classification_report,
+)
+
 from ml_deduplication.modeling.xgboost.model import (
     DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
     DEFAULT_SHOULD_BE_EQUAL_FIELDS,
@@ -24,9 +28,6 @@ from ml_deduplication.training.xgboost.training import (
 )
 from ml_deduplication.training.xgboost.utils import (
     generate_performance_reports,
-)
-from sklearn.metrics import (
-    classification_report,
 )
 
 logger = logging.getLogger(__name__)
@@ -229,7 +230,7 @@ if __name__ == "__main__":
         logger.error("Dataset not found: %s", args.dataset_path)
         raise SystemExit(1)
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%d_%H%M")
+    timestamp = datetime.now(UTC).strftime("%Y_%m_%d_%H%M")
     # Ensure log directory exists
     log_dir: Path = args.log_dir / f"training_{args.mode}_{timestamp}"
     log_dir.mkdir(parents=True, exist_ok=True)

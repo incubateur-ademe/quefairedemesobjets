@@ -4,15 +4,6 @@ from typing import Any
 
 import numpy as np
 import polars as pl
-from ml_deduplication.modeling.xgboost.model import (
-    XGBoostBusinessRulesModel,
-)
-from ml_deduplication.training.settings import PROJECT_FOLDER, RANDOM_SEED
-from ml_deduplication.training.xgboost.preprocessing import prepare_folds
-from ml_deduplication.training.xgboost.utils import (
-    compute_pairwise_metrics_at_thresholds,
-    generate_performance_reports,
-)
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -22,6 +13,16 @@ from sklearn.metrics import (
 )
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
+
+from ml_deduplication.modeling.xgboost.model import (
+    XGBoostBusinessRulesModel,
+)
+from ml_deduplication.training.settings import PROJECT_FOLDER, RANDOM_SEED
+from ml_deduplication.training.xgboost.preprocessing import prepare_folds
+from ml_deduplication.training.xgboost.utils import (
+    compute_pairwise_metrics_at_thresholds,
+    generate_performance_reports,
+)
 
 logger = logging.getLogger(__name__)
 

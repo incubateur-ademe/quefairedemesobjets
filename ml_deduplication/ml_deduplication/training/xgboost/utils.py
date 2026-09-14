@@ -1,18 +1,19 @@
 from collections.abc import Iterable
 
 import polars as pl
+from sklearn.metrics import (
+    confusion_matrix,
+    fbeta_score,
+    precision_score,
+    recall_score,
+)
+
 from ml_deduplication.evaluation.metrics.cluster import generate_full_cluster_report
 from ml_deduplication.evaluation.metrics.pairwise import (
     pairwise_metrics_from_clusters,
 )
 from ml_deduplication.training.utils import (
     create_acteur_to_cluster_dict,
-)
-from sklearn.metrics import (
-    confusion_matrix,
-    fbeta_score,
-    precision_score,
-    recall_score,
 )
 
 
