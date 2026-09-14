@@ -150,7 +150,10 @@ class TestGestesDuLieu:
         s'afficher deux fois."""
         lieu = DisplayedActeurFactory()
         groupe = GroupeActionFactory(code="reparer", libelle_court="Réparer")
-        for code in ("reparer", "donner"):
+        # Deux actions distinctes du *même* groupe. Les codes sont inventés :
+        # `ActionFactory` fait un get_or_create sur le code, et réutiliser un
+        # code existant ramènerait l'action réelle, avec son propre groupe.
+        for code in ("reparer_test_a", "reparer_test_b"):
             DisplayedPropositionServiceFactory(
                 acteur=lieu, action=ActionFactory(code=code, groupe_action=groupe)
             )

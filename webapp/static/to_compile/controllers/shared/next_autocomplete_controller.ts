@@ -37,17 +37,8 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
 
   static #LISTBOX_BOTTOM_MARGIN_PX = 8
 
-  #boundReposition = () => this.#positionListbox()
-
   connect() {
     this.#hideListbox()
-    window.addEventListener("resize", this.#boundReposition)
-    window.addEventListener("scroll", this.#boundReposition, { passive: true })
-  }
-
-  disconnect() {
-    window.removeEventListener("resize", this.#boundReposition)
-    window.removeEventListener("scroll", this.#boundReposition)
   }
 
   clickOutside(event) {
@@ -306,19 +297,9 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     const anchorRect = (
       isInnerWrapper ? inputParent : this.inputTarget
     ).getBoundingClientRect()
-    const wrapperRect = this.element.getBoundingClientRect()
-    this.resultsTarget.style.top = `${anchorRect.bottom}px`
-    this.resultsTarget.style.left = `${wrapperRect.left}px`
-    this.resultsTarget.style.width = `${wrapperRect.width}px`
-    // Clear any previous max-height before measuring, otherwise a clamped
-    // value from a prior pass leaks into the new layout.
-    this.resultsTarget.style.maxHeight = ""
-
-    // Read the actual top *after* layout — Tailwind margin on the dropdown
-    // (e.g. qf-mt-1w) shifts it below the anchor.
-    const frameTop = this.resultsTarget.getBoundingClientRect().top
     const margin = AutocompleteController.#LISTBOX_BOTTOM_MARGIN_PX
-    const bodyBottom = document.documentElement.clientHeight
+    const frameTop = this.resultsTarget.getBoundingClientRect().top
+    const bodyBottom = document.documentElement.getBoundingClientRect().height
     const available = computeAvailableHeight(frameTop, bodyBottom, margin)
     this.resultsTarget.style.maxHeight = `${available}px`
   }

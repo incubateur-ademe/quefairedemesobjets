@@ -12,7 +12,7 @@ import {
   elementPinpoint,
   type CouleursPinpoint,
 } from "../../js/assistant/pinpoint"
-import type { Map as CarteMapLibre, Marker } from "maplibre-gl"
+import type { Map as CarteMapLibre, Marker, StyleSpecification } from "maplibre-gl"
 
 type Mesure = { serveur: number; total: number; lieux: number }
 
@@ -70,7 +70,12 @@ export default class extends Controller<HTMLElement> {
 
     this.carte = new Map({
       container: this.conteneurTarget,
-      style: mapStyles.desaturated,
+      // `carte-facile` embarque sa propre copie de maplibre-gl (5.x) alors que
+      // la V1 en exige une 6.x : les deux déclarations de `StyleSpecification`
+      // divergent sur un champ optionnel, `font-faces`. L'objet est identique à
+      // l'exécution ; seules les déclarations se contredisent, d'où ce cast
+      // délibérément étroit plutôt qu'un `any`.
+      style: mapStyles.desaturated as unknown as StyleSpecification,
       center: [this.longitudeValue, this.latitudeValue],
       zoom: 13,
       attributionControl: { compact: true },

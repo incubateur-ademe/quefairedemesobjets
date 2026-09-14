@@ -132,20 +132,6 @@ models:
         - base
         - propositionservice
         - visible
-  - name: base_action
-    description: "Actions"
-    columns:
-      - name: id
-        description: "L'identifiant de l'action"
-      - name: nom
-        description: "Le nom de l'action"
-    config:
-      materialized: table
-      tags:
-        - stats
-        - base
-        - actions
-        - visible
   - name: base_random_position
     description: "Positions aléatoires dans la France"
     columns:
