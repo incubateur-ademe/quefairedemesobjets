@@ -28,11 +28,11 @@ Mesures préventives et dispositifs permettant de **maintenir le service en fonc
 
 ### Bases de données (Scaleway RDB PostgreSQL 16)
 
-| Mécanisme                  | Détail                                                                                                                                                                                  |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Offre RDB HA**           | Bases `lvao-{env}-webapp`, `lvao-{env}-warehouse`, `lvao-{env}-airflow` provisionnées en mode **Haute Disponibilité** (réplication synchrone + failover automatique géré par Scaleway). |
-| **Point-in-time recovery** | Rétention PITR 24 h (granularité seconde) sur chaque base.                                                                                                                              |
-| **`sslmode=require`**      | Chiffrement systématique des connexions clientes.                                                                                                                                       |
+| Mécanisme                  | Détail                                                                                                                                                                                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Offre RDB HA**           | Instances `lvao-{env}-webapp` et `lvao-{env}-warehouse` provisionnées en mode **Haute Disponibilité** (réplication synchrone + failover automatique géré par Scaleway). Les bases Airflow et Metabase sont hébergées sur l'instance warehouse. |
+| **Point-in-time recovery** | Rétention PITR 24 h (granularité seconde) sur chaque base.                                                                                                                                                                                     |
+| **`sslmode=require`**      | Chiffrement systématique des connexions clientes.                                                                                                                                                                                              |
 
 ### Object Storage (Scaleway S3 `fr-par`)
 

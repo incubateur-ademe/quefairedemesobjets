@@ -858,7 +858,7 @@ export async function searchOnProduitPage(page: Page, searchedAddress: string) {
     })
   } catch {
     const someWagtailCarteBlock = page
-      .locator(".cmsfr-block-carte_sur_mesure turbo-frame[data-testid=carte]")
+      .locator(".cmsfr-block-carte turbo-frame[data-testid=carte]")
       .first()
     await expect(someWagtailCarteBlock).toBeAttached({ timeout: 1000 })
     await searchCarteAndWaitForActeurs(page, searchedAddress, page, {

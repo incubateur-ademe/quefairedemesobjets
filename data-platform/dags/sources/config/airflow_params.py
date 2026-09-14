@@ -36,7 +36,6 @@ from sources.tasks.transform.transform_df import (
     get_latlng_from_geopoint,
     merge_sous_categories_columns,
 )
-from utils.django import django_setup_full
 
 PATH_NOMENCLARURE_DECHET = (
     "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
@@ -289,6 +288,8 @@ def get_mapping_config(mapping_key: str = "sous_categories"):
 
 
 def get_souscategorie_mapping_from_db():
+
+    from utils.django import django_setup_full
 
     django_setup_full()
     from qfdmo.models.categorie_objet import SousCategorieObjet

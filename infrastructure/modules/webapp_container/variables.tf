@@ -59,6 +59,16 @@ variable "SECRET_KEY" {
   sensitive = true
 }
 
+variable "NOTION_TOKEN" {
+  type      = string
+  sensitive = true
+}
+
+variable "NOTION_CONTACT_FORM_DATABASE_ID" {
+  type      = string
+  sensitive = true
+}
+
 variable "ALLOWED_HOSTS" {
   type    = string
   default = ""
@@ -77,6 +87,11 @@ variable "AWS_SECRET_ACCESS_KEY" {
 }
 
 variable "AWS_STORAGE_BUCKET_NAME" {
+  type    = string
+  default = ""
+}
+
+variable "BASE_URL" {
   type    = string
   default = ""
 }

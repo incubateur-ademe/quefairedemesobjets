@@ -817,7 +817,7 @@ class ViewModeForm(AutoSubmitMixin, GetFormMixin, CarteConfigFormMixin, DsfrBase
         CARTE = {
             "value": CarteConfig.ModesAffichage.CARTE.value,
             "label": CarteConfig.ModesAffichage.CARTE.label,
-            "icon": "map-pin-2-fill",
+            "icon": "map-pin-2-line",
         }
         LISTE = {
             "value": CarteConfig.ModesAffichage.LISTE.value,

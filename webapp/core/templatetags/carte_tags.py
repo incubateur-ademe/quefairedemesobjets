@@ -283,7 +283,7 @@ def acteurs_table(context, acteurs):
 
 
 @register.inclusion_tag("templatetags/carte.html", takes_context=True)
-def carte(context: dict, carte_config: CarteConfig) -> dict:
+def carte(context: dict, carte_config: CarteConfig, in_modal: bool = False) -> dict:
     """
     Render an embedded carte (map) in a turbo-frame for a Wagtail page.
     Used in Wagtail StreamField blocks to display interactive maps of actors
@@ -297,6 +297,9 @@ def carte(context: dict, carte_config: CarteConfig) -> dict:
         ),
         initial_query_string=carte_config.SOLUTION_TEMPORAIRE_A_SUPPRIMER_DES_QUE_POSSIBLE_parametres_url,
     )
+
+    if in_modal:
+        base_url = with_query(base_url, "in_modal", "1")
 
     # Avoid circular import — ProduitPage depends on this module's blocks.
     from qfdmd.models import ProduitPage

@@ -4,9 +4,7 @@ import logging
 
 import numpy as np
 import pandas as pd
-
 from utils.dataframes import df_filter
-from utils.django import DJANGO_WH_CONNECTION_NAME, django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +13,8 @@ def enrich_dbt_model_read(
     dbt_model_name: str, filters: list[dict] = []
 ) -> pd.DataFrame:
     """Reads necessary QFDMO acteurs and AE entries from DB"""
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_setup_full
+
     django_setup_full()
     from django.db import connections
 

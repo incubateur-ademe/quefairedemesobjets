@@ -19,6 +19,7 @@ type PersonProperties = {
 type UserConversionConfig = {
   homePageView: number
   produitPageView: number
+  contentPageWithConversionView: number
   userInteractionWithMap: number
   userInteractionWithSolutionDetails: number
 }
@@ -81,6 +82,7 @@ export default class extends Controller<HTMLElement> {
   userConversionScoreConfig: UserConversionConfig = {
     homePageView: 0,
     produitPageView: 1,
+    contentPageWithConversionView: 1,
     userInteractionWithMap: 1,
     userInteractionWithSolutionDetails: 1,
   }

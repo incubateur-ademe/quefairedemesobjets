@@ -104,18 +104,14 @@ class TestCacheBypass:
         resp = get("/", headers={"Host": BASE_DOMAIN})
         assert resp.headers.get("X-Cache-Status") == "BYPASS"
 
-    @pytest.mark.skipif(
-        CACHE_DISABLED, reason="Container built with NGINX_DISABLE_CACHE=1"
-    )
+    @pytest.mark.skipif(CACHE_DISABLED, reason="Only valid when NGINX_DISABLE_CACHE=1")
     def test_anonymous_request_is_cache_eligible(self):
         resp = get("/", headers={"Host": BASE_DOMAIN})
         assert resp.headers.get("X-Cache-Status") in ("MISS", "HIT", "STALE", "EXPIRED")
 
 
 class TestCacheKeySecFetchDest:
-    @pytest.mark.skipif(
-        CACHE_DISABLED, reason="Container built with NGINX_DISABLE_CACHE=1"
-    )
+    @pytest.mark.skipif(CACHE_DISABLED, reason="Only valid when NGINX_DISABLE_CACHE=1")
     def test_iframe_and_document_have_separate_cache_entries(self):
         # Use a unique path to avoid hitting entries cached by other tests.
         path = f"/?_cache_test={time.time()}"
@@ -137,6 +133,25 @@ class TestCacheKeySecFetchDest:
             path, headers={"Host": BASE_DOMAIN, "Sec-Fetch-Dest": "document"}
         )
         assert resp_doc_2.headers.get("X-Cache-Status") == "HIT"
+
+
+class TestCacheKeyIgnoresRef:
+    @pytest.mark.skipif(CACHE_DISABLED, reason="Only valid when NGINX_DISABLE_CACHE=1")
+    def test_different_ref_values_share_one_cache_entry(self):
+        # ref=<base64 parent URL> is added by iframe.js for client-side analytics
+        # only; a different ref must not bust the cache.
+        stamp = time.time()
+        headers = {"Host": BASE_DOMAIN, "Sec-Fetch-Dest": "iframe"}
+
+        first = get(f"/infotri/embed?ref=AAAA&_t={stamp}", headers=headers)
+        assert first.headers.get("X-Cache-Status") == "MISS"
+
+        second = get(f"/infotri/embed?ref=BBBB&_t={stamp}", headers=headers)
+        assert second.headers.get("X-Cache-Status") == "HIT"
+
+        # Other params still matter.
+        third = get(f"/infotri/embed?ref=BBBB&_t={stamp}&x=1", headers=headers)
+        assert third.headers.get("X-Cache-Status") == "MISS"
 
 
 class TestXCacheStatusHeader:

@@ -9,7 +9,6 @@ from pydantic import AnyUrl
 from shared.config.airflow import TMP_FOLDER
 from utils import logging_utils as log
 from utils.cmd import cmd_run
-from utils.django import django_schema_create_and_check, django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +18,8 @@ def command_psql_copy_from_csv(
     delimiter: str,
 ) -> str:
     """Command to load CSV into DB, factored out for reuse"""
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.conf import settings
 
@@ -38,6 +39,8 @@ def command_ogr2ogr_import_geojson(
 
     For more information about ogr2ogr, see: https://gdal.gloobe.org/ogr/ogr2ogr.html
     """
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.conf import settings
 
@@ -71,6 +74,8 @@ def command_ogr2ogr_import_geojson_from_stdin(
     geometry_column_name: str = "contours_administratifs",
 ) -> str:
     """Command to load GeoJSON into DB using ogr2ogr from stdin"""
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.conf import settings
 
@@ -217,6 +222,8 @@ def clone_table_create(
     fix_corrupted_utf8_sed_substitutions: list[str],
     dry_run: bool,
 ) -> None:
+    from utils.django import django_schema_create_and_check, django_setup_full
+
     django_setup_full()
     from django.db import connections
 

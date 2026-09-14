@@ -62,5 +62,7 @@ resource "scaleway_container" "airflow_scheduler" {
     SCW_DEFAULT_PROJECT_ID                  = var.SCW_DEFAULT_PROJECT_ID
     SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
     SECRET_KEY                              = var.SECRET_KEY
+    MATTERMOST_WEBHOOK_URL                  = var.MATTERMOST_WEBHOOK_URL
+    POSTHOG_PERSONAL_API_KEY                = var.POSTHOG_PERSONAL_API_KEY
   }
 }

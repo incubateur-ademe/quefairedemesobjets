@@ -47,6 +47,7 @@ resource "scaleway_container" "webapp" {
   environment_variables = merge(
     {
       ENVIRONMENT             = var.environment
+      BASE_URL                = var.BASE_URL
       ALLOWED_HOSTS           = var.ALLOWED_HOSTS
       AWS_STORAGE_BUCKET_NAME = var.AWS_STORAGE_BUCKET_NAME
       AWS_S3_REGION_NAME      = var.AWS_S3_REGION_NAME
@@ -57,11 +58,13 @@ resource "scaleway_container" "webapp" {
 
   secret_environment_variables = merge(
     {
-      DATABASE_URL          = var.DATABASE_URL
-      SECRET_KEY            = var.SECRET_KEY
-      AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
-      AWS_SECRET_ACCESS_KEY = var.AWS_SECRET_ACCESS_KEY
-      SENTRY_DSN            = var.SENTRY_DSN
+      DATABASE_URL                    = var.DATABASE_URL
+      SECRET_KEY                      = var.SECRET_KEY
+      NOTION_TOKEN                    = var.NOTION_TOKEN
+      NOTION_CONTACT_FORM_DATABASE_ID = var.NOTION_CONTACT_FORM_DATABASE_ID
+      AWS_ACCESS_KEY_ID               = var.AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY           = var.AWS_SECRET_ACCESS_KEY
+      SENTRY_DSN                      = var.SENTRY_DSN
     },
     var.extra_secret_environment_variables,
   )

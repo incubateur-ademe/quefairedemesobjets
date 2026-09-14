@@ -6,13 +6,13 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from utils.django import django_setup_full
-
 logger = logging.getLogger(__name__)
 
 
 def value_to_json_ready(key: str, value):
     """Convert a parent_data_new value to a JSON-serializable form."""
+
+    from utils.django import django_setup_full
 
     django_setup_full()
     from django.db import models
@@ -58,6 +58,8 @@ def data_serialize(model: type[Any], data: dict) -> dict:
     Returns:
     - A dictionary with values adjusted to match the model's requirements.
     """
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.db import models
     from qfdmo.models.utils import django_model_to_wire

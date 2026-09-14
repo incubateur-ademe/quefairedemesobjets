@@ -2,10 +2,10 @@
 
 ## Using two databases instance
 
-The application uses two PostgreSQL databases:
+The application uses two PostgreSQL instances:
 
 - `webapp`: stores and serves the data used to administer and display objects for the “La Carte” and “L’Assistant” applications
-- `warehouse`: used for all data processing, calculations, and consolidation work
+- `warehouse`: used for all data processing, calculations, and consolidation work. It also hosts the Airflow metadata database and, when enabled, the Metabase application database.
 
 The goal is to separate the databases so that data processing does not impact the performance of the web application.
 We also need much more storage capacity for data processing, and higher responsiveness for the web application.

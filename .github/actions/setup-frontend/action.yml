@@ -27,8 +27,12 @@ runs:
       id: cache-node-modules
       uses: actions/cache@v6
       with:
-        path: ${{ inputs.working-directory }}/node_modules
-        key: node-modules-${{ runner.os }}-${{ hashFiles(format('{0}/package-lock.json', inputs.working-directory)) }}
+        # npm workspace: packages are hoisted to the root node_modules and the
+        # lockfile lives at the repo root, not in the working directory
+        path: |
+          node_modules
+          ${{ inputs.working-directory }}/node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install npm dependencies
       if: steps.cache-node-modules.outputs.cache-hit != 'true'

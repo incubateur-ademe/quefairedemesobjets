@@ -13,6 +13,7 @@ class ContactFormData(BaseModel):
     email: EmailStr
     subject: str
     message: str
+    location: str
 
 
 def create_new_row_in_notion_table(database_id: str, data: ContactFormData):
@@ -35,6 +36,7 @@ def create_new_row_in_notion_table(database_id: str, data: ContactFormData):
             "Objet": {"rich_text": [{"text": {"content": data.subject}}]},
             "Message": {"rich_text": [{"text": {"content": data.message}}]},
             "Date": {"date": {"start": timezone.now().isoformat()}},
+            "Localisation": {"rich_text": [{"text": {"content": data.location}}]},
         },
     }
 

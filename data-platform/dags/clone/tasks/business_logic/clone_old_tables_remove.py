@@ -2,7 +2,6 @@ import logging
 import re
 
 from utils import logging_utils as log
-from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +11,8 @@ def clone_old_tables_remove(
     remove_table_name_pattern: re.Pattern,
     dry_run: bool,
 ) -> None:
+    from utils.django import django_setup_full
+
     django_setup_full()
     from django.db import connections
 

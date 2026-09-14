@@ -37,15 +37,9 @@ Dans chaque environnement, 2 conteneurs sont déployés:
 - lvao-airflow-scheduler : scheduler d'airflow, orchestre et execute les dags car l'option `LocalExecutor` est active
 - lvao-airflow-webserver : interface d'airflow
 
-Chaque environnement utilise sa propre base de données :
+Chaque environnement utilise sa propre base de données `airflow` sur l'instance warehouse : lvao-{env}-warehouse
 
-- lvao-preprod-airflow
-- lvao-prod-airflow
-
-et chaque environnement utilise son espace de stockage s3 :
-
-- lvao-preprod-airflow
-- lvao-prod-airflow
+et chaque environnement utilise son espace de stockage s3 : lvao-{env}-airflow
 
 ## Déploiement et configuration
 

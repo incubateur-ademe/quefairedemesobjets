@@ -40,7 +40,7 @@ flowchart LR
         subgraph Databases["🗄️ Bases PostgreSQL 16 (RDB HA)"]
             db_webapp[("DB Webapp\nlvao-{env}-webapp")]
             db_warehouse[("DB Warehouse\nlvao-{env}-warehouse")]
-            db_airflow[("DB Airflow\nlvao-{env}-airflow")]
+            db_airflow[("DB Airflow\nsur lvao-{env}-warehouse")]
             db_warehouse <-->|"postgres_fdw"| db_webapp
         end
 
@@ -127,7 +127,7 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | **DB Webapp** `lvao-{env}-webapp` (données métier, cache, médias Wagtail, PostGIS)                                           | Scaleway RDB PostgreSQL 16 HA                         | [`db/db_organisation.md`](../db/db_organisation.md), [`db/architecture.md`](../db/architecture.md)     |
 | **DB Warehouse** `lvao-{env}-warehouse` (couches dbt)                                                                        | Scaleway RDB                                          | [`db/db_organisation.md`](../db/db_organisation.md), [`data-platform/dbt.md`](../data-platform/dbt.md) |
-| **DB Airflow** `lvao-{env}-airflow` (métadonnées)                                                                            | Scaleway RDB                                          | [`data-platform/airflow.md`](../data-platform/airflow.md)                                              |
+| **DB Airflow** `airflow` sur `lvao-{env}-warehouse` (métadonnées)                                                            | Scaleway RDB                                          | [`data-platform/airflow.md`](../data-platform/airflow.md)                                              |
 | Liaison **`postgres_fdw`** Webapp ↔ Warehouse                                                                                | Schémas virtuels `webapp_public` / `warehouse_public` | [`db/db_organisation.md`](../db/db_organisation.md)                                                    |
 | **Object Storage** S3 (`qfdmo-interface`, `lvao-opendata`, `lvao-{env}-airflow`, `lvao-data-source`, `lvao-terraform-state`) | Scaleway S3 (`fr-par`)                                | [`infrastructure/provisioning.md`](../infrastructure/provisioning.md)                                  |
 

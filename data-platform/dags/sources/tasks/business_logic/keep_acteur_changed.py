@@ -9,7 +9,6 @@ from cluster.config.metadata import (
 )
 from sources.config.models import SourceConfig
 from sources.tasks.transform.transform_df import compute_identifiant_unique
-from utils.django import django_setup_full, get_model_fields
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +151,8 @@ def keep_acteur_changed(
     df_acteur_from_db: pd.DataFrame,
     dag_config: SourceConfig,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    from utils.django import django_setup_full, get_model_fields
+
     django_setup_full()
 
     from data.models.changes.acteur_rgpd_anonymize import VALUE_ANONYMIZED

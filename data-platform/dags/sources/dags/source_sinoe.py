@@ -9,10 +9,6 @@ from sources.config.airflow_params import (
     source_sinoe_dechet_mapping_get,
 )
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
-from utils.django import django_setup_full
-
-django_setup_full()
-from qfdmo.models.acteur import ActeurStatus  # noqa: E402
 
 with DAG(
     dag_id="source_sinoe",
@@ -96,8 +92,11 @@ with DAG(
                         "value": "ademesinoedecheteries",
                     },
                     {
+                        # Hardcoded values (ActeurStatus.ACTIF):
+                        # not ideal, but avoids initializing Django at DAG module load
+                        # time.
                         "column": "statut",
-                        "value": ActeurStatus.ACTIF.value,
+                        "value": "ACTIF",
                     },
                     # 4. Transformation du dataframe
                     {
