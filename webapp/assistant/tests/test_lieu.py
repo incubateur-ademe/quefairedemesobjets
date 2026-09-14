@@ -3,8 +3,13 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from assistant.lieu import infos_pratiques_de, propose_le_bonus
-from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory, LabelQualiteFactory
+from assistant.lieu import gestes_de, infos_pratiques_de, propose_le_bonus
+from unit_tests.qfdmo.acteur_factory import (
+    DisplayedActeurFactory,
+    DisplayedPropositionServiceFactory,
+    LabelQualiteFactory,
+)
+from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -134,3 +139,30 @@ class TestPageLieu:
             if "displayedacteur" in requete["sql"]
         ]
         assert len(sur_le_lieu) == 3
+
+
+class TestGestesDuLieu:
+    def test_un_lieu_sans_proposition_n_a_pas_de_geste(self):
+        assert gestes_de(DisplayedActeurFactory()) == []
+
+    def test_les_gestes_sont_dedupliques(self):
+        """Plusieurs actions partagent un groupe : « Réparer » ne doit pas
+        s'afficher deux fois."""
+        lieu = DisplayedActeurFactory()
+        groupe = GroupeActionFactory(code="reparer", libelle_court="Réparer")
+        for code in ("reparer", "donner"):
+            DisplayedPropositionServiceFactory(
+                acteur=lieu, action=ActionFactory(code=code, groupe_action=groupe)
+            )
+
+        assert [g["code"] for g in gestes_de(lieu)] == ["reparer"]
+
+    def test_les_gestes_suivent_l_ordre_de_la_spec(self):
+        lieu = DisplayedActeurFactory()
+        for code, libelle in [("trier", "Déposer"), ("reparer", "Réparer")]:
+            groupe = GroupeActionFactory(code=code, libelle_court=libelle)
+            DisplayedPropositionServiceFactory(
+                acteur=lieu, action=ActionFactory(code=code, groupe_action=groupe)
+            )
+
+        assert [g["code"] for g in gestes_de(lieu)] == ["reparer", "trier"]

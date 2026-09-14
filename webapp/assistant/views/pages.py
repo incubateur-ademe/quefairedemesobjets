@@ -7,7 +7,7 @@ from django.views import View
 from django.views.generic import DetailView, TemplateView
 
 from assistant.consignes import consignes_pour
-from assistant.lieu import infos_pratiques_de, propose_le_bonus
+from assistant.lieu import gestes_de, infos_pratiques_de, propose_le_bonus
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
 from qfdmo.models.acteur import DisplayedActeur
@@ -85,5 +85,6 @@ class LieuView(TurboFrameMixin, DetailView):
             parametres=urlencode(parcours.en_parametres()),
             infos_pratiques=infos_pratiques_de(self.object),
             bonus_reparation=propose_le_bonus(self.object),
+            gestes=gestes_de(self.object),
             **kwargs,
         )

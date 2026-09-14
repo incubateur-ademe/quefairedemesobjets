@@ -45,3 +45,26 @@ def infos_pratiques_de(lieu) -> list[str]:
         infos.append(lieu.consignes_dacces)
 
     return infos
+
+
+def gestes_de(lieu) -> list[dict]:
+    """Les gestes que le lieu propose, dédupliqués et ordonnés.
+
+    Un acteur porte une proposition de service par action ; plusieurs actions
+    partagent un même groupe. La maquette (30142:9581) montre des étiquettes de
+    geste, donc des groupes : sans déduplication, « Réparer » s'afficherait
+    autant de fois qu'il y a d'actions dans le groupe.
+    """
+    from assistant.consignes import ORDRE_GESTES
+
+    groupes = {}
+    for proposition in lieu.proposition_services.all():
+        groupe = proposition.action.groupe_action if proposition.action else None
+        if groupe and groupe.code not in groupes:
+            groupes[groupe.code] = {
+                "code": groupe.code,
+                "libelle": groupe.libelle_court or groupe.libelle,
+            }
+
+    ordre = {code: rang for rang, code in enumerate(ORDRE_GESTES)}
+    return sorted(groupes.values(), key=lambda g: ordre.get(g["code"], len(ordre)))
