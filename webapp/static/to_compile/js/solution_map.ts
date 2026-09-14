@@ -8,10 +8,18 @@ import {
   Marker,
   NavigationControl,
   Popup,
+  setWorkerUrl,
 } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
+import maplibreWorkerSource from "bundle-text:maplibre-gl/dist/maplibre-gl-worker.mjs"
 import MapController from "../controllers/carte/map_controller"
 import type { Location } from "./types"
+
+// maplibre-gl v6 resolves its worker from import.meta.url, which parcel does not
+// preserve, so inline the bundled worker source as a blob URL instead.
+setWorkerUrl(
+  URL.createObjectURL(new Blob([maplibreWorkerSource], { type: "text/javascript" })),
+)
 const DEFAULT_LOCATION: LngLat = new LngLat(2.213749, 46.227638)
 const DEFAULT_INITIAL_ZOOM: number = 5
 const DEFAULT_MAX_ZOOM: number = 18
