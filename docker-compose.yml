@@ -48,13 +48,12 @@ services:
     profiles: [lvao]
 
   lvao-webapp-db:
-    platform: linux/amd64
-    image: postgis/postgis:16-3.5-alpine
+    platform: ${POSTGIS_IMAGE_PLATFORM:-linux/amd64}
+    image: imresamu/postgis:16-3.5-alpine # We use imresamu image because official Postgis image does not ship ARM builds
     environment:
       - POSTGRES_USER=webapp
       - POSTGRES_PASSWORD=webapp # pragma: allowlist secret
       - POSTGRES_DB=webapp
-      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
       - webapp_dbdata:/var/lib/postgresql/data:delegated
     expose:
@@ -64,8 +63,8 @@ services:
     profiles: [lvao, airflow]
 
   lvao-warehouse-db:
-    platform: linux/amd64
-    image: postgis/postgis:15-3.3-alpine
+    platform: ${POSTGIS_IMAGE_PLATFORM:-linux/amd64}
+    image: imresamu/postgis:15-3.3-alpine # We use imresamu image because official Postgis image does not ship ARM builds
     environment:
       - POSTGRES_USER=warehouse
       - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
@@ -167,7 +166,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
+    restart: unless-stopped
     depends_on:
       <<: *airflow-common-depends-on
       airflow-webserver:
