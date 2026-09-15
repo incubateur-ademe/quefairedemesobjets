@@ -75,7 +75,9 @@
   },
   "sous_categories_cma": {
     "articles d’ameublement (meubles, chaises, fauteuils, canapés, tapis, etc)": [
-      "meuble"
+      "meuble", 
+      "sieges_elements_d_ameublement",
+      "decorations_textiles_elements_d_ameublement"
     ],
     "articles de sport, cycles": [
       "materiel_de_sport_hors_velo",
