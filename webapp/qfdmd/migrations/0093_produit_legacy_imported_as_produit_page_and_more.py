@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("qfdmd", "0087_produitindexpage"),
+        ("qfdmd", "0092_merge_20260910_0833"),
     ]
 
     operations = [
