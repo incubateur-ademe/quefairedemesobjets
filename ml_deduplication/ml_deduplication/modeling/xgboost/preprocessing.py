@@ -130,6 +130,7 @@ def preprocess_entities_df(
         additional_columns_to_keep.extend(["cluster_id", "cluster_id_split"])
 
     additional_columns_to_keep = list(set(additional_columns_to_keep))
+
     logger.info("Starting blocking...")
     df_pairs = block_df(
         df_features_preprocessed,

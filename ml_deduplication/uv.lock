@@ -1625,22 +1625,15 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "connectorx" },
-    { name = "dedupe" },
     { name = "duckdb" },
-    { name = "optuna" },
-    { name = "plotly" },
     { name = "polars" },
     { name = "polars-distance" },
     { name = "psycopg", extra = ["binary"] },
-    { name = "psycopg2" },
     { name = "pyarrow" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
-    { name = "spatial-polars" },
-    { name = "splink" },
     { name = "sqlalchemy" },
     { name = "tqdm" },
-    { name = "tqdm-joblib" },
     { name = "xgboost" },
 ]
 
@@ -1662,26 +1655,28 @@ notebooks = [
     { name = "python-lsp-server", extra = ["all"] },
     { name = "shapely" },
 ]
+training = [
+    { name = "dedupe" },
+    { name = "optuna" },
+    { name = "plotly" },
+    { name = "psycopg2" },
+    { name = "spatial-polars" },
+    { name = "splink" },
+    { name = "tqdm-joblib" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "connectorx", specifier = ">=0.4.5" },
-    { name = "dedupe", specifier = ">=3.0.3" },
     { name = "duckdb", specifier = ">=1.5.5" },
-    { name = "optuna", specifier = ">=4.9.0" },
-    { name = "plotly", specifier = ">=6.9.0" },
     { name = "polars", specifier = ">=1.44.1" },
     { name = "polars-distance", specifier = ">=0.5.3" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
-    { name = "psycopg2", specifier = ">=2.9.12" },
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "scikit-learn", specifier = ">=1.9.0" },
     { name = "sentence-transformers", specifier = ">=5.7.0" },
-    { name = "spatial-polars", specifier = ">=0.3.0" },
-    { name = "splink", specifier = ">=4,<5" },
     { name = "sqlalchemy", specifier = ">=2.0.49" },
     { name = "tqdm", specifier = ">=4.69.0" },
-    { name = "tqdm-joblib", specifier = ">=0.0.5" },
     { name = "xgboost", specifier = ">=2.1.0" },
 ]
 
@@ -1702,6 +1697,15 @@ notebooks = [
     { name = "polars-distance", specifier = ">=0.5.3" },
     { name = "python-lsp-server", extras = ["all"], specifier = ">=1.15.0" },
     { name = "shapely", specifier = ">=2.1.2" },
+]
+training = [
+    { name = "dedupe", specifier = ">=3.0.3" },
+    { name = "optuna", specifier = ">=4.9.0" },
+    { name = "plotly", specifier = ">=6.9.0" },
+    { name = "psycopg2", specifier = ">=2.9.12" },
+    { name = "spatial-polars", specifier = ">=0.3.0" },
+    { name = "splink", specifier = ">=4,<5" },
+    { name = "tqdm-joblib", specifier = ">=0.0.5" },
 ]
 
 [[package]]
