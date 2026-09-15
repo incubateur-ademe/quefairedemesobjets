@@ -90,6 +90,11 @@ export default class extends Controller<HTMLElement> {
   initialize(): void {
     initSentry(this.sentryDsnValue, this.sentryEnvironmentValue)
     posthog.init(this.posthogKeyValue, this.posthogConfig)
+    posthog.onFeatureFlags(() => {
+      if (posthog.isFeatureEnabled("enable-autocapture")) {
+        posthog.set_config({ autocapture: true })
+      }
+    })
     this.#identifyAuthenticatedUser()
     this.#initialiseIframeRelatedPersonProperties()
     this.#registerSuperProperties()
