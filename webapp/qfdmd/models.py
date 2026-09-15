@@ -109,7 +109,7 @@ def _split_off_embeds(html: str) -> tuple[str, list[str]]:
     return cleaned, embeds
 
 
-def _repair_html(html: str) -> str:
+def _repaired_html(html: str) -> str:
     """Balance tags in legacy HTML before it becomes a RichTextBlock value.
 
     Some legacy fields contain unbalanced markup (e.g. a stray ``</b>``
@@ -123,7 +123,7 @@ def _repair_html(html: str) -> str:
     return str(soup)
 
 
-# ponytail: legacy content only ever links to these two hosts, hardcoded.
+# Les contenus legacy ne pointent que vers ces deux hôtes.
 OWN_HOSTS = {"quefairedemesobjets.ademe.fr", "quefairedemesdechets.ademe.fr"}
 
 
@@ -188,7 +188,7 @@ _BLOCK_TAGS = {
 }
 
 
-def _ensure_wrapped_in_paragraph(html: str) -> str:
+def _wrapped_in_paragraph(html: str) -> str:
     """Wrap bare top-level text/inline HTML in a <p> tag.
 
     Legacy fields are plain text with <br> line breaks, not RichText, so
@@ -213,7 +213,7 @@ def _ensure_wrapped_in_paragraph(html: str) -> str:
     return str(wrapped)
 
 
-def _decapitalize(nom: str) -> str:
+def _decapitalized(nom: str) -> str:
     """Lowercase the first letter, except when the first word holds another
     capital (acronym or CamelCase brand): "Bougie" → "bougie", "DVD" → "DVD"."""
     first_word = nom.split(" ", 1)[0]
@@ -239,9 +239,7 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                     "value": {
                         "title": "Donner ou revendre",
                         "heading_tag": "h3",
-                        "description": _ensure_wrapped_in_paragraph(
-                            _repair_html(bon_etat)
-                        ),
+                        "description": _wrapped_in_paragraph(_repaired_html(bon_etat)),
                         "top_detail_badges_tags": [
                             {
                                 "type": "badges",
@@ -264,8 +262,8 @@ def _build_consignes_avec_etat(bon_etat: str, mauvais_etat: str) -> dict:
                     "value": {
                         "title": "Déposer",
                         "heading_tag": "h3",
-                        "description": _ensure_wrapped_in_paragraph(
-                            _repair_html(mauvais_etat)
+                        "description": _wrapped_in_paragraph(
+                            _repaired_html(mauvais_etat)
                         ),
                         "top_detail_badges_tags": [
                             {
@@ -1040,7 +1038,7 @@ class ProduitPage(
             body.append(
                 {
                     "type": "paragraph",
-                    "value": _repair_html(produit.qu_est_ce_que_j_en_fais),
+                    "value": _repaired_html(produit.qu_est_ce_que_j_en_fais),
                 }
             )
             msgs.append("Consignes sans état (texte riche).")
@@ -1079,7 +1077,7 @@ class ProduitPage(
         ]:
             if field:
                 cleaned_field, embeds = _split_off_embeds(field)
-                cleaned_field = _repair_html(cleaned_field)
+                cleaned_field = _repaired_html(cleaned_field)
                 body.append(
                     {
                         "type": "paragraph",
@@ -1129,7 +1127,7 @@ class ProduitPage(
 
         # Used mid-sentence ("Que faire de mon xxx"): drop the leading capital,
         # unless the first word looks like an acronym (DVD, PC portable…).
-        self.titre_phrase = _decapitalize(produit.nom)
+        self.titre_phrase = _decapitalized(produit.nom)
         msgs.append("Titre utilisé dans les phrases initialisé.")
 
         if synonyme and synonyme.meta_description:
@@ -1227,11 +1225,8 @@ class ProduitPage(
                     pass
 
     def save(self, *args, **kwargs):
-        # Ensure titre_phrase is always populated on newly created
-        # produit page.
-        # This should not be a requirement for initial page creation,
-        # so is not enforced at the database level, but is now needed
-        # for search.
+        # Not enforced at the database level (a page can be created without
+        # it), but search indexing needs a value.
         if not self.titre_phrase:
             self.titre_phrase = self.title
 
