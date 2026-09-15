@@ -25,13 +25,17 @@ from shared.config.tags import TAGS
 )
 def compute_sample_acteur():
 
+    # The `+` prefix also selects the upstream `base_*` models, so the DAG
+    # is self-sufficient on a warehouse where `compute_acteurs` has not run.
+    dbt_selector = "+tag:sample"
+
     dbt_run_base_acteurs = BashOperator(
         task_id="dbt_run_base_acteurs",
-        bash_command=(f"{DBT_RUN} tag:acteurs,tag:sample"),
+        bash_command=(f"{DBT_RUN} {dbt_selector}"),
     )
     dbt_test_base_acteurs = BashOperator(
         task_id="dbt_test_base_acteurs",
-        bash_command=(f"{DBT_TEST} tag:acteurs,tag:sample"),
+        bash_command=(f"{DBT_TEST} {dbt_selector}"),
     )
 
     chain(

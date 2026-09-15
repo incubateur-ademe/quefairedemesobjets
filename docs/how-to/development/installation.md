@@ -205,10 +205,20 @@ Tests JS unitaires
 npm run test
 ```
 
-End to end avec Playwright (depuis **`webapp/`**) :
+End-to-end avec Playwright.
+Ces tests nécessitent une base de données incluant un échantillon d'acteurs issus de la base de données principale.
+Celle-ci peut être générée en local facilement, via une commande à lancer depuis la racine du dépôt.
+(`make e2e-prepare` construit l'échantillon via le DAG `compute_sample_acteur`,
+voir [create_webapp_sample_db.md](create_webapp_sample_db.md)) :
 
 ```sh
-make init-playwright
+make -C webapp init-playwright
+make e2e            # préparation + tests
+```
+
+Pour relancer seulement les tests (depuis **`webapp/`**) :
+
+```sh
 make e2e-test
 make e2e-test-ui
 ```
