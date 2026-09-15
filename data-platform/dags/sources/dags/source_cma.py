@@ -11,12 +11,12 @@ from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 NORMALIZATION_RULES = [
     # 1. Renommage des colonnes
     {
-        "origin": "horaires",
-        "destination": "horaires_description",
-    },
-    {
         "origin": "id",
         "destination": "identifiant_externe",
+    },
+    {
+        "origin": "horaires",
+        "destination": "horaires_description",
     },
     {
         "origin": "nafa",
