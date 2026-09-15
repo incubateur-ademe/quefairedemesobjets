@@ -9,6 +9,7 @@ per-object admin views allowing to migrate / revert a single produit.
 # ont été migré vers des qfdmd.ProduitPage
 # Ce module entier n'existe que pour la migration.
 
+import logging
 from dataclasses import dataclass, field
 
 from django.utils import timezone
@@ -26,6 +27,8 @@ from qfdmd.models import (
     ProduitPage,
     TaggedSearchTag,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class MigrationError(Exception):
@@ -293,7 +296,14 @@ def finalize_produit_migration(page: ProduitPage) -> ProduitIndexPage:
 
 
 def log_without_raising(instance, action, **kwargs):
+    """Log a Wagtail action, never failing the surrounding migration.
+
+    The audit log is a nice-to-have here: a logging backend problem must
+    not roll back an otherwise successful migration.
+    """
     try:
         log(instance=instance, action=action, **kwargs)
     except Exception:
-        pass
+        logger.warning(
+            "Wagtail log failed for action %s on %r", action, instance, exc_info=True
+        )
