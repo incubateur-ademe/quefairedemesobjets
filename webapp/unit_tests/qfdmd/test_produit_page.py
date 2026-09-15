@@ -1,9 +1,9 @@
 import pytest
 
 from qfdmd.models import (
-    _decapitalize,
-    _ensure_wrapped_in_paragraph,
-    _repair_html,
+    _decapitalized,
+    _wrapped_in_paragraph,
+    _repaired_html,
     _split_off_embeds,
 )
 from unit_tests.qfdmd.qfdmod_factory import (
@@ -256,7 +256,7 @@ class TestSyncFromLegacyProduitEmbeds:
 
 
 class TestRepairHtml:
-    """_repair_html balances tags in legacy HTML before it is stored as a
+    """_repaired_html balances tags in legacy HTML before it is stored as a
     RichTextBlock value. Unbalanced markup (e.g. a stray closing tag with no
     matching opening tag) otherwise crashes Wagtail's contentstate converter
     with "AssertionError: Unmatched tags" as soon as the page is opened in
@@ -265,7 +265,7 @@ class TestRepairHtml:
     def test_well_formed_html_is_unchanged_in_content(self):
         html = "<p>Rien à signaler</p><b>gras</b>."
 
-        repaired = _repair_html(html)
+        repaired = _repaired_html(html)
 
         assert "Rien à signaler" in repaired
         assert "<b>gras</b>" in repaired
@@ -273,7 +273,7 @@ class TestRepairHtml:
     def test_drops_unmatched_closing_tag(self):
         html = "avant.<br><br></b>après</b>, fin."
 
-        repaired = _repair_html(html)
+        repaired = _repaired_html(html)
 
         assert "</b>après</b>" not in repaired
         assert "après" in repaired
@@ -319,7 +319,7 @@ class TestSyncFromLegacyProduitMalformedHtml:
 
 
 class TestEnsureWrappedInParagraph:
-    """_ensure_wrapped_in_paragraph guarantees a card's "description" value
+    """_wrapped_in_paragraph guarantees a card's "description" value
     has a top-level <p> for the DSFR card template's richtext_p_add_class
     filter (which only adds its layout class to existing <p> tags via
     ``soup.find_all("p")``) to attach its CSS class to. Legacy fields are
@@ -333,14 +333,14 @@ class TestEnsureWrappedInParagraph:
     def test_wraps_bare_text_in_paragraph(self):
         html = "Proposez-le à un proche.<br><br>Vous pouvez aussi le revendre."
 
-        wrapped = _ensure_wrapped_in_paragraph(html)
+        wrapped = _wrapped_in_paragraph(html)
 
         assert wrapped == f"<p>{html}</p>".replace("<br>", "<br/>")
 
     def test_leaves_already_wrapped_paragraph_untouched(self):
         html = "<p>Déjà encapsulé.</p>"
 
-        wrapped = _ensure_wrapped_in_paragraph(html)
+        wrapped = _wrapped_in_paragraph(html)
 
         assert wrapped == html
 
@@ -349,7 +349,7 @@ class TestEnsureWrappedInParagraph:
         whole thing in one <p> would nest a block element inside it."""
         html = "<h2>Titre</h2>Texte après le titre."
 
-        wrapped = _ensure_wrapped_in_paragraph(html)
+        wrapped = _wrapped_in_paragraph(html)
 
         assert wrapped == html
 
@@ -493,8 +493,8 @@ class TestSyncFromLegacyProduitTitrePhrase:
         ("", ""),
     ],
 )
-def test_decapitalize(nom, expected):
-    assert _decapitalize(nom) == expected
+def test_decapitalized(nom, expected):
+    assert _decapitalized(nom) == expected
 
 
 def test_consignes_avec_etat_badges_use_valid_dsfr_colors():
@@ -521,7 +521,7 @@ class TestRepairHtmlInternalizesLinks:
         bonus = Page(title="Bonus réparation", slug="bonus-reparation")
         root.add_child(instance=bonus)
 
-        html = _repair_html(
+        html = _repaired_html(
             '<p><a href="https://quefairedemesobjets.ademe.fr/bonus-reparation/" '
             'target="_blank">bonus</a></p>'
         )
@@ -529,7 +529,7 @@ class TestRepairHtmlInternalizesLinks:
         assert html == f'<p><a id="{bonus.pk}" linktype="page">bonus</a></p>'
 
     def test_link_to_unknown_own_path_becomes_relative(self):
-        html = _repair_html(
+        html = _repaired_html(
             '<p><a href="https://quefairedemesdechets.ademe.fr/dechet/pile" '
             'target="_blank" rel="noopener">piles</a></p>'
         )
@@ -539,4 +539,4 @@ class TestRepairHtmlInternalizesLinks:
     def test_external_link_is_untouched(self):
         html = '<p><a href="https://www.economie.gouv.fr/x" target="_blank">x</a></p>'
 
-        assert _repair_html(html) == html
+        assert _repaired_html(html) == html
