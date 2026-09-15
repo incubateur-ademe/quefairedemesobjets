@@ -1,10 +1,30 @@
 # ML Deduplication
 
-Machine-learning based entity deduplication pipeline for actor records, built on top of the [`dedupe`](https://github.com/dedupeio/dedupe) library.
+Machine-learning based entity deduplication pipeline for actor records. It
+learns which pairs of entities (e.g. organizations / actors) refer to the same
+real-world object and clusters them accordingly.
+
+## Model paths
+
+This project contains **three** model implementations, each with its own
+training and inference entry points. The **XGBoost path is the current
+production path** (it is what the Docker inference image and the Makefile
+serve). The other two are alternatives / reference implementations.
+
+| Model                                                        | Status             | Training entry point                         | Inference entry point             |
+| ------------------------------------------------------------ | ------------------ | -------------------------------------------- | --------------------------------- |
+| [**XGBoost**](./ml_deduplication/modeling/xgboost/README.md) | **Production**     | `training.xgboost.training_pipeline_xgboost` | `inference.xgboost.run_inference` |
+| [**Dedupe**](./ml_deduplication/modeling/dedupe/README.md)   | Legacy / reference | `training.dedupe.training_pipeline_dedupe`   | `inference.run_inference`         |
+| [**Splink**](./ml_deduplication/modeling/splink/README.md)   | Experimental       | `training.splink.training_pipeline_splink`   | `inference.run_inference_splink`  |
+
+Each README in the linked subdirectories documents its pipeline, training and
+inference usage, and dependencies.
 
 ## Overview
 
-This project provides a complete training and evaluation workflow to learn which pairs of entities (e.g., organizations / actors) refer to the same real-world object and cluster them accordingly. It follows an end-to-end pipeline:
+The project provides a complete training and evaluation workflow to learn which
+pairs of entities refer to the same real-world object and cluster them
+accordingly. It follows an end-to-end pipeline:
 
 - **Feature extraction** — build structured, comparable representations from raw records
 - **Supervised learning** — train record linkage models on labeled match/distinct pairs
@@ -47,27 +67,33 @@ flowchart LR
 
 ```text
 ml_deduplication/
-├── main.py                     # Entry point (placeholder)
 ├── datasets/                   # Raw / prepared Parquet data
 │   └── features_dataset_*.parquet
 ├── logs/                       # Training results (JSON) & artifacts
+├── outputs/                    # Inference results (parquet)
 └── ml_deduplication/           # Package source
-    ├── dataset/
+    ├── dataset/                # Labeled-pairs dataset creation
     │   ├── dataset_creation.py     # Create labeled entity pairs dataset
-    │   ├── features_engineering.py # Extract features + train/test split
-    │   └── utils.py
+    │   ├── features_creation.py    # Extract features + train/test split
+    │   ├── pairs.py / clusters.py / utils.py
     ├── evaluation/
     │   ├── metrics/
     │   │   ├── pairwise.py         # Precision / recall / F1
     │   │   └── cluster.py          # Cluster-level quality metrics
     │   └── learning_curve.py
-    └── training/
-        ├── model.py                # BusinessRulesDedupe wrapper
-        ├── business_rules.py       # Standalone business rules application
-        ├── features.py             # Feature definitions and dedupe configs
-        ├── model_selection.py      # Parameter grid + threshold selection
-        ├── training_pipeline.py    # Full training pipeline
-        └── utils.py
+    ├── inference/               # Inference entry points
+    │   ├── xgboost/run_inference.py      # Production xgboost inference
+    │   ├── run_inference.py              # Dedupe inference
+    │   └── run_inference_splink.py       # Splink inference
+    ├── modeling/                # Model implementations (per-model READMEs)
+    │   ├── xgboost/  # Production model (README)
+    │   ├── dedupe/   # Experimental model (README)
+    │   └── splink/   # Experimental model (README)
+    └── training/                # Training pipelines (per model)
+        ├── xgboost/
+        ├── dedupe/
+        ├── splink/
+        └── utils.py / settings.py
 ```
 
 ## Setup
@@ -76,9 +102,22 @@ Requires Python ≥ 3.13 and [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
 cd ml_deduplication
-uv sync               # create .venv + install deps (polars, dedupe, …)
+uv sync                     # create .venv + install base deps (inference-only)
+uv sync --group training    # + training/EDA deps (dedupe, splink, optuna, …)
 cp .env.example .env  # adapt local paths / credentials if any
 ```
+
+The project is split into dependency groups:
+
+- **base** (`[project].dependencies`) — minimal set needed to run **inference**
+  (`ml_deduplication.inference.xgboost.run_inference`).
+- **`training` group** — heavier training / EDA packages (`dedupe`, `splink`,
+  `optuna`, `plotly`, …). Opt-in via `uv sync --group training` (or
+  `uv sync --all-groups` to install every group).
+- **`dev` / `notebooks` groups** — dev tooling and notebook environment.
+
+The Docker inference image installs only the base group (`uv sync --frozen
+--no-dev`), keeping it lean.
 
 ## Usage
 
@@ -115,12 +154,12 @@ Enrich the labeled pairs dataset with full entity attributes and perform train/t
 
 ```bash
 # Basic usage
-python -m ml_deduplication.dataset.features_engineering \
+python -m ml_deduplication.dataset.features_creation \
     --ml-dataset-filepath ./datasets/ml_dataset_20250101.parquet \
     --database-uri "your_database_uri"
 
 # With custom output and test size
-python -m ml_deduplication.dataset.features_engineering \
+python -m ml_deduplication.dataset.features_creation \
     --ml-dataset-filepath ./datasets/ml_dataset_20250101.parquet \
     --database-uri "your_database_uri" \
     --dataset-output-path ./datasets/features_dataset_custom.parquet \
@@ -139,143 +178,35 @@ python -m ml_deduplication.dataset.features_engineering \
 
 **Environment variables:** `ML_DATASET_FILEPATH`, `DATABASE_CONNECTION_URI`
 
-### Training
+### 3. Training & inference (per model)
 
-Train the deduplication model on the features dataset:
+Once the features dataset is ready, training and inference differ by model.
+Follow the dedicated README for the path you use:
 
-```bash
-# Simple training with default hyperparameters
-python -m ml_deduplication.training.training_pipeline datasets/features_dataset_20250101.parquet
-
-# Hyperparameter tuning across feature configs and index predicates
-python -m ml_deduplication.training.training_pipeline datasets/features_dataset_20250101.parquet --mode tuning
-
-# Custom log directory
-python -m ml_deduplication.training.training_pipeline datasets/features_dataset_20250101.parquet --log-dir ./my_custom_logs
-
-# Both flags combined
-python -m ml_deduplication.training.training_pipeline datasets/features_dataset_20250101.parquet --mode tuning --log-dir ./outputs
-```
-
-**Training process (for each hyperparameter configuration):**
-
-```mermaid
-flowchart TD
-    A["Features dataset\nwith split column"] --> B["Split train into train/dev"]
-    B --> C["Train dedupe model\non train subset"]
-    C --> D["Select best threshold\non dev split\nmaximize precision\nsubject to recall ≥ 0.25"]
-    D --> E["Re-train on full train split\nwith best threshold"]
-    E --> F["Evaluate on test split\npairwise + clusterwise metrics"]
-    F --> G["Log results to JSON\n+ predicted pairs parquet"]
-```
-
-**Training pipeline details:**
-
-1. **Train/dev split** — the `train` portion is further split to select the optimal classification threshold
-2. **Threshold selection** — test thresholds from 0.10 to 0.95 (step 0.05); pick the one maximizing precision among those meeting minimum recall (0.25)
-3. **Full re-training** — retrain on the complete `train` split using the selected threshold
-4. **Evaluation** — run predictions on the `test` split and compute both pairwise and clusterwise metrics
-
-**Hyperparameter grid** (in `training/model_selection.py`):
-
-- `index_predicates`: `True` (with blocking indices) vs `False` (exhaustive comparison)
-- `dedupe_variables_config`: `MANDATORY`, `RESTRICTED`, or `FULL` feature sets
-- `features_names`: which columns from the dataset to use
-
-**Outputs:**
-
-- `training_results_<mode>_<timestamp>.json` — metrics and configuration summary
-- `training_<mode>_<timestamp>_test_pred_pairs.parquet` — predicted pairs on test set
-
-## Key components
-
-| Module                                      | What it does                                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `training/model.py` – `BusinessRulesDedupe` | Thin wrapper around `dedupe.Dedupe`; exposes `prepare_training()`, `train()` and `partition(data, threshold)`                  |
-| `training/training_pipeline.py`             | Orchestrates a full pipeline: train on labeled pairs → pick best threshold (dev) → re-train → evaluate (test)                  |
-| `training/model_selection.py`               | Builds the hyperparameter grid (feature combinations + index predicates) and searches for the optimal classification threshold |
-| `evaluation/metrics/pairwise.py`            | Computes precision / recall / F1 at the pair level from ground-truth vs. predicted clusters                                    |
-| `evaluation/metrics/cluster/`               | Cluster-level report: completeness, homogeneity, purity and size distributions                                                 |
-
-## How `BusinessRulesDedupe` works
-
-`BusinessRulesDedupe` extends `dedupe.Dedupe` with domain-specific constraints that prevent impossible matchings. It operates at three levels:
-
-```mermaid
-flowchart TD
-    subgraph Blocking["🔍 Blocking & Pair Generation"]
-        A["Entity dictionary"] --> B["Fingerprinter\nblocking indices"]
-        B --> C["Generate candidate pairs"]
-        C --> D["Filter conflicting pairs\nbefore scoring"]
-    end
-
-    subgraph Scoring["📊 Scoring"]
-        D --> E["Logistic regression\nclassifier"]
-        E --> F["Zero out scores\nfor any remaining conflicts"]
-    end
-
-    subgraph Clustering["🔗 Clustering"]
-        F --> G["Connected components\nabove threshold"]
-        G --> H["Apply business rules\nresolve conflicts"]
-        H --> I["Clean clusters\n+ singletons"]
-    end
-
-    subgraph Rules["📐 Business Rules"]
-        J["unique_fields:\nsame source_id → conflict"]
-        K["distinct_fields:\ndifferent acteur_type_id → conflict"]
-    end
-
-    Rules -.->|applied at| Blocking
-    Rules -.->|applied at| Scoring
-    Rules -.->|applied at| Clustering
-```
-
-### Conflict detection
-
-Two entities **conflict** if:
-
-- **Unique field conflict**: they share the same non-null value on a `unique_fields` column (e.g., `source_id`) — they cannot be duplicates because they represent distinct source records
-- **Distinct field conflict**: they have different non-null values on a `distinct_fields` column (e.g., `acteur_type_id`) — they cannot be duplicates because they are different entity types
-
-### Three-level enforcement
-
-1. **Blocking level** — conflicting pairs are filtered out before scoring, saving compute and preventing transitive clustering through bridge records
-2. **Scoring level** — any remaining conflicting pairs get their scores zeroed out
-3. **Clustering level** — after initial clustering, each cluster is checked for internal conflicts; the most conflicting entity (lowest confidence score) is iteratively removed until the cluster is conflict-free. Removed entities become singletons
-
-### Configuration
-
-```python
-BusinessRulesDedupe(
-    variable_definition=dedupe_variables_config,
-    unique_fields=("source_id",),          # Same value → conflict
-    distinct_fields=("acteur_type_id",),   # Different value → conflict
-    index_predicates=True,                 # Use blocking indices
-)
-```
+- [**XGBoost (production)**](./ml_deduplication/modeling/xgboost/README.md)
+- [**Dedupe (legacy)**](./ml_deduplication/modeling/dedupe/README.md)
+- [**Splink (experimental)**](./ml_deduplication/modeling/splink/README.md)
 
 ## Evaluation metrics
 
 - **Pair-wise** — treats every entity pair as a binary classification; reports precision, recall, F1. Used to select the best threshold on dev data (`min_recall=0.25`).
 - **Cluster-wise** — assesses whole clusters (completeness, homogeneity) and size distributions vs. ground truth.
 
-## Configuration & hyperparameters
+## Docker / Makefile
 
-The search grid lives in `training/model_selection.py`. It varies:
+The [Dockerfile](./Dockerfile) builds a lean inference image that:
 
-1. **Feature sets** — which columns are compared (names, addresses, SIRET, …).
-2. **Dedupe field config** — per-field comparison rules (`exact`, `levenshtein` distance, etc.).
-3. **Index predicates** — whether to build blocking indices for speed vs. exhaustiveness.
+- Bakes the XGBoost model artifacts into the image at `/model` via the
+  `MODEL_DIR` build arg (default `models/xgboost`).
+- Installs only the base dependency group (`uv sync --frozen --no-dev`).
+- Runs as a non-root `dedup` user with a read-only `/app` and `/model`.
 
-Run `uv run python main.py --help` (if implemented) or inspect `generate_parameter_grid()` to see current options.
-
-## Datasets & logging
-
-- Feature datasets live in `datasets/`. Expected columns include the entity identifier, ground-truth cluster id and a `split` column (`train` / `test`).
-- Each tuning run appends a JSON summary under `logs/training_results_<date>.json`.
+The [Makefile](./Makefile) provides `build`, `buildx`, and `run` targets. The
+`build` target forwards `MODEL_DIR` as a build arg; `run` mounts only the
+specific acteurs file and the output directory (no model mount needed, since
+the model is baked into the image). See `make help` for details.
 
 ## Notes
 
 - Training is **CPU-bound** (blocking + pairwise distance computation); large grids may take minutes to hours.
-- The dedupe library's active-learning UI is intentionally bypassed — all training uses labelled pairs, which keeps the pipeline reproducible and CI-friendly.
 - The train/test split is performed at the **cluster level** (not at the pair level) to prevent data leakage: all pairs involving entities from the same ground-truth cluster end up in the same split.
