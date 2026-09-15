@@ -58,6 +58,8 @@ LEGACY_PRODUIT_INDEX_SLUG = "dechet"
 # Index page hosting the hand-made produit pages; finalized migrations move there.
 CATEGORIES_INDEX_SLUG = "categories"
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 # Fields copied verbatim from the legacy Produit model onto ProduitPage
 # (prefixed with legacy_) by the migrate_produits_legacy command.
 PRODUIT_LEGACY_COPIED_FIELDS = (
@@ -477,6 +479,8 @@ class SearchTag(SearchTerm, TagBase):
     Inherits from SearchTerm for unified search across different content types.
     """
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     legacy_existing_synonyme = models.ForeignKey(
         "qfdmd.Synonyme",
         on_delete=models.SET_NULL,
@@ -600,6 +604,8 @@ def find_duplicate_search_tag_names(tag_names, page_id=None):
     return duplicates
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class LegacyProduitObjectList(ObjectList):
     """Tab only shown on pages automatically migrated from a legacy Produit."""
 
@@ -764,6 +770,8 @@ class ProduitPage(
 
     commentaire = RichTextField(blank=True)
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     # Legacy Produit data, filled by the migrate_produits_legacy command.
     # Raw copy (read-only in the admin) of the qfdmd.Produit fields, kept
     # as a reference while editors rework the content.
@@ -928,6 +936,8 @@ class ProduitPage(
         ),
     ]
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     legacy_produit_panels = [
         MultiFieldPanel(
             [
@@ -961,6 +971,8 @@ class ProduitPage(
         ],
     )
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     @property
     def related_legacy_produit_display(self) -> str:
         """Return the name of the legacy Produit this page was migrated from.
@@ -971,11 +983,15 @@ class ProduitPage(
 
     related_legacy_produit_display.fget.short_description = "Produit legacy"
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     @property
     def linked_legacy_produit(self) -> "Produit | None":
         """Return the legacy Produit this page was migrated from, if any."""
         return self.legacy_imported_produits.first()
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     @cached_property
     def _main_synonyme(self):
         """Return the main synonyme (matching nom with its produit) for
@@ -985,6 +1001,8 @@ class ProduitPage(
             return None
         return produit.synonymes.filter(nom=produit.nom).first()
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     def sync_from_legacy_produit(self) -> list[str]:
         """Rebuild ``body`` and ``infotri`` from the linked legacy Produit.
 
@@ -1370,6 +1388,8 @@ class AbstractBaseProduit(NomAsNaturalKeyModel):
         ordering = ("id",)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class ProduitQuerySet(models.QuerySet):
     def to_migrate(self):
         """Produits legacy pas encore migrés vers une ProduitPage.
@@ -1401,6 +1421,8 @@ class ProduitQuerySet(models.QuerySet):
 class Produit(index.Indexed, AbstractBaseProduit):
     objects = NomAsNaturalKeyManager.from_queryset(ProduitQuerySet)()
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     legacy_imported_as_produit_page = models.ForeignKey(
         "qfdmd.ProduitPage",
         on_delete=models.SET_NULL,
@@ -1461,6 +1483,8 @@ class Produit(index.Indexed, AbstractBaseProduit):
     def __str__(self):
         return f"{self.pk} - {self.nom}"
 
+    # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+    # ont été migré vers des qfdmd.ProduitPage
     def synonymes_to_migrate(self) -> models.QuerySet:
         """Synonymes de ce produit pas encore importés comme SearchTag."""
         return self.synonymes.filter(

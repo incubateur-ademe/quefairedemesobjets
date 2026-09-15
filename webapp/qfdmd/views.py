@@ -57,6 +57,8 @@ from search.score_breakdown import compute_breakdown
 logger = logging.getLogger(__name__)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def legacy_migrate(request, id):
     page = Page.objects.get(id=id).specific
     if not page.produit and not page.synonyme and not page.infotri:
@@ -75,6 +77,8 @@ def legacy_migrate(request, id):
     return redirect("wagtailadmin_pages:edit", id)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def _collect_synonymes_for_page(page):
     """Collect all synonymes eligible for import, minus exclusions."""
     excluded_synonyme_ids = set(
@@ -125,6 +129,8 @@ def _preview_names(names: list[str]) -> str:
     return head
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class _EmptySlugError(Exception):
     """Raised when a legacy Synonyme has an empty slug.
 
@@ -136,6 +142,8 @@ class _EmptySlugError(Exception):
     """
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def _import_one_synonyme(page, synonyme, tracking_field="imported_as_search_tag"):
     """Import a single Synonyme as a SearchTag, linked to the given page.
 
@@ -194,6 +202,8 @@ def _import_one_synonyme(page, synonyme, tracking_field="imported_as_search_tag"
     return truncated
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def _execute_import(page, all_synonymes, tracking_field="imported_as_search_tag"):
     """Execute the import of legacy synonymes as SearchTags.
 
@@ -239,6 +249,8 @@ def _execute_import(page, all_synonymes, tracking_field="imported_as_search_tag"
     return failed, truncated, empty_slug
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def import_legacy_synonymes(request, id):
     """
     Import legacy synonymes as SearchTags for a ProduitPage.
@@ -322,6 +334,8 @@ def import_legacy_synonymes(request, id):
 # Wagtail admin viewsets
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigrationStatusFilter(django_filters.ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault(
@@ -373,6 +387,8 @@ class ProduitPageFilterSet(WagtailFilterSet):
         fields = []
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigrationOnlyFilterSet(WagtailFilterSet):
     migration_status = MigrationStatusFilter()
 
@@ -429,6 +445,8 @@ class FamillesViewSet(PageListingViewSet):
     filterset_class = MigrationOnlyFilterSet
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class AMigrerIndexView(IndexView):
     page_title = "Produits/familles à migrer"
 
@@ -436,6 +454,8 @@ class AMigrerIndexView(IndexView):
         return super().get_base_queryset().filter(migree_depuis_synonymes_legacy=False)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class AMigrerViewSet(PageListingViewSet):
     model = ProduitPage
     icon = "doc-full-inverse"
@@ -446,6 +466,8 @@ class AMigrerViewSet(PageListingViewSet):
     filterset_class = ProduitPageFilterSet
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class LegacyProduitsToMigrateIndexView(ModelIndexView):
     page_title = "Produits à migrer"
     # Produit is index.Indexed (for its ProduitPage autocomplete search) but
@@ -464,6 +486,8 @@ class LegacyProduitsToMigrateIndexView(ModelIndexView):
         ]
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class LegacyProduitsToMigrateViewSet(ModelViewSet):
     """Produits legacy (qfdmd.Produit) pas encore migrés vers une ProduitPage.
 
@@ -485,6 +509,8 @@ class LegacyProduitsToMigrateViewSet(ModelViewSet):
     add_to_admin_menu = False
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigratedLegacyProduitsIndexView(IndexView):
     page_title = "Produits migrés"
 
@@ -496,6 +522,8 @@ class MigratedLegacyProduitsIndexView(IndexView):
         )
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigratedLegacyProduitsViewSet(PageListingViewSet):
     """ProduitPage créées automatiquement par migrate_produits_legacy."""
 
@@ -513,6 +541,8 @@ class ProduitsViewSetGroup(ViewSetGroup):
         FamilleEtProduitsViewSet,
         ProduitsViewSet,
         FamillesViewSet,
+        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+        # ont été migré vers des qfdmd.ProduitPage
         AMigrerViewSet,
         LegacyProduitsToMigrateViewSet,
         MigratedLegacyProduitsViewSet,
@@ -657,6 +687,8 @@ class SynonymeDetailView(DetailView):
         except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
 
+        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+        # ont été migré vers des qfdmd.ProduitPage
         # Finally, check if the produit was automatically migrated to a
         # ProduitPage by the migrate_produits_legacy command
         migrated_page = synonyme.produit.legacy_imported_as_produit_page
@@ -673,6 +705,8 @@ class SynonymeDetailView(DetailView):
         return super().get(request, *args, **kwargs)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def migrate_single_produit(request: HttpRequest, id: str) -> HttpResponse:
     """Migrate a single legacy Produit to a ProduitPage from the admin.
 
@@ -728,6 +762,8 @@ def migrate_single_produit(request: HttpRequest, id: str) -> HttpResponse:
     )
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def revert_single_produit(request: HttpRequest, id: str) -> HttpResponse:
     """Revert the automatic migration of a single legacy Produit.
 
@@ -776,6 +812,8 @@ def revert_single_produit(request: HttpRequest, id: str) -> HttpResponse:
     )
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def sync_page_from_produit(request: HttpRequest, id: str) -> HttpResponse:
     """Synchronize a ProduitPage's body and infotri from its legacy Produit.
 
@@ -819,6 +857,8 @@ def sync_page_from_produit(request: HttpRequest, id: str) -> HttpResponse:
     )
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def finalize_page_migration(request: HttpRequest, id: str) -> HttpResponse:
     """Finalize the automatic migration of a ProduitPage from the admin.
 
