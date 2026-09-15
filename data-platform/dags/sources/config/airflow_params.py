@@ -38,12 +38,12 @@ from sources.tasks.transform.transform_df import (
 )
 
 PATH_NOMENCLARURE_DECHET = (
-    "https://data.ademe.fr/data-fair/api/v1/datasets/sinoe-r-nomenclature-dechets/lines"
-    "?size=10000"
+    "https://data.sinoe-dechets.ademe.fr/data-fair/api/v1/datasets/"
+    "nom-003-liste-des-dechets/lines?size=10000"
 )
-KEY_CODE_DECHET = "C_TYP_DECHET"
-KEY_LIBELLE_DECHET = "L_TYP_DECHET"
-KEY_LIBELLE_DECHET_ALT = "LST_TYP_DECHET"
+
+KEY_CODE_DECHET = "code_dechet"
+KEY_LIBELLE_DECHET = "libelle_dechet"
 
 TRANSFORM_COLUMN_MAPPING = {
     "cast_eo_boolean_or_string_to_boolean": cast_eo_boolean_or_string_to_boolean,
@@ -301,26 +301,20 @@ def get_souscategorie_mapping_from_db():
 
 
 def source_sinoe_dechet_mapping_get():
-    """Mapping de C_TYP_DECHET (ex: "01")
-    vers L_TYP_DECHET (ex: "Déchets de composés chimiques")
+    """Mapping de code_dechet (ex: "01")
+    vers libelle_dechet (ex: "Déchets de composés chimiques")
     {
-    "total": 232,
+    "total": 243,
     "results": [
         {
-        "_rand": 237210,
-        "C_TYP_DECHET": "01",
-        "_i": 1,
-        "NIV_HIER": 1,
-        "L_TYP_DECHET": "Déchets de composés chimiques",
-        "_score": null,
-        "_id": "4UbH7jVe1hc_lXPc0oWz9"
+        "libelle_dechet": "Déchets de composés chimiques",
+        "code_dechet": "01",
+        "code_dechet_pere": null,
+        "niveau_code_dechet": 1,
+        "dangerosite": "D-Déchets dangereux",
+        "date_debut": "1900-01-01",
+        "date_fin": null
         },
     """
     data = requests.get(PATH_NOMENCLARURE_DECHET).json()
-    # Attention on a eu des renommage L_TYP_DECHET <-> LST_TYP_DECHET par le passé
-    # d'où le get sur les deux clés
-    return {
-        x[KEY_CODE_DECHET]: x.get(KEY_LIBELLE_DECHET, None)
-        or x.get(KEY_LIBELLE_DECHET_ALT)
-        for x in data["results"]
-    }
+    return {x[KEY_CODE_DECHET]: x[KEY_LIBELLE_DECHET] for x in data["results"]}
