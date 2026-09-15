@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.git/
+.ruff_cache/
+.pytest_cache/
+
+datasets/
+logs/
+outputs/
+cache_artifacts/
+.virtual_documents/
+.env
