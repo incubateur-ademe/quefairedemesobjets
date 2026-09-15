@@ -12,8 +12,8 @@ runs:
     - name: Get Playwright version
       id: playwright-version
       shell: bash
+      # package-lock.json lives at the repo root (npm workspace), not in webapp/
       run: echo "version=$(jq -r '.packages["node_modules/@playwright/test"].version' package-lock.json)" >> $GITHUB_OUTPUT
-      working-directory: webapp
 
     - name: Cache Playwright browsers
       id: cache-playwright
