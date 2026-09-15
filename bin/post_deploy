@@ -16,3 +16,6 @@ python manage.py create_remote_db_server
 
 # Purge orphan base SearchTerm index entries (django-modelsearch #58). Idempotent.
 python manage.py purge_orphan_searchterm_index
+
+# Infotri images are decorative. Idempotent.
+python manage.py mark_infotri_decorative

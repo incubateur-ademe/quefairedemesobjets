@@ -5,7 +5,7 @@ from django.views.generic import RedirectView
 from qfdmd.views import (
     AutocompleteHomeSearchView,
     HomeView,
-    SynonymeDetailView,
+    dechet_detail,
     get_assistant_script,
 )
 
@@ -26,7 +26,10 @@ urlpatterns = [
     # The URL here needs to be kept as is because it was used in the previous
     # Gatsby website. If changed, a redirect need to be created to keep the
     # legacy behaviour.
-    path("dechet/<slug:slug>/", SynonymeDetailView.as_view(), name="synonyme-detail"),
+    # Wagtail is given priority on this route (migrated ProduitPage live
+    # under the /dechet index page); dechet_detail falls back to the legacy
+    # SynonymeDetailView when no Wagtail page matches.
+    path("dechet/<slug:slug>/", dechet_detail, name="synonyme-detail"),
     path("iframe.js", get_assistant_script, name="script"),
     path("", HomeView.as_view(), name="home"),
 ]
