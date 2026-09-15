@@ -109,6 +109,14 @@ The `sync_databases.yml` workflow synchronizes production data to preproduction.
 - Create the remote database server between webapp and warehouse
 - Synchronize S3 buckets (copy from prod to preprod)
 
+### Database backups (on demand)
+
+The `backup-databases.yml` workflow creates Scaleway RDB backups of `webapp`, `warehouse`, `metabase` and `airflow`, downloads the `.custom` dumps and uploads them as GitHub Actions artifacts (7-day retention).
+
+**Trigger**: Manual (`workflow_dispatch`), environment `prod` or `preprod`.
+
+Optional input `use_latest_backup` reuses the latest ready Scaleway backup instead of creating a new one.
+
 ### Dependabot
 
 The `dependabot.yml` file configures automatic dependency updates.
