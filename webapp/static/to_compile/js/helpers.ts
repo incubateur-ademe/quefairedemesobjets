@@ -24,18 +24,18 @@ export function removeHash() {
 }
 
 /**
- * Compute the available vertical space below `frameTop` inside the document
- * body, leaving `margin` pixels between the bottom edge and the body bottom.
+ * Compute the vertical space available below `frameTop` in a viewport of
+ * `viewportHeight` pixels, keeping `margin` pixels above the bottom edge.
  *
  * Returns 0 if there is no room left rather than a negative value, so callers
  * can pass the result straight to a CSS length.
  */
 export function computeAvailableHeight(
   frameTop: number,
-  bodyHeight: number,
+  viewportHeight: number,
   margin: number,
 ): number {
-  return Math.max(0, bodyHeight - frameTop - margin)
+  return Math.max(0, viewportHeight - frameTop - margin)
 }
 
 // SameSite=None; Secure; Partitioned lets the cookie survive a navigation
