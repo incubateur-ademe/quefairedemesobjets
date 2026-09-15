@@ -5,6 +5,10 @@ the bulk actions available on the Produit snippet listing and the
 per-object admin views allowing to migrate / revert a single produit.
 """
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+# Ce module entier n'existe que pour la migration.
+
 from dataclasses import dataclass, field
 
 from django.utils import timezone

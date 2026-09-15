@@ -1,3 +1,6 @@
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+# Commande one-shot de migration.
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 

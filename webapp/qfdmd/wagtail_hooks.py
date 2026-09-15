@@ -34,6 +34,8 @@ def register_permissions():
     return Permission.objects.filter(codename__in=["can_see_beta_search"])
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigratePageMenuItem(ActionMenuItem):
     # This menu item is permanently hidden (is_shown() returns False)
     # but kept around in case the migration from produit / synonyme
@@ -56,6 +58,8 @@ class MigratePageMenuItem(ActionMenuItem):
         return False
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class ImportLegacySynonymesMenuItem(ActionMenuItem):
     name = "import-legacy-synonymes"
     label = "Importer les synonymes de recherche"
@@ -82,11 +86,15 @@ def register_sync_page_menu_item():
     return MigratePageMenuItem(order=10)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 @hooks.register("register_page_action_menu_item")
 def register_import_legacy_synonymes_menu_item():
     return ImportLegacySynonymesMenuItem(order=11)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 @hooks.register("register_admin_urls")
 def register_legacy_migrate_url():
     return [
@@ -128,6 +136,8 @@ def register_produitpage_viewset():
     return ProduitsViewSetGroup()
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 @hooks.register("after_edit_page")
 def check_synonyme_redirection_conflicts(request, page):
     """Check for conflicts in legacy_synonyme redirections."""
@@ -155,6 +165,8 @@ def check_synonyme_redirection_conflicts(request, page):
             pass
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class BaseProduitMigrationBulkAction(SnippetBulkAction):
     """Base for the bulk actions of the legacy Produit migration.
 
@@ -206,6 +218,8 @@ class BaseProduitMigrationBulkAction(SnippetBulkAction):
         return mark_safe(message)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 @hooks.register("register_bulk_action")
 class MigrateProduitsBulkAction(BaseProduitMigrationBulkAction):
     display_name = "Migrer vers une page"
@@ -233,6 +247,8 @@ class MigrateProduitsBulkAction(BaseProduitMigrationBulkAction):
         return report.page.pk, report.page.title
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 @hooks.register("register_bulk_action")
 class RevertProduitsMigrationBulkAction(BaseProduitMigrationBulkAction):
     display_name = "Annuler la migration"
