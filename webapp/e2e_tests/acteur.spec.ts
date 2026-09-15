@@ -29,6 +29,18 @@ test.describe("📋 Fiche Acteur - mode carte", () => {
 
       // Wait for the carte turbo-frame to load inside the produit page
       await mockApiAdresse(page)
+
+      // When the CMS carte block is configured with `open_in_modal`, the carte
+      // is rendered inside a DSFR modal (`fr-modal--top`, see carte_block.html)
+      // closed on load: its address input is hidden until the modal is opened.
+      // The opener is found through `aria-controls` because its label is CMS
+      // content. `dialog.fr-modal` alone would also match the filtres modal.
+      const carteModal = iframe.locator("dialog.fr-modal--top")
+      if ((await carteModal.count()) > 0) {
+        const carteModalId = await carteModal.getAttribute("id")
+        await iframe.locator(`button[aria-controls="${carteModalId}"]`).first().click()
+      }
+
       await expect(iframe.locator('[data-testid="carte-adresse-input"]')).toBeVisible({
         timeout: TIMEOUT.DEFAULT,
       })
