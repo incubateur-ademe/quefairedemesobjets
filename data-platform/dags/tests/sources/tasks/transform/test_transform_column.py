@@ -11,7 +11,7 @@ from sources.tasks.transform.exceptions import (
     RepriseWarning,
     SirenWarning,
     SiretWarning,
-    SousCategorieCodesError,
+    SousCategorieCodesWarning,
     UrlWarning,
 )
 from sources.tasks.transform.transform_column import (
@@ -494,8 +494,15 @@ class TestCleanSousCategorieCodes:
 
     def test_clean_sous_categorie_codes_raise(self, dag_config):
         dag_config.product_mapping = {"sscat1": 1.0}
-        with pytest.raises(SousCategorieCodesError):
+        with pytest.raises(SousCategorieCodesWarning):
             clean_sous_categorie_codes("sscat1", dag_config)
+
+    def test_clean_sous_categorie_codes_unknown_raises_warning(
+        self, dag_config, caplog
+    ):
+        dag_config.product_mapping = {"sscat1": "mapped1"}
+        with pytest.raises(SousCategorieCodesWarning):
+            clean_sous_categorie_codes("unknown", dag_config)
 
 
 class TestCleanSouscategorieCodesSinoe:
