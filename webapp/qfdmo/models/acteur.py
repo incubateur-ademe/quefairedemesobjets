@@ -305,50 +305,53 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
-NOMBRE_MAX_LIEUX = 20
+MAX_PLACES_ON_MAP = 20
 
-DUREE_CACHE_OFFRES = 60 * 60 * 12
+OFFERS_CACHE_TTL = 60 * 60 * 12
 
+GEOGRAPHIC_SCAN_THRESHOLD = 1_000
 
-SEUIL_PARCOURS_GEOGRAPHIQUE = 1_000
+MISS = object()
 
 
 def acteur_ids_offering(
     groupe_action_code: str, sous_categorie_ids
 ) -> list[str] | None:
-    """Identifiants des lieux proposant ce geste pour cet objet, en France.
+    """Ids of the acteurs offering this geste for this objet, France-wide.
 
-    Renvoie `None` quand ils sont trop nombreux pour être listés : au-delà du
-    seuil, le parcours géographique trouve ses 20 résultats sans effort et la
-    liste ne sert plus à rien.
+    Returns `None` when they are too many to be listed: past the threshold,
+    the geographic scan finds its 20 results effortlessly and the list is
+    useless.
 
-    Le nombre de lieux par couple geste/objet s'étale sur cinq ordres de
-    grandeur — de 0 pour « réparer un emballage » à 110 320 pour « trier un
-    emballage ». Sans cette liste, une combinaison rare fait parcourir les
-    388 000 acteurs à la recherche de résultats presque inexistants : mesuré à
-    2,5 s contre 3 ms une fois la liste connue.
+    The number of acteurs per geste/objet pair spans five orders of magnitude,
+    from 0 for "réparer un emballage" to 110,320 for "trier un emballage".
+    Without this list, a rare pair scans the 388,000 acteurs looking for
+    almost nonexistent results: measured at 2.5 s against 3 ms once the list
+    is known.
 
-    Le couple ne change qu'au rythme des imports, d'où un cache long.
+    The pair only changes with imports, hence the long cache.
     """
     from django.core.cache import cache
 
-    cle = (
+    key = (
         f"offres:{groupe_action_code}:{','.join(map(str, sorted(sous_categorie_ids)))}"
     )
-    identifiants = cache.get(cle)
-    if identifiants is None:
+    # `None` is a legitimate cached value ("too many"), so a miss needs its own
+    # sentinel: otherwise the big pairs would be recomputed on every call.
+    ids = cache.get(key, MISS)
+    if ids is MISS:
         propositions = DisplayedPropositionService.objects.filter(
             action__groupe_action__code=groupe_action_code,
             sous_categories__in=sous_categorie_ids,
         )
-        trouves = list(
+        found = list(
             propositions.values_list("acteur_id", flat=True).distinct()[
-                : SEUIL_PARCOURS_GEOGRAPHIQUE + 1
+                : GEOGRAPHIC_SCAN_THRESHOLD + 1
             ]
         )
-        identifiants = None if len(trouves) > SEUIL_PARCOURS_GEOGRAPHIQUE else trouves
-        cache.set(cle, identifiants, DUREE_CACHE_OFFRES)
-    return identifiants
+        ids = None if len(found) > GEOGRAPHIC_SCAN_THRESHOLD else found
+        cache.set(key, ids, OFFERS_CACHE_TTL)
+    return ids
 
 
 class DisplayedActeurQuerySet(models.QuerySet):
@@ -444,24 +447,24 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
 
     def proposing(self, groupe_action_code: str, sous_categorie_ids=None):
-        """Acteurs proposant ce geste, éventuellement pour un objet donné.
+        """Acteurs offering this geste, optionally for a given objet.
 
-        Un « geste » au sens usager est un GroupeAction (5 en base), pas une
-        Action (11) : choisir « donner » doit inclure les acteurs qui ne
-        déclarent que `echanger` ou `rapporter`.
+        A "geste" as the user sees it is a GroupeAction (5 in the database),
+        not an Action (11): choosing "donner" must include the acteurs that
+        only declare `echanger` or `rapporter`.
 
-        Le geste et l'objet sont cherchés sur la *même* proposition : un
-        réparateur de vélos et un donneur de meubles ne constituent pas un
-        réparateur de meubles.
+        The geste and the objet are looked up on the *same* proposition: a
+        bike repairer that also takes furniture donations is not a furniture
+        repairer.
 
-        Le filtre passe par EXISTS plutôt que par une jointure pour éviter la
-        duplication de lignes — 9 363 acteurs ont plusieurs propositions dans
-        un même groupe, ce qui ferait rendre moins de 20 lieux distincts.
+        The filter goes through EXISTS rather than a join to avoid duplicated
+        rows: 9,363 acteurs have several propositions within one groupe, which
+        would yield fewer than 20 distinct places.
         """
         if sous_categorie_ids:
-            identifiants = acteur_ids_offering(groupe_action_code, sous_categorie_ids)
-            if identifiants is not None:
-                return self.filter(identifiant_unique__in=identifiants)
+            ids = acteur_ids_offering(groupe_action_code, sous_categorie_ids)
+            if ids is not None:
+                return self.filter(identifiant_unique__in=ids)
 
         propositions = DisplayedPropositionService.objects.filter(
             acteur=OuterRef("pk"),
@@ -472,33 +475,36 @@ class DisplayedActeurQuerySet(models.QuerySet):
         return self.filter(Exists(propositions))
 
     def nearest_to(self, longitude, latitude):
-        """Acteurs physiques triés du plus proche au plus lointain.
+        """Physical acteurs sorted from nearest to farthest.
 
-        Aucune borne de distance : `ST_DWithin` empêcherait le parcours
-        ordonné de l'index GiST et coûterait deux ordres de grandeur de plus.
-        Le plafond de résultats suffit à borner le travail.
+        No distance bound: `ST_DWithin` would prevent the ordered scan of the
+        GiST index and cost two orders of magnitude more. The result cap is
+        enough to bound the work.
         """
         reference_point = Point(float(longitude), float(latitude), srid=4326)
         return self.physical().order_by(NearestTo("location", reference_point))
 
     def within(self, bbox):
-        """Acteurs de la zone visible, du plus proche de son centre au plus loin.
+        """Acteurs of the visible area, from nearest to its center to farthest.
 
-        Le filtre passe par `bboverlaps` (opérateur `&&`) et non `within` :
-        sur une colonne geography, `within` ignore l'index GiST et coûte
-        2 s contre 1 ms pour le même résultat, les lieux étant des points.
+        The filter uses `bboverlaps` (operator `&&`) rather than `within`: on a
+        geography column, `within` ignores the GiST index and costs 2 s
+        against 1 ms for the same result, places being points.
         """
-        zone = Polygon.from_bbox(bbox)
-        zone.srid = 4326
-        centre = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
+        area = Polygon.from_bbox(bbox)
+        area.srid = 4326
+        center = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
         return (
             self.physical()
-            .filter(location__bboverlaps=zone)
-            .order_by(NearestTo("location", centre))
+            .filter(location__bboverlaps=area)
+            .order_by(NearestTo("location", center))
         )
 
-    def for_the_map(self, limit: int = NOMBRE_MAX_LIEUX):
-        return self.with_bonus()[:limit]
+    def for_the_map(self, limit: int = MAX_PLACES_ON_MAP):
+        # `location` is nullable and `NULL <-> point` sorts last: with few
+        # candidates, unlocated acteurs would pad the result and break
+        # `as_geojson_feature`.
+        return self.filter(location__isnull=False).with_bonus()[:limit]
 
     def as_geojson(self) -> dict:
         return {
@@ -1640,12 +1646,11 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         )
 
     def as_geojson_feature(self) -> dict:
-        """Représentation GeoJSON du lieu pour la carte.
+        """GeoJSON representation of the place for the map.
 
-        La couleur du pinpoint n'est pas exposée ici : elle suit le geste
-        choisi par l'usager, que le client connaît déjà, et non une propriété
-        du lieu. `action_principale` est d'ailleurs vide pour 99,7 % des
-        acteurs.
+        The pinpoint color is not exposed here: it follows the geste chosen by
+        the user, which the client already knows, not a property of the place.
+        `action_principale` is empty for 99.7% of acteurs anyway.
         """
         return {
             "type": "Feature",
