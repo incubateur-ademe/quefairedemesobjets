@@ -37,14 +37,14 @@ Example: `acteur_by_id`
 
 ### Local linting and formatting
 
-Python uses **two separate uv projects** (`webapp/` and `data-platform/`). From the **repository root**:
+Python uses a **single uv workspace** at the repo root (`webapp/` and `data-platform/` are members, one `uv.lock`). From the **repository root**:
 
-- **Python (Black + Ruff)**: `make check-format` runs checks in `webapp/` then `data-platform/dags/`.
+- **Python (Black + Ruff + SqlFluff)**: `make check-format` runs checks in `data-platform/` then `webapp/`.
 - **Apply Python formatting**: `make format`.
 
 You can also run `make check-format` / `make format` inside `webapp/` or `data-platform/` alone.
 
-From the repo root (after `uv sync --group dev --group webapp-dev` and `npm ci`):
+From the repo root (after `uv sync --all-packages --group dev --group webapp-dev` and `npm ci`):
 
 - **TypeScript**
   - **Lint**: `npm run lint --workspace webapp`
