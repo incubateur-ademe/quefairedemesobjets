@@ -1,16 +1,16 @@
 {% load dsfr_tags static %}
 {% comment %}
-Deux piles d'assets cohabitent dans le projet, et elles ne doivent jamais être
-chargées ensemble : chacune démarre sa propre application Stimulus, qui
-scannerait le même DOM et enregistrerait des contrôleurs concurrents.
+Two asset stacks coexist in the project, and they must never be loaded
+together: each starts its own Stimulus application, which would scan the same
+DOM and register competing controllers.
 
-Une preview choisit la sienne via l'attribut `assets` de sa classe :
+A preview picks its stack through the `assets` attribute of its class:
 
     class AssistantPreview(LookbookPreview):
         assets = "assistant"
 
-Par défaut, c'est la pile historique (DSFR + qfdmd) qui est servie, pour ne
-rien changer aux previews existantes.
+By default the legacy stack (DSFR + qfdmd) is served, leaving the existing
+previews untouched.
 {% endcomment %}
 <!DOCTYPE html>
 <html lang="fr">
@@ -34,7 +34,7 @@ rien changer aux previews existantes.
   {% block extra_js %}
   {% endblock extra_js %}
 </head>
-<body class="{% if preview_instance.assets == 'assistant' %}qfa-preview{% else %}qf-p-4w{% endif %}">
+<body class="qf-p-4w qfa-preview">
   <div>
     {{ preview_html }}
   </div>

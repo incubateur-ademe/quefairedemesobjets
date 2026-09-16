@@ -1,25 +1,29 @@
-"""Stockage des statiques conscient des chunks Parcel.
+"""Static files storage aware of Parcel chunks.
 
-Parcel nomme déjà ses chunks par le hachage de leur contenu
-(`maplibre-gl.1ea7348e.js`) et son runtime les charge par ce nom, en le
-concaténant à l'URL du bundle courant : ce n'est pas un `import` que Django
-saurait réécrire. Or `ManifestStaticFilesStorage` renomme chaque fichier avec
-son propre hachage, et `WHITENOISE_KEEP_ONLY_HASHED_FILES` supprime l'original.
-En production, chaque chunk chargé à la demande répondrait donc 404 — tout en
-marchant sous `runserver`, qui sert les fichiers d'origine.
+Parcel already names its chunks after their content hash
+(`maplibre-gl.1ea7348e.js`) and its runtime loads them by that name, appended
+to the URL of the current bundle: this is not an `import` Django knows how to
+rewrite. Yet `ManifestStaticFilesStorage` renames every file with its own
+hash, and `WHITENOISE_KEEP_ONLY_HASHED_FILES` deletes the original. In
+production, every lazily loaded chunk would answer 404, while working under
+`runserver`, which serves the original files.
 
-Ce stockage ajoute un motif de réécriture pour ces références : le nom d'un
-chunk, entre guillemets, dans un fichier JavaScript. Le motif est étroit — un
-nom se terminant par huit caractères hexadécimaux puis `.js` ou `.css` — pour
-ne toucher que ce que Parcel produit.
+This storage adds a rewrite pattern for those references: the name of a
+chunk, between double quotes, in a JavaScript file. The pattern is narrow (a
+name ending with eight hexadecimal characters then `.js` or `.css`) to only
+touch what Parcel produces.
+
+A reference to a chunk that does not exist makes `collectstatic` fail, as any
+broken reference does under the manifest storage: the deploy stops rather
+than shipping a 404.
 """
 
 from whitenoise.storage import CompressedManifestStaticFilesStorage
 
-CHUNK_PARCEL = r"""(?P<matched>"(?P<url>[\w.-]+\.[a-f0-9]{8}\.(?:js|css))")"""
+PARCEL_CHUNK = r"""(?P<matched>"(?P<url>[\w.-]+\.[a-f0-9]{8}\.(?:js|css))")"""
 
 
 class ParcelManifestStaticFilesStorage(CompressedManifestStaticFilesStorage):
     patterns = CompressedManifestStaticFilesStorage.patterns + (
-        ("*.js", ((CHUNK_PARCEL, '"%(url)s"'),)),
+        ("*.js", ((PARCEL_CHUNK, '"%(url)s"'),)),
     )

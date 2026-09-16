@@ -544,7 +544,7 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        # Réécrit aussi les références aux chunks Parcel : voir core/storage.py.
+        # Also rewrites references to Parcel chunks: see core/storage.py.
         "BACKEND": "core.storage.ParcelManifestStaticFilesStorage",
     },
 }
