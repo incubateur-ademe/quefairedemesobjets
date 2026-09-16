@@ -13,8 +13,6 @@
 - Installer et configurer le client Scalingo en suivant [les instructions de Scalingo](https://doc.scalingo.com/platform/cli/start)
 - [OpenTofu](https://opentofu.org/docs/intro/install/) et [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 
-Conseil: utiliser `asdf` ou `mise` pour la gestion des environnements virtuel `node` et `python`
-
 ⚠️ L'accès à la plateforme Scaleway est nécessaire pour exécuter la copie de la base de données de production en local
 
 #### Spécificité d'installation pour les processeurs Mx de Mac
