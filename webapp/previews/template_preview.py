@@ -5,6 +5,7 @@ from pathlib import Path
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
@@ -19,8 +20,9 @@ from core.widgets import (
     SearchAutocompleteInput,
 )
 from infotri.forms import InfotriForm
+from previews.widgets import AdresseDatalistInput
 from qfdmd.forms import QfSearchForm
-from qfdmd.models import Synonyme
+from qfdmd.models import ProduitPage, Synonyme
 from qfdmd.views import get_homepage
 from qfdmo.forms import (
     LegendeForm,
@@ -32,7 +34,8 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.models.action import Action
+from qfdmo.models.action import Action, GroupeAction
+from qfdmo.views.autocomplete import BAN_API_URL, BAN_TIMEOUT_SECONDS
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
@@ -1424,3 +1427,105 @@ class TestsPreview(LookbookPreview):
             "ui/tests/t_19_infotri_responsive.html",
             {"base_url": base_url},
         )
+
+
+class GesteForm(DsfrBaseForm):
+    geste = forms.ChoiceField(
+        label="Geste",
+        choices=[
+            ("reparer", "Réparer"),
+            ("donner_echanger_rapporter", "Donner, échanger, rapporter"),
+            ("emprunter_preter_louer", "Emprunter, prêter, louer"),
+            ("vendre_acheter", "Vendre, acheter"),
+            ("trier", "Trier"),
+        ],
+    )
+    objet = forms.CharField(
+        label="Slug d'une fiche produit (facultatif)", required=False
+    )
+    adresse = forms.CharField(
+        label="Adresse ou commune",
+        required=False,
+        initial="Paris",
+        widget=AdresseDatalistInput(
+            attrs={"placeholder": "Paris, Lyon, 12 rue de la Paix…"}
+        ),
+        help_text="Centre de la carte. Les suggestions viennent de la BAN.",
+    )
+
+
+class AssistantPreview(LookbookPreview):
+    """Composants de l'assistant V2."""
+
+    # Sert assistant.js/css seuls : la pile historique démarre sa propre
+    # application Stimulus et chargerait le DSFR, que l'assistant n'utilise pas.
+    assets = "assistant"
+
+    @register_form_class(GesteForm)
+    def carte(self, geste="reparer", objet="", adresse="Paris", **kwargs):
+        longitude, latitude = _coordonnees_de(adresse)
+        groupe = GroupeAction.objects.filter(code=geste).first()
+        lieux = (
+            DisplayedActeur.objects.all()
+            .proposing(geste, _sous_categorie_ids(objet))
+            .nearest_to(longitude, latitude)
+            .for_the_map()
+        )
+        return render_to_string(
+            "ui/components/assistant/carte.html",
+            {
+                "geste": geste,
+                "objet": objet,
+                "longitude": longitude,
+                "latitude": latitude,
+                "couleur_geste": groupe.couleur if groupe else "#009081",
+                "lieux": lieux,
+                "debug": True,
+            },
+        )
+
+
+PARIS = (2.3488, 48.8534)
+
+
+def _coordonnees_de(adresse):
+    """Géocode une adresse via la BAN, en retombant sur Paris si besoin.
+
+    Le résultat est mis en cache : le lookbook re-rend la preview à chaque
+    changement de paramètre, et rien ne justifie de réinterroger la BAN pour
+    une adresse déjà résolue.
+    """
+    if not adresse:
+        return PARIS
+
+    cle = f"lookbook:geocode:{adresse}"
+    coordonnees = cache.get(cle)
+    if coordonnees is None:
+        coordonnees = _geocode_ban(adresse) or PARIS
+        cache.set(cle, coordonnees, 60 * 60 * 24)
+    return coordonnees
+
+
+def _geocode_ban(adresse):
+    import requests
+
+    try:
+        reponse = requests.get(
+            BAN_API_URL, params={"q": adresse, "limit": 1}, timeout=BAN_TIMEOUT_SECONDS
+        )
+        reponse.raise_for_status()
+        features = reponse.json().get("features", [])
+    except (requests.RequestException, ValueError):
+        return None
+
+    if not features:
+        return None
+    longitude, latitude = features[0]["geometry"]["coordinates"]
+    return (longitude, latitude)
+
+
+def _sous_categorie_ids(slug):
+    if not slug:
+        return []
+    page = ProduitPage.objects.live().filter(slug=slug).first()
+    return list(page.sous_categorie_objet.values_list("id", flat=True)) if page else []

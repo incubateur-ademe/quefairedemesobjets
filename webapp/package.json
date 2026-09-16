@@ -2,12 +2,12 @@
   "name": "webapp",
   "type": "module",
   "scripts": {
-    "build": "parcel build --target prod",
+    "build": "parcel build --target prod --target worker",
     "lint": "eslint . --fix",
     "format:check": "prettier --check static/to_compile",
     "format": "prettier static/to_compile --write",
     "test": "jest ./static/to_compile",
-    "watch": "parcel watch --target dev --no-hmr",
+    "watch": "parcel watch --target dev --target worker --no-hmr",
     "e2e_test": " npx playwright test --update-snapshots"
   },
   "dependencies": {
@@ -64,6 +64,7 @@
     "static/to_compile/embed/infotri.ts",
     "static/to_compile/infotri-child.ts",
     "static/to_compile/qfdmd.ts",
+    "static/to_compile/assistant.ts",
     "static/to_compile/qfdmo.ts"
   ],
   "targets": {
@@ -73,6 +74,13 @@
     },
     "dev": {
       "distDir": "./static/compiled"
+    },
+    "worker": {
+      "distDir": "./static/compiled",
+      "sourceMap": false,
+      "context": "web-worker",
+      "source": "static/to_compile/maplibre-worker.ts",
+      "scopeHoist": false
     }
   },
   "browserslist": [

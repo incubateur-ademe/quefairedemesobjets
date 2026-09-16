@@ -1,27 +1,49 @@
 {% load dsfr_tags static %}
+{% comment %}
+Deux piles d'assets cohabitent dans le projet, et elles ne doivent jamais être
+chargées ensemble : chacune démarre sa propre application Stimulus, qui
+scannerait le même DOM et enregistrerait des contrôleurs concurrents.
+
+Une preview choisit la sienne via l'attribut `assets` de sa classe :
+
+    class AssistantPreview(LookbookPreview):
+        assets = "assistant"
+
+Par défaut, c'est la pile historique (DSFR + qfdmd) qui est servie, pour ne
+rien changer aux previews existantes.
+{% endcomment %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  {% dsfr_css %}
-  <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
-  {# Sites Conformes css #}
-  <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
+  {% if preview_instance.assets == "assistant" %}
+    <link rel="stylesheet" href="{% static 'assistant.css' %}">
+  {% else %}
+    {% dsfr_css %}
+    <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
+    {# Sites Conformes css #}
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
+  {% endif %}
+
   {% block extra_css %}
   {% endblock extra_css %}
 
   {% block extra_js %}
   {% endblock extra_js %}
 </head>
-<body class="qf-p-4w">
+<body class="{% if preview_instance.assets == 'assistant' %}qfa-preview{% else %}qf-p-4w{% endif %}">
   <div>
     {{ preview_html }}
   </div>
 
-  {% dsfr_js %}
-  <script type="module" src="{% static 'qfdmd.js' %}"></script>
+  {% if preview_instance.assets == "assistant" %}
+    <script type="module" src="{% static 'assistant.js' %}"></script>
+  {% else %}
+    {% dsfr_js %}
+    <script type="module" src="{% static 'qfdmd.js' %}"></script>
+  {% endif %}
 </body>
 </html>

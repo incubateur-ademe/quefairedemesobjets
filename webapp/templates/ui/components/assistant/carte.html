@@ -1,0 +1,59 @@
+{% load l10n static %}
+<div
+    class="qfa-carte"
+    data-controller="assistant-carte"
+    data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
+    data-assistant-carte-url-value="{% url 'assistant:lieux-geojson' %}"
+    data-assistant-carte-url-worker-value="{% static 'maplibre-worker.js' %}"
+    data-assistant-carte-geste-value="{{ geste }}"
+    data-assistant-carte-objet-value="{{ objet|default:'' }}"
+    {% comment %}
+    URL modèle vers la fiche d'un lieu, facultative : le contrôleur y remplace
+    `__uuid__`. Elle vient de l'appelant plutôt que d'un `{% url %}` ici, parce
+    que la page de lieu n'existe pas encore — sans elle, les punaises restent
+    des boutons plutôt que des liens vers nulle part.
+    {% endcomment %}
+    {% if url_lieu %}data-assistant-carte-url-lieu-value="{{ url_lieu }}"{% endif %}
+    {% comment %}
+    `unlocalize` est indispensable : la locale française formate les décimaux
+    avec une virgule, que Number() lit comme NaN.
+    {% endcomment %}
+    data-assistant-carte-longitude-value="{{ longitude|unlocalize }}"
+    data-assistant-carte-latitude-value="{{ latitude|unlocalize }}"
+    data-assistant-carte-adresse-precise-value="{{ adresse_precise|yesno:'true,false' }}"
+    style="--qfa-geste-couleur: {{ couleur_geste }}"
+>
+    <div
+        class="qfa-carte__toile"
+        data-assistant-carte-target="conteneur"
+        role="application"
+        aria-label="Carte des lieux proposant ce geste"
+    ></div>
+
+    {% if debug %}
+        <div class="qfa-chrono" data-controller="assistant-chrono">
+            <strong data-assistant-chrono-target="valeur">—</strong>
+            <span data-assistant-chrono-target="detail"></span>
+        </div>
+    {% endif %}
+
+    <p
+        class="qfa-carte__message"
+        data-assistant-carte-target="message"
+        role="status"
+        aria-live="polite"
+    ></p>
+
+    {% comment %}
+    Une carte MapLibre n'est ni navigable au clavier ni lisible par un lecteur
+    d'écran. Cette liste est le seul chemin accessible vers les résultats tant
+    que la bascule liste/carte n'existe pas.
+    {% endcomment %}
+    <ul class="qfa-carte__liste-accessible">
+        {% for lieu in lieux %}
+            <li>{{ lieu.nom_commercial|default:lieu.nom }}</li>
+        {% empty %}
+            <li>Aucun lieu à proximité pour ce geste.</li>
+        {% endfor %}
+    </ul>
+</div>
