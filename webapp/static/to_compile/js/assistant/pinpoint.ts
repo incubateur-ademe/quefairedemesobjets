@@ -1,59 +1,59 @@
-import type { Lieu } from "./lieux_visibles"
+import type { Place } from "./visible_places"
 
-export type CouleursPinpoint = {
+export type PinpointColors = {
   geste: string
   bonus: string
-  adresse: string
+  address: string
 }
 
 /**
- * Élément DOM d'un pinpoint.
+ * DOM element of a pinpoint.
  *
- * La couleur suit le geste choisi par l'usager, pas une propriété du lieu :
- * un même acteur s'affiche en bleu si l'usager a choisi « donner » et en brun
- * s'il a choisi « revendre » (#3295). Seul le Bonus Réparation fait exception
- * et prend le pas sur la couleur du geste.
+ * The color follows the geste chosen by the user, not a property of the
+ * place: the same acteur shows in blue if the user chose "donner" and in brown
+ * if they chose "revendre" (#3295). Only the Bonus Réparation is an exception
+ * and overrides the geste color.
  */
-export function elementPinpoint(
-  lieu: Lieu,
-  couleurs: CouleursPinpoint,
+export function pinpointElement(
+  place: Place,
+  colors: PinpointColors,
   geste: string,
-  urlDuLieu?: (uuid: string) => string,
+  lieuUrl?: (uuid: string) => string,
 ): HTMLElement {
-  // Un lien quand une page de lieu existe — ouvrable dans un nouvel onglet et
-  // utilisable sans JavaScript — et un bouton sinon : un `<a>` sans `href`
-  // n'est ni focalisable ni annoncé, alors qu'un bouton reste accessible au
-  // clavier même quand la fiche du lieu n'est pas encore livrée.
-  const element = urlDuLieu
-    ? Object.assign(document.createElement("a"), { href: urlDuLieu(lieu.uuid) })
+  // A link when a place page exists (openable in a new tab, usable without
+  // JavaScript) and a button otherwise: an `<a>` without `href` is neither
+  // focusable nor announced, while a button stays keyboard-accessible even
+  // before the place page is delivered.
+  const element = lieuUrl
+    ? Object.assign(document.createElement("a"), { href: lieuUrl(place.uuid) })
     : Object.assign(document.createElement("button"), { type: "button" })
   element.className = "qfa-pinpoint"
-  element.dataset.uuid = lieu.uuid
+  element.dataset.uuid = place.uuid
   element.dataset.geste = geste
-  element.setAttribute("aria-label", lieu.nom)
+  element.setAttribute("aria-label", place.nom)
   element.style.setProperty(
-    "--qfa-pinpoint-couleur",
-    lieu.bonus ? couleurs.bonus : couleurs.geste,
+    "--qfa-pinpoint-color",
+    place.bonus ? colors.bonus : colors.geste,
   )
-  if (lieu.bonus) element.dataset.bonus = "true"
+  if (place.bonus) element.dataset.bonus = "true"
 
-  const icone = document.createElement("span")
-  icone.className = "qfa-pinpoint__icone"
-  element.append(icone)
+  const icon = document.createElement("span")
+  icon.className = "qfa-pinpoint__icon"
+  element.append(icon)
   return element
 }
 
 /**
- * Marqueur de l'adresse saisie par l'usager.
+ * Marker of the address entered by the user.
  *
- * N'est créé que pour une adresse précise, jamais pour une commune (#3356) :
- * « Lyon » n'a pas de position à montrer.
+ * Only created for a precise address, never for a municipality (#3356):
+ * "Lyon" has no position to show.
  */
-export function elementAdresse(couleurs: CouleursPinpoint): HTMLElement {
+export function addressElement(colors: PinpointColors): HTMLElement {
   const element = document.createElement("div")
-  element.className = "qfa-pinpoint qfa-pinpoint--adresse"
+  element.className = "qfa-pinpoint qfa-pinpoint--address"
   element.setAttribute("role", "img")
   element.setAttribute("aria-label", "Votre adresse")
-  element.style.setProperty("--qfa-pinpoint-couleur", couleurs.adresse)
+  element.style.setProperty("--qfa-pinpoint-color", colors.address)
   return element
 }

@@ -1,52 +1,52 @@
 import { Controller } from "@hotwired/stimulus"
 
-const SEUIL_MS = 50
-const MESURES_CONSERVEES = 8
+const THRESHOLD_MS = 50
+const KEPT_TIMINGS = 8
 
-type Mesure = { serveur: number; total: number; lieux: number }
+type Timing = { server: number; total: number; places: number }
 
 /**
- * Overlay de debug : durée des requêtes de lieux.
+ * Debug overlay: duration of the places requests.
  *
- * `serveur` vient de l'en-tête `Server-Timing` renvoyé par l'endpoint, donc du
- * temps réellement passé en base. `total` inclut le réseau et la
- * désérialisation, c'est ce que ressent l'usager.
+ * `server` comes from the `Server-Timing` header sent by the endpoint, so from
+ * the time actually spent in the database. `total` includes the network and
+ * the parsing: what the user feels.
  */
 export default class extends Controller<HTMLElement> {
-  static targets = ["valeur", "detail"]
-  static values = { seuil: { type: Number, default: SEUIL_MS } }
+  static targets = ["value", "detail"]
+  static values = { threshold: { type: Number, default: THRESHOLD_MS } }
 
-  declare readonly valeurTarget: HTMLElement
+  declare readonly valueTarget: HTMLElement
   declare readonly detailTarget: HTMLElement
   declare readonly hasDetailTarget: boolean
-  declare seuilValue: number
+  declare thresholdValue: number
 
-  private mesures: Mesure[] = []
+  private timings: Timing[] = []
 
-  mesurer(mesure: Mesure) {
-    this.mesures = [mesure, ...this.mesures].slice(0, MESURES_CONSERVEES)
-    this.#afficher()
+  record(timing: Timing) {
+    this.timings = [timing, ...this.timings].slice(0, KEPT_TIMINGS)
+    this.#render()
   }
 
-  #afficher() {
-    const [derniere] = this.mesures
-    const mediane = this.#mediane(this.mesures.map((m) => m.total))
+  #render() {
+    const [last] = this.timings
+    const median = this.#median(this.timings.map((timing) => timing.total))
 
-    this.valeurTarget.textContent = `${derniere.total.toFixed(0)} ms`
-    this.element.dataset.depasse = String(derniere.total > this.seuilValue)
+    this.valueTarget.textContent = `${last.total.toFixed(0)} ms`
+    this.element.dataset.overBudget = String(last.total > this.thresholdValue)
 
     if (this.hasDetailTarget) {
       this.detailTarget.textContent = [
-        `serveur ${derniere.serveur.toFixed(1)} ms`,
-        `médiane ${mediane.toFixed(0)} ms`,
-        `${derniere.lieux} lieux`,
-        `budget ${this.seuilValue} ms`,
+        `serveur ${last.server.toFixed(1)} ms`,
+        `médiane ${median.toFixed(0)} ms`,
+        `${last.places} lieux`,
+        `budget ${this.thresholdValue} ms`,
       ].join(" · ")
     }
   }
 
-  #mediane(valeurs: number[]): number {
-    const triees = [...valeurs].sort((a, b) => a - b)
-    return triees[Math.floor(triees.length / 2)] ?? 0
+  #median(values: number[]): number {
+    const sorted = [...values].sort((a, b) => a - b)
+    return sorted[Math.floor(sorted.length / 2)] ?? 0
   }
 }

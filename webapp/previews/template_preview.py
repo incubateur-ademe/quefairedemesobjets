@@ -7,22 +7,25 @@ from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
+import requests
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
+from assistant.views.geojson import sous_categorie_ids_for
 from core.widgets import (
     SearchAutocompleteInput,
 )
 from infotri.forms import InfotriForm
 from previews.widgets import AdresseDatalistInput
 from qfdmd.forms import QfSearchForm
-from qfdmd.models import ProduitPage, Synonyme
+from qfdmd.models import Synonyme
 from qfdmd.views import get_homepage
 from qfdmo.forms import (
     LegendeForm,
@@ -1454,18 +1457,21 @@ class GesteForm(DsfrBaseForm):
     )
 
 
-class AssistantPreview(LookbookPreview):
-    """Composants de l'assistant V2."""
+DEFAULT_GESTE_COLOR = "#009081"
 
-    # Sert assistant.js/css seuls : la pile historique démarre sa propre
-    # application Stimulus et chargerait le DSFR, que l'assistant n'utilise pas.
+
+class AssistantPreview(LookbookPreview):
+    """Assistant V2 components."""
+
+    # Serves assistant.js/css alone: the legacy stack starts its own Stimulus
+    # application and would load the DSFR, which the assistant does not use.
     assets = "assistant"
 
     @register_form_class(GesteForm)
     def carte(self, geste="reparer", objet="", adresse="Paris", **kwargs):
-        longitude, latitude = _coordonnees_de(adresse)
+        longitude, latitude, precise = _coordinates_of(adresse)
         groupe = GroupeAction.objects.filter(code=geste).first()
-        lieux = (
+        acteurs = (
             DisplayedActeur.objects.all()
             .proposing(geste, _sous_categorie_ids(objet))
             .nearest_to(longitude, latitude)
@@ -1478,54 +1484,61 @@ class AssistantPreview(LookbookPreview):
                 "objet": objet,
                 "longitude": longitude,
                 "latitude": latitude,
-                "couleur_geste": groupe.couleur if groupe else "#009081",
-                "lieux": lieux,
+                "adresse_precise": precise,
+                "couleur_geste": groupe.couleur if groupe else DEFAULT_GESTE_COLOR,
+                "lieux": acteurs,
                 "debug": True,
             },
         )
 
 
-PARIS = (2.3488, 48.8534)
+# Longitude, latitude, and whether the address is precise (see `_geocode_ban`).
+PARIS = (2.3488, 48.8534, False)
 
 
-def _coordonnees_de(adresse):
-    """Géocode une adresse via la BAN, en retombant sur Paris si besoin.
+def _coordinates_of(adresse):
+    """Geocodes an address through the BAN, falling back on Paris.
 
-    Le résultat est mis en cache : le lookbook re-rend la preview à chaque
-    changement de paramètre, et rien ne justifie de réinterroger la BAN pour
-    une adresse déjà résolue.
+    A successful result is cached: the lookbook re-renders the preview on
+    every parameter change, and nothing justifies asking the BAN again for an
+    address already resolved. A failure is not cached, so a BAN outage does
+    not pin the fallback for a day.
     """
     if not adresse:
         return PARIS
 
-    cle = f"lookbook:geocode:{adresse}"
-    coordonnees = cache.get(cle)
-    if coordonnees is None:
-        coordonnees = _geocode_ban(adresse) or PARIS
-        cache.set(cle, coordonnees, 60 * 60 * 24)
-    return coordonnees
+    key = f"lookbook:geocode:v2:{adresse}"
+    coordinates = cache.get(key)
+    if coordinates is None:
+        coordinates = _geocode_ban(adresse)
+        if coordinates:
+            cache.set(key, coordinates, 60 * 60 * 24)
+    return coordinates or PARIS
 
 
 def _geocode_ban(adresse):
-    import requests
-
     try:
-        reponse = requests.get(
+        response = requests.get(
             BAN_API_URL, params={"q": adresse, "limit": 1}, timeout=BAN_TIMEOUT_SECONDS
         )
-        reponse.raise_for_status()
-        features = reponse.json().get("features", [])
+        response.raise_for_status()
+        features = response.json().get("features", [])
     except (requests.RequestException, ValueError):
         return None
 
     if not features:
         return None
     longitude, latitude = features[0]["geometry"]["coordinates"]
-    return (longitude, latitude)
+    # A municipality has no position worth marking: the address marker is only
+    # shown for a street or a house number.
+    precise = features[0]["properties"].get("type") != "municipality"
+    return (longitude, latitude, precise)
 
 
 def _sous_categorie_ids(slug):
     if not slug:
         return []
-    page = ProduitPage.objects.live().filter(slug=slug).first()
-    return list(page.sous_categorie_objet.values_list("id", flat=True)) if page else []
+    try:
+        return sous_categorie_ids_for(slug)
+    except Http404:
+        return []
