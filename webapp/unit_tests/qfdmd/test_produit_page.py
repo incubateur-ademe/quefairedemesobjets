@@ -540,3 +540,11 @@ class TestRepairHtmlInternalizesLinks:
         html = '<p><a href="https://www.economie.gouv.fr/x" target="_blank">x</a></p>'
 
         assert _repaired_html(html) == html
+
+
+def test_infotri_image_block_is_decorative_by_default():
+    from qfdmd.models import ProduitPage
+
+    block = ProduitPage._meta.get_field("infotri").stream_block.child_blocks["image"]
+
+    assert block.child_blocks["decorative"].get_default() is True
