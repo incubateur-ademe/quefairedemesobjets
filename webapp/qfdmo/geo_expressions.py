@@ -2,15 +2,15 @@ from django.db.models import FloatField, Func, Value
 
 
 class NearestTo(Func):
-    """Ordonne par l'opérateur KNN `<->` de PostGIS.
+    """Orders by the PostGIS KNN operator `<->`.
 
-    Distinct de `Distance` : l'opérateur KNN permet à PostgreSQL de parcourir
-    l'index GiST dans l'ordre des distances croissantes et de s'arrêter au
-    LIMIT, au lieu de calculer la distance de tous les candidats puis de les
-    trier. Mesuré sur 388 000 acteurs : 2 ms contre 437 ms à Paris.
+    Distinct from `Distance`: the KNN operator lets PostgreSQL walk the GiST
+    index in increasing distance order and stop at the LIMIT, instead of
+    computing the distance of every candidate and then sorting. Measured on
+    388,000 acteurs: 2 ms against 437 ms in Paris.
 
-    La valeur produite sert au tri, pas à l'affichage. Annoter `Distance` en
-    parallèle si la distance exacte doit être montrée.
+    The produced value is meant for sorting, not display. Annotate `Distance`
+    alongside if the exact distance must be shown.
     """
 
     template = "%(expressions)s"

@@ -4,35 +4,35 @@
     data-controller="assistant-carte"
     data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
     data-assistant-carte-url-value="{% url 'assistant:lieux-geojson' %}"
-    data-assistant-carte-url-worker-value="{% static 'maplibre-worker.js' %}"
+    data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
     data-assistant-carte-geste-value="{{ geste }}"
     data-assistant-carte-objet-value="{{ objet|default:'' }}"
     {% comment %}
-    URL modèle vers la fiche d'un lieu, facultative : le contrôleur y remplace
-    `__uuid__`. Elle vient de l'appelant plutôt que d'un `{% url %}` ici, parce
-    que la page de lieu n'existe pas encore — sans elle, les punaises restent
-    des boutons plutôt que des liens vers nulle part.
+    Optional URL pattern to a place's page: the controller replaces `__uuid__`
+    in it. It comes from the caller rather than from a `{% url %}` here, because
+    the place page does not exist yet; without it, the pins stay buttons rather
+    than links to nowhere.
     {% endcomment %}
-    {% if url_lieu %}data-assistant-carte-url-lieu-value="{{ url_lieu }}"{% endif %}
+    {% if url_lieu %}data-assistant-carte-lieu-url-value="{{ url_lieu }}"{% endif %}
     {% comment %}
-    `unlocalize` est indispensable : la locale française formate les décimaux
-    avec une virgule, que Number() lit comme NaN.
+    `unlocalize` is required: the French locale formats decimals with a comma,
+    which Number() reads as NaN.
     {% endcomment %}
     data-assistant-carte-longitude-value="{{ longitude|unlocalize }}"
     data-assistant-carte-latitude-value="{{ latitude|unlocalize }}"
-    data-assistant-carte-adresse-precise-value="{{ adresse_precise|yesno:'true,false' }}"
-    style="--qfa-geste-couleur: {{ couleur_geste }}"
+    data-assistant-carte-precise-address-value="{{ adresse_precise|yesno:'true,false' }}"
+    style="--qfa-geste-color: {{ couleur_geste }}"
 >
     <div
-        class="qfa-carte__toile"
-        data-assistant-carte-target="conteneur"
+        class="qfa-carte__canvas"
+        data-assistant-carte-target="container"
         role="application"
         aria-label="Carte des lieux proposant ce geste"
     ></div>
 
     {% if debug %}
         <div class="qfa-chrono" data-controller="assistant-chrono">
-            <strong data-assistant-chrono-target="valeur">—</strong>
+            <strong data-assistant-chrono-target="value">—</strong>
             <span data-assistant-chrono-target="detail"></span>
         </div>
     {% endif %}
@@ -45,11 +45,11 @@
     ></p>
 
     {% comment %}
-    Une carte MapLibre n'est ni navigable au clavier ni lisible par un lecteur
-    d'écran. Cette liste est le seul chemin accessible vers les résultats tant
-    que la bascule liste/carte n'existe pas.
+    A MapLibre map is neither keyboard-navigable nor readable by a screen
+    reader. This list is the only accessible path to the results until the
+    list/map toggle exists.
     {% endcomment %}
-    <ul class="qfa-carte__liste-accessible">
+    <ul class="qfa-carte__accessible-list">
         {% for lieu in lieux %}
             <li>{{ lieu.nom_commercial|default:lieu.nom }}</li>
         {% empty %}

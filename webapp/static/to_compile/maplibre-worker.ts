@@ -1,13 +1,16 @@
-// Worker MapLibre, construit à part : cible Parcel `worker`, contexte
-// `web-worker` (voir package.json).
+// MapLibre worker, built apart: Parcel target `worker`, context `web-worker`
+// (see package.json).
 //
-// maplibre-gl 6 résout son worker via `import.meta.url`, que Parcel ne conserve
-// pas : il faut lui fournir une URL. Or ce worker importe le cœur de MapLibre
-// (480 ko) depuis un fichier voisin, et tout bundle produit dans le contexte de
-// la page — `bundle-text:`, `url:` — laisse Parcel partager ce cœur avec elle.
-// Un worker vit dans son propre contexte et ne peut pas l'atteindre : « Cannot
-// find module », et la carte reste grise, sans aucune tuile demandée.
+// maplibre-gl 6 resolves its worker through `import.meta.url`, which Parcel
+// does not preserve: it needs an explicit URL. Yet this worker imports the
+// MapLibre core (480 kB) from a sibling file, and any bundle produced in the
+// page context (`bundle-text:`, `url:`) lets Parcel share that core with the
+// page. A worker lives in its own context and cannot reach it: "Cannot find
+// module", and the map stays grey, no tile ever requested.
 //
-// Parcel ne partage jamais de code entre contextes : une cible `web-worker`
-// donne un seul fichier autonome, que whitenoise sert et hache comme les autres.
+// Parcel never shares code across contexts: a `web-worker` target yields one
+// self-contained file, served and hashed by whitenoise like the others.
+// `scopeHoist` is off for that target: with hoisting, maplibre-gl's
+// `sideEffects` field lets Parcel drop this entry, which exports nothing, and
+// the bundle comes out empty.
 import "maplibre-gl/dist/maplibre-gl-worker.mjs"
