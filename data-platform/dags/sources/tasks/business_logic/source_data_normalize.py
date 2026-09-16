@@ -81,7 +81,7 @@ def _rename_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     return df
 
 
-def _error_messages_with_identifier(row: pd.Series, e: Exception) -> str:
+def _format_error_messages_with_identifier(row: pd.Series, e: Exception) -> str:
     def _identifiant_str(row: pd.Series) -> str:
         if "identifiant_unique" in row.index:
             return f"identifiant_unique : {row['identifiant_unique']}"
@@ -120,7 +120,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFra
                         fonction_de_transformation=function_name,
                         origine_colonnes=[column_to_transform.origin],
                         origine_valeurs=[str(origin_value)],
-                        message=_error_messages_with_identifier(row, e),
+                        message=_format_error_messages_with_identifier(row, e),
                     )
                 )
                 transformed_column[index] = ""
@@ -174,7 +174,7 @@ def _transform_df(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
                         fonction_de_transformation=function_name,
                         origine_colonnes=column_to_transform_df.origin,
                         origine_valeurs=[str(v) for v in origin_values.tolist()],
-                        message=_error_messages_with_identifier(row, e),
+                        message=_format_error_messages_with_identifier(row, e),
                     )
                 )
                 # Set default values for all destination columns
