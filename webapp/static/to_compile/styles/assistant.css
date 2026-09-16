@@ -1,0 +1,244 @@
+/* Feuille de styles de l'assistant V2, servie seule dans le lookbook : le
+   DSFR et la pile historique n'y sont pas chargés (voir
+   `django_lookbook/preview.html`). Cette première livraison ne porte que la
+   carte ; les autres composants viendront ici, sous le même préfixe `qfa-`. */
+
+/* `border-box` partout : les tailles de la maquette (un pinpoint de 35×47)
+   désignent la boîte visible, bordure comprise. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+/* Couleurs des gestes, relevées sur le Figma « Composants spécifiques à Que
+   faire » (nœud 368:1591, Carte/Punaises de carte). Ce sont des jetons
+   d'illustration du DSFR, nommés ici par le geste qu'ils portent plutôt que
+   par leur teinte — un nom de couleur devient faux dès que le design change.
+
+   Quatre des cinq valeurs correspondent à `GroupeAction.couleur` en base ;
+   `vendre_acheter` suit la base (#D1B781) et non le Figma (#BB8568), dont le
+   jeton était un état de survol pris par erreur. */
+:root {
+  --qfa-geste-reparation: #009081; /* green-menthe-main-548 */
+  --qfa-geste-don: #417dc4; /* blue-cumulus-main-526 */
+  --qfa-geste-vente: #d1b781;
+  --qfa-geste-loc: #ce614a; /* pink-tuile-main-556 */
+  --qfa-geste-tri: #a558a0; /* purple-glycine-main-494 */
+
+  --qfa-bonus-couleur: var(--qfa-geste-reparation);
+  --qfa-adresse-usager: #e1000f; /* red-marianne, cf. maquette carte */
+  --qfa-rayon: 8px;
+}
+
+/* 450 px de haut et toute la largeur, comme la maquette (30141:9028). */
+.qfa-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 450px;
+}
+
+.qfa-carte__toile {
+  flex: 1 1 auto;
+  min-height: 0;
+  border-radius: var(--qfa-rayon);
+  overflow: hidden;
+}
+
+.qfa-carte__message:empty {
+  display: none;
+}
+
+.qfa-carte__message {
+  padding: 0.5rem 1rem;
+  background: #fff;
+  border-radius: var(--qfa-rayon);
+}
+
+.qfa-pinpoint {
+  /* MapLibre positionne le marqueur via `transform` : sans `position:
+     absolute`, la transformation reste sans effet et le pinpoint s'empile
+     en bas de page. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35px;
+  height: 47px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: none;
+  color: var(--qfa-pinpoint-couleur);
+}
+
+/* Le pin du Figma (nœud 368:1591) empile trois calques : un corps blanc, un
+   cerne de la couleur du geste, et l'icône du geste. La pointe descend jusqu'à
+   y=47 — c'est elle, et non le centre, qui désigne le lieu (#3356).
+
+   Les SVG exportés servent de masques plutôt que d'images : la forme reste
+   exactement celle de la maquette, et la couleur continue de venir de
+   `--qfa-pinpoint-couleur`, donc du geste choisi par l'usager. */
+.qfa-pinpoint::before,
+.qfa-pinpoint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Corps blanc : la goutte est la même pour les cinq gestes.
+   Les `url()` sont écrits directement dans `mask` plutôt que via une variable :
+   Parcel refuse une URL relative dans une custom property, car elle se résout
+   là où le `var()` est utilisé, pas là où il est défini. */
+.qfa-pinpoint::before {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  background: #fff;
+}
+
+/* Cerne de la goutte, à la couleur du geste. Identique pour les cinq gestes :
+   c'est l'icône, posée par-dessus, qui les distingue. */
+.qfa-pinpoint::after {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  background: currentColor;
+}
+
+/* L'icône du geste, ~20×20 dans la maquette, centrée dans la tête de la goutte
+   (et non dans le pin entier, dont la pointe occupe le tiers bas). */
+.qfa-pinpoint__icone {
+  position: absolute;
+  top: 7.78px;
+  left: 7.77px;
+  width: 19.47px;
+  height: 19.5px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  top: 5.48px;
+  left: 6.99px;
+  width: 21.92px;
+  height: 21.96px;
+}
+.qfa-pinpoint[data-geste="vendre_acheter"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+}
+.qfa-pinpoint[data-geste="emprunter_preter_louer"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+}
+.qfa-pinpoint[data-geste="trier"] .qfa-pinpoint__icone {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+}
+
+/* « Donner » est exporté d'un seul tenant dans le Figma, icône comprise : pas
+   de calque séparé à superposer. */
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"]::after {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-don.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-don.svg");
+}
+
+.qfa-pinpoint:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+/* Liste rendue côté serveur : seul chemin accessible vers les résultats. */
+.qfa-carte__liste-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Marge de confort dans le lookbook, hors pages réelles. */
+.qfa-preview {
+  margin: 0;
+  padding: 2rem;
+}
+
+/* Overlay de debug : durée des requêtes de lieux. Rendu seulement si `debug`. */
+.qfa-chrono {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--qfa-rayon);
+  background: rgb(0 0 0 / 0.75);
+  color: #fff;
+  font:
+    500 0.75rem/1.4 ui-monospace,
+    monospace;
+  pointer-events: none;
+}
+
+.qfa-chrono[data-depasse="true"] {
+  background: var(--qfa-adresse-usager);
+}
+
+.qfa-chrono span {
+  opacity: 0.75;
+}
+
+/* Sur fond rouge, le texte atténué tombe sous 4,5:1 (WCAG 1.4.3). */
+.qfa-chrono[data-depasse="true"] span {
+  opacity: 1;
+}
+
+.qfa-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Punaise de l'adresse saisie : un disque rouge cerné de blanc, et non une
+   goutte comme les lieux (maquette 30141:9028, « pin rouge »). La forme
+   distingue d'un coup d'œil « vous » des solutions. */
+.qfa-pinpoint--adresse {
+  width: 50px;
+  height: 50px;
+}
+
+.qfa-pinpoint--adresse::before,
+.qfa-pinpoint--adresse::after {
+  -webkit-mask: none;
+  mask: none;
+}
+
+.qfa-pinpoint--adresse::before {
+  background: url("../images/assistant/ui/adresse-cercle.svg") center / contain
+    no-repeat;
+}
+
+.qfa-pinpoint--adresse::after {
+  inset: 9px;
+  background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
+}

@@ -39,6 +39,7 @@ from django.forms import ValidationError, model_to_dict
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.functional import cached_property
+from qfdmo.geo_expressions import NearestTo
 from qfdmo.models.action import Action, get_action_instances
 from qfdmo.models.categorie_objet import SousCategorieObjet
 
@@ -304,6 +305,52 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+NOMBRE_MAX_LIEUX = 20
+
+DUREE_CACHE_OFFRES = 60 * 60 * 12
+
+
+SEUIL_PARCOURS_GEOGRAPHIQUE = 1_000
+
+
+def acteur_ids_offering(
+    groupe_action_code: str, sous_categorie_ids
+) -> list[str] | None:
+    """Identifiants des lieux proposant ce geste pour cet objet, en France.
+
+    Renvoie `None` quand ils sont trop nombreux pour être listés : au-delà du
+    seuil, le parcours géographique trouve ses 20 résultats sans effort et la
+    liste ne sert plus à rien.
+
+    Le nombre de lieux par couple geste/objet s'étale sur cinq ordres de
+    grandeur — de 0 pour « réparer un emballage » à 110 320 pour « trier un
+    emballage ». Sans cette liste, une combinaison rare fait parcourir les
+    388 000 acteurs à la recherche de résultats presque inexistants : mesuré à
+    2,5 s contre 3 ms une fois la liste connue.
+
+    Le couple ne change qu'au rythme des imports, d'où un cache long.
+    """
+    from django.core.cache import cache
+
+    cle = (
+        f"offres:{groupe_action_code}:{','.join(map(str, sorted(sous_categorie_ids)))}"
+    )
+    identifiants = cache.get(cle)
+    if identifiants is None:
+        propositions = DisplayedPropositionService.objects.filter(
+            action__groupe_action__code=groupe_action_code,
+            sous_categories__in=sous_categorie_ids,
+        )
+        trouves = list(
+            propositions.values_list("acteur_id", flat=True).distinct()[
+                : SEUIL_PARCOURS_GEOGRAPHIQUE + 1
+            ]
+        )
+        identifiants = None if len(trouves) > SEUIL_PARCOURS_GEOGRAPHIQUE else trouves
+        cache.set(cle, identifiants, DUREE_CACHE_OFFRES)
+    return identifiants
+
+
 class DisplayedActeurQuerySet(models.QuerySet):
     def with_reparer(self):
         proposition_service_reparer = DisplayedPropositionService.objects.filter(
@@ -395,6 +442,69 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
         )
+
+    def proposing(self, groupe_action_code: str, sous_categorie_ids=None):
+        """Acteurs proposant ce geste, éventuellement pour un objet donné.
+
+        Un « geste » au sens usager est un GroupeAction (5 en base), pas une
+        Action (11) : choisir « donner » doit inclure les acteurs qui ne
+        déclarent que `echanger` ou `rapporter`.
+
+        Le geste et l'objet sont cherchés sur la *même* proposition : un
+        réparateur de vélos et un donneur de meubles ne constituent pas un
+        réparateur de meubles.
+
+        Le filtre passe par EXISTS plutôt que par une jointure pour éviter la
+        duplication de lignes — 9 363 acteurs ont plusieurs propositions dans
+        un même groupe, ce qui ferait rendre moins de 20 lieux distincts.
+        """
+        if sous_categorie_ids:
+            identifiants = acteur_ids_offering(groupe_action_code, sous_categorie_ids)
+            if identifiants is not None:
+                return self.filter(identifiant_unique__in=identifiants)
+
+        propositions = DisplayedPropositionService.objects.filter(
+            acteur=OuterRef("pk"),
+            action__groupe_action__code=groupe_action_code,
+        )
+        if sous_categorie_ids:
+            propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
+        return self.filter(Exists(propositions))
+
+    def nearest_to(self, longitude, latitude):
+        """Acteurs physiques triés du plus proche au plus lointain.
+
+        Aucune borne de distance : `ST_DWithin` empêcherait le parcours
+        ordonné de l'index GiST et coûterait deux ordres de grandeur de plus.
+        Le plafond de résultats suffit à borner le travail.
+        """
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        return self.physical().order_by(NearestTo("location", reference_point))
+
+    def within(self, bbox):
+        """Acteurs de la zone visible, du plus proche de son centre au plus loin.
+
+        Le filtre passe par `bboverlaps` (opérateur `&&`) et non `within` :
+        sur une colonne geography, `within` ignore l'index GiST et coûte
+        2 s contre 1 ms pour le même résultat, les lieux étant des points.
+        """
+        zone = Polygon.from_bbox(bbox)
+        zone.srid = 4326
+        centre = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
+        return (
+            self.physical()
+            .filter(location__bboverlaps=zone)
+            .order_by(NearestTo("location", centre))
+        )
+
+    def for_the_map(self, limit: int = NOMBRE_MAX_LIEUX):
+        return self.with_bonus()[:limit]
+
+    def as_geojson(self) -> dict:
+        return {
+            "type": "FeatureCollection",
+            "features": [acteur.as_geojson_feature() for acteur in self],
+        }
 
 
 class LatLngPropertiesMixin(models.Model):
@@ -1528,6 +1638,27 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+    def as_geojson_feature(self) -> dict:
+        """Représentation GeoJSON du lieu pour la carte.
+
+        La couleur du pinpoint n'est pas exposée ici : elle suit le geste
+        choisi par l'usager, que le client connaît déjà, et non une propriété
+        du lieu. `action_principale` est d'ailleurs vide pour 99,7 % des
+        acteurs.
+        """
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [self.location.x, self.location.y],
+            },
+            "properties": {
+                "uuid": self.uuid,
+                "nom": self.nom_commercial or self.nom,
+                "bonus": getattr(self, "bonus", False),
+            },
+        }
 
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):
