@@ -77,7 +77,7 @@ From `webapp/`:
   - `make unit-test`: unit tests
   - `make integration-test`: integration tests
 
-DAG / Airflow Python tests live in **`data-platform/`**: from the repo root, run `uv sync --all-packages --group dev`, then `make -C data-platform dags-test` (or `make data-platform-dags-test`).
+DAG / Airflow Python tests live in **`data-platform/dags/tests`**: from the repo root, run `uv sync --all-packages --group dev`, then `make -C data-platform dags-test` (or `make data-platform-dags-test`).
 
 #### Running E2E tests locally
 
