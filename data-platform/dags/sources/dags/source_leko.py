@@ -13,7 +13,7 @@ with DAG(
     dag_display_name="Source - LEKO",
     default_args=DEFAULT_ARGS,
     description=(
-        "Injestion des données de l'éco-organisme LEKO à partir des données disponible"
+        "Ingestion des données de l'éco-organisme LEKO à partir des données disponibles"
         " sur de Koumoul"
     ),
     tags=[
@@ -44,7 +44,7 @@ with DAG(
             Si la source de données gère des points d'apport de contenants consignés,
             alors ce paramètre doit être activé
             Les points d'apport pour ré-emploi sont alors considérés comme des points
-            d'apport de contenant retournable.
+            d'apport de contenants retournables.
             On y associera alors le geste `rapporter`.
 
             Si ce paramètre est inactif, alors les points d'apport pour ré-emploi sont
