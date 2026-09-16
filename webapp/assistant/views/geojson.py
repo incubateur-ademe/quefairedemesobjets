@@ -1,3 +1,4 @@
+import math
 from time import perf_counter
 
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
@@ -7,7 +8,7 @@ from django.views.decorators.cache import cache_control
 
 from qfdmd.models import ProduitPage
 from qfdmo.map_utils import sanitize_frontend_bbox
-from qfdmo.models.acteur import NOMBRE_MAX_LIEUX, DisplayedActeur
+from qfdmo.models.acteur import MAX_PLACES_ON_MAP, DisplayedActeur
 
 
 class InvalidPosition(ValueError):
@@ -15,23 +16,30 @@ class InvalidPosition(ValueError):
 
 
 def sous_categorie_ids_for(slug: str) -> list[int]:
-    """Sous-catégories de la fiche, pour restreindre les lieux à cet objet.
+    """Sous-catégories of the fiche, to narrow the places to that objet.
 
-    Une fiche sans sous-catégorie renvoie une liste vide : les lieux ne sont
-    alors pas restreints, plutôt que de n'en afficher aucun.
+    A fiche without sous-catégorie returns an empty list: the places are then
+    not narrowed, rather than showing none.
     """
     page = ProduitPage.objects.live().filter(slug=slug).first()
     if page is None:
-        raise Http404(f"objet inconnu : {slug}")
+        raise Http404(f"unknown objet: {slug}")
     return list(page.sous_categorie_objet.values_list("id", flat=True))
 
 
-def position_from(query) -> dict:
-    """Lit la position demandée, en donnant la priorité à la zone visible.
+def coordinate(query, name: str, bound: float) -> float:
+    value = float(query[name])
+    if not math.isfinite(value) or abs(value) > bound:
+        raise ValueError(name)
+    return value
 
-    Une bbox illisible est refusée plutôt que rabattue sur lat/lon : le repli
-    masquerait un bug client et afficherait une zone que l'usager ne regarde
-    pas.
+
+def position_from(query) -> dict:
+    """Reads the requested position, giving priority to the visible area.
+
+    An unreadable bbox is refused rather than falling back on lat/lon: the
+    fallback would hide a client bug and show an area the user is not looking
+    at.
     """
     if raw_bbox := query.get("bbox"):
         bbox = sanitize_frontend_bbox(raw_bbox)
@@ -42,11 +50,11 @@ def position_from(query) -> dict:
     try:
         return {
             "bbox": None,
-            "longitude": float(query["lon"]),
-            "latitude": float(query["lat"]),
+            "longitude": coordinate(query, "lon", 180),
+            "latitude": coordinate(query, "lat", 90),
         }
-    except (KeyError, TypeError, ValueError) as erreur:
-        raise InvalidPosition("lat/lon") from erreur
+    except (KeyError, TypeError, ValueError) as error:
+        raise InvalidPosition("lat/lon") from error
 
 
 @method_decorator(
@@ -57,29 +65,30 @@ class LieuxGeoJSONView(View):
     def get(self, request, *args, **kwargs):
         geste = request.GET.get("geste")
         if not geste:
-            return HttpResponseBadRequest("geste manquant")
+            return HttpResponseBadRequest("missing geste")
 
         try:
             position = position_from(request.GET)
-        except InvalidPosition as erreur:
-            return HttpResponseBadRequest(f"position invalide : {erreur}")
+        except InvalidPosition as error:
+            return HttpResponseBadRequest(f"invalid position: {error}")
 
         sous_categorie_ids = (
             sous_categorie_ids_for(objet) if (objet := request.GET.get("objet")) else []
         )
 
-        lieux = DisplayedActeur.objects.all().proposing(geste, sous_categorie_ids)
+        acteurs = DisplayedActeur.objects.all().proposing(geste, sous_categorie_ids)
         if position["bbox"]:
-            lieux = lieux.within(position["bbox"])
+            acteurs = acteurs.within(position["bbox"])
         else:
-            lieux = lieux.nearest_to(position["longitude"], position["latitude"])
+            acteurs = acteurs.nearest_to(position["longitude"], position["latitude"])
 
-        debut = perf_counter()
-        payload = lieux.for_the_map(NOMBRE_MAX_LIEUX).as_geojson()
-        duree_ms = (perf_counter() - debut) * 1000
+        start = perf_counter()
+        payload = acteurs.for_the_map(MAX_PLACES_ON_MAP).as_geojson()
+        duration_ms = (perf_counter() - start) * 1000
 
-        reponse = JsonResponse(payload)
-        # Lu par le navigateur (onglet Réseau, PerformanceObserver) et par
-        # l'overlay de debug de la carte.
-        reponse.headers["Server-Timing"] = f'acteurs;dur={duree_ms:.1f};desc="lieux"'
-        return reponse
+        response = JsonResponse(payload)
+        # Read by the browser (Network tab, PerformanceObserver) and by the
+        # map's debug overlay.
+        timing = f'acteurs;dur={duration_ms:.1f};desc="lieux"'
+        response.headers["Server-Timing"] = timing
+        return response
