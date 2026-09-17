@@ -198,7 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="useful_command.html">Commandes Django utiles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dependencies.html">Gestion de package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fixture_generation.html">Utiliser les fixtures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="create_webapp_sample_db.html">Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tests_e2e.html">Tests de Régression E2E</a></li>
 <li class="toctree-l3"><a class="reference internal" href="test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
 <li class="toctree-l3"><a class="reference internal" href="secure_development.html">Bonnes pratiques de développement sécurisé</a></li>
@@ -539,9 +539,17 @@ make<span class="w"> </span>integration-test
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
 </pre></div>
 </div>
-<p>End to end avec Playwright (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>init-playwright
-make<span class="w"> </span>e2e-test
+<p>End-to-end avec Playwright.
+Ces tests nécessitent une base de données incluant un échantillon d’acteurs issus de la base de données principale.
+Celle-ci peut être générée en local facilement, via une commande à lancer depuis la racine du dépôt.
+(<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-prepare</span></code> construit l’échantillon via le DAG <code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code>,
+voir <a class="reference internal" href="create_webapp_sample_db.html"><span class="std std-doc">create_webapp_sample_db.md</span></a>) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-C<span class="w"> </span>webapp<span class="w"> </span>init-playwright
+make<span class="w"> </span>e2e<span class="w">            </span><span class="c1"># préparation + tests</span>
+</pre></div>
+</div>
+<p>Pour relancer seulement les tests (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>e2e-test
 make<span class="w"> </span>e2e-test-ui
 </pre></div>
 </div>

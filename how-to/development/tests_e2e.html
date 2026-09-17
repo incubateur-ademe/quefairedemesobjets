@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Tester le referrer d’une iframe" href="test_iframe_referrer.html"><link rel="prev" title="Création de la base de données webapp_sample pour les tests" href="create_webapp_sample_db.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Tester le referrer d’une iframe" href="test_iframe_referrer.html"><link rel="prev" title="Créer la base d’échantillon webapp_sample pour les tests e2e" href="create_webapp_sample_db.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Tests de Régression E2E - Documentation Que faire de mes objets et déchets</title>
@@ -198,7 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="useful_command.html">Commandes Django utiles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dependencies.html">Gestion de package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fixture_generation.html">Utiliser les fixtures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="create_webapp_sample_db.html">Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Tests de Régression E2E</a></li>
 <li class="toctree-l3"><a class="reference internal" href="test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
 <li class="toctree-l3"><a class="reference internal" href="secure_development.html">Bonnes pratiques de développement sécurisé</a></li>
@@ -486,9 +486,14 @@ icon_class=&quot;fr-icon-alert-line&quot; %}
 <a class="reference internal" href="../../reference/webapp/README.html#running-e2e-tests-locally"><span class="std std-ref">README.md</span></a>.</p>
 <section id="tous-les-tests">
 <h3>Tous les tests<a class="headerlink" href="#tous-les-tests" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span>e2e_test<span class="w"> </span>--workspace<span class="w"> </span>webapp
-<span class="c1"># ou, avec préparation de la base d&#39;échantillon :</span>
-make<span class="w"> </span>prepare-e2e-test-local<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>e2e-test
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Depuis la racine : prépare tout (stack Docker, pont FDW, DAG</span>
+<span class="c1"># `compute_sample_acteur`, migrations, index, build JS) puis lance les tests.</span>
+make<span class="w"> </span>e2e
+
+<span class="c1"># Préparation seule</span>
+make<span class="w"> </span>e2e-prepare
+<span class="c1"># Sans reconstruire l&#39;échantillon (pour gagner du temps si on est sûr d&#39;avoir une db sample à jour)</span>
+make<span class="w"> </span>e2e-prepare-fast<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>webapp-e2e-test
 </pre></div>
 </div>
 </section>
@@ -577,7 +582,7 @@ make<span class="w"> </span>prepare-e2e-test-local<span class="w"> </span><span 
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Création de la base de données webapp_sample pour les tests</div>
+                <div class="title">Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e</div>
                 
               </div>
             </a>

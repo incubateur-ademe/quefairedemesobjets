@@ -198,7 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/useful_command.html">Commandes Django utiles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/dependencies.html">Gestion de package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/fixture_generation.html">Utiliser les fixtures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html">Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/tests_e2e.html">Tests de Régression E2E</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/development/secure_development.html">Bonnes pratiques de développement sécurisé</a></li>
@@ -394,8 +394,12 @@ We also need much more storage capacity for data processing, and higher responsi
 </section>
 <section id="webapp-sample-database">
 <h2><code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database<a class="headerlink" href="#webapp-sample-database" title="Lien vers cette rubrique">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> is a database stored in <code class="docutils literal notranslate"><span class="pre">webapp</span></code> instance in preprod and locally (not in prod)</p>
-<p>It is used to compute a sample of data (Auray and Montbeliard), this sample is computed weekly via a Airflow DAG is used to run tests</p>
+<p><code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> is a database stored in the <code class="docutils literal notranslate"><span class="pre">webapp</span></code> instance in preprod and locally (not in prod).</p>
+<p>It holds a sample of the data (Auray and Montbéliard EPCIs, plus all digital
+acteurs) used by the e2e tests. The sample is always built <strong>locally</strong> by the
+<code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code> Airflow DAG from the <code class="docutils literal notranslate"><span class="pre">webapp</span></code> database — no remote
+sample database is copied. See
+<a class="reference internal" href="../../how-to/development/create_webapp_sample_db.html"><span class="std std-doc">create_webapp_sample_db.md</span></a>.</p>
 </section>
 </section>
 

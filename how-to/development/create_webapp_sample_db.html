@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Tests de Régression E2E" href="tests_e2e.html"><link rel="prev" title="Utiliser les fixtures" href="fixture_generation.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Création de la base de données webapp_sample pour les tests - Documentation Que faire de mes objets et déchets</title>
+        <title>Créer la base d’échantillon webapp_sample pour les tests e2e - Documentation Que faire de mes objets et déchets</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -198,7 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="useful_command.html">Commandes Django utiles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dependencies.html">Gestion de package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fixture_generation.html">Utiliser les fixtures</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Création de la base de données webapp_sample pour les tests</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tests_e2e.html">Tests de Régression E2E</a></li>
 <li class="toctree-l3"><a class="reference internal" href="test_iframe_referrer.html">Tester le referrer d’une iframe</a></li>
 <li class="toctree-l3"><a class="reference internal" href="secure_development.html">Bonnes pratiques de développement sécurisé</a></li>
@@ -350,65 +350,125 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="creation-de-la-base-de-donnees-webapp-sample-pour-les-tests">
-<h1>Création de la base de données webapp_sample pour les tests<a class="headerlink" href="#creation-de-la-base-de-donnees-webapp-sample-pour-les-tests" title="Lien vers cette rubrique">¶</a></h1>
-<p>La base de données <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> est une base de données généré en preprod dont on utilise le backup pour créer une base de tests.
-Elle permet de disposer d’un environnement de test isolé avec un échatillon de données d’acteurs à afficher sans impacter la base de données principale.</p>
-<p>Dans le cas de développement/debuggage de cette fonctionnalité, on a besoin de cette base de données configurée localement.</p>
-<section id="creation-de-la-base-de-donnees">
-<h2>Création de la base de données<a class="headerlink" href="#creation-de-la-base-de-donnees" title="Lien vers cette rubrique">¶</a></h2>
-<p>Pour créer la base de données <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> localement, utilisez la commande Django suivante :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>create_webapp_sample_db
+          <section id="creer-la-base-d-echantillon-webapp-sample-pour-les-tests-e2e">
+<h1>Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e<a class="headerlink" href="#creer-la-base-d-echantillon-webapp-sample-pour-les-tests-e2e" title="Lien vers cette rubrique">¶</a></h1>
+<p>Les tests e2e tournent sur <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code>, une base réduite (~2 000 acteurs)
+isolée de votre base de développement. Elle est construite <strong>entièrement en
+local</strong> par le DAG Airflow <code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code>.</p>
+<blockquote>
+<div><p>Aucune base d’échantillon distante n’est copiée. L’ancienne variable
+<code class="docutils literal notranslate"><span class="pre">REMOTE_SAMPLE_DATABASE_URL</span></code> et le script <code class="docutils literal notranslate"><span class="pre">restore_sample_locally.sh</span></code> ont été
+supprimés : l’échantillon se régénère à partir de votre base <code class="docutils literal notranslate"><span class="pre">webapp</span></code> locale.</p>
+</div></blockquote>
+<section id="en-une-commande">
+<h2>En une commande<a class="headerlink" href="#en-une-commande" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>e2e-prepare<span class="w">   </span><span class="c1"># vérifie les prérequis, joue le DAG, prépare la webapp</span>
+make<span class="w"> </span>e2e<span class="w">           </span><span class="c1"># idem puis lance les tests Playwright</span>
 </pre></div>
 </div>
-<p>Cette commande effectue automatiquement :</p>
-<ol class="arabic simple">
-<li><p><strong>Création de la base de données</strong> <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> si elle n’existe pas déjà</p></li>
-<li><p><strong>Création de l’utilisateur</strong> <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> avec les permissions nécessaires (superuser)</p></li>
-<li><p><strong>Configuration des extensions PostgreSQL</strong> requises (postgis, pg_stat_statements, unaccent, pg_trgm, uuid-ossp, postgres_fdw)</p></li>
-</ol>
-<p>Si la base de données existe déjà, la commande affichera un avertissement mais continuera l’exécution pour s’assurer que les permissions et extensions sont correctement configurées.</p>
+<p><code class="docutils literal notranslate"><span class="pre">scripts/e2e_prepare.sh</span></code> s’arrête avec un message explicite si la base
+<code class="docutils literal notranslate"><span class="pre">webapp</span></code> est vide (restaurer la prod d’abord) ; il crée le pont
+<code class="docutils literal notranslate"><span class="pre">postgres_fdw</span></code> s’il manque.</p>
 </section>
-<section id="restaurer-la-base-de-donnees-depuis-une-base-distante">
-<h2>Restaurer la base de données depuis une base distante<a class="headerlink" href="#restaurer-la-base-de-donnees-depuis-une-base-distante" title="Lien vers cette rubrique">¶</a></h2>
-<p>Pour peupler la base de données <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> locale à partir d’une base distante (ex : preprod), utilisez le script :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>db-restore-local-from-sample
+<section id="le-processus-complet">
+<h2>Le processus complet<a class="headerlink" href="#le-processus-complet" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>prod ──(1) restauration──► webapp ──(2) postgres_fdw──► warehouse
+                             │                             │
+                             │                       (3) dbt +tag:sample
+                             │                             │
+                             └──(4) copy_db_schema/data────►│
+                                                            │
+                                   (5) copy_displayed_data──► webapp_sample
 </pre></div>
 </div>
-<p>Ce script effectue automatiquement :</p>
-<ol class="arabic simple">
-<li><p><strong>Dump</strong> de la base distante via <code class="docutils literal notranslate"><span class="pre">pg_dump</span></code></p></li>
-<li><p><strong>Suppression et recréation</strong> du schéma <code class="docutils literal notranslate"><span class="pre">public</span></code> local</p></li>
-<li><p><strong>Création des extensions</strong> PostgreSQL requises</p></li>
-<li><p><strong>Restauration</strong> du dump dans la base locale</p></li>
-<li><p><strong>Suppression</strong> du fichier de dump temporaire</p></li>
-</ol>
-<section id="variables-d-environnement-requises">
-<h3>Variables d’environnement requises<a class="headerlink" href="#variables-d-environnement-requises" title="Lien vers cette rubrique">¶</a></h3>
+<section id="restaurer-la-production-dans-webapp">
+<h3>1. Restaurer la production dans <code class="docutils literal notranslate"><span class="pre">webapp</span></code><a class="headerlink" href="#restaurer-la-production-dans-webapp" title="Lien vers cette rubrique">¶</a></h3>
+<p>L’échantillon dérive de la base <code class="docutils literal notranslate"><span class="pre">webapp</span></code>, qui doit contenir des acteurs :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>db-restore-local-from-prod
+</pre></div>
+</div>
+</section>
+<section id="creer-le-pont-postgres-fdw">
+<h3>2. Créer le pont <code class="docutils literal notranslate"><span class="pre">postgres_fdw</span></code><a class="headerlink" href="#creer-le-pont-postgres-fdw" title="Lien vers cette rubrique">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">warehouse</span></code> lit <code class="docutils literal notranslate"><span class="pre">webapp</span></code> via le schéma virtuel <code class="docutils literal notranslate"><span class="pre">webapp_public</span></code> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>webapp-create-remote-db-server
+</pre></div>
+</div>
+<p>Inclus dans la restauration prod, et rejoué au besoin par <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-prepare</span></code>.</p>
+</section>
+<section id="a-5-jouer-le-dag-compute-sample-acteur">
+<h3>3 à 5. Jouer le DAG <code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code><a class="headerlink" href="#a-5-jouer-le-dag-compute-sample-acteur" title="Lien vers cette rubrique">¶</a></h3>
+<p>En CLI (ce que fait <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-prepare</span></code>) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>./scripts/e2e_run_sample_dag.sh
+</pre></div>
+</div>
+<p>Ou via l’UI Airflow sur <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> (identifiants <code class="docutils literal notranslate"><span class="pre">airflow</span></code> /
+<code class="docutils literal notranslate"><span class="pre">airflow</span></code>) : chercher <strong>[TEST] Calculer l’échantillon des acteurs</strong>, puis
+<em>Trigger DAG</em>.</p>
+<p>Les cinq tâches enchaînées :</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Variable</p></th>
-<th class="head"><p>Description</p></th>
+<tr class="row-odd"><th class="head"><p>Tâche</p></th>
+<th class="head"><p>Rôle</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">REMOTE_SAMPLE_DATABASE_URL</span></code></p></td>
-<td><p>URL de connexion à la base distante à copier (ex : preprod)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dbt_run_base_acteurs</span></code></p></td>
+<td><p>construit les modèles <code class="docutils literal notranslate"><span class="pre">+tag:sample</span></code> dans <code class="docutils literal notranslate"><span class="pre">warehouse</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SAMPLE_DATABASE_URL</span></code></p></td>
-<td><p>URL de connexion à la base locale cible</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dbt_test_base_acteurs</span></code></p></td>
+<td><p>joue les tests dbt sur ces modèles</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">copy_db_schema</span></code></p></td>
+<td><p>copie le schéma <code class="docutils literal notranslate"><span class="pre">webapp</span></code> → <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">copy_db_data</span></code></p></td>
+<td><p>copie les données de référence <code class="docutils literal notranslate"><span class="pre">webapp</span></code> → <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">copy_displayed_data_from_warehouse</span></code></p></td>
+<td><p>copie les acteurs échantillonnés <code class="docutils literal notranslate"><span class="pre">warehouse</span></code> → <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Ces deux variables doivent être définies dans le fichier <code class="docutils literal notranslate"><span class="pre">.env</span></code> (voir <code class="docutils literal notranslate"><span class="pre">.env.template</span></code>).</p>
-<p><code class="docutils literal notranslate"><span class="pre">REMOTE_SAMPLE_DATABASE_URL</span></code> doit pointer vers une base accessible depuis votre machine.</p>
+<p>Le sélecteur dbt est <code class="docutils literal notranslate"><span class="pre">+tag:sample</span></code> : le préfixe <code class="docutils literal notranslate"><span class="pre">+</span></code> inclut les modèles amont
+(<code class="docutils literal notranslate"><span class="pre">base_displayedacteur</span></code>, <code class="docutils literal notranslate"><span class="pre">base_epci</span></code>, <code class="docutils literal notranslate"><span class="pre">base_acteur_type</span></code>…). Sans lui, sur un
+warehouse vierge, dbt échoue sur
+<code class="docutils literal notranslate"><span class="pre">relation</span> <span class="pre">&quot;public.base_displayedacteur&quot;</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">exist</span></code>.</p>
 </section>
+</section>
+<section id="contenu-de-l-echantillon">
+<h2>Contenu de l’échantillon<a class="headerlink" href="#contenu-de-l-echantillon" title="Lien vers cette rubrique">¶</a></h2>
+<p>Défini par <code class="docutils literal notranslate"><span class="pre">models/exposure/acteurs/sample/exposure_sample_displayedacteur.sql</span></code> :</p>
+<ul class="simple">
+<li><p>EPCI <strong>Auray Quiberon Terre Atlantique</strong> (<code class="docutils literal notranslate"><span class="pre">200043123</span></code>)</p></li>
+<li><p>EPCI <strong>Pays de Montbéliard Agglomération</strong> (<code class="docutils literal notranslate"><span class="pre">200065647</span></code>)</p></li>
+<li><p>tous les acteurs de type <code class="docutils literal notranslate"><span class="pre">acteur_digital</span></code></p></li>
+</ul>
+<p>Les tests e2e s’appuient sur ce périmètre (recherches sur Auray notamment).</p>
+</section>
+<section id="creer-la-base-seule">
+<h2>Créer la base seule<a class="headerlink" href="#creer-la-base-seule" title="Lien vers cette rubrique">¶</a></h2>
+<p>Pour repartir d’une base <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> vide (rôle, extensions, config de
+recherche <code class="docutils literal notranslate"><span class="pre">wagtail_french</span></code>) sans jouer le DAG :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>webapp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>create_webapp_sample_db
+</pre></div>
+</div>
+</section>
+<section id="en-ci">
+<h2>En CI<a class="headerlink" href="#en-ci" title="Lien vers cette rubrique">¶</a></h2>
+<p>La CI ne dispose pas de stack Airflow : elle restaure un dump de la base
+d’échantillon de preprod via le secret <code class="docutils literal notranslate"><span class="pre">SAMPLE_DB_URI</span></code>
+(<code class="docutils literal notranslate"><span class="pre">.github/actions/prepare-django-db</span></code>). Ce chemin distant ne concerne que la CI ;
+en local, l’échantillon est toujours reconstruit par le DAG.</p>
 </section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Lien vers cette rubrique">¶</a></h2>
-<p>La base de données <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> est configurée dans <code class="docutils literal notranslate"><span class="pre">webapp/core/settings.py</span></code> en utilisant la variable d’environnement <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code></p>
+<p>La connexion est définie par <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code> (voir <code class="docutils literal notranslate"><span class="pre">webapp/.env.template</span></code>)
+et consommée dans <code class="docutils literal notranslate"><span class="pre">webapp/settings/base.py</span></code> ainsi que par
+<code class="docutils literal notranslate"><span class="pre">webapp/playwright.config.ts</span></code>, qui la passe en <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> au serveur de
+test.</p>
 </section>
 </section>
 
@@ -467,12 +527,17 @@ Elle permet de disposer d’un environnement de test isolé avec un échatillon 
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Création de la base de données webapp_sample pour les tests</a><ul>
-<li><a class="reference internal" href="#creation-de-la-base-de-donnees">Création de la base de données</a></li>
-<li><a class="reference internal" href="#restaurer-la-base-de-donnees-depuis-une-base-distante">Restaurer la base de données depuis une base distante</a><ul>
-<li><a class="reference internal" href="#variables-d-environnement-requises">Variables d’environnement requises</a></li>
+<li><a class="reference internal" href="#">Créer la base d’échantillon <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> pour les tests e2e</a><ul>
+<li><a class="reference internal" href="#en-une-commande">En une commande</a></li>
+<li><a class="reference internal" href="#le-processus-complet">Le processus complet</a><ul>
+<li><a class="reference internal" href="#restaurer-la-production-dans-webapp">1. Restaurer la production dans <code class="docutils literal notranslate"><span class="pre">webapp</span></code></a></li>
+<li><a class="reference internal" href="#creer-le-pont-postgres-fdw">2. Créer le pont <code class="docutils literal notranslate"><span class="pre">postgres_fdw</span></code></a></li>
+<li><a class="reference internal" href="#a-5-jouer-le-dag-compute-sample-acteur">3 à 5. Jouer le DAG <code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#contenu-de-l-echantillon">Contenu de l’échantillon</a></li>
+<li><a class="reference internal" href="#creer-la-base-seule">Créer la base seule</a></li>
+<li><a class="reference internal" href="#en-ci">En CI</a></li>
 <li><a class="reference internal" href="#configuration">Configuration</a></li>
 </ul>
 </li>
