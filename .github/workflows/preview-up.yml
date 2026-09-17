@@ -79,7 +79,6 @@ jobs:
     uses: ./.github/workflows/_terragrunt-apply.yml
     secrets: inherit # pragma: allowlist secret
     with:
-      command: apply
       pr_number: ${{ needs.resolve.outputs.pr_number }}
       image_tag: ${{ needs.resolve.outputs.image_tag }}
       environment: preview
