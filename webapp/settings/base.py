@@ -171,6 +171,7 @@ INSTALLED_APPS = [
     "qfdmd",
     "qfdmo",
     "infotri",
+    "assistant",
     "data",
     "adminsortable2",
     "corsheaders",
@@ -543,7 +544,8 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Also rewrites references to Parcel chunks: see core/storage.py.
+        "BACKEND": "core.storage.ParcelManifestStaticFilesStorage",
     },
 }
 
