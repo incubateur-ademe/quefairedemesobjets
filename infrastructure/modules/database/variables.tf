@@ -82,18 +82,6 @@ variable "warehouse_volume_size" {
   type        = number
 }
 
-# DEPRECATED
-variable "airflow_volume_size" {
-  description = "Taille du volume en GB de la base de données airflow"
-  type        = number
-}
-
-# DEPRECATED
-variable "airflow_node_type" {
-  description = "Type de nœud de la base de données airflow"
-  type        = string
-}
-
 variable "airflow_db_name" {
   description = "Nom de la base de données airflow (hébergée sur l'instance warehouse)"
   type        = string
@@ -137,6 +125,12 @@ variable "create_remote_warehouse_in_webapp_script_path" {
 
 variable "create_remote_webapp_in_warehouse_script_path" {
   description = "Chemin absolu vers le script SQL qui configure le foreign server webapp dans la base warehouse. Si null, le script n'est pas exécuté."
+  type        = string
+  default     = null
+}
+
+variable "grant_metabase_default_privileges_script_path" {
+  description = "Chemin absolu vers le script SQL qui configure les privilèges par défaut pour Metabase. Si null, le script n'est pas exécuté."
   type        = string
   default     = null
 }
