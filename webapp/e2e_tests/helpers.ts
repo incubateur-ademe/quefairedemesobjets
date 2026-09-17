@@ -752,7 +752,7 @@ export async function clickFirstClickableActeurMarker(
 
   // We start from the end to ensure markers are not too close to each other
   // because this could be harder for playwright to click
-  for (let i = count; i > 0; i--) {
+  for (let i = count - 1; i >= 0; i--) {
     const marker = acteurMarkers.nth(i)
     try {
       // Try to click without force - this will fail if element is obstructed
@@ -803,6 +803,25 @@ export function getIframe(page: Page, iframeId?: string): FrameLocator {
     return page.frameLocator(`iframe#${iframeId}`)
   }
   return page.frameLocator("iframe").first()
+}
+
+/**
+ * Wait until iframe-resizer has replaced the initial `100vh` height of the
+ * iframe with the content height in px.
+ *
+ * Before that first resize the iframe is shorter than its content, so scrolling
+ * an element into view (explicitly or through Playwright's click actionability)
+ * scrolls the child document instead of the parent page. iframe-resizer then
+ * measures the content with that scroll offset applied, sets a too-small
+ * height, and the frame keeps moving on every later scroll: clicks land on the
+ * wrong element and Playwright reports "element is not stable".
+ */
+export async function waitForIframeResize(page: Page, iframeId: string): Promise<void> {
+  await expect
+    .poll(() => page.locator(`iframe#${iframeId}`).evaluate((el) => el.style.height), {
+      timeout: TIMEOUT.DEFAULT,
+    })
+    .toMatch(/px$/)
 }
 
 /**
