@@ -43,7 +43,7 @@ resource "scaleway_rdb_privilege" "webapp_metabase_privilege" {
   instance_id   = scaleway_rdb_instance.webapp.id
   user_name     = scaleway_rdb_user.webapp_metabase_user.name
   database_name = scaleway_rdb_database.webapp.name
-  permission    = "readonly"
+  permission    = "all"
 }
 
 ## Warehouse
@@ -89,7 +89,7 @@ resource "scaleway_rdb_privilege" "warehouse_metabase_privilege" {
   instance_id   = scaleway_rdb_instance.warehouse.id
   user_name     = scaleway_rdb_user.warehouse_metabase_user.name
   database_name = scaleway_rdb_database.warehouse_database.name
-  permission    = "readonly"
+  permission    = "all"
 }
 
 ## Airflow DB on warehouse instance
