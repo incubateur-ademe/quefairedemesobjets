@@ -25,16 +25,14 @@ inputs = {
   warehouse_db_metabase_password = "[warehouse_db_metabase_password]"
   warehouse_volume_size          = 100
 
-  # Airflow
+  # Airflow (database on warehouse instance)
   airflow_db_name     = "airflow"
   airflow_db_username = "[airflow_db_username]"
   airflow_db_password = "[airflow_db_password]"
-  # DEPRECATED
-  airflow_node_type   = "DB-PLAY2-NANO"
-  airflow_volume_size = 10
 
 
   # Cross-DB postgres_fdw setup between webapp and warehouse.
   create_remote_warehouse_in_webapp_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_warehouse_in_webapp.sql")
   create_remote_webapp_in_warehouse_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_webapp_in_warehouse.sql")
+  grant_metabase_default_privileges_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/grant_metabase_default_privileges.sql")
 }
