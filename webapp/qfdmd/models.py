@@ -1518,19 +1518,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
 
         return (bon_etat, mauvais_etat)
 
-    @property
-    def carte_settings(self):
-        # TODO : gérer plusieurs catégories ici
-        sous_categorie = self.sous_categories.filter(afficher_carte=True).first()
-        if not sous_categorie:
-            return {}
-
-        return {
-            "direction": "jai",
-            "sc_id": sous_categorie.id,
-            "sous_categorie_objet": sous_categorie.libelle,
-        }
-
     @cached_property
     def en_savoir_plus(self):
         produit_liens = (
