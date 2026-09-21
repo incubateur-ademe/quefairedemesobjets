@@ -69,8 +69,8 @@ class LieuxGeoJSONView(View):
 
         try:
             position = position_from(request.GET)
-        except InvalidPosition as error:
-            return HttpResponseBadRequest(f"invalid position: {error}")
+        except InvalidPosition:
+            return HttpResponseBadRequest("invalid position")
 
         sous_categorie_ids = (
             sous_categorie_ids_for(objet) if (objet := request.GET.get("objet")) else []
