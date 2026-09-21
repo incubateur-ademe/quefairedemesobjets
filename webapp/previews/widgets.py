@@ -1,18 +1,6 @@
 from django import forms
 
-SUGGESTED_CITIES = (
-    "Paris",
-    "Lyon",
-    "Marseille",
-    "Bordeaux",
-    "Lille",
-    "Strasbourg",
-    "Nantes",
-    "Rennes",
-    "Brest",
-    "Ajaccio",
-    "Chambéry",
-)
+SUGGESTED_CITIES = ("Auray", "Montbeliard")
 
 
 class AdresseDatalistInput(forms.TextInput):
