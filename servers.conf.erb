@@ -36,6 +36,14 @@ map $host $is_valid_host {
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
 <% end %>
 }
+# Tell Django the original scheme so build_absolute_uri() yields https.
+# Production: Scalingo's router already sets X-Forwarded-Proto, keep it.
+# Local: nginx terminates TLS itself, so fall back to its own $scheme.
+map $http_x_forwarded_proto $forwarded_proto {
+    default $http_x_forwarded_proto;
+    ""      $scheme;
+}
+
 upstream gunicorn {
     server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;
     # keepalive: maintain persistent connections to gunicorn to avoid
@@ -77,6 +85,7 @@ server {
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
 
         proxy_cache assistant;
         proxy_cache_valid 200 301 302 10m;
@@ -153,6 +162,7 @@ server {
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 120s;
         # Should not exceed 75s per the documentation
         # https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_connect_timeout
@@ -171,6 +181,7 @@ server {
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 30s;
         proxy_connect_timeout 15s;
 
