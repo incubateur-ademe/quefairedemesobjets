@@ -1,4 +1,3 @@
-import math
 from time import perf_counter
 
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
@@ -6,13 +5,9 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_control
 
+from assistant.forms import LieuxForm
 from qfdmd.models import ProduitPage
-from qfdmo.map_utils import sanitize_frontend_bbox
 from qfdmo.models.acteur import MAX_PLACES_ON_MAP, DisplayedActeur
-
-
-class InvalidPosition(ValueError):
-    pass
 
 
 def sous_categorie_ids_for(slug: str) -> list[int]:
@@ -27,60 +22,30 @@ def sous_categorie_ids_for(slug: str) -> list[int]:
     return list(page.sous_categorie_objet.values_list("id", flat=True))
 
 
-def coordinate(query, name: str, bound: float) -> float:
-    value = float(query[name])
-    if not math.isfinite(value) or abs(value) > bound:
-        raise ValueError(name)
-    return value
-
-
-def position_from(query) -> dict:
-    """Reads the requested position, giving priority to the visible area.
-
-    An unreadable bbox is refused rather than falling back on lat/lon: the
-    fallback would hide a client bug and show an area the user is not looking
-    at.
-    """
-    if raw_bbox := query.get("bbox"):
-        bbox = sanitize_frontend_bbox(raw_bbox)
-        if not bbox:
-            raise InvalidPosition("bbox")
-        return {"bbox": bbox, "longitude": None, "latitude": None}
-
-    try:
-        return {
-            "bbox": None,
-            "longitude": coordinate(query, "lon", 180),
-            "latitude": coordinate(query, "lat", 90),
-        }
-    except (KeyError, TypeError, ValueError) as error:
-        raise InvalidPosition("lat/lon") from error
-
-
 @method_decorator(
     cache_control(public=True, max_age=300, stale_while_revalidate=60),
     name="dispatch",
 )
 class LieuxGeoJSONView(View):
     def get(self, request, *args, **kwargs):
-        geste = request.GET.get("geste")
-        if not geste:
-            return HttpResponseBadRequest("missing geste")
-
-        try:
-            position = position_from(request.GET)
-        except InvalidPosition:
-            return HttpResponseBadRequest("invalid position")
+        form = LieuxForm(request.GET)
+        if not form.is_valid():
+            return HttpResponseBadRequest(
+                form.errors.as_json(), content_type="application/json"
+            )
+        params = form.cleaned_data
 
         sous_categorie_ids = (
-            sous_categorie_ids_for(objet) if (objet := request.GET.get("objet")) else []
+            sous_categorie_ids_for(params["objet"]) if params["objet"] else []
         )
 
-        acteurs = DisplayedActeur.objects.all().proposing(geste, sous_categorie_ids)
-        if position["bbox"]:
-            acteurs = acteurs.within(position["bbox"])
+        acteurs = DisplayedActeur.objects.all().proposing(
+            params["geste"], sous_categorie_ids
+        )
+        if params["bbox"]:
+            acteurs = acteurs.within(params["bbox"])
         else:
-            acteurs = acteurs.nearest_to(position["longitude"], position["latitude"])
+            acteurs = acteurs.nearest_to(params["lon"], params["lat"])
 
         start = perf_counter()
         payload = acteurs.for_the_map(MAX_PLACES_ON_MAP).as_geojson()
