@@ -1432,17 +1432,19 @@ class TestsPreview(LookbookPreview):
         )
 
 
-class GesteForm(DsfrBaseForm):
-    geste = forms.ChoiceField(
-        label="Geste",
-        choices=[
-            ("reparer", "Réparer"),
-            ("donner_echanger_rapporter", "Donner, échanger, rapporter"),
-            ("emprunter_preter_louer", "Emprunter, prêter, louer"),
-            ("vendre_acheter", "Vendre, acheter"),
-            ("trier", "Trier"),
-        ],
+def geste_choices():
+    """Read at each form instantiation, not at import: the table is empty
+    during migrations and tests."""
+    groupes = (
+        GroupeAction.objects.filter(afficher=True)
+        .order_by("order")
+        .prefetch_related("actions")
     )
+    return [(groupe.code, groupe.libelle) for groupe in groupes]
+
+
+class GesteForm(DsfrBaseForm):
+    geste = forms.ChoiceField(label="Geste", choices=geste_choices)
     objet = forms.CharField(
         label="Slug d'une fiche produit (facultatif)", required=False
     )
