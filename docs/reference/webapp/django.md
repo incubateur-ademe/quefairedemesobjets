@@ -83,13 +83,13 @@ Voir aussi [`infrastructure/provisioning.md`](../infrastructure/provisioning.md)
 
 ## Recherche (autocomplete)
 
-La recherche objet présent en header et en la page d'accueil s'appuie sur
+La recherche objet présent dans le header et sur la page d'accueil s'appuie sur
 la recherche Fuzzy (par trigrammes) de django-modelsearch, embarquée avec Wagtail.
 Chaque résultat porte deux valeurs :
 
 - **Raw** : similarité brute, sans bonus. Décide _si_ le résultat s'affiche.
 - **Score** : similarité pondérée (normalisation par longueur du titre, bonus
-  de préfixe). Décide _à quelle position_.
+  de préfixe). Décide _à quelle position_ le résultat apparait dans l'autocomplete.
 
 Les règles appliquées dans `webapp/search/ranking.py` :
 
@@ -97,8 +97,8 @@ Les règles appliquées dans `webapp/search/ranking.py` :
   `SEARCH_RAW_SIMILARITY_MINIMUM ≤ raw` et `score ≥ SEARCH_SCORE_MINIMUM` ;
 - tri par raw décroissant, puis par score décroissant.
 
-Ces trois seuils sont des variables d'environnement (modifiables dans
-Scalingo, un redémarrage suffit, aucune réindexation n'est nécessaire) :
+Ces trois seuils sont des variables d'environnement, modifiables dans
+Scalingo/Scaleway. Aucune réindexation n'est nécessaire après leur mise à jour :
 
 | Variable                           | Défaut |
 | ---------------------------------- | ------ |
