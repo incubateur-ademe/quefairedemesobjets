@@ -60,6 +60,21 @@ class TestParametres:
         """A fallback would hide a client bug and show another area."""
         assert get_lieux(client, geste="reparer", bbox="{}").status_code == 400
 
+    @pytest.mark.parametrize(
+        "bbox",
+        [
+            "[1,2]",
+            '{"southWest":{"lng":"x","lat":1},"northEast":{"lng":2,"lat":3}}',
+            '{"southWest":{"lng":1e400,"lat":1},"northEast":{"lng":2,"lat":3}}',
+            '{"southWest":{"lng":200,"lat":1},"northEast":{"lng":2,"lat":3}}',
+        ],
+    )
+    def test_returns_400_on_malformed_bbox_contents(self, client, bbox):
+        assert get_lieux(client, geste="reparer", bbox=bbox).status_code == 400
+
+    def test_returns_400_on_out_of_range_coordinates(self, client):
+        assert get_lieux(client, geste="reparer", lat="91").status_code == 400
+
 
 @pytest.mark.django_db
 class TestReponse:
