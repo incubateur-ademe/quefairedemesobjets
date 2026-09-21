@@ -158,11 +158,10 @@ prepare-e2e-test:
 	make createsuperuser-example
 	BASE_URL=http://localhost:8888 npm run build
 
+# Alias for the root `make e2e-prepare`.
 .PHONY: prepare-e2e-test-local
 prepare-e2e-test-local:
-	make create-db-sample
-	make -C .. DB_WEBAPP_SAMPLE=$(DB_WEBAPP_SAMPLE) load-sample-dump
-	make DATABASE_URL=$(DB_WEBAPP_SAMPLE) prepare-e2e-test
+	make -C .. e2e-prepare
 
 .PHONY: e2e-test
 e2e-test:

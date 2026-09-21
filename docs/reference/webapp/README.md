@@ -86,27 +86,32 @@ dev `webapp` database) on the same Postgres container, so you don't have to muta
 the dev data you're working with. The connection is configured by `DB_WEBAPP_SAMPLE`
 in `.env` (see `.env.template`); the dev `DATABASE_URL` is left untouched.
 
-```bash
-# 1. start the local Postgres container (from repo root)
-docker compose --profile lvao up -d
-
-# 2. from webapp/: create the sample DB (if missing), migrate, seed search index, build JS
-make prepare-e2e-test-local
-
-# 3. run the tests
-make e2e-test
-```
-
-`prepare-e2e-test-local` is idempotent for DB creation — it calls
-`manage.py create_webapp_sample_db`, which creates the `webapp_sample` database,
-role, and extensions only if they don't already exist, so steps 2-3 are the normal
-loop for iterating on tests.
-
-To start fresh, drop the sample DB and rerun step 2:
+The sample is built entirely locally by the Airflow DAG `compute_sample_acteur`,
+from your restored `webapp` database. No remote sample database is copied.
 
 ```bash
-psql "$DATABASE_URL" -c "DROP DATABASE webapp_sample;"
+# from repo root — checks prerequisites, runs the DAG, prepares the webapp
+make e2e-prepare
+
+# prepare + run the Playwright tests in one go
+make e2e
 ```
+
+`make e2e-prepare` fails with an explicit message when a prerequisite is missing
+(Docker down, `.env` absent, a port squatted by another process, an empty
+`webapp` database, a broken `postgres_fdw` bridge). It requires a restored
+production database — run `make db-restore-local-from-prod` first.
+
+Rebuilding the sample takes a few minutes. When iterating on tests and the
+sample is already up to date, skip the DAG:
+
+```bash
+make e2e-prepare-fast   # migrations, search index and JS build only
+make webapp-e2e-test
+```
+
+See [create_webapp_sample_db.md](../../how-to/development/create_webapp_sample_db.md)
+for the full pipeline and how to trigger the DAG from the Airflow UI.
 
 See [tests_e2e.md](../../how-to/development/tests_e2e.md) for how to write new E2E tests.
 

@@ -4,6 +4,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import django_filters
 from django.contrib import messages
+from django.contrib.admin.utils import quote
 from django.db import (
     DataError,
     IntegrityError,
@@ -11,22 +12,36 @@ from django.db import (
     connection,
     transaction,
 )
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.http import Http404, HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+from wagtail.views import serve as wagtail_serve
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, ListView, TemplateView
 from modelsearch.index import insert_or_update_object
 from wagtail.admin.filters import WagtailFilterSet
+from wagtail.admin.ui.tables import BulkActionsCheckboxColumn
+from wagtail.admin.views.generic.models import IndexView as ModelIndexView
 from wagtail.admin.views.pages.listing import IndexView
 from wagtail.admin.viewsets.base import ViewSetGroup
+from wagtail.admin.viewsets.model import ModelViewSet
 from wagtail.admin.viewsets.pages import PageListingViewSet
 from modelsearch.query import Fuzzy
 from wagtail.models import Page
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
+from qfdmd.legacy_migration import (
+    finalize_produit_migration,
+    MigrationError,
+    get_or_create_legacy_index_page,
+    migrate_produit,
+    revert_produit_migration,
+)
 from qfdmd.models import (
     HomePage,
     Produit,
@@ -43,6 +58,8 @@ from search.score_breakdown import compute_breakdown
 logger = logging.getLogger(__name__)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def legacy_migrate(request, id):
     page = Page.objects.get(id=id).specific
     if not page.produit and not page.synonyme and not page.infotri:
@@ -61,6 +78,8 @@ def legacy_migrate(request, id):
     return redirect("wagtailadmin_pages:edit", id)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def _collect_synonymes_for_page(page):
     """Collect all synonymes eligible for import, minus exclusions."""
     excluded_synonyme_ids = set(
@@ -111,6 +130,8 @@ def _preview_names(names: list[str]) -> str:
     return head
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class _EmptySlugError(Exception):
     """Raised when a legacy Synonyme has an empty slug.
 
@@ -122,12 +143,19 @@ class _EmptySlugError(Exception):
     """
 
 
-def _import_one_synonyme(page, synonyme):
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+def _import_one_synonyme(page, synonyme, tracking_field="imported_as_search_tag"):
     """Import a single Synonyme as a SearchTag, linked to the given page.
 
     Wrapped in a savepoint by the caller so a per-synonyme failure rolls
     back only this iteration. Raises any DB exception so the caller can
     record it.
+
+    ``tracking_field`` is the Synonyme field stamped with the created
+    SearchTag: ``imported_as_search_tag`` for the manual import,
+    ``legacy_imported_as_search_tag`` for the automatic migration
+    (migrate_produits_legacy command).
 
     Returns True when the synonyme's name or slug had to be truncated to
     fit SearchTag's 100-char limit (the caller surfaces those to the user
@@ -168,14 +196,16 @@ def _import_one_synonyme(page, synonyme):
     # excluded the orphan tag.
     insert_or_update_object(search_tag)
 
-    if synonyme.imported_as_search_tag is None:
-        synonyme.imported_as_search_tag = search_tag
-        synonyme.save(update_fields=["imported_as_search_tag"])
+    if getattr(synonyme, tracking_field) is None:
+        setattr(synonyme, tracking_field, search_tag)
+        synonyme.save(update_fields=[tracking_field])
 
     return truncated
 
 
-def _execute_import(page, all_synonymes):
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+def _execute_import(page, all_synonymes, tracking_field="imported_as_search_tag"):
     """Execute the import of legacy synonymes as SearchTags.
 
     Each synonyme is imported in its own savepoint: a failure on one
@@ -190,7 +220,9 @@ def _execute_import(page, all_synonymes):
     for synonyme in all_synonymes:
         try:
             with transaction.atomic():
-                was_truncated = _import_one_synonyme(page, synonyme)
+                was_truncated = _import_one_synonyme(
+                    page, synonyme, tracking_field=tracking_field
+                )
         except _EmptySlugError:
             logger.warning(
                 "Skipped synonyme %s (id=%s): empty slug",
@@ -218,6 +250,8 @@ def _execute_import(page, all_synonymes):
     return failed, truncated, empty_slug
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 def import_legacy_synonymes(request, id):
     """
     Import legacy synonymes as SearchTags for a ProduitPage.
@@ -301,6 +335,8 @@ def import_legacy_synonymes(request, id):
 # Wagtail admin viewsets
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigrationStatusFilter(django_filters.ChoiceFilter):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault(
@@ -352,6 +388,8 @@ class ProduitPageFilterSet(WagtailFilterSet):
         fields = []
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class MigrationOnlyFilterSet(WagtailFilterSet):
     migration_status = MigrationStatusFilter()
 
@@ -408,6 +446,8 @@ class FamillesViewSet(PageListingViewSet):
     filterset_class = MigrationOnlyFilterSet
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class AMigrerIndexView(IndexView):
     page_title = "Produits/familles à migrer"
 
@@ -415,6 +455,8 @@ class AMigrerIndexView(IndexView):
         return super().get_base_queryset().filter(migree_depuis_synonymes_legacy=False)
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
 class AMigrerViewSet(PageListingViewSet):
     model = ProduitPage
     icon = "doc-full-inverse"
@@ -425,12 +467,86 @@ class AMigrerViewSet(PageListingViewSet):
     filterset_class = ProduitPageFilterSet
 
 
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+class LegacyProduitsToMigrateIndexView(ModelIndexView):
+    page_title = "Produits à migrer"
+    # Produit is index.Indexed (for its ProduitPage autocomplete search) but
+    # its search_fields/queryset filters aren't set up for the Wagtail search
+    # backend. Force the plain Django `icontains` fallback instead.
+    search_backend_name = None
+
+    def get_base_queryset(self):
+        return Produit.objects.to_migrate().order_by("id")
+
+    @cached_property
+    def columns(self):
+        return [
+            BulkActionsCheckboxColumn("bulk_actions", obj_type="snippet"),
+            *super().columns,
+        ]
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+class LegacyProduitsToMigrateViewSet(ModelViewSet):
+    """Produits legacy (qfdmd.Produit) pas encore migrés vers une ProduitPage.
+
+    Listing en lecture : la migration se fait via la commande
+    migrate_produits_legacy, pas depuis cette interface.
+    """
+
+    model = Produit
+    icon = "doc-full-inverse"
+    menu_label = "Produits à migrer"
+    menu_name = "produits-legacy-a-migrer"
+    name = "produits-legacy-a-migrer"
+    index_view_class = LegacyProduitsToMigrateIndexView
+    index_template_name = "wagtailsnippets/snippets/index.html"
+    form_fields = ["nom"]
+    list_display = ["nom", "id", "nb_synonymes_to_migrate"]
+    search_fields = ["nom"]
+    inspect_view_enabled = True
+    add_to_admin_menu = False
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+class MigratedLegacyProduitsIndexView(IndexView):
+    page_title = "Produits migrés"
+
+    def get_base_queryset(self):
+        return (
+            super()
+            .get_base_queryset()
+            .filter(automatically_migrated_from_legacy_produit=True)
+        )
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+class MigratedLegacyProduitsViewSet(PageListingViewSet):
+    """ProduitPage créées automatiquement par migrate_produits_legacy."""
+
+    model = ProduitPage
+    icon = "doc-full-inverse"
+    menu_label = "Produits migrés"
+    menu_name = "produits-legacy-migres"
+    name = "produits-legacy-migres"
+    index_view_class = MigratedLegacyProduitsIndexView
+    filterset_class = ProduitPageFilterSet
+
+
 class ProduitsViewSetGroup(ViewSetGroup):
     items = (
         FamilleEtProduitsViewSet,
         ProduitsViewSet,
         FamillesViewSet,
+        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+        # ont été migré vers des qfdmd.ProduitPage
         AMigrerViewSet,
+        LegacyProduitsToMigrateViewSet,
+        MigratedLegacyProduitsViewSet,
     )
     menu_icon = "doc-full-inverse"
     menu_label = "Produits"
@@ -580,4 +696,229 @@ class SynonymeDetailView(DetailView):
         except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
             pass
 
+        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+        # ont été migré vers des qfdmd.ProduitPage
+        # Finally, check if the produit was automatically migrated to a
+        # ProduitPage by the migrate_produits_legacy command
+        migrated_page = synonyme.produit.legacy_imported_as_produit_page
+        if migrated_page is not None and migrated_page.live:
+            synonyme_can_be_redirected = (
+                not hasattr(synonyme, "should_not_redirect_to")
+                or synonyme.should_not_redirect_to.page.pk != migrated_page.pk
+            )
+            # Guard against a redirect loop when the migrated page lives at
+            # the exact same URL as the legacy synonyme (/dechet/<slug>/)
+            if synonyme_can_be_redirected and migrated_page.url != request.path:
+                return redirect(self._build_redirect_url(request, migrated_page.url))
+
         return super().get(request, *args, **kwargs)
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+def migrate_single_produit(request: HttpRequest, id: str) -> HttpResponse:
+    """Migrate a single legacy Produit to a ProduitPage from the admin.
+
+    GET shows a confirmation page. POST executes the migration and
+    redirects back with a success/error message.
+    """
+    produit = get_object_or_404(Produit, pk=id)
+
+    if request.method != "POST":
+        return render(
+            request,
+            "admin/qfdmd/confirm_migrate_produit.html",
+            {
+                "produit": produit,
+                "nb_synonymes": produit.nb_synonymes_to_migrate(),
+            },
+        )
+
+    try:
+        index_page, _ = get_or_create_legacy_index_page()
+        with transaction.atomic():
+            report = migrate_produit(produit, index_page=index_page)
+    except MigrationError as exc:
+        messages.error(request, str(exc))
+        return redirect(
+            reverse(
+                "wagtailsnippets_qfdmd_produit:edit",
+                args=[quote(id)],
+            )
+        )
+    except Exception as exc:
+        messages.error(request, f"Erreur inattendue : {exc}")
+        return redirect(
+            reverse(
+                "wagtailsnippets_qfdmd_produit:edit",
+                args=[quote(id)],
+            )
+        )
+
+    page_url = reverse("wagtailadmin_pages:edit", args=[report.page.pk])
+    msg = mark_safe(
+        f"Produit &laquo;&nbsp;{produit.nom}&nbsp;&raquo; migr&eacute; vers la page "
+        f'<a href="{page_url}">{report.page.title}</a>.'
+    )
+    if report.details:
+        msg = mark_safe(msg + f" {report.details}")
+    messages.success(request, msg)
+    return redirect(
+        reverse(
+            "wagtailsnippets_qfdmd_produit:edit",
+            args=[quote(id)],
+        )
+    )
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+def revert_single_produit(request: HttpRequest, id: str) -> HttpResponse:
+    """Revert the automatic migration of a single legacy Produit.
+
+    GET shows a confirmation page. POST deletes the migrated ProduitPage
+    and cleans up, then redirects back with a success/error message.
+    """
+    produit = get_object_or_404(Produit, pk=id)
+
+    if request.method != "POST":
+        return render(
+            request,
+            "admin/qfdmd/confirm_revert_produit.html",
+            {"produit": produit},
+        )
+
+    try:
+        with transaction.atomic():
+            revert_produit_migration(produit)
+    except MigrationError as exc:
+        messages.error(request, str(exc))
+        return redirect(
+            reverse(
+                "wagtailsnippets_qfdmd_produit:edit",
+                args=[quote(id)],
+            )
+        )
+    except Exception as exc:
+        messages.error(request, f"Erreur inattendue : {exc}")
+        return redirect(
+            reverse(
+                "wagtailsnippets_qfdmd_produit:edit",
+                args=[quote(id)],
+            )
+        )
+
+    messages.success(
+        request,
+        f"Migration de « {produit.nom} » annulée. "
+        "Le produit est de nouveau éligible à la migration.",
+    )
+    return redirect(
+        reverse(
+            "wagtailsnippets_qfdmd_produit:edit",
+            args=[quote(id)],
+        )
+    )
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+def sync_page_from_produit(request: HttpRequest, id: str) -> HttpResponse:
+    """Synchronize a ProduitPage's body and infotri from its legacy Produit.
+
+    GET shows a confirmation page. POST executes the sync and redirects
+    back with a success/error message.
+    """
+    page = get_object_or_404(Page, pk=id).specific
+    if not isinstance(page, ProduitPage):
+        messages.error(
+            request,
+            "Cette action n'est disponible que pour les pages Produit.",
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    if page.linked_legacy_produit is None:
+        messages.warning(request, "Aucun produit legacy lié à cette page.")
+        return redirect("wagtailadmin_pages:edit", id)
+
+    if request.method == "POST":
+        try:
+            msgs = page.sync_from_legacy_produit()
+        except Exception as exc:
+            messages.error(request, f"Erreur lors de la synchronisation : {exc}")
+            return redirect("wagtailadmin_pages:edit", id)
+        if msgs:
+            messages.success(
+                request,
+                mark_safe(
+                    "Contenu synchronisé depuis le produit legacy :<br/>"
+                    + "<br/>".join(f"&bull; {m}" for m in msgs)
+                ),
+            )
+        else:
+            messages.info(request, "Aucune modification effectuée.")
+        return redirect("wagtailadmin_pages:edit", id)
+
+    return render(
+        request,
+        "admin/qfdmd/confirm_sync_produit.html",
+        {"page": page, "produit": page.linked_legacy_produit},
+    )
+
+
+# TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+# ont été migré vers des qfdmd.ProduitPage
+def finalize_page_migration(request: HttpRequest, id: str) -> HttpResponse:
+    """Finalize the automatic migration of a ProduitPage from the admin.
+
+    GET shows a confirmation page. POST moves the page under /categories,
+    converts the automatic legacy links to manual ones, unlocks the page
+    and redirects back to the editor.
+    """
+    page = get_object_or_404(Page, pk=id).specific
+    if not isinstance(page, ProduitPage) or not (
+        page.automatically_migrated_from_legacy_produit
+    ):
+        messages.error(
+            request,
+            "Cette action n'est disponible que pour les pages Produit "
+            "migrées automatiquement.",
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                categories = finalize_produit_migration(page)
+        except MigrationError as exc:
+            messages.error(request, str(exc))
+        except Exception as exc:
+            messages.error(request, f"Erreur inattendue : {exc}")
+        else:
+            messages.success(
+                request,
+                f"Migration finalisée : la page a été déplacée sous "
+                f"« {categories.title} » et déverrouillée.",
+            )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    return render(
+        request,
+        "admin/qfdmd/confirm_finalize_migration.html",
+        {"page": page, "produit": page.linked_legacy_produit},
+    )
+
+
+def dechet_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    """Route /dechet/<slug>/: try Wagtail first, then the legacy view.
+
+    Automatically migrated ProduitPage live under the "dechet" Wagtail
+    index page and therefore share the historic synonyme URL space. We
+    first try to serve a Wagtail page at this address; if none exists
+    (produit not migrated yet), we fall back to the legacy
+    SynonymeDetailView.
+    """
+    try:
+        return wagtail_serve(request, request.path)
+    except Http404:
+        return SynonymeDetailView.as_view()(request, slug=slug)

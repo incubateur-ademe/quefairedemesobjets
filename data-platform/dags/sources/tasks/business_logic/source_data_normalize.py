@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import cast
 
 import pandas as pd
 import requests
@@ -81,6 +82,21 @@ def _rename_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     return df
 
 
+def _format_error_messages_with_identifier(row: pd.Series, e: Exception) -> str:
+    def _identifiant_str(row: pd.Series) -> str:
+        if "identifiant_unique" in row.index:
+            return f"identifiant_unique : {row['identifiant_unique']}"
+        if "identifiant_externe" in row.index:
+            return f"identifiant_externe : {row['identifiant_externe']}"
+        return ""
+
+    messages = []
+    if identifiant_str := _identifiant_str(row):
+        messages.append(identifiant_str)
+    messages.append(str(e))
+    return " - ".join(messages)
+
+
 def _transform_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_transform = [
         t
@@ -105,7 +121,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFra
                         fonction_de_transformation=function_name,
                         origine_colonnes=[column_to_transform.origin],
                         origine_valeurs=[str(origin_value)],
-                        message=str(e),
+                        message=_format_error_messages_with_identifier(row, e),
                     )
                 )
                 transformed_column[index] = ""
@@ -159,7 +175,7 @@ def _transform_df(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
                         fonction_de_transformation=function_name,
                         origine_colonnes=column_to_transform_df.origin,
                         origine_valeurs=[str(v) for v in origin_values.tolist()],
-                        message=str(e),
+                        message=_format_error_messages_with_identifier(row, e),
                     )
                 )
                 # Set default values for all destination columns
@@ -308,6 +324,8 @@ def source_data_normalize(
             columns={"Numéro d'établissement": "identifiant_externe"},
             inplace=True,
         )
+    if dag_id == "source_sinoe":
+        df = df_normalize_sinoe(df)
 
     # Init log_warning for each row
     df["log_warning"] = [[] for _ in range(len(df))]
@@ -388,9 +406,6 @@ def source_data_normalize(
     if dag_id == "pharmacies":
         df = df_normalize_pharmacie(df)
 
-    if dag_id == "source_sinoe":
-        df = df_normalize_sinoe(df)
-
     # Filter by content (home, duplicates, subcategory, location)
     df, metadata = _remove_undesired_lines(df)
     log.preview("df after filtering rows by content", df)
@@ -419,13 +434,22 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 def df_normalize_sinoe(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    # DUPLICATES: extra safety — even though the API should not return
-    # duplicates (q_mode=simple&ANNEE_eq=2025),
-    # we still check that there is only one year
-    log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
-    if df["ANNEE"].nunique() != 1:
-        raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")
-    df = df.drop(columns=["ANNEE"])
+    # For each entity, keep the latest version of the year
+    log.preview("annees uniques", sorted(df["annee"].unique().tolist()))
+    nb_before = len(df)
+    df = cast(
+        pd.DataFrame,
+        df.loc[df.groupby("code_service", sort=False)["annee"].idxmax()],
+    )
+    if nb_filtered := nb_before - len(df):
+        logger.info(
+            "Versions SINOE filtrées (années antérieures): "
+            f"{nb_filtered} / {nb_before}"
+        )
+    df = df.drop(columns=["annee"]).reset_index(drop=True)
+
+    # Remove entities with a date_fermeture_service
+    df = cast(pd.DataFrame, df.loc[df["date_fermeture_service"].isna()])
 
     return df
 

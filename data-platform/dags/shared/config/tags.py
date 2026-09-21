@@ -62,6 +62,7 @@ class TAGS:
     JOUET: str = "JOUET"  # Fillière Jouet
     KOUMOUL: str = "koumoul"
     LAPOSTE: str = "laposte"
+    LEKO: str = "leko"  # eco-organisme
     LIEUX_DITS: str = "lieux-dits"
     LOGS: str = "logs"
     LUB: str = "LUB"  # Fillière Lubrifiant
