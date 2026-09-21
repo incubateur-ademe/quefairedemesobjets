@@ -1,6 +1,7 @@
 # Aliases
 BASE_DOMAIN := quefairedemesdechets.ademe.local
-DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
+WEBAPP_DB_PORT ?= 6543
+DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
 PYTHON := uv run python
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
