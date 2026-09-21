@@ -1646,12 +1646,7 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         )
 
     def as_geojson_feature(self) -> dict:
-        """GeoJSON representation of the place for the map.
-
-        The pinpoint color is not exposed here: it follows the geste chosen by
-        the user, which the client already knows, not a property of the place.
-        `action_principale` is empty for 99.7% of acteurs anyway.
-        """
+        """GeoJSON representation of the place for the map."""
         return {
             "type": "Feature",
             "geometry": {
