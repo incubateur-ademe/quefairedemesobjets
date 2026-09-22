@@ -161,3 +161,21 @@ class TestXCacheStatusHeader:
     def test_header_always_present(self, path):
         resp = get(path, headers={"Host": BASE_DOMAIN})
         assert "X-Cache-Status" in resp.headers
+
+
+class TestPostHogProxy:
+    # https://posthog.com/docs/advanced/proxy/nginx : /static/, /array/ and /
+    # must all reach PostHog EU through our /ph/ prefix.
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "/ph/static/array.js",
+            "/ph/array/phc_test/config.js",
+            "/ph/decide/?v=3",
+        ],
+    )
+    def test_routes_reach_posthog(self, path):
+        resp = get(path, headers={"Host": BASE_DOMAIN}, timeout=15)
+        # Any real PostHog answer (200, or 4xx for a bogus token) is fine;
+        # 502/504 means nginx could not resolve or verify the upstream.
+        assert resp.status_code < 500, (path, resp.status_code, resp.text[:200])
