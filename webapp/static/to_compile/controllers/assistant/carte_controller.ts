@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { useResize } from "stimulus-use"
 
 import {
+  isInArea,
   merge,
   placesFromGeoJSON,
   type Area,
@@ -178,10 +179,11 @@ export default class extends Controller<HTMLElement> {
         places: incoming.length,
       }
       this.assistantChronoOutlets.forEach((chrono) => chrono.record(timing))
-      this.places = merge(this.places, incoming, this.#visibleArea())
+      const area = this.#visibleArea()
+      this.places = merge(this.places, incoming, area)
       this.#draw()
       this.#announce(
-        this.places.length
+        this.places.some((place) => isInArea(place, area))
           ? ""
           : "Aucun lieu trouvé ici. Déplacez la carte pour explorer une autre zone.",
       )
