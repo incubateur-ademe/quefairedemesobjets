@@ -1,0 +1,9 @@
+{% comment %}
+Icône d'un geste (Figma 24395:12759), 24×24.
+
+Décorative par défaut : elle accompagne presque toujours un libellé visible.
+Passer `titre` pour la rendre au lecteur d'écran quand elle est seule.
+{% endcomment %}
+<span class="qfa-icone-geste"
+      data-geste="{{ geste }}"
+      {% if titre %}role="img" aria-label="{{ titre }}"{% else %}aria-hidden="true"{% endif %}></span>
