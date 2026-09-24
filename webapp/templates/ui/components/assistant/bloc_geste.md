@@ -14,6 +14,7 @@ Unité de la fiche objet : badges d'état, titre, consigne, appel à l'action.
 | `consigne`     | contenu CMS, **déjà marqué sûr en amont**                |
 | `badges`       | liste de `{condition, libelle}`                          |
 | `appel_action` | libellé du bouton (défaut « Je découvre les solutions ») |
+| `url_compte`   | endpoint du nombre de solutions, chargé après le rendu   |
 
 ## L'ordre n'est pas décidé ici
 
