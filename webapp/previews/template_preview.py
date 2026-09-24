@@ -840,8 +840,7 @@ class IframePreview(LookbookPreview):
         """
 
         template = Template(
-            f"<script src='{base_url}/static/iframe.js'"
-            """
+            f"<script src='{base_url}/static/iframe.js'" """
                 data-max_width="100%"
                 data-height="720px"
                 data-direction="jai"
