@@ -220,12 +220,13 @@ export default class extends Controller<HTMLElement> {
   #placesUrl(): string {
     const area = this.#visibleArea()
     const params = new URLSearchParams({
-      geste: this.gesteValue,
       bbox: JSON.stringify({
         southWest: { lng: area.west, lat: area.south },
         northEast: { lng: area.east, lat: area.north },
       }),
     })
+    // One `geste` per code: a block of the fiche may span two gestes.
+    for (const code of this.#gestes()) params.append("geste", code)
     if (this.ficheValue) params.set("fiche", this.ficheValue)
     return `${this.urlValue}?${params}`
   }
@@ -255,7 +256,8 @@ export default class extends Controller<HTMLElement> {
     for (const place of this.places) {
       if (this.markers.has(place.uuid)) continue
 
-      const element = pinpointElement(place, colors, this.gesteValue, lieuUrl)
+      // The pin shows the icon of the block's first geste.
+      const element = pinpointElement(place, colors, this.#gestes()[0] ?? "", lieuUrl)
       const marker = new this.MarkerClass({
         element,
         anchor: "bottom",
@@ -277,6 +279,10 @@ export default class extends Controller<HTMLElement> {
   #lieuUrlBuilder(): ((uuid: string) => string) | undefined {
     if (!this.lieuUrlValue) return undefined
     return (uuid) => this.lieuUrlValue.replace(UUID_PLACEHOLDER, uuid)
+  }
+
+  #gestes(): string[] {
+    return this.gesteValue.split(",").filter(Boolean)
   }
 
   #colors(): PinpointColors {

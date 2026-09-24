@@ -26,75 +26,93 @@ GESTES_ORDER = (
     "trier",
 )
 
-# The condition drives the badge shown at the top of the block.
-ETATS = {
-    "reparer": ("reparable", "Réparable"),
-    "donner_echanger_rapporter": ("bon_etat", "Bon état"),
-    "vendre_acheter": ("bon_etat", "Bon état"),
-    "emprunter_preter_louer": ("bon_etat", "Bon état"),
-    "trier": ("mauvais_etat", "Mauvais état"),
-}
+# The three blocks of the fiche (Figma 30139:14476): one per condition of the
+# objet, each carrying the gestes that apply. "Donner ou revendre" spans two
+# GroupeAction, hence a list; its label exists nowhere in the database.
+# `emprunter_preter_louer` is not on the mockup and stays out.
+BLOCKS = (
+    {
+        "code": "reparer",
+        "gestes": ("reparer",),
+        "libelle": "Réparer",
+        "etat": ("reparable", "Réparable"),
+        "bonus": True,
+        "consigne": (
+            "Votre objet est abîmé mais réparable ? La réparation prolonge sa"
+            " durée de vie et coûte souvent moins cher qu'un remplacement. Les"
+            " réparateurs proposant le Bonus Réparation sont signalés par le"
+            " symbole %."
+        ),
+    },
+    {
+        "code": "donner_revendre",
+        "gestes": ("donner_echanger_rapporter", "vendre_acheter"),
+        "libelle": "Donner ou revendre",
+        "etat": ("bon_etat", "Bon état"),
+        "bonus": False,
+        "consigne": (
+            "Votre objet fonctionne encore et peut servir à quelqu'un d'autre ?"
+            " Proposez-le à un proche, donnez-le à une association ou à une"
+            " structure de réemploi. Vous pouvez aussi essayer de le revendre"
+            " sur une plateforme de seconde main ou en dépôt-vente."
+        ),
+    },
+    {
+        "code": "trier",
+        "gestes": ("trier",),
+        "libelle": "Déposer",
+        "etat": ("mauvais_etat", "Mauvais état"),
+        "bonus": False,
+        "consigne": (
+            "Votre objet est hors d'usage ? Il ne se jette pas avec les ordures"
+            " ménagères : déposez-le en point de collecte pour qu'il soit recyclé"
+            " ou traité correctement."
+        ),
+    },
+)
 
-CONSIGNES = {
-    "reparer": (
-        "Votre objet est abîmé mais réparable ? La réparation prolonge sa durée"
-        " de vie et coûte souvent moins cher qu'un remplacement. Les"
-        " réparateurs proposant le Bonus Réparation sont signalés par le"
-        " symbole %."
-    ),
-    "donner_echanger_rapporter": (
-        "Votre objet fonctionne encore et peut servir à quelqu'un d'autre ?"
-        " Le donner ou l'échanger lui offre une seconde vie, sans passer par"
-        " la case déchet."
-    ),
-    "vendre_acheter": (
-        "Votre objet est en bon état et a encore de la valeur ? Le revendre"
-        " permet à quelqu'un d'en profiter, et à vous d'en tirer un revenu."
-    ),
-    "emprunter_preter_louer": (
-        "Vous n'avez besoin de cet objet que ponctuellement ? Le prêt et la"
-        " location évitent un achat, et l'objet sert à plusieurs personnes."
-    ),
-    "trier": (
-        "Votre objet est hors d'usage ? Il ne se jette pas avec les ordures"
-        " ménagères : déposez-le en point de collecte pour qu'il soit recyclé"
-        " ou traité correctement."
-    ),
-}
 
-# Only repair gives access to the Bonus Réparation.
-GESTE_WITH_BONUS = "reparer"
+def block_for(gestes) -> dict | None:
+    """The block whose gestes are exactly these, whatever their order."""
+    wanted = frozenset(gestes)
+    return next(
+        (block for block in BLOCKS if frozenset(block["gestes"]) == wanted), None
+    )
 
 
 def consignes_for(produit_page, parcours=None) -> list[dict]:
-    """Consignes of the fiche, in the display order of the spec.
+    """Blocks of the fiche, in the display order of the spec.
 
     `produit_page` is not read yet: it will be once the CMS field exists
     (#3284). The parameter is there so the signature does not change that day.
 
     `parcours` builds the link to the solutions: the objet and the address
-    must follow the user from one screen to the next.
+    must follow the user from one screen to the next. A block spanning several
+    gestes repeats `geste` in the query string.
+
+    A block is skipped when none of its gestes exists in the database.
     """
-    groupes = {groupe.code: groupe for groupe in GroupeAction.objects.all()}
+    known = set(GroupeAction.objects.values_list("code", flat=True))
     base = parcours.as_params() if parcours else {}
 
     consignes = []
-    for code in GESTES_ORDER:
-        groupe = groupes.get(code)
-        if groupe is None:
+    for block in BLOCKS:
+        gestes = [code for code in block["gestes"] if code in known]
+        if not gestes:
             continue
 
-        etat, etat_label = ETATS[code]
+        etat, etat_label = block["etat"]
         badges = [{"condition": etat, "libelle": etat_label}]
-        if code == GESTE_WITH_BONUS:
+        if block["bonus"]:
             badges.append({"condition": "bonus", "libelle": "Bonus Réparation"})
 
-        params = urlencode({**base, "geste": code})
+        params = urlencode({**base, "geste": gestes}, doseq=True)
         consignes.append(
             {
-                "geste": code,
-                "libelle": groupe.libelle_court or groupe.libelle,
-                "consigne": CONSIGNES[code],
+                "code": block["code"],
+                "gestes": gestes,
+                "libelle": block["libelle"],
+                "consigne": block["consigne"],
                 "badges": badges,
                 "url": f"{reverse('assistant:solutions')}?{params}",
             }

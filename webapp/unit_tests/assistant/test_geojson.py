@@ -111,6 +111,19 @@ class TestReponse:
         )
         assert len(payload["features"]) == 1
 
+    def test_accepts_several_gestes(self, client):
+        """A block of the fiche may span two gestes: the union is served."""
+        place_offering("donner_echanger_rapporter", action_code="donner")
+        place_offering("vendre_acheter", action_code="revendre")
+        place_offering("trier")
+
+        payload = json.loads(
+            get_lieux(
+                client, geste=["donner_echanger_rapporter", "vendre_acheter"]
+            ).content
+        )
+        assert len(payload["features"]) == 2
+
     def test_ignores_places_offering_another_geste(self, client):
         place_offering("trier")
         payload = json.loads(get_lieux(client, geste="reparer").content)

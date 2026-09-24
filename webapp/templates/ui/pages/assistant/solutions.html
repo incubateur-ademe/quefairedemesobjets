@@ -14,7 +14,9 @@
                 <a class="qfa-changer-geste" href="{{ url_fiche }}">
                     <span class="qfa-changer-geste__retour" aria-hidden="true"></span>
                     <span class="qfa-changer-geste__icones">
-                        {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+                        {% for geste in gestes %}
+                            {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+                        {% endfor %}
                     </span>
                     {{ libelle_geste }}
                 </a>
@@ -23,7 +25,9 @@
                       data-action="assistant-combobox:chosen->assistant-submit#submit">
                     <input type="hidden" name="objet" value="{{ parcours.objet }}">
                     <input type="hidden" name="fiche" value="{{ parcours.fiche }}">
-                    <input type="hidden" name="geste" value="{{ geste }}">
+                    {% for geste in gestes %}
+                        <input type="hidden" name="geste" value="{{ geste }}">
+                    {% endfor %}
                     {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise %}
                 </form>
             </div>
