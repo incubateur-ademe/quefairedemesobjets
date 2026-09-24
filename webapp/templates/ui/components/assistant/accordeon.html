@@ -1,0 +1,16 @@
+{% comment %}
+Accordéon (Figma 24424:606 desktop / 24424:609 mobile).
+
+`<details>` plutôt qu'un contrôleur Stimulus : le pliage, l'état et le clavier
+sont natifs, et le contenu reste accessible sans JavaScript.
+{% endcomment %}
+<details class="qfa-accordeon" {% if ouvert %}open{% endif %}>
+    <summary class="qfa-accordeon__entete">
+        <span class="qfa-accordeon__textes">
+            <span class="qfa-accordeon__intitule">{{ intitule }}</span>
+            {% if apercu %}<span class="qfa-accordeon__apercu">{{ apercu }}</span>{% endif %}
+        </span>
+        <span class="qfa-accordeon__chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="qfa-accordeon__contenu">{{ contenu }}</div>
+</details>
