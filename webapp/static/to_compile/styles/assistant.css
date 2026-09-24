@@ -720,6 +720,13 @@ body {
   line-height: 1.4;
 }
 
+/* Les icônes d'un bloc à plusieurs gestes se suivent à 4 px (30174:11578). */
+.qfa-bloc-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
 .qfa-bloc-geste__consigne {
   color: var(--qfa-texte-titre);
   font-size: 12px;
