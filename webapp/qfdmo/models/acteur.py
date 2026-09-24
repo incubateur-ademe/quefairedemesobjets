@@ -512,6 +512,14 @@ class DisplayedActeurQuerySet(models.QuerySet):
         # `as_geojson_feature`.
         return self.filter(location__isnull=False).with_bonus()[:limit]
 
+    def for_the_detail(self):
+        """A place and everything its page shows, without cascading queries.
+
+        The `prefetch_related` lives here rather than in the view: it is a
+        property of the data to load, not of the page showing it.
+        """
+        return self.select_related("acteur_type").prefetch_related("labels", "sources")
+
     def as_geojson(self) -> dict:
         return {
             "type": "FeatureCollection",
@@ -959,7 +967,6 @@ def clean_parent(parent):
 
 
 class DisplayedActeurLinkMixin:
-
     identifiant_unique: str
 
     @property
@@ -1386,7 +1393,6 @@ class FinalActeur(BaseActeur):
 
 
 class VueActeurManager(FinalActeurManager, models.Manager):
-
     def get_visible_acteurs(self):
         return self.get_queryset().filter(
             Q(est_dans_carte=True) | Q(est_dans_opendata=True),
