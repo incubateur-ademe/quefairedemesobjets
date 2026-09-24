@@ -738,24 +738,16 @@ body {
   max-width: 300px;
 }
 
-/* Les gestes s'alignent sur la même colonne que les champs : 296 px à 320,
-   600 px au-delà (maquettes 30141:8702 et 30174:11412), gouttières de 12 px
-   comprises. Un `width` fixe déborderait sous 320. */
+/* Toute la largeur, gouttières de 12 px comprises : l'assistant vit en iframe,
+   c'est l'hôte qui décide de sa largeur. */
 .qfa-bloc-gestes {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-3v);
   width: 100%;
-  max-width: calc(296px + 2 * var(--qfa-espace-3v));
   margin: 0;
   padding: 0 var(--qfa-espace-3v);
   list-style: none;
-}
-
-@media (min-width: 800px) {
-  .qfa-bloc-gestes {
-    max-width: calc(600px + 2 * var(--qfa-espace-3v));
-  }
 }
 
 /* 40 px de haut sur la maquette (30141:8863) : le remplissage n'en fait que
@@ -896,8 +888,6 @@ body {
   gap: var(--qfa-espace-4v);
   align-items: center;
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
   padding-bottom: var(--qfa-espace-4v);
 }
 
@@ -912,6 +902,12 @@ body {
   background: var(--qfa-geste-reparation-fond);
 }
 
+/* Sur la fiche, le panneau vit dans un formulaire : sans cela, la colonne
+   centrée le rétrécit à la largeur de son contenu. */
+.qfa-ecran > form {
+  width: 100%;
+}
+
 /* Bandeau et carte se touchent (30141:9302) : ce conteneur les soustrait à
    l'espacement de l'écran, qui ne vaut qu'avant le pied de page. */
 .qfa-haut-de-page {
@@ -924,21 +920,10 @@ body {
   gap: var(--qfa-espace-2v);
 }
 
-/* Le contenu du panneau s'aligne sur 600 px dès que la place le permet, comme
-   dans la maquette large (30174:11318), où les champs ne s'étirent pas. */
-@media (min-width: 800px) {
-  .qfa-panneau > * {
-    width: 600px;
-    margin: 0 auto;
-  }
-}
-
 .qfa-fiche {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-4v);
-  max-width: 40rem;
-  margin: 0 auto;
   padding: var(--qfa-espace-4v);
 }
 
@@ -959,21 +944,14 @@ body {
   background: var(--qfa-geste-reparation-fond);
 }
 
-/* Fiche d'un lieu (maquette 30142:9565) : même colonne que les autres écrans,
-   gouttières de 12 px comprises. */
+/* Fiche d'un lieu (maquette 30142:9565) : toute la largeur, gouttières de
+   12 px comprises. */
 .qfa-lieu {
   display: flex;
   flex-direction: column;
   gap: var(--qfa-espace-3v);
   width: 100%;
-  max-width: calc(296px + 2 * var(--qfa-espace-3v));
   padding: 0 var(--qfa-espace-3v);
-}
-
-@media (min-width: 800px) {
-  .qfa-lieu {
-    max-width: calc(600px + 2 * var(--qfa-espace-3v));
-  }
 }
 
 .qfa-lieu__identite {
