@@ -67,24 +67,28 @@ terminé : pas de requête pendant un glissement. Il n'y a pas de temporisation
 supplémentaire ; une requête encore en vol est annulée par la suivante (voir
 « Requêtes annulables »).
 
-### Un point visible ne disparaît pas
+### Les lieux chargés restent
 
 C'est la règle la plus subtile, et la raison pour laquelle l'endpoint renvoie
 du GeoJSON plutôt que du HTML : le client doit posséder l'état des marqueurs
-pour comparer l'ancien et le nouveau.
+pour l'enrichir au fil de l'exploration.
 
 ```typescript
-const kept = shown.filter((place) => isInArea(place, area))
-const merged = new Map(kept.map((place) => [place.uuid, place]))
+const merged = new Map(loaded.map((place) => [place.uuid, place]))
 for (const place of incoming) {
-  if (merged.size >= cap) break
+  if (added >= cap) break
+  if (merged.has(place.uuid)) continue
   merged.set(place.uuid, place)
+  added += 1
 }
 ```
 
-Les lieux conservés sont insérés **en premier** : ce sont eux qui remplissent
-le plafond de 20. Un lieu sous les yeux de l'usager ne saute donc jamais, ce
-qui répond à un retour de test explicite.
+Tout ce qui a déjà été chargé est conservé, dans le cadre ou juste en dehors :
+un lieu vu par l'usager ne saute jamais (#3356, étendu à l'exploration). Chaque
+requête ajoute au plus 20 lieux nouveaux, donc l'ensemble grandit en
+parcourant la carte. La mémoire est bornée à 200 lieux : au-delà, les lieux
+hors cadre les plus éloignés du centre sont retirés en premier, jamais ceux
+qui sont à l'écran.
 
 ### Dézoom : masqués, pas perdus
 
