@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { useResize } from "stimulus-use"
 
 import {
   isInArea,
@@ -60,10 +59,9 @@ export default class extends Controller<HTMLElement> {
   private markers = new Map<string, Marker>()
   private places: Place[] = []
   private pendingRequest: AbortController | null = null
+  private lastRequestedUrl = ""
 
   async connect() {
-    useResize(this)
-
     const [{ Map, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
       await Promise.all([import("maplibre-gl"), import("carte-facile")])
     // Disconnected while the imports were loading (lookbook re-render): a map
@@ -132,7 +130,11 @@ export default class extends Controller<HTMLElement> {
   #placeAddressMarker() {
     if (!this.map || !this.preciseAddressValue) return
 
-    new this.MarkerClass({ element: addressElement(this.#colors()), anchor: "center" })
+    new this.MarkerClass({
+      element: addressElement(this.#colors()),
+      anchor: "center",
+      subpixelPositioning: true,
+    })
       .setLngLat([this.longitudeValue, this.latitudeValue])
       .addTo(this.map)
   }
@@ -143,10 +145,6 @@ export default class extends Controller<HTMLElement> {
     this.markers.clear()
     this.map?.remove()
     this.map = null
-  }
-
-  resize() {
-    this.map?.resize()
   }
 
   /**
@@ -160,20 +158,36 @@ export default class extends Controller<HTMLElement> {
   async #load() {
     if (!this.map) return
 
-    if (this.map.getZoom() < MIN_ZOOM) {
-      this.#hideMarkers()
+    // Below the département zoom, the pins are hidden by CSS but kept in the
+    // DOM and in memory: zooming back in shows them at once, without waiting
+    // for a request, and nothing is rebuilt. Toggling a class rather than
+    // removing markers also keeps the canvas size constant, so MapLibre has
+    // nothing to re-render (#3356).
+    const zoomedOut = this.map.getZoom() < MIN_ZOOM
+    this.element.dataset.zoomedOut = String(zoomedOut)
+    if (zoomedOut) {
       this.#announce(
         "Zoomez sur la carte et faites-la défiler, ou cherchez une nouvelle adresse pour voir apparaître des points.",
       )
       return
     }
 
+    // Whatever memory holds is drawn before asking the server: the map is
+    // never empty while a request is in flight.
+    this.#draw()
+
+    // MapLibre also emits `moveend` on a container resize, even when the view
+    // did not move: the same viewport is never requested twice in a row.
+    const url = this.#placesUrl()
+    if (url === this.lastRequestedUrl) return
+    this.lastRequestedUrl = url
+
     this.pendingRequest?.abort()
     this.pendingRequest = new AbortController()
 
     const start = performance.now()
     try {
-      const response = await fetch(this.#placesUrl(), {
+      const response = await fetch(url, {
         signal: this.pendingRequest.signal,
       })
       if (!response.ok) throw new Error(`response ${response.status}`)
@@ -195,6 +209,8 @@ export default class extends Controller<HTMLElement> {
       )
     } catch (error) {
       if ((error as Error).name === "AbortError") return
+      // Let the next move retry the same viewport.
+      this.lastRequestedUrl = ""
       this.#announce(
         "Les lieux n'ont pas pu être chargés. Déplacez la carte pour réessayer.",
       )
@@ -240,7 +256,13 @@ export default class extends Controller<HTMLElement> {
       if (this.markers.has(place.uuid)) continue
 
       const element = pinpointElement(place, colors, this.gesteValue, lieuUrl)
-      const marker = new this.MarkerClass({ element, anchor: "bottom" })
+      const marker = new this.MarkerClass({
+        element,
+        anchor: "bottom",
+        // Without it MapLibre rounds marker positions to whole pixels, which
+        // makes the pins jitter during zoom animations.
+        subpixelPositioning: true,
+      })
         .setLngLat([place.longitude, place.latitude])
         .addTo(this.map!)
       this.markers.set(place.uuid, marker)
@@ -264,11 +286,6 @@ export default class extends Controller<HTMLElement> {
       bonus: style.getPropertyValue("--qfa-bonus-color").trim(),
       address: style.getPropertyValue("--qfa-user-address").trim(),
     }
-  }
-
-  #hideMarkers() {
-    this.markers.forEach((marker) => marker.remove())
-    this.markers.clear()
   }
 
   #announce(message: string) {
