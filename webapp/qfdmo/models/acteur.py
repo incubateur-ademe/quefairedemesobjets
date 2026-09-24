@@ -17,7 +17,7 @@ from core.validators import EmptyEmailValidator
 from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
-from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.db.models.functions import Distance, GeometryDistance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.measure import D
@@ -304,6 +304,55 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+MAX_PLACES_ON_MAP = 20
+
+OFFERS_CACHE_TTL = 60 * 60 * 12
+
+GEOGRAPHIC_SCAN_THRESHOLD = 1_000
+
+MISS = object()
+
+
+def acteur_ids_offering(
+    groupe_action_code: str, sous_categorie_ids
+) -> list[str] | None:
+    """Ids of the acteurs offering this geste for this objet, France-wide.
+
+    Returns `None` when they are too many to be listed: past the threshold,
+    the geographic scan finds its 20 results effortlessly and the list is
+    useless.
+
+    The number of acteurs per geste/objet pair spans five orders of magnitude,
+    from 0 for "réparer un emballage" to 110,320 for "trier un emballage".
+    Without this list, a rare pair scans the 388,000 acteurs looking for
+    almost nonexistent results: measured at 2.5 s against 3 ms once the list
+    is known.
+
+    The pair only changes with imports, hence the long cache.
+    """
+    from django.core.cache import cache
+
+    key = (
+        f"offres:{groupe_action_code}:{','.join(map(str, sorted(sous_categorie_ids)))}"
+    )
+    # `None` is a legitimate cached value ("too many"), so a miss needs its own
+    # sentinel: otherwise the big pairs would be recomputed on every call.
+    ids = cache.get(key, MISS)
+    if ids is MISS:
+        propositions = DisplayedPropositionService.objects.filter(
+            action__groupe_action__code=groupe_action_code,
+            sous_categories__in=sous_categorie_ids,
+        )
+        found = list(
+            propositions.values_list("acteur_id", flat=True).distinct()[
+                : GEOGRAPHIC_SCAN_THRESHOLD + 1
+            ]
+        )
+        ids = None if len(found) > GEOGRAPHIC_SCAN_THRESHOLD else found
+        cache.set(key, ids, OFFERS_CACHE_TTL)
+    return ids
+
+
 class DisplayedActeurQuerySet(models.QuerySet):
     def with_reparer(self):
         proposition_service_reparer = DisplayedPropositionService.objects.filter(
@@ -395,6 +444,79 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
         )
+
+    def proposing(self, groupe_action_code: str, sous_categorie_ids=None):
+        """Acteurs offering this geste, optionally for a given objet.
+
+        A "geste" as the user sees it is a GroupeAction (5 in the database),
+        not an Action (11): choosing "donner" must include the acteurs that
+        only declare `echanger` or `rapporter`.
+
+        The geste and the objet are looked up on the *same* proposition: a
+        bike repairer that also takes furniture donations is not a furniture
+        repairer.
+
+        The filter goes through EXISTS rather than a join to avoid duplicated
+        rows: 9,363 acteurs have several propositions within one groupe, which
+        would yield fewer than 20 distinct places.
+        """
+        if sous_categorie_ids:
+            ids = acteur_ids_offering(groupe_action_code, sous_categorie_ids)
+            if ids is not None:
+                return self.filter(identifiant_unique__in=ids)
+
+        propositions = DisplayedPropositionService.objects.filter(
+            acteur=OuterRef("pk"),
+            action__groupe_action__code=groupe_action_code,
+        )
+        if sous_categorie_ids:
+            propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
+        return self.filter(Exists(propositions))
+
+    def nearest_to(self, longitude, latitude):
+        """Physical acteurs sorted from nearest to farthest.
+
+        `GeometryDistance` is the PostGIS KNN operator `<->`, distinct from
+        `Distance` (`ST_Distance`): it lets PostgreSQL walk the GiST index in
+        increasing distance order and stop at the LIMIT, instead of computing
+        the distance of every candidate and then sorting. Measured on 388,000
+        acteurs: 2 ms against 437 ms in Paris. The value is meant for sorting,
+        not display: annotate `Distance` alongside if it must be shown.
+
+        No distance bound: `ST_DWithin` would prevent the ordered scan of the
+        GiST index and cost two orders of magnitude more. The result cap is
+        enough to bound the work.
+        """
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        return self.physical().order_by(GeometryDistance("location", reference_point))
+
+    def within(self, bbox):
+        """Acteurs of the visible area, from nearest to its center to farthest.
+
+        The filter uses `bboverlaps` (operator `&&`) rather than `within`: on a
+        geography column, `within` ignores the GiST index and costs 2 s
+        against 1 ms for the same result, places being points.
+        """
+        area = Polygon.from_bbox(bbox)
+        area.srid = 4326
+        center = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
+        return (
+            self.physical()
+            .filter(location__bboverlaps=area)
+            .order_by(GeometryDistance("location", center))
+        )
+
+    def for_the_map(self, limit: int = MAX_PLACES_ON_MAP):
+        # `location` is nullable and `NULL <-> point` sorts last: with few
+        # candidates, unlocated acteurs would pad the result and break
+        # `as_geojson_feature`.
+        return self.filter(location__isnull=False).with_bonus()[:limit]
+
+    def as_geojson(self) -> dict:
+        return {
+            "type": "FeatureCollection",
+            "features": [acteur.as_geojson_feature() for acteur in self],
+        }
 
 
 class LatLngPropertiesMixin(models.Model):
@@ -1528,6 +1650,21 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+    def as_geojson_feature(self) -> dict:
+        """GeoJSON representation of the place for the map."""
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [self.location.x, self.location.y],
+            },
+            "properties": {
+                "uuid": self.uuid,
+                "nom": self.nom_commercial or self.nom,
+                "bonus": getattr(self, "bonus", False),
+            },
+        }
 
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):

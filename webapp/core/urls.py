@@ -91,6 +91,10 @@ urlpatterns = (
         path("data/", include(("data.urls", "data"), namespace="data")),
         path("infotri/", include(("infotri.urls", "infotri"), namespace="infotri")),
         path(
+            "assistant/",
+            include(("assistant.urls", "assistant"), namespace="assistant"),
+        ),
+        path(
             "docs/",
             TemplateView.as_view(template_name="techdocs.html"),
             name="techdocs",
