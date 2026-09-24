@@ -109,6 +109,12 @@ export default class extends Controller<HTMLElement> {
 
     await this.map.once("load")
 
+    // MapLibre opens the compact attribution on load; the mockup shows it
+    // folded (30141:9028). It stays openable by the user.
+    this.containerTarget
+      .querySelector(".maplibregl-ctrl-attrib")
+      ?.classList.remove("maplibregl-compact-show")
+
     // `moveend` is only wired after `load`: the resize and the style setup
     // emit it, which would trigger a second load identical to the first.
     this.map.on("moveend", () => this.refresh())

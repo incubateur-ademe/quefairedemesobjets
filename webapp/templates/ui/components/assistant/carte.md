@@ -136,7 +136,8 @@ aucune carte.
 Un même acteur s'affiche en bleu si l'usager a choisi « donner » et en brun
 s'il a choisi « revendre ». La couleur vient donc du template
 (`--qfa-geste-color`, alimenté par `GroupeAction.couleur` en base), jamais
-d'une propriété du lieu. Seul le Bonus Réparation prend le pas.
+d'une propriété du lieu. Seul le Bonus Réparation prend le pas, et
+ajoute la pastille « % » sur l'épaule droite de la goutte (30141:9028).
 
 ## Accessibilité
 
