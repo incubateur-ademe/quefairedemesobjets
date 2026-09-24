@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
-from assistant.consignes import consignes_for
+from assistant.consignes import block_for, consignes_for
 from assistant.forms import SearchForm
 from assistant.lieu import gestes_of, offers_bonus, practical_info_of
 from assistant.objets import fiche_for_label
@@ -97,22 +97,32 @@ class SolutionsView(TurboFrameMixin, TemplateView):
         parcours = Parcours.from_query(self.request.GET)
         if not parcours.fiche:
             parcours = replace(parcours, fiche=_fiche_slug_for(parcours.objet))
-        geste = (self.request.GET.get("geste") or "").strip()
-        groupe = GroupeAction.objects.filter(code=geste).first()
+        # A block of the fiche may span several gestes ("Donner ou revendre"):
+        # `geste` is repeated in the query string, in the block's order.
+        gestes = _requested_gestes(self.request.GET)
+        groupes = _groupes_in_order(gestes)
+        block = block_for(gestes)
 
         longitude, latitude = _position_of(parcours)
         return super().get_context_data(
             parcours=parcours,
-            geste=geste,
+            gestes=gestes,
             # The GeoJSON endpoint expects the fiche's slug, not the typed
             # label: the slug is what carries the sous-catégories.
             slug=parcours.fiche,
-            libelle_geste=(groupe.libelle_court or groupe.libelle) if groupe else "",
-            couleur_geste=groupe.couleur if groupe else "",
+            libelle_geste=(
+                block["libelle"]
+                if block
+                else (groupes[0].libelle_court or groupes[0].libelle) if groupes else ""
+            ),
+            # Several gestes share one map: the pins take the first one's color.
+            couleur_geste=groupes[0].couleur if groupes else "",
             url_fiche=self._fiche_url(parcours),
             # A pin's link carries the parcours: without it, "Revenir aux
             # solutions" would lose the geste and the address.
-            parametres_lieu=urlencode({**parcours.as_params(), "geste": geste}),
+            parametres_lieu=urlencode(
+                {**parcours.as_params(), "geste": gestes}, doseq=True
+            ),
             longitude=longitude,
             latitude=latitude,
             # The red marker only shows for a precise address (#3356).
@@ -143,6 +153,20 @@ def _fiche_slug_for(label: str) -> str:
     return fiche.slug if fiche else ""
 
 
+def _requested_gestes(query) -> list[str]:
+    seen: list[str] = []
+    for code in query.getlist("geste"):
+        code = code.strip()
+        if code and code not in seen:
+            seen.append(code)
+    return seen
+
+
+def _groupes_in_order(codes: list[str]) -> list[GroupeAction]:
+    by_code = {g.code: g for g in GroupeAction.objects.filter(code__in=codes)}
+    return [by_code[code] for code in codes if code in by_code]
+
+
 def _position_of(parcours: Parcours) -> tuple[float, float]:
     if parcours.is_located:
         return parcours.longitude, parcours.latitude
@@ -164,11 +188,11 @@ class LieuView(TurboFrameMixin, DetailView):
         # Going back to the solutions must recover the geste, which the
         # parcours does not carry: it is the choice made on the fiche.
         back = {**parcours.as_params()}
-        if geste := (self.request.GET.get("geste") or "").strip():
-            back["geste"] = geste
+        if gestes := [v for v in self.request.GET.getlist("geste") if v.strip()]:
+            back["geste"] = gestes
         return super().get_context_data(
             parcours=parcours,
-            parametres=urlencode(back),
+            parametres=urlencode(back, doseq=True),
             infos_pratiques=practical_info_of(self.object),
             bonus_reparation=offers_bonus(self.object),
             gestes=gestes_of(self.object),

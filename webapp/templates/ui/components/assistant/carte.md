@@ -7,7 +7,7 @@ pendant l'exploration.
 
 ```django
 {% include "ui/components/assistant/carte.html" with
-   geste="reparer"
+   gestes=gestes
    fiche="telephone-mobile"
    longitude=2.3488
    latitude=48.8534
@@ -19,7 +19,7 @@ pendant l'exploration.
 
 | Paramètre         | Requis | Rôle                                                                 |
 | ----------------- | ------ | -------------------------------------------------------------------- |
-| `geste`           | ✅     | code d'un `GroupeAction` — voir ci-dessous                           |
+| `gestes`          | ✅     | codes de `GroupeAction` — voir ci-dessous ; plusieurs pour un bloc   |
 | `longitude`       | ✅     | centre initial                                                       |
 | `latitude`        | ✅     | centre initial                                                       |
 | `couleur_geste`   | ✅     | couleur des pinpoints, issue de `GroupeAction.couleur`               |
