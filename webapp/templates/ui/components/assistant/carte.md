@@ -60,15 +60,12 @@ elle se teste en Jest (`visible_places.test.ts`), sans monter de carte.
 Toutes viennent de la spec
 [#3356](https://app.notion.com/p/3a06523d57d780589476d537f8776008).
 
-### Rafraîchissement après une seconde d'immobilité
+### Rafraîchissement à chaque déplacement
 
-```typescript
-static debounces = [{ name: "refresh", wait: SETTLE_DELAY_MS }]
-```
-
-Rien ne se passe pendant que l'usager déplace ou zoome. `useDebounce` de
-`stimulus-use` applique les défauts `leading: false, trailing: true`, soit
-exactement « attendre que ça s'arrête ».
+Le contrôleur écoute `moveend`, que MapLibre n'émet qu'une fois le geste
+terminé : pas de requête pendant un glissement. Il n'y a pas de temporisation
+supplémentaire ; une requête encore en vol est annulée par la suivante (voir
+« Requêtes annulables »).
 
 ### Un point visible ne disparaît pas
 
@@ -119,14 +116,6 @@ disconnect() {
 
 Sans `carte.remove()`, le contexte WebGL fuit à chaque navigation de Turbo
 Frame. Le problème a déjà été rencontré sur la carte V1.
-
-### Une méthode débouncée ne peut pas être `await`ée
-
-`useDebounce` remplace la méthode par une enveloppe qui **ne retourne rien**.
-`await this.refresh()` résout immédiatement sur `undefined`, et
-`.catch()` lève. C'est pourquoi `refresh()` reste synchrone et délègue à
-`#load()`, qui gère ses propres erreurs : un
-rejet non capturé deviendrait une _unhandled promise rejection_ silencieuse.
 
 ### MapLibre est chargé dynamiquement
 
