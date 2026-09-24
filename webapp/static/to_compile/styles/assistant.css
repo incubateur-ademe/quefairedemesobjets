@@ -900,6 +900,42 @@ body {
   view-transition-name: entete;
 }
 
+/* Les éléments du bandeau présents sur plusieurs écrans voyagent chacun pour
+   soi : le champ d'adresse glisse de sa place sur la fiche à sa place sous le
+   bouton de geste, sans fondu, et le bouton vert se transforme de « Réparer »
+   en « Revenir aux solutions ». Un nom par écran, jamais deux : un seul champ
+   d'adresse, un seul champ d'objet, un seul bouton de geste. */
+#recherche-adresse {
+  view-transition-name: champ-adresse;
+}
+
+#recherche-objet {
+  view-transition-name: champ-objet;
+}
+
+.qfa-changer-geste {
+  view-transition-name: bouton-geste;
+}
+
+/* Le champ d'adresse ne fait que se déplacer : ni fondu sortant ni fondu
+   entrant, seule la nouvelle image bouge. */
+::view-transition-old(champ-adresse) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(champ-adresse) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* Sur la fiche, le panneau vit dans un formulaire : sans cela, la colonne
    centrée le rétrécit à la largeur de son contenu. */
 .qfa-ecran > form {
