@@ -47,7 +47,12 @@ def fiche_for_label(label: str):
 
 
 def fiche_of(term):
-    """The `ProduitPage` of a term, or None if it targets none."""
+    """The live `ProduitPage` of a term, or None if it targets none.
+
+    A draft or unpublished fiche is not a destination: every other lookup of
+    the app goes through `ProduitPage.objects.live()`, and routing to a page
+    that then 404s would be worse than "unknown objet".
+    """
     from django.core.exceptions import ObjectDoesNotExist
 
     for relation in FICHE_RELATIONS:
@@ -55,7 +60,7 @@ def fiche_of(term):
             page = getattr(term, relation, None)
         except ObjectDoesNotExist:
             continue
-        if page is not None and getattr(page, "slug", None):
+        if page is not None and getattr(page, "slug", None) and page.live:
             return page
     return None
 
@@ -83,7 +88,7 @@ def suggest_objets(query: str) -> list[dict]:
     The `statement_timeout` bounds the query rather than letting a pathological
     search block typing: better an empty list than a frozen field.
     """
-    from django.db import OperationalError, connection
+    from django.db import OperationalError, connection, transaction
     from modelsearch.query import Fuzzy
 
     from search.models import SearchTerm
@@ -92,19 +97,25 @@ def suggest_objets(query: str) -> list[dict]:
     if len(query) < MIN_LENGTH:
         return []
 
+    # `SET LOCAL` only lasts until the end of the current transaction: in
+    # autocommit mode it would be discarded before the search runs. The
+    # timeout and the search must share one transaction.
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("SET LOCAL statement_timeout = %s", [SEARCH_TIMEOUT_MS])
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute("SET LOCAL statement_timeout = %s", [SEARCH_TIMEOUT_MS])
 
-        terms = SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
-            :RESULTS_COUNT
-        ]
-        specifics = _specifics([term.id for term in terms])
-
-        suggestions = (_suggestion(specifics.get(term.id)) for term in terms)
-        return [suggestion for suggestion in suggestions if suggestion]
+            terms = list(
+                SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
+                    :RESULTS_COUNT
+                ]
+            )
+            specifics = _specifics([term.id for term in terms])
     except OperationalError:
         return []
+
+    suggestions = (_suggestion(specifics.get(term.id)) for term in terms)
+    return [suggestion for suggestion in suggestions if suggestion]
 
 
 def _specifics(ids: list[int]) -> dict[int, object]:
