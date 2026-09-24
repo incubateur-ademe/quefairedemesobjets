@@ -1,42 +1,108 @@
-/* Stylesheet of the assistant V2, served alone in the lookbook: neither the
-   DSFR nor the legacy stack is loaded there (see
-   `django_lookbook/preview.html`). This first delivery only carries the map;
-   the other components will come here, under the same `qfa-` prefix. */
+/* Public Sans, la police du Figma (ADR 0009 Q7), auto-hébergée via
+   `@fontsource-variable` : aucun appel à Google Fonts au chargement, donc pas
+   de requête tierce ni de dépendance réseau externe.
 
-/* `border-box` everywhere: the mockup sizes (a 35×47 pinpoint) describe the
-   visible box, border included. */
+   `wght.css` déclare trois sous-ensembles (latin, latin-ext, vietnamien), mais
+   chacun porte sa `unicode-range` : le navigateur ne télécharge que celui dont
+   la page a besoin, donc le vietnamien ne part jamais sur le réseau pour une
+   interface française.
+
+   Fonte variable : un seul fichier couvre les graisses 400 à 700 utilisées par
+   les composants, au lieu de quatre fichiers statiques. Les italiques ne sont
+   pas importées, faute d'usage. */
+@import "npm:@fontsource-variable/public-sans/wght.css";
+
+/* Le défilement doux était la seule utilité Tailwind de l'assistant. L'écrire
+   ici évite d'embarquer 2 282 classes utilitaires pour une ligne (ADR 0009 Q2),
+   et permet de la neutraliser sous `prefers-reduced-motion`. */
+/* `border-box` partout : les tailles du Figma (un bouton de 300 px, un champ
+   de 360) désignent la boîte visible, bordure et remplissage compris. En
+   `content-box`, un bouton de 300 px plafonné en affiche 332.
+
+   Tailwind fournissait ce réglage via son preflight ; le retirer (ADR 0009 Q2)
+   l'a emporté avec lui. */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
+html {
+  scroll-behavior: smooth;
 }
 
-/* Geste colors, taken from the Figma "Composants spécifiques à Que faire"
-   (node 368:1591, Carte/Punaises de carte). They are DSFR illustration tokens,
-   named here after the geste they carry rather than their hue: a color name
-   becomes wrong as soon as the design changes.
+/* La marge par défaut du navigateur (8 px) rentrait le bandeau de saisie, qui
+   va bord à bord dans la maquette. Tailwind la remettait à zéro via son
+   preflight ; le retirer (ADR 0009 Q2) l'a laissée revenir. */
+body {
+  margin: 0;
+  font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
+}
 
-   Four of the five values match `GroupeAction.couleur` in the database;
-   `vendre_acheter` follows the database (#D1B781) rather than the Figma
-   (#BB8568), whose token was a hover state picked by mistake. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Jetons relevés sur le Figma « 🪑 Composants spécifiques à Que faire »,
+   nœud 368:1591 (Carte/Punaises de carte). Ce ne sont pas des couleurs
+   arbitraires : ce sont des jetons d'illustration du DSFR, nommés ici par le
+   geste qu'ils portent plutôt que par leur teinte.
+
+   La spec #3295 décrit « Prêter/Louer = orange » ; le Figma utilise en réalité
+   pink-tuile (#CE614A), un terracotta. La maquette fait foi. */
 :root {
   --qfa-geste-reparation: #009081; /* green-menthe-main-548 */
   --qfa-geste-don: #417dc4; /* blue-cumulus-main-526 */
+  /* Valeur de `GroupeAction.couleur`, pas celle du Figma (#BB8568) : le Figma
+     y utilise un jeton `-hover`, vraisemblablement pris par erreur sur un état
+     de survol. La base fait foi (ADR 0009 Q4). */
   --qfa-geste-vente: #d1b781;
   --qfa-geste-loc: #ce614a; /* pink-tuile-main-556 */
   --qfa-geste-tri: #a558a0; /* purple-glycine-main-494 */
 
   --qfa-bonus-color: var(--qfa-geste-reparation);
-  --qfa-user-address: #e1000f; /* red-marianne, see the map mockup */
-  --qfa-radius: 8px;
+  --qfa-bonus-pastille: #efcb3a; /* yellow-tournesol-850 */
+  --qfa-user-address: #e1000f; /* red-marianne, cf. maquette carte */
+
+  /* Fonds pastel des étiquettes de geste. */
+  --qfa-geste-reparation-fond: #dffdf7; /* green-menthe-975 */
+  --qfa-geste-don-fond: #dae6fd; /* blue-cumulus-925 */
+  --qfa-geste-vente-fond: #f3e2d9; /* brown-caramel-925 */
+  --qfa-geste-loc-fond: #fddfd8; /* orange-terre-battue-925 */
+  --qfa-geste-tri-fond: #fee7fc; /* purple-glycine-950 */
+
+  /* Badges d'état : chaque fond va avec son texte, pour le contraste. */
+  --qfa-etat-reparable-fond: #dffdf7;
+  --qfa-etat-reparable-texte: #37635f;
+  --qfa-etat-bon-fond: #e1fee8;
+  --qfa-etat-bon-texte: #18753c;
+  --qfa-etat-mauvais-fond: #fee7fc;
+  --qfa-etat-mauvais-texte: #6e445a;
+  --qfa-etat-bonus-fond: #fef7da;
+  --qfa-etat-bonus-texte: #66673d;
+
+  --qfa-texte-titre: #161616;
+  --qfa-texte-courant: #3a3a3a;
+  --qfa-accent: #37635f; /* green-menthe-sun-373 : boutons, intitulés */
+  --qfa-bordure: #dddddd;
+  --qfa-fond-contraste: #eeeeee;
+  --qfa-fond-survol: #f6f6f6;
+
+  /* Échelle d'espacement du Figma : un pas vaut 4px. */
+  --qfa-espace-1v: 4px;
+  --qfa-espace-2v: 8px;
+  --qfa-espace-3v: 12px;
+  --qfa-espace-4v: 16px;
+
+  --qfa-rayon-sm: 4px;
+  --qfa-rayon-md: 8px;
+  --qfa-rayon-pilule: 999px;
+  --qfa-rayon: var(--qfa-rayon-md);
 }
 
-/* 450 px high and full width, as in the mockup (30141:9028). */
+/* 450 px de haut et toute la largeur, comme la maquette (30141:9028). */
 .qfa-carte {
   position: relative;
   display: flex;
@@ -48,7 +114,7 @@ body {
 .qfa-carte__canvas {
   flex: 1 1 auto;
   min-height: 0;
-  border-radius: var(--qfa-radius);
+  border-radius: var(--qfa-rayon);
   overflow: hidden;
 }
 
@@ -59,13 +125,13 @@ body {
 .qfa-carte__message {
   padding: 0.5rem 1rem;
   background: #fff;
-  border-radius: var(--qfa-radius);
+  border-radius: var(--qfa-rayon);
 }
 
 .qfa-pinpoint {
-  /* MapLibre positions the marker through `transform`: without `position:
-     absolute` the transform has no effect and the pinpoint piles up at the
-     bottom of the page. */
+  /* MapLibre positionne le marqueur via `transform` : sans `position:
+     absolute`, la transformation reste sans effet et le pinpoint s'empile
+     en bas de page. */
   position: absolute;
   top: 0;
   left: 0;
@@ -78,13 +144,13 @@ body {
   color: var(--qfa-pinpoint-color);
 }
 
-/* The Figma pin (node 368:1591) stacks three layers: a white body, a ring in
-   the geste color, and the geste icon. The tip goes down to y=47: it is the
-   tip, not the center, that points at the place (#3356).
+/* Le pin du Figma (nœud 368:1591) empile trois calques : un corps blanc, un
+   cerne de la couleur du geste, et l'icône du geste. La pointe descend jusqu'à
+   y=47 — c'est elle, et non le centre, qui désigne le lieu (#3356).
 
-   The exported SVGs are used as masks rather than images: the shape stays
-   exactly the mockup's, and the color keeps coming from
-   `--qfa-pinpoint-color`, hence from the geste chosen by the user. */
+   Les SVG exportés servent de masques plutôt que d'images : la forme reste
+   exactement celle de la maquette, et la couleur continue de venir de
+   `--qfa-pinpoint-color`, donc du geste choisi par l'usager. */
 .qfa-pinpoint::before,
 .qfa-pinpoint::after {
   content: "";
@@ -96,26 +162,26 @@ body {
   mask-repeat: no-repeat;
 }
 
-/* White body: the drop is the same for the five gestes.
-   The `url()` are written directly in `mask` rather than through a variable:
-   Parcel refuses a relative URL in a custom property, since it resolves where
-   the `var()` is used, not where it is defined. */
+/* Corps blanc : la goutte est la même pour les cinq gestes.
+   Les `url()` sont écrits directement dans `mask` plutôt que via une variable :
+   Parcel refuse une URL relative dans une custom property, car elle se résout
+   là où le `var()` est utilisé, pas là où il est défini. */
 .qfa-pinpoint::before {
   -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
   mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
   background: #fff;
 }
 
-/* Ring of the drop, in the geste color. Identical for the five gestes: the
-   icon, laid on top, is what tells them apart. */
+/* Cerne de la goutte, à la couleur du geste. Identique pour les cinq gestes :
+   c'est l'icône, posée par-dessus, qui les distingue. */
 .qfa-pinpoint::after {
   -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
   mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
   background: currentColor;
 }
 
-/* The geste icon, ~20×20 in the mockup, centered in the head of the drop (not
-   in the whole pin, whose tip takes the bottom third). */
+/* L'icône du geste, ~20×20 dans la maquette, centrée dans la tête de la goutte
+   (et non dans le pin entier, dont la pointe occupe le tiers bas). */
 .qfa-pinpoint__icon {
   position: absolute;
   top: 7.78px;
@@ -150,8 +216,8 @@ body {
   mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
 }
 
-/* "Donner" is exported in one piece in the Figma, icon included: no separate
-   layer to overlay. */
+/* « Donner » est exporté d'un seul tenant dans le Figma, icône comprise : pas
+   de calque séparé à superposer. */
 .qfa-pinpoint[data-geste="donner_echanger_rapporter"]::after {
   -webkit-mask-image: url("../images/assistant/pinpoints/geste-don.svg");
   mask-image: url("../images/assistant/pinpoints/geste-don.svg");
@@ -162,7 +228,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Server-rendered list: the only accessible path to the results. */
+/* Liste rendue côté serveur : seul chemin accessible vers les résultats. */
 .qfa-carte__accessible-list {
   position: absolute;
   width: 1px;
@@ -172,13 +238,13 @@ body {
   white-space: nowrap;
 }
 
-/* Comfort margin in the lookbook, not on real pages. */
+/* Marge de confort dans le lookbook, hors pages réelles. */
 .qfa-preview {
   margin: 0;
   padding: 2rem;
 }
 
-/* Debug overlay: duration of the places requests. Rendered only if `debug`. */
+/* Overlay de debug : durée des requêtes de lieux. Rendu seulement si `debug`. */
 .qfa-chrono {
   position: absolute;
   top: 0.5rem;
@@ -188,7 +254,7 @@ body {
   gap: 0.5rem;
   align-items: baseline;
   padding: 0.35rem 0.6rem;
-  border-radius: var(--qfa-radius);
+  border-radius: var(--qfa-rayon);
   background: rgb(0 0 0 / 0.75);
   color: #fff;
   font:
@@ -205,9 +271,110 @@ body {
   opacity: 0.75;
 }
 
-/* On the red background, the dimmed text falls under 4.5:1 (WCAG 1.4.3). */
+/* Sur fond rouge, le texte atténué passe sous 4.5:1 (WCAG 1.4.3). */
 .qfa-chrono[data-over-budget="true"] span {
   opacity: 1;
+}
+
+.qfa-combobox {
+  position: relative;
+}
+
+/* Question posée au-dessus du champ (30139:14308) : c'est elle qui tient lieu
+   de titre sur l'écran d'accueil, d'où le gras. */
+.qfa-combobox__label {
+  display: block;
+  margin-bottom: var(--qfa-espace-2v);
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+/* Le cadre porte la bordure et la loupe ; le champ lui-même est nu, sinon la
+   bordure du navigateur doublerait celle de la maquette. */
+.qfa-combobox__cadre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  padding: var(--qfa-espace-3v);
+  border: 2px solid var(--qfa-accent);
+  border-radius: var(--qfa-rayon-sm);
+  background: #fff;
+}
+
+.qfa-combobox__cadre:focus-within {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+/* 24 px, la taille déclarée du symbole « Icônes » dans la maquette.
+
+   À noter : le cadre du Figma annonce 48 px de haut, mais 12+12 de remplissage
+   plus 2+2 de bordure plus cette icône de 24 en font 52. La maquette se
+   contredit ; l'icône, valeur explicite du composant, l'emporte sur la hauteur
+   du cadre, qui n'est qu'un résultat de mise en page. */
+.qfa-combobox__loupe {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: var(--qfa-texte-titre);
+  -webkit-mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain no-repeat;
+}
+
+/* Valeurs relevées sur le Figma (nœud 24371:24, « Barre de recherche ») :
+   bordure de 2 px à la couleur d'accent, rayon court, remplissage de 12 px.
+   La hauteur de 48 px en découle, elle n'est pas imposée. */
+.qfa-combobox__champ {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: var(--qfa-texte-titre);
+  font-family: inherit;
+  font-size: 16px;
+  /* 48 px de haut = 2×12 (remplissage) + 2×2 (bordure) + 20 de ligne. */
+  line-height: 20px;
+  /* Ellipsis si la saisie dépasse, comme annoté sur la maquette. */
+  text-overflow: ellipsis;
+}
+
+.qfa-combobox__champ::placeholder {
+  color: #666;
+}
+
+/* Le cadre porte déjà l'anneau de focus. */
+.qfa-combobox__champ:focus-visible {
+  outline: none;
+}
+
+.qfa-combobox__liste {
+  position: absolute;
+  z-index: 20;
+  width: 100%;
+  margin: var(--qfa-espace-1v) 0 0;
+  padding: 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--qfa-bordure);
+  border-radius: var(--qfa-rayon-sm);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+}
+
+/* Suggestion : 45 px de haut dans le Figma (nœud 24395:189). */
+.qfa-combobox__option {
+  /* 45 px de haut dans la maquette = 2×12 (remplissage) + 21 (ligne). */
+  padding: var(--qfa-espace-3v);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.qfa-combobox__option[aria-selected="true"],
+.qfa-combobox__option:hover {
+  background: var(--qfa-fond-survol);
 }
 
 .qfa-sr-only {
@@ -219,9 +386,586 @@ body {
   white-space: nowrap;
 }
 
-/* Marker of the entered address: a red disc ringed with white, not a drop
-   like the places (mockup 30141:9028, "pin rouge"). The shape tells "you"
-   from the solutions at a glance. */
+/* ---------------------------------------------------------------------------
+   Composants élémentaires (#3433)
+   --------------------------------------------------------------------------- */
+
+.qfa-etiquette {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+  padding: 3px var(--qfa-espace-3v) 3px var(--qfa-espace-1v);
+  border-radius: var(--qfa-rayon-pilule);
+  color: var(--qfa-texte-titre);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.qfa-etiquette__icone {
+  width: 20px;
+  height: 20px;
+  /* Le masque prend la couleur du geste, pas `currentColor` : le texte de
+     l'étiquette est gris foncé, l'icône ne l'est pas. */
+  background: var(--qfa-etiquette-icone-couleur);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.qfa-etiquette[data-geste="reparer"] {
+  background: var(--qfa-geste-reparation-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-reparation);
+}
+.qfa-etiquette[data-geste="reparer"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-reparer.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-reparer.svg");
+}
+.qfa-etiquette[data-geste="donner_echanger_rapporter"] {
+  background: var(--qfa-geste-don-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-don);
+}
+.qfa-etiquette[data-geste="donner_echanger_rapporter"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-donner.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-donner.svg");
+}
+.qfa-etiquette[data-geste="vendre_acheter"] {
+  background: var(--qfa-geste-vente-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-vente);
+}
+.qfa-etiquette[data-geste="vendre_acheter"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-vendre.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-vendre.svg");
+}
+.qfa-etiquette[data-geste="emprunter_preter_louer"] {
+  background: var(--qfa-geste-loc-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-loc);
+}
+.qfa-etiquette[data-geste="emprunter_preter_louer"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-preter.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-preter.svg");
+}
+.qfa-etiquette[data-geste="trier"] {
+  background: var(--qfa-geste-tri-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-tri);
+}
+.qfa-etiquette[data-geste="trier"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-deposer.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-deposer.svg");
+}
+
+.qfa-badge {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+  padding: var(--qfa-espace-1v) 10px;
+  border-radius: var(--qfa-rayon-pilule);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.qfa-badge[data-condition="reparable"] {
+  background: var(--qfa-etat-reparable-fond);
+  color: var(--qfa-etat-reparable-texte);
+}
+.qfa-badge[data-condition="bon_etat"] {
+  background: var(--qfa-etat-bon-fond);
+  color: var(--qfa-etat-bon-texte);
+}
+.qfa-badge[data-condition="mauvais_etat"] {
+  background: var(--qfa-etat-mauvais-fond);
+  color: var(--qfa-etat-mauvais-texte);
+}
+.qfa-badge[data-condition="bonus"] {
+  background: var(--qfa-etat-bonus-fond);
+  color: var(--qfa-etat-bonus-texte);
+}
+
+.qfa-badge__icone {
+  width: 14px;
+  height: 14px;
+  background-image: url("../images/assistant/ui/badge-bonus.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.qfa-alerte {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border: 1px solid var(--qfa-texte-courant);
+  border-radius: var(--qfa-rayon-sm);
+  background: var(--qfa-fond-survol);
+  color: var(--qfa-texte-courant);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.qfa-alerte__icone {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/alerte-info.svg") center / contain no-repeat;
+  mask: url("../images/assistant/ui/alerte-info.svg") center / contain no-repeat;
+}
+
+.qfa-icone-geste {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.qfa-icone-geste[data-geste="reparer"] {
+  background-image: url("../images/assistant/gestes/geste-reparer.svg");
+}
+/* « Donner » est le seul geste dont le Figma exporte le glyphe à part : le
+   fichier principal ne contient que le cercle. Sans ce second calque, l'icône
+   s'affiche vide. */
+.qfa-icone-geste[data-geste="donner_echanger_rapporter"] {
+  position: relative;
+  background-image: url("../images/assistant/gestes/geste-donner.svg");
+}
+
+.qfa-icone-geste[data-geste="donner_echanger_rapporter"]::after {
+  content: "";
+  position: absolute;
+  inset: 16.67%;
+  background: url("../images/assistant/gestes/geste-donner-main.svg") center / contain
+    no-repeat;
+}
+.qfa-icone-geste[data-geste="emprunter_preter_louer"] {
+  background-image: url("../images/assistant/gestes/geste-preter.svg");
+}
+.qfa-icone-geste[data-geste="vendre_acheter"] {
+  background-image: url("../images/assistant/gestes/geste-vendre.svg");
+}
+.qfa-icone-geste[data-geste="trier"] {
+  background-image: url("../images/assistant/gestes/geste-deposer.svg");
+}
+
+/* ---------------------------------------------------------------------------
+   Composants complexes (#3433)
+   --------------------------------------------------------------------------- */
+
+/* 36 px de haut dans la maquette = 2×8 (remplissage) + 19,6 (ligne). Un
+   `<button>` hérite d'une bordure et d'une police du navigateur : les deux
+   sont neutralisées, sinon il dépasse de 4 px son équivalent en lien. */
+.qfa-bouton {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  justify-content: center;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+  border: 0;
+  border-radius: var(--qfa-rayon-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qfa-bouton--primaire {
+  background: var(--qfa-accent);
+  color: #fff;
+}
+
+.qfa-bouton--tertiaire {
+  background: none;
+  color: var(--qfa-accent);
+}
+
+.qfa-bouton:focus-visible,
+.qfa-changer-geste:focus-visible,
+.qfa-accordeon__entete:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+.qfa-bouton__fleche,
+.qfa-bouton__externe {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.qfa-bouton__fleche {
+  -webkit-mask-image: url("../images/assistant/ui/fleche-droite.svg");
+  mask-image: url("../images/assistant/ui/fleche-droite.svg");
+}
+
+.qfa-bouton__externe {
+  -webkit-mask-image: url("../images/assistant/ui/lien-externe.svg");
+  mask-image: url("../images/assistant/ui/lien-externe.svg");
+}
+
+.qfa-bloc-geste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-bloc-geste__badges {
+  display: flex;
+  gap: var(--qfa-espace-1v);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.qfa-bloc-geste__titre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.qfa-bloc-geste__consigne {
+  color: var(--qfa-texte-titre);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.qfa-bloc-geste .qfa-bouton {
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Les gestes s'alignent sur la même colonne que les champs : 296 px à 320,
+   600 px au-delà (maquettes 30141:8702 et 30174:11412), gouttières de 12 px
+   comprises. Un `width` fixe déborderait sous 320. */
+.qfa-bloc-gestes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  max-width: calc(296px + 2 * var(--qfa-espace-3v));
+  margin: 0;
+  padding: 0 var(--qfa-espace-3v);
+  list-style: none;
+}
+
+@media (min-width: 800px) {
+  .qfa-bloc-gestes {
+    max-width: calc(600px + 2 * var(--qfa-espace-3v));
+  }
+}
+
+.qfa-changer-geste {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border-radius: var(--qfa-rayon-md);
+  background: var(--qfa-accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.qfa-changer-geste__retour {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  /* La flèche « droite » du Figma, retournée : une seule icône embarquée. */
+  transform: rotate(180deg);
+  -webkit-mask: url("../images/assistant/ui/fleche-droite.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/fleche-droite.svg") center / contain no-repeat;
+}
+
+.qfa-changer-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
+.qfa-accordeon {
+  border-top: 1px solid var(--qfa-bordure);
+  border-bottom: 1px solid var(--qfa-bordure);
+}
+
+/* Deux accordéons qui se suivent ne doublent pas leur trait. */
+.qfa-accordeon + .qfa-accordeon {
+  border-top: 0;
+}
+
+/* Fond blanc, comme sur la maquette d'écran (I30170:10155) : la bibliothèque
+   montre un fond vert d'eau, mais c'est l'usage réel qui fait foi. Les
+   séparateurs haut et bas viennent des bordures du conteneur. */
+.qfa-accordeon__entete {
+  display: flex;
+  gap: var(--qfa-espace-4v);
+  align-items: center;
+  padding: var(--qfa-espace-3v) var(--qfa-espace-4v);
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Safari affiche un triangle par défaut, que le chevron remplace. */
+.qfa-accordeon__entete::-webkit-details-marker {
+  display: none;
+}
+
+.qfa-accordeon__textes {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--qfa-espace-1v);
+}
+
+.qfa-accordeon__intitule {
+  color: var(--qfa-accent);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.qfa-accordeon__apercu {
+  color: var(--qfa-texte-courant);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* L'asset du Figma pointe vers le haut, c'est-à-dire l'état ouvert. Fermé, le
+   chevron doit inviter à déplier : c'est donc l'état fermé qui pivote. */
+.qfa-accordeon__chevron {
+  flex: none;
+  transform: rotate(180deg);
+  width: 16px;
+  height: 16px;
+  background: var(--qfa-accent);
+  transition: transform 150ms ease-out;
+  -webkit-mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain no-repeat;
+}
+
+.qfa-accordeon[open] .qfa-accordeon__chevron {
+  transform: rotate(0deg);
+}
+
+.qfa-accordeon__contenu {
+  padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+}
+
+.qfa-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  align-items: center;
+}
+
+.qfa-footer__marques {
+  display: flex;
+  gap: 21px;
+  align-items: center;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qfa-accordeon__chevron {
+    transition: none;
+  }
+}
+
+/* Détail d'une suggestion : le contexte BAN (« 75004 Paris, Paris, Île-de-France »),
+   secondaire par rapport au libellé. */
+.qfa-combobox__detail {
+  color: var(--qfa-texte-courant);
+  font-size: 0.85em;
+}
+
+/* Gabarit d'écran, relevé sur les maquettes 30136:8533 (320 px) et
+   30174:11316 (800 px). Le contenu est bordé à 800 px : au-delà, la maquette
+   ne centre pas une colonne large, elle garde la même. */
+.qfa-ecran {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: var(--qfa-espace-4v);
+}
+
+/* Panneau de saisie vert d'eau (30139:14317). Il occupe toute la largeur et
+   déborde volontairement des gouttières : c'est un bandeau, pas une carte. */
+.qfa-panneau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
+  background: var(--qfa-geste-reparation-fond);
+}
+
+/* Le contenu du panneau s'aligne sur 600 px dès que la place le permet, comme
+   dans la maquette large (30174:11318), où les champs ne s'étirent pas. */
+@media (min-width: 800px) {
+  .qfa-panneau > * {
+    width: 600px;
+    margin: 0 auto;
+  }
+}
+
+.qfa-fiche {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--qfa-espace-4v);
+}
+
+.qfa-fiche__titre {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+/* Rappel de la recherche, en tête de fiche et d'écran solutions. */
+.qfa-entete {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  padding: var(--qfa-espace-3v);
+  border-radius: var(--qfa-rayon-md);
+  background: var(--qfa-geste-reparation-fond);
+}
+
+/* Fiche d'un lieu (maquette 30142:9565) : même colonne que les autres écrans,
+   gouttières de 12 px comprises. */
+.qfa-lieu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  max-width: calc(296px + 2 * var(--qfa-espace-3v));
+  padding: 0 var(--qfa-espace-3v);
+}
+
+@media (min-width: 800px) {
+  .qfa-lieu {
+    max-width: calc(600px + 2 * var(--qfa-espace-3v));
+  }
+}
+
+.qfa-lieu__identite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-lieu__nom {
+  margin: 0;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* 10 px dans la maquette : c'est une mention, pas un sous-titre. */
+.qfa-lieu__type {
+  margin: 0;
+  color: #000;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.qfa-lieu__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-1v);
+}
+
+.qfa-lieu__section p {
+  margin: 0;
+  color: #000;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.qfa-lieu__soustitre {
+  margin: 0;
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.qfa-lieu__gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qfa-espace-2v);
+}
+
+.qfa-lieu__accordeons {
+  display: flex;
+  flex-direction: column;
+}
+
+/* `turbo-frame` est un élément inconnu du navigateur, donc `display: inline`
+   par défaut. Quand il enveloppe le contenu d'un écran, il devient l'unique
+   enfant du conteneur flex : l'espacement s'applique alors à lui seul, et le
+   contenu qu'il porte se retrouve collé. En faire un conteneur flex à son tour
+   rétablit le rythme vertical. */
+turbo-frame {
+  display: block;
+}
+
+.qfa-fiche > turbo-frame,
+.qfa-lieu > turbo-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+}
+
+/* Le bouton de recherche porte une loupe avant son libellé (30139:14339). */
+.qfa-bouton--pleine-largeur {
+  width: 100%;
+}
+
+.qfa-bouton__loupe {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain no-repeat;
+}
+
+/* Punaise de l'adresse saisie : un disque rouge cerné de blanc, et non une
+   goutte comme les lieux (maquette 30141:9028, « pin rouge »). La forme
+   distingue d'un coup d'œil « vous » des solutions. */
 .qfa-pinpoint--address {
   width: 50px;
   height: 50px;
@@ -241,4 +985,17 @@ body {
 .qfa-pinpoint--address::after {
   inset: 9px;
   background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
+}
+
+/* État d'erreur d'un champ (maquette 30144:16020). Le cadre passe au rouge et
+   le message s'affiche dessous, relié au champ par `aria-describedby`. */
+.qfa-combobox__cadre[data-erreur="true"] {
+  border-color: var(--qfa-user-address);
+}
+
+.qfa-combobox__erreur {
+  margin: var(--qfa-espace-1v) 0 0;
+  color: var(--qfa-user-address);
+  font-size: 12px;
+  line-height: 1.5;
 }

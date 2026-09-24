@@ -137,6 +137,19 @@ class GroupeAction(CodeAsNaturalKeyModel):
         help_text="Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",  # noqa E501
     )
 
+    libelle_court = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name="Libellé court",
+        help_text=(
+            "Nom du geste à l'infinitif, tel qu'affiché sur les étiquettes de"
+            " l'assistant : « Réparer », « Donner ». Se distingue du libellé"
+            " courant, une phrase à la première personne (« Je répare ») déduite"
+            " des actions du groupe."
+        ),
+    )
+
     def get_libelle_from(self, actions):
         return ", ".join({a.libelle_groupe for a in actions}).capitalize()
 
