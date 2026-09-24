@@ -200,3 +200,16 @@ class TestSolutionsScreen:
 
         assert "Atelier test" in content
         assert "Aucun lieu à proximité" not in content
+
+    def test_the_map_canvas_is_a_permanent_element_inside_the_map(
+        self, client, reparer
+    ):
+        """Turbo carries the canvas from screen to screen; here it lives in
+        the map component, not parked at the end of the body."""
+        content = client.get(
+            reverse("assistant:solutions"), {"geste": "reparer"}
+        ).content.decode()
+
+        assert content.count('id="assistant-carte-canvas"') == 1
+        assert content.count("data-turbo-permanent") == 1
+        assert "qfa-carte__canvas" in content
