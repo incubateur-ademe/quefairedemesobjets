@@ -917,6 +917,38 @@ body {
   view-transition-name: bouton-geste;
 }
 
+/* Le bouton vert est le même élément sur les solutions (« Réparer ») et sur
+   le lieu (« Revenir aux solutions ») : sa boîte et son chevron restent en
+   place sans fondu, les icônes de geste sortent seules, et seul le libellé
+   se fond d'un texte à l'autre. Chaque partie nommée sort de l'image de la
+   boîte, qui devient identique sur les deux écrans. */
+.qfa-changer-geste__icones {
+  view-transition-name: bouton-geste-icones;
+}
+
+.qfa-changer-geste__libelle {
+  view-transition-name: bouton-geste-libelle;
+}
+
+::view-transition-old(bouton-geste) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(bouton-geste) {
+  animation: none;
+}
+
+/* Le libellé change de largeur (« Réparer » → « Revenir aux solutions ») :
+   sans cela, l'ancienne image est étirée à la nouvelle largeur pendant le
+   fondu et le texte semble grossir. Chaque image garde sa largeur naturelle,
+   alignée à gauche, et seul le fondu reste. */
+::view-transition-old(bouton-geste-libelle),
+::view-transition-new(bouton-geste-libelle) {
+  width: auto;
+  height: 100%;
+}
+
 /* Le champ d'adresse ne fait que se déplacer : ni fondu sortant ni fondu
    entrant, seule la nouvelle image bouge. */
 ::view-transition-old(champ-adresse) {
