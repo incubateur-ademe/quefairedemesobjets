@@ -5,6 +5,7 @@ the viewer has the wagtailadmin.can_see_beta_search permission (request.beta).
 Expects:
 - breakdown: ScoreBreakdown instance (from search.score_breakdown)
 - result_pk: pk of the SearchTerm this breakdown describes
+- display_thresholds: DisplayThresholds instance (from search.ranking)
 {% endcomment %}
 <dl
     id="score-breakdown-{{ result_pk }}"
@@ -33,5 +34,9 @@ Expects:
     <div class="qf-flex qf-gap-1v">
         <dt>Raw</dt>
         <dd class="qf-m-0">{{ breakdown.raw|floatformat:3 }}</dd>
+    </div>
+    <div class="qf-flex qf-gap-1v">
+        <dt>Seuils</dt>
+        <dd class="qf-m-0">raw&nbsp;≥&nbsp;{{ display_thresholds.raw_similarity_sufficient|floatformat:2 }} ou (raw&nbsp;≥&nbsp;{{ display_thresholds.raw_similarity_minimum|floatformat:2 }} et score&nbsp;≥&nbsp;{{ display_thresholds.score_minimum|floatformat:2 }})</dd>
     </div>
 </dl>
