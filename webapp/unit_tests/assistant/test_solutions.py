@@ -154,3 +154,24 @@ class TestSolutionsScreen:
         assert f"fiche={fiche.slug}" in back
         assert "geste=reparer" in back
         assert "adresse=Auray" in back
+
+    def test_a_block_of_two_gestes_shows_both_icons_and_its_label(
+        self, client, reparer
+    ):
+        """ "Donner ou revendre" (30174:11559) spans two GroupeAction."""
+        GroupeActionFactory(code="donner_echanger_rapporter", libelle_court="Donner")
+        GroupeActionFactory(code="vendre_acheter", libelle_court="Vendre")
+
+        content = client.get(
+            reverse("assistant:solutions"),
+            {"geste": ["donner_echanger_rapporter", "vendre_acheter"]},
+        ).content.decode()
+
+        assert "Donner ou revendre" in content
+        assert 'data-geste="donner_echanger_rapporter"' in content
+        assert 'data-geste="vendre_acheter"' in content
+        assert (
+            'data-assistant-carte-geste-value="donner_echanger_rapporter,vendre_acheter"'
+            in content
+        )
+        assert content.count('name="geste"') == 2
