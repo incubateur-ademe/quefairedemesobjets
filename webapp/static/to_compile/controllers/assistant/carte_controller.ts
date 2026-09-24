@@ -28,7 +28,7 @@ const UUID_PLACEHOLDER = "__uuid__"
 const MIN_ZOOM = 9
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["container", "message"]
+  static targets = ["container", "message", "messageText"]
   static values = {
     url: String,
     geste: String,
@@ -45,6 +45,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly containerTarget: HTMLElement
   declare readonly messageTarget: HTMLElement
   declare readonly hasMessageTarget: boolean
+  declare readonly messageTextTarget: HTMLElement
   declare urlValue: string
   declare gesteValue: string
   declare ficheValue: string
@@ -295,6 +296,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   #announce(message: string) {
-    if (this.hasMessageTarget) this.messageTarget.textContent = message
+    if (!this.hasMessageTarget) return
+    this.messageTextTarget.textContent = message
+    this.messageTarget.hidden = !message
   }
 }
