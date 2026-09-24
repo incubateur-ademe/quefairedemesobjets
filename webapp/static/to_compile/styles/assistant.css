@@ -346,8 +346,18 @@ body {
   opacity: 1;
 }
 
+/* `view-transition-name` fait de chaque champ et du bandeau un contexte
+   d'empilement : le z-index de la liste ne compte plus qu'à l'intérieur du
+   champ. L'ordre est donc posé ici : le bandeau au-dessus de ce qui le suit
+   (blocs, carte), et le champ d'objet au-dessus du champ d'adresse, sur
+   lequel sa liste se déploie. */
 .qfa-combobox {
   position: relative;
+  z-index: 1;
+}
+
+#recherche-objet {
+  z-index: 2;
 }
 
 /* Question posée au-dessus du champ (30139:14308) : c'est elle qui tient lieu
@@ -898,6 +908,10 @@ body {
   /* Un seul bandeau par écran : d'un écran à l'autre, la View Transition le
      fait glisser et se redimensionner vers son nouvel état. */
   view-transition-name: entete;
+  /* Contexte d'empilement (voir `.qfa-combobox`) : au-dessus de la carte,
+     pour que les listes de suggestions la recouvrent. */
+  position: relative;
+  z-index: 2;
 }
 
 /* Les éléments du bandeau présents sur plusieurs écrans voyagent chacun pour
