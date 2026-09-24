@@ -16,6 +16,29 @@ import type { Map as MapLibreMap, Marker, StyleSpecification } from "maplibre-gl
 
 type Timing = { server: number; total: number; places: number }
 
+/**
+ * What survives a screen change.
+ *
+ * The canvas is a Turbo permanent element (`layout/assistant.html`): the same
+ * node travels from page to page, and with it the MapLibre instance, its
+ * tiles, and the pins. This state hangs on the node so that the controller of
+ * the next solutions screen picks it up instead of building a new map.
+ */
+type PersistedMap = {
+  map: MapLibreMap
+  Marker: typeof Marker
+  markers: Map<string, Marker>
+  places: Place[]
+  addressMarker: Marker | null
+  /** Gestes + objet: when they change, the pins are wrong and start over. */
+  key: string
+  /** Last viewport requested: the same one is never asked twice in a row. */
+  lastRequestedUrl: string
+  onMoveEnd: (() => void) | null
+}
+
+const CANVAS_ID = "assistant-carte-canvas"
+
 /** Reads `acteurs;dur=12.3` from the Server-Timing header. */
 function serverDuration(header: string | null): number {
   const match = header?.match(/acteurs;dur=([\d.]+)/)
@@ -26,9 +49,10 @@ function serverDuration(header: string | null): number {
 const UUID_PLACEHOLDER = "__uuid__"
 
 const MIN_ZOOM = 9
+const INITIAL_ZOOM = 13
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["container", "message", "messageText"]
+  static targets = ["message", "messageText"]
   static values = {
     url: String,
     geste: String,
@@ -42,7 +66,6 @@ export default class extends Controller<HTMLElement> {
   static outlets = ["assistant-chrono"]
 
   declare readonly assistantChronoOutlets: { record(timing: Timing): void }[]
-  declare readonly containerTarget: HTMLElement
   declare readonly messageTarget: HTMLElement
   declare readonly hasMessageTarget: boolean
   declare readonly messageTextTarget: HTMLElement
@@ -55,44 +78,20 @@ export default class extends Controller<HTMLElement> {
   declare latitudeValue: number
   declare preciseAddressValue: boolean
 
-  private map: MapLibreMap | null = null
-  private MarkerClass!: typeof Marker
-  private markers = new Map<string, Marker>()
-  private places: Place[] = []
+  private state: PersistedMap | null = null
   private pendingRequest: AbortController | null = null
-  private lastRequestedUrl = ""
 
   async connect() {
-    const [{ Map, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
-      await Promise.all([import("maplibre-gl"), import("carte-facile")])
-    // Disconnected while the imports were loading (lookbook re-render): a map
-    // created now would live on a detached node, and its worker and WebGL
-    // context would never be released.
-    if (!this.element.isConnected) return
-    this.MarkerClass = Marker
+    const canvas = await this.#canvasOnceRendered()
+    if (!canvas) return
 
-    // Without an explicit URL the MapLibre worker never starts and the map
-    // stays grey: see `static/to_compile/maplibre-worker.ts`.
-    setWorkerUrl(this.workerUrlValue)
+    const existing = (canvas as HTMLElement & { assistantMap?: PersistedMap })
+      .assistantMap
+    this.state = existing ?? (await this.#createMap(canvas))
+    if (!this.state) return
+    ;(canvas as HTMLElement & { assistantMap?: PersistedMap }).assistantMap = this.state
 
-    this.map = new Map({
-      container: this.containerTarget,
-      // `carte-facile` ships its own copy of maplibre-gl (5.x) while V1
-      // requires 6.x: the two `StyleSpecification` declarations diverge on an
-      // optional field, `font-faces`. The object is identical at runtime; only
-      // the declarations disagree, hence this deliberately narrow cast rather
-      // than an `any`.
-      style: mapStyles.desaturated as unknown as StyleSpecification,
-      center: [this.longitudeValue, this.latitudeValue],
-      zoom: 13,
-      attributionControl: { compact: true },
-    })
-    this.map.addControl(new NavigationControl({ showCompass: false }), "top-left")
-
-    // MapLibre measures its container at construction, before the stylesheet
-    // is necessarily applied. Without this resize, the computed visible area
-    // is that of a too-tall container and the fetched places land off-screen.
-    this.map.resize()
+    if (existing) this.#reuse(existing)
 
     // Places are requested right away, without waiting for `load`.
     //
@@ -106,18 +105,94 @@ export default class extends Controller<HTMLElement> {
     // spares it the wait for the tiles.
     this.#placeAddressMarker()
 
-    await this.map.once("load")
-
-    // MapLibre opens the compact attribution on load; the mockup shows it
-    // folded (30141:9028). It stays openable by the user.
-    this.containerTarget
-      .querySelector(".maplibregl-ctrl-attrib")
-      ?.classList.remove("maplibregl-compact-show")
+    if (!existing) {
+      await this.state.map.once("load")
+      // MapLibre opens the compact attribution on load; the mockup shows it
+      // folded (30141:9028). It stays openable by the user.
+      canvas
+        .querySelector(".maplibregl-ctrl-attrib")
+        ?.classList.remove("maplibregl-compact-show")
+    }
 
     // `moveend` is only wired after `load`: the resize and the style setup
     // emit it, which would trigger a second load identical to the first.
-    this.map.on("moveend", () => this.refresh())
+    this.state.onMoveEnd = () => this.refresh()
+    this.state.map.on("moveend", this.state.onMoveEnd)
     await places
+  }
+
+  async #createMap(canvas: HTMLElement): Promise<PersistedMap | null> {
+    const [{ Map: MapLibre, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
+      await Promise.all([import("maplibre-gl"), import("carte-facile")])
+    // Disconnected while the imports were loading (lookbook re-render): a map
+    // created now would live on a detached node, and its worker and WebGL
+    // context would never be released.
+    if (!this.element.isConnected) return null
+
+    // Without an explicit URL the MapLibre worker never starts and the map
+    // stays grey: see `static/to_compile/maplibre-worker.ts`.
+    setWorkerUrl(this.workerUrlValue)
+
+    const map = new MapLibre({
+      container: canvas,
+      // `carte-facile` ships its own copy of maplibre-gl (5.x) while V1
+      // requires 6.x: the two `StyleSpecification` declarations diverge on an
+      // optional field, `font-faces`. The object is identical at runtime; only
+      // the declarations disagree, hence this deliberately narrow cast rather
+      // than an `any`.
+      style: mapStyles.desaturated as unknown as StyleSpecification,
+      center: [this.longitudeValue, this.latitudeValue],
+      zoom: INITIAL_ZOOM,
+      attributionControl: { compact: true },
+    })
+    map.addControl(new NavigationControl({ showCompass: false }), "top-left")
+
+    // MapLibre measures its container at construction, before the stylesheet
+    // is necessarily applied. Without this resize, the computed visible area
+    // is that of a too-tall container and the fetched places land off-screen.
+    map.resize()
+
+    return {
+      map,
+      Marker,
+      markers: new Map(),
+      places: [],
+      addressMarker: null,
+      key: this.#key(),
+      lastRequestedUrl: "",
+      onMoveEnd: null,
+    }
+  }
+
+  /**
+   * The map came back from another screen. It was parked hidden, so its size
+   * is stale; the search may have changed too.
+   */
+  #reuse(state: PersistedMap) {
+    if (state.onMoveEnd) state.map.off("moveend", state.onMoveEnd)
+    state.map.resize()
+
+    // Another geste or objet: the pins on screen answer the previous search.
+    if (state.key !== this.#key()) {
+      state.markers.forEach((marker) => marker.remove())
+      state.markers.clear()
+      state.places = []
+      state.key = this.#key()
+    }
+
+    // Another address: recenter as a first display would.
+    const center = state.map.getCenter()
+    const moved =
+      Math.abs(center.lng - this.longitudeValue) > 1e-6 ||
+      Math.abs(center.lat - this.latitudeValue) > 1e-6
+    if (moved && !state.places.length) {
+      state.map.jumpTo({
+        center: [this.longitudeValue, this.latitudeValue],
+        zoom: INITIAL_ZOOM,
+      })
+    } else if (moved) {
+      state.map.jumpTo({ center: [this.longitudeValue, this.latitudeValue] })
+    }
   }
 
   /**
@@ -129,23 +204,41 @@ export default class extends Controller<HTMLElement> {
    * mislead.
    */
   #placeAddressMarker() {
-    if (!this.map || !this.preciseAddressValue) return
+    if (!this.state) return
+    this.state.addressMarker?.remove()
+    this.state.addressMarker = null
+    if (!this.preciseAddressValue) return
 
-    new this.MarkerClass({
+    this.state.addressMarker = new this.state.Marker({
       element: addressElement(this.#colors()),
       anchor: "center",
       subpixelPositioning: true,
     })
       .setLngLat([this.longitudeValue, this.latitudeValue])
-      .addTo(this.map)
+      .addTo(this.state.map)
   }
 
   disconnect() {
     this.pendingRequest?.abort()
-    this.markers.forEach((marker) => marker.remove())
-    this.markers.clear()
-    this.map?.remove()
-    this.map = null
+    const state = this.state
+    const canvas = this.#canvas()
+    this.state = null
+    if (!state) return
+
+    if (state.onMoveEnd) state.map.off("moveend", state.onMoveEnd)
+    state.onMoveEnd = null
+
+    // Turbo moves the permanent canvas to the next screen synchronously; only
+    // when it is truly gone (lookbook re-render, document torn down) must the
+    // WebGL context be released. Decide once the DOM has settled.
+    setTimeout(() => {
+      if (canvas?.isConnected) return
+      state.markers.forEach((marker) => marker.remove())
+      state.addressMarker?.remove()
+      state.map.remove()
+      if (canvas)
+        delete (canvas as HTMLElement & { assistantMap?: PersistedMap }).assistantMap
+    })
   }
 
   /**
@@ -157,14 +250,20 @@ export default class extends Controller<HTMLElement> {
   }
 
   async #load() {
-    if (!this.map) return
+    const state = this.state
+    const canvas = this.#canvas()
+    if (!state || !canvas) return
+    // Parked behind another screen: MapLibre reports a collapsed viewport,
+    // and nothing is worth fetching for it. Showing it again re-emits
+    // `moveend` with the real bounds.
+    if (!canvas.clientWidth) return
 
     // Below the département zoom, the pins are hidden by CSS but kept in the
     // DOM and in memory: zooming back in shows them at once, without waiting
     // for a request, and nothing is rebuilt. Toggling a class rather than
     // removing markers also keeps the canvas size constant, so MapLibre has
     // nothing to re-render (#3356).
-    const zoomedOut = this.map.getZoom() < MIN_ZOOM
+    const zoomedOut = state.map.getZoom() < MIN_ZOOM
     this.element.dataset.zoomedOut = String(zoomedOut)
     if (zoomedOut) {
       this.#announce(
@@ -180,8 +279,8 @@ export default class extends Controller<HTMLElement> {
     // MapLibre also emits `moveend` on a container resize, even when the view
     // did not move: the same viewport is never requested twice in a row.
     const url = this.#placesUrl()
-    if (url === this.lastRequestedUrl) return
-    this.lastRequestedUrl = url
+    if (url === state.lastRequestedUrl) return
+    state.lastRequestedUrl = url
 
     this.pendingRequest?.abort()
     this.pendingRequest = new AbortController()
@@ -201,17 +300,17 @@ export default class extends Controller<HTMLElement> {
       }
       this.assistantChronoOutlets.forEach((chrono) => chrono.record(timing))
       const area = this.#visibleArea()
-      this.places = merge(this.places, incoming, area)
+      state.places = merge(state.places, incoming, area)
       this.#draw()
       this.#announce(
-        this.places.some((place) => isInArea(place, area))
+        state.places.some((place) => isInArea(place, area))
           ? ""
           : "Aucun lieu trouvé ici. Déplacez la carte pour explorer une autre zone.",
       )
     } catch (error) {
       if ((error as Error).name === "AbortError") return
       // Let the next move retry the same viewport.
-      this.lastRequestedUrl = ""
+      state.lastRequestedUrl = ""
       this.#announce(
         "Les lieux n'ont pas pu être chargés. Déplacez la carte pour réessayer.",
       )
@@ -233,7 +332,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #visibleArea(): Area {
-    const bounds = this.map!.getBounds()
+    const bounds = this.state!.map.getBounds()
     return {
       west: bounds.getWest(),
       south: bounds.getSouth(),
@@ -243,23 +342,25 @@ export default class extends Controller<HTMLElement> {
   }
 
   #draw() {
-    const expected = new Set(this.places.map((place) => place.uuid))
+    const state = this.state
+    if (!state) return
+    const expected = new Set(state.places.map((place) => place.uuid))
 
-    this.markers.forEach((marker, uuid) => {
+    state.markers.forEach((marker, uuid) => {
       if (!expected.has(uuid)) {
         marker.remove()
-        this.markers.delete(uuid)
+        state.markers.delete(uuid)
       }
     })
 
     const colors = this.#colors()
     const lieuUrl = this.#lieuUrlBuilder()
-    for (const place of this.places) {
-      if (this.markers.has(place.uuid)) continue
+    for (const place of state.places) {
+      if (state.markers.has(place.uuid)) continue
 
       // The pin shows the icon of the block's first geste.
       const element = pinpointElement(place, colors, this.#gestes()[0] ?? "", lieuUrl)
-      const marker = new this.MarkerClass({
+      const marker = new state.Marker({
         element,
         anchor: "bottom",
         // Without it MapLibre rounds marker positions to whole pixels, which
@@ -267,8 +368,8 @@ export default class extends Controller<HTMLElement> {
         subpixelPositioning: true,
       })
         .setLngLat([place.longitude, place.latitude])
-        .addTo(this.map!)
-      this.markers.set(place.uuid, marker)
+        .addTo(state.map)
+      state.markers.set(place.uuid, marker)
     }
   }
 
@@ -284,6 +385,35 @@ export default class extends Controller<HTMLElement> {
 
   #gestes(): string[] {
     return this.gesteValue.split(",").filter(Boolean)
+  }
+
+  #key(): string {
+    return `${this.gesteValue}|${this.objetValue}`
+  }
+
+  /** The permanent canvas, by id: the node may come from another page's parking. */
+  #canvas(): HTMLElement | null {
+    return this.element.querySelector<HTMLElement>(`#${CANVAS_ID}`)
+  }
+
+  /**
+   * During a Turbo Drive render, Stimulus connects this controller while the
+   * permanent canvas is still a placeholder: Turbo swaps the body, awaits a
+   * repaint, then puts the permanent elements back. The canvas is therefore
+   * looked up again once the visit has rendered.
+   */
+  async #canvasOnceRendered(): Promise<HTMLElement | null> {
+    const found = this.#canvas()
+    if (found) return found
+    await new Promise<void>((resolve) => {
+      const done = () => {
+        clearTimeout(timer)
+        resolve()
+      }
+      const timer = setTimeout(done, 2000)
+      document.addEventListener("turbo:load", done, { once: true })
+    })
+    return this.#canvas()
   }
 
   #colors(): PinpointColors {
