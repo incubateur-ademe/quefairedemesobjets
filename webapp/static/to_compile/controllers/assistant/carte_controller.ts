@@ -32,6 +32,8 @@ type PersistedMap = {
   addressMarker: Marker | null
   /** Gestes + objet: when they change, the pins are wrong and start over. */
   key: string
+  /** Address the map was centered on: the view only moves when it changes. */
+  address: [number, number]
   /** Last viewport requested: the same one is never asked twice in a row. */
   lastRequestedUrl: string
   onMoveEnd: (() => void) | null
@@ -166,6 +168,7 @@ export default class extends Controller<HTMLElement> {
       places: [],
       addressMarker: null,
       key: this.#key(),
+      address: [this.longitudeValue, this.latitudeValue],
       lastRequestedUrl: "",
       onMoveEnd: null,
     }
@@ -187,18 +190,19 @@ export default class extends Controller<HTMLElement> {
       state.key = this.#key()
     }
 
-    // Another address: recenter as a first display would.
-    const center = state.map.getCenter()
-    const moved =
-      Math.abs(center.lng - this.longitudeValue) > 1e-6 ||
-      Math.abs(center.lat - this.latitudeValue) > 1e-6
-    if (moved && !state.places.length) {
+    // Another address: recenter as a first display would. The same address
+    // keeps the view where the user left it, pans and zooms included: the
+    // spec forbids any automatic recentering after the first display (#3356).
+    const [lng, lat] = state.address
+    const addressChanged =
+      Math.abs(lng - this.longitudeValue) > 1e-6 ||
+      Math.abs(lat - this.latitudeValue) > 1e-6
+    if (addressChanged) {
+      state.address = [this.longitudeValue, this.latitudeValue]
       state.map.jumpTo({
         center: [this.longitudeValue, this.latitudeValue],
         zoom: INITIAL_ZOOM,
       })
-    } else if (moved) {
-      state.map.jumpTo({ center: [this.longitudeValue, this.latitudeValue] })
     }
   }
 
