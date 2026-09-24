@@ -54,13 +54,14 @@ Tests : `unit_tests/assistant/` (seul dossier collecté par `make unit-test`).
 
 ## Routes
 
-| URL                        | Vue             | Réponse                |
-| -------------------------- | --------------- | ---------------------- |
-| `/assistant/`              | `HomeView`      | HTML                   |
-| `/assistant/recherche/`    | `SearchView`    | redirection vers fiche |
-| `/assistant/objet/<slug>/` | `ProduitView`   | HTML                   |
-| `/assistant/solutions/`    | `SolutionsView` | HTML (carte)           |
-| `/assistant/lieu/<uuid>/`  | `LieuView`      | HTML                   |
+| URL                           | Vue                  | Réponse                |
+| ----------------------------- | -------------------- | ---------------------- |
+| `/assistant/`                 | `HomeView`           | HTML                   |
+| `/assistant/recherche/`       | `SearchView`         | redirection vers fiche |
+| `/assistant/objet/<slug>/`    | `ProduitView`        | HTML                   |
+| `/assistant/solutions/`       | `SolutionsView`      | HTML (carte)           |
+| `/assistant/solutions/compte` | `SolutionsCountView` | JSON, compteur différé |
+| `/assistant/lieu/<uuid>/`     | `LieuView`           | HTML                   |
 
 Les écrans sont les premiers clients de l'[API publique v1](../apis/v1.md) :
 la carte et les deux champs de recherche appellent `/api/v1/…`. Il n'existe
