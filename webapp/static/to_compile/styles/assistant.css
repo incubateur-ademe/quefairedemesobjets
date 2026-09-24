@@ -152,10 +152,32 @@ body {
   display: none;
 }
 
-/* Sous le zoom d'un département, les lieux sont masqués mais conservés ; la
-   punaise de l'adresse reste, elle dit où l'usager se trouve. */
-.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address) {
-  display: none;
+/* Les punaises apparaissent en fondu (insertion) et disparaissent de même,
+   que ce soit sous le zoom d'un département ou à leur retrait de la mémoire.
+   `!important` : MapLibre peut poser une opacité en ligne sur ses marqueurs,
+   et une animation ou une déclaration importante la surclasse ; `visibility`
+   suit avec un délai pour que la punaise masquée sorte aussi de l'ordre de
+   tabulation. La punaise de l'adresse reste, elle dit où l'usager se trouve. */
+@keyframes qfa-pinpoint-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.qfa-pinpoint:not(.qfa-pinpoint--address) {
+  animation: qfa-pinpoint-in 200ms ease-out;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 0s;
+}
+
+.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address),
+.qfa-pinpoint--leaving {
+  opacity: 0 !important;
+  visibility: hidden;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 200ms;
 }
 
 .qfa-pinpoint {
@@ -977,8 +999,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
-  ::view-transition-new(*) {
+  ::view-transition-new(*),
+  .qfa-pinpoint {
     animation: none !important;
+    transition: none !important;
   }
 }
 
