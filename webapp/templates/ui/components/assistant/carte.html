@@ -8,12 +8,11 @@
     data-assistant-carte-geste-value="{{ geste }}"
     data-assistant-carte-objet-value="{{ objet|default:'' }}"
     {% comment %}
-    Optional URL pattern to a place's page: the controller replaces `__uuid__`
-    in it. It comes from the caller rather than from a `{% url %}` here, because
-    the place page does not exist yet; without it, the pins stay buttons rather
-    than links to nowhere.
+    URL pattern of a place's page: the controller replaces `__uuid__` in it.
+    `parametres_lieu` carries the journey (geste, objet, address) so that the
+    place page can lead back to the same solutions.
     {% endcomment %}
-    {% if url_lieu %}data-assistant-carte-lieu-url-value="{{ url_lieu }}"{% endif %}
+    data-assistant-carte-lieu-url-value="{% url 'assistant:lieu' uuid='__uuid__' %}{% if parametres_lieu %}?{{ parametres_lieu }}{% endif %}"
     {% comment %}
     `unlocalize` is required: the French locale formats decimals with a comma,
     which Number() reads as NaN.
