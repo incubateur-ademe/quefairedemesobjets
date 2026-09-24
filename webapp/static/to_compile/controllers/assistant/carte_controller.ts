@@ -50,6 +50,8 @@ const UUID_PLACEHOLDER = "__uuid__"
 
 const MIN_ZOOM = 9
 const INITIAL_ZOOM = 13
+/** Matches the fade of `.qfa-pinpoint--leaving` in the stylesheet. */
+const LEAVE_MS = 200
 
 export default class extends Controller<HTMLElement> {
   static targets = ["message", "messageText"]
@@ -348,7 +350,9 @@ export default class extends Controller<HTMLElement> {
 
     state.markers.forEach((marker, uuid) => {
       if (!expected.has(uuid)) {
-        marker.remove()
+        // Fade out before leaving the DOM (see `.qfa-pinpoint--leaving`).
+        marker.getElement().classList.add("qfa-pinpoint--leaving")
+        setTimeout(() => marker.remove(), LEAVE_MS)
         state.markers.delete(uuid)
       }
     })
