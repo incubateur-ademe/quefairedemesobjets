@@ -251,11 +251,18 @@ body {
   mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
 }
 
-/* « Donner » est exporté d'un seul tenant dans le Figma, icône comprise : pas
-   de calque séparé à superposer. */
-.qfa-pinpoint[data-geste="donner_echanger_rapporter"]::after {
-  -webkit-mask-image: url("../images/assistant/pinpoints/geste-don.svg");
-  mask-image: url("../images/assistant/pinpoints/geste-don.svg");
+/* « Donner » est exporté d'un seul tenant dans le Figma (`geste-don.svg`),
+   corps blanc compris : servi tel quel de masque, le corps opaque peignait
+   toute la goutte en bleu et avalait l'icône. L'icône en est extraite dans
+   `icone-don.svg`, avec le repère du pin entier : posée sur toute la goutte,
+   elle tombe exactement où la maquette la place, sans recalcul. */
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"] .qfa-pinpoint__icon {
+  top: 0;
+  left: 0;
+  width: 35px;
+  height: 46px;
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-don.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-don.svg");
 }
 
 /* Pastille Bonus Réparation (30141:9028, « Punaises Bonus Réparation ») : un
