@@ -138,10 +138,29 @@ body {
   display: none;
 }
 
+/* Posé sur la carte, jamais dans le flux : un message qui pousserait la
+   toile la ferait changer de taille, et MapLibre redessinerait tout à chaque
+   apparition, d'où un saut visible au dézoom. Au-dessus de l'attribution. */
 .qfa-carte__message {
-  padding: 0.5rem 1rem;
+  position: absolute;
+  right: var(--qfa-espace-3v);
+  bottom: 48px;
+  left: var(--qfa-espace-3v);
+  z-index: 5;
+  margin: 0;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
   background: #fff;
   border-radius: var(--qfa-rayon);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+  font-size: 14px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+/* Sous le zoom d'un département, les lieux sont masqués mais conservés ; la
+   punaise de l'adresse reste, elle dit où l'usager se trouve. */
+.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address) {
+  display: none;
 }
 
 .qfa-pinpoint {
