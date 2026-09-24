@@ -7,7 +7,7 @@ hors d'usage) est décidé par la vue, pas ici.
 `consigne` est du HTML issu du CMS : il est marqué sûr en amont, dans le
 modèle, jamais échappé à la volée dans le gabarit.
 {% endcomment %}
-<article class="qfa-bloc-geste" data-geste="{{ geste }}">
+<article class="qfa-bloc-geste" data-gestes="{{ gestes|join:' ' }}">
     {% if badges %}
         <p class="qfa-bloc-geste__badges">
             {% for badge in badges %}
@@ -17,7 +17,15 @@ modèle, jamais échappé à la volée dans le gabarit.
     {% endif %}
 
     <h3 class="qfa-bloc-geste__titre">
-        {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+        {% comment %}
+        One icon per geste the block spans (30174:11578): "Donner ou revendre"
+        shows the donner and vendre icons side by side.
+        {% endcomment %}
+        <span class="qfa-bloc-geste__icones">
+            {% for geste in gestes %}
+                {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+            {% endfor %}
+        </span>
         {{ libelle }}
     </h3>
 
