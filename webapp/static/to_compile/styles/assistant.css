@@ -687,6 +687,14 @@ body {
   color: #fff;
 }
 
+/* Sans solution à proximité : le bouton reste un lien vers la carte, mais
+   ne promet plus rien. Contour au lieu d'aplat. */
+.qfa-bouton--secondaire {
+  border: 1px solid var(--qfa-accent);
+  background: #fff;
+  color: var(--qfa-accent);
+}
+
 .qfa-bouton--tertiaire {
   background: none;
   color: var(--qfa-accent);
