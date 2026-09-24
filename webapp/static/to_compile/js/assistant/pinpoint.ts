@@ -40,6 +40,13 @@ export function pinpointElement(
   const icon = document.createElement("span")
   icon.className = "qfa-pinpoint__icon"
   element.append(icon)
+
+  // The "%" pastille on the pin's right shoulder (30141:9028).
+  if (place.bonus) {
+    const pastille = document.createElement("span")
+    pastille.className = "qfa-pinpoint__bonus"
+    element.append(pastille)
+  }
   return element
 }
 
