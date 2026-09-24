@@ -12,6 +12,12 @@
    pas importées, faute d'usage. */
 @import "npm:@fontsource-variable/public-sans/wght.css";
 
+/* Styles de MapLibre : contrôles de zoom, attribution, et surtout
+   `overflow: hidden` sur la carte, sans lequel les punaises débordent sur le
+   bandeau. La V1 l'importe depuis `solution_map.ts` ; l'assistant a son
+   propre bundle. */
+@import "npm:maplibre-gl/dist/maplibre-gl.css";
+
 /* Le défilement doux était la seule utilité Tailwind de l'assistant. L'écrire
    ici évite d'embarquer 2 282 classes utilitaires pour une ligne (ADR 0009 Q2),
    et permet de la neutraliser sous `prefers-reduced-motion`. */
@@ -111,11 +117,21 @@ body {
   height: 450px;
 }
 
+/* Bord à bord et sans arrondi, comme la maquette (30141:9028). */
 .qfa-carte__canvas {
   flex: 1 1 auto;
   min-height: 0;
-  border-radius: var(--qfa-rayon);
   overflow: hidden;
+}
+
+/* Zoom en haut à gauche et attribution en bas à droite à 12 px du bord
+   (30141:9028) ; MapLibre les place à 10 px. */
+.qfa-carte .maplibregl-ctrl-top-left .maplibregl-ctrl {
+  margin: 12px 0 0 12px;
+}
+
+.qfa-carte .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0 12px 12px 0;
 }
 
 .qfa-carte__message:empty {
@@ -223,6 +239,20 @@ body {
   mask-image: url("../images/assistant/pinpoints/geste-don.svg");
 }
 
+/* Pastille Bonus Réparation (30141:9028, « Punaises Bonus Réparation ») : un
+   disque sombre de 10 px sous le pictogramme « % » jaune de 20 px, posé sur
+   l'épaule droite de la goutte, à 23 px du bord gauche et 5 px au-dessus. */
+.qfa-pinpoint__bonus {
+  position: absolute;
+  top: -5px;
+  left: 23px;
+  width: 20px;
+  height: 20px;
+  background:
+    url("../images/assistant/pinpoints/bonus-pourcent.svg") center / 20px no-repeat,
+    url("../images/assistant/pinpoints/bonus-ellipse.svg") center / 10px no-repeat;
+}
+
 .qfa-pinpoint:focus-visible {
   outline: 2px solid #0a76f6;
   outline-offset: 2px;
@@ -236,6 +266,25 @@ body {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Lien d'évitement : invisible tant qu'il n'a pas le focus clavier. */
+.qfa-skiplink {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.qfa-skiplink:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  clip: auto;
+  color: var(--qfa-accent);
 }
 
 /* Marge de confort dans le lookbook, hors pages réelles. */
@@ -293,11 +342,13 @@ body {
 
 /* Le cadre porte la bordure et la loupe ; le champ lui-même est nu, sinon la
    bordure du navigateur doublerait celle de la maquette. */
+/* 48 px de haut (30141:8711) : la bordure de 2 px est comprise dans les 12 px
+   qui séparent la loupe du bord, d'où un remplissage de 10. */
 .qfa-combobox__cadre {
   display: flex;
   gap: var(--qfa-espace-2v);
   align-items: center;
-  padding: var(--qfa-espace-3v);
+  padding: 10px var(--qfa-espace-3v);
   border: 2px solid var(--qfa-accent);
   border-radius: var(--qfa-rayon-sm);
   background: #fff;
@@ -335,8 +386,7 @@ body {
   color: var(--qfa-texte-titre);
   font-family: inherit;
   font-size: 16px;
-  /* 48 px de haut = 2×12 (remplissage) + 2×2 (bordure) + 20 de ligne. */
-  line-height: 20px;
+  line-height: 1.5;
   /* Ellipsis si la saisie dépasse, comme annoté sur la maquette. */
   text-overflow: ellipsis;
 }
@@ -675,10 +725,13 @@ body {
   }
 }
 
+/* 40 px de haut sur la maquette (30141:8863) : le remplissage n'en fait que
+   36, d'où la hauteur minimale. */
 .qfa-changer-geste {
   display: inline-flex;
   gap: var(--qfa-espace-2v);
   align-items: center;
+  min-height: 40px;
   padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
   border-radius: var(--qfa-rayon-md);
   background: var(--qfa-accent);
@@ -693,11 +746,11 @@ body {
   width: 16px;
   height: 16px;
   background: currentColor;
-  /* La flèche « droite » du Figma, retournée : une seule icône embarquée. */
+  /* Le chevron « droite » du Figma, retourné : une seule icône embarquée. */
   transform: rotate(180deg);
-  -webkit-mask: url("../images/assistant/ui/fleche-droite.svg") center / contain
+  -webkit-mask: url("../images/assistant/ui/chevron-droite.svg") center / contain
     no-repeat;
-  mask: url("../images/assistant/ui/fleche-droite.svg") center / contain no-repeat;
+  mask: url("../images/assistant/ui/chevron-droite.svg") center / contain no-repeat;
 }
 
 .qfa-changer-geste__icones {
@@ -824,6 +877,18 @@ body {
   width: 100%;
   padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
   background: var(--qfa-geste-reparation-fond);
+}
+
+/* Bandeau et carte se touchent (30141:9302) : ce conteneur les soustrait à
+   l'espacement de l'écran, qui ne vaut qu'avant le pied de page. */
+.qfa-haut-de-page {
+  width: 100%;
+}
+
+/* Sur l'écran solutions, 8 px entre le bouton de geste et le champ d'adresse
+   (30141:8709), contre 12 entre les deux champs de l'accueil. */
+.qfa-panneau--solutions {
+  gap: var(--qfa-espace-2v);
 }
 
 /* Le contenu du panneau s'aligne sur 600 px dès que la place le permet, comme
