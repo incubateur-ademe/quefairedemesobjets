@@ -19,6 +19,7 @@ The backend is a **Django** project whose central configuration lives in `core/`
 - **qfdmo** — Core business (models, views, forms of the main tool)
 - **qfdmd** — CMS and content (pages, middleware, multi‑site integration)
 - **infotri** — Infotri module (configurator, dedicated forms)
+- **assistant** — Assistant V2 (see [assistant.md](assistant.md))
 - **search** — Search
 - **stats** — Statistics
 - **data** — Data management and suggestions (admin, import/export)
@@ -131,4 +132,5 @@ look-and-feel.md
 javascript.md
 django.md
 internationalization.md
+assistant.md
 ```
