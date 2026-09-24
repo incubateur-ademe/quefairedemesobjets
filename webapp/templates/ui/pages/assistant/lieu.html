@@ -7,6 +7,8 @@
         {% comment %}
         Retour vers les solutions, dans le bandeau vert d'eau (30141:9306).
         La maquette le place seul en haut de page, à la place des champs.
+        Turbo Drive rend la page solutions sans recharger, et la carte, élément
+        permanent, y revient telle quelle.
         {% endcomment %}
         <div class="qfa-panneau">
             <a class="qfa-changer-geste" href="{% url 'assistant:solutions' %}?{{ parametres }}">

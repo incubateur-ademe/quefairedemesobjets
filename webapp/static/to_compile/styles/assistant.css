@@ -895,12 +895,22 @@ body {
   width: 100%;
   padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
   background: var(--qfa-geste-reparation-fond);
+  /* Un seul bandeau par écran : d'un écran à l'autre, la View Transition le
+     fait glisser et se redimensionner vers son nouvel état. */
+  view-transition-name: entete;
 }
 
 /* Sur la fiche, le panneau vit dans un formulaire : sans cela, la colonne
    centrée le rétrécit à la largeur de son contenu. */
 .qfa-ecran > form {
   width: 100%;
+}
+
+/* Parquée hors de l'écran solutions (enfant direct de `body`, voir
+   `layout/assistant.html`), la toile de la carte est masquée mais vit
+   toujours : Turbo la ramène telle quelle dans le composant carte. */
+body > #assistant-carte-canvas {
+  display: none;
 }
 
 /* Bandeau et carte se touchent (30141:9302) : ce conteneur les soustrait à

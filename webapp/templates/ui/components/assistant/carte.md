@@ -177,3 +177,27 @@ JavaScript. `parametres_lieu` y ajoute le parcours pour que « revenir aux
 solutions » retrouve le geste et l'adresse. `pinpoint.ts` sait aussi rendre un
 `<button>` quand aucune URL n'est fournie, ce qui n'arrive plus depuis que la
 page existe.
+
+## La carte survit aux changements d'écran
+
+Turbo Drive est actif dans l'assistant : chaque changement d'écran remplace le
+`<body>` sans recharger, avec une View Transition. La toile de la carte
+(`carte_canvas.html`) est un élément permanent (`data-turbo-permanent`) : Turbo
+déplace le même nœud d'une page à l'autre, instance MapLibre, tuiles et
+punaises comprises. Hors de l'écran solutions, il est parqué en fin de `body`
+par le layout, masqué par la feuille de style.
+
+Le contrôleur accroche son état à ce nœud (`assistantMap`) et le reprend au
+retour : même geste et même objet, les punaises sont déjà là ; autre geste,
+elles repartent de zéro ; autre adresse, la carte se recentre. Il ne détruit la
+carte que si le nœud a vraiment disparu du document, décision prise un tick
+après `disconnect` — Turbo déplace l'élément permanent de façon synchrone.
+
+> ⚠️ Pendant un rendu Turbo, Stimulus connecte le contrôleur alors que la toile
+> permanente est encore un espace réservé : Turbo remplace le `body`, attend un
+> repaint, puis remet les éléments permanents en place. Le contrôleur attend
+> donc `turbo:load` avant de chercher sa toile.
+
+Mesuré en navigateur, sur fiche → solutions → lieu → solutions → fiche →
+solutions (autre geste) → précédent → précédent : un seul chargement de
+document, la même instance de carte du début à la fin.
