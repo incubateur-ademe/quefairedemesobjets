@@ -134,27 +134,22 @@ body {
   margin: 0 12px 12px 0;
 }
 
-.qfa-carte__message:empty {
-  display: none;
-}
-
 /* Posé sur la carte, jamais dans le flux : un message qui pousserait la
    toile la ferait changer de taille, et MapLibre redessinerait tout à chaque
-   apparition, d'où un saut visible au dézoom. Au-dessus de l'attribution. */
+   apparition, d'où un saut visible au dézoom. À droite du contrôle de zoom
+   (12 + 29 + 6 px) et à 12 px du haut et du bord, comme la maquette
+   30162:9443 ; le style est celui du composant alerte. */
 .qfa-carte__message {
   position: absolute;
+  top: var(--qfa-espace-3v);
   right: var(--qfa-espace-3v);
-  bottom: 48px;
-  left: var(--qfa-espace-3v);
+  left: 47px;
   z-index: 5;
-  margin: 0;
-  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
-  background: #fff;
-  border-radius: var(--qfa-rayon);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
-  font-size: 14px;
-  line-height: 1.4;
   pointer-events: none;
+}
+
+.qfa-carte__message[hidden] {
+  display: none;
 }
 
 /* Sous le zoom d'un département, les lieux sont masqués mais conservés ; la
