@@ -92,8 +92,15 @@ qui sont à l'écran.
 
 ### Dézoom : masqués, pas perdus
 
-Sous le zoom d'un département, les marqueurs sont retirés de la carte mais
-`this.places` est conservé. Un rezoom les réaffiche **sans requête**.
+Sous le zoom d'un département, les punaises sont masquées par CSS
+(`data-zoomed-out` sur le composant), mais restent dans le DOM et en mémoire.
+Un rezoom les réaffiche **immédiatement, sans requête**, et rien n'est
+reconstruit. Le message d'état est posé **sur** la carte, jamais dans le flux :
+un message qui pousserait la toile la ferait changer de taille, et MapLibre
+redessinerait tout à chaque apparition, d'où un saut visible.
+
+Une même zone n'est jamais redemandée deux fois de suite : MapLibre émet aussi
+`moveend` quand son conteneur change de taille, sans que la vue ait bougé.
 
 ### Requêtes annulables
 
