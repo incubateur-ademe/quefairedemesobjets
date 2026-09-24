@@ -12,5 +12,10 @@ urlpatterns = [
     path("recherche/", views.SearchView.as_view(), name="recherche"),
     path("objet/<slug:slug>/", views.ProduitView.as_view(), name="produit"),
     path("solutions/", views.SolutionsView.as_view(), name="solutions"),
+    path(
+        "solutions/compte",
+        views.SolutionsCountView.as_view(),
+        name="solutions-compte",
+    ),
     path("lieu/<str:uuid>/", views.LieuView.as_view(), name="lieu"),
 ]
