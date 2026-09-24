@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { useDebounce, useResize } from "stimulus-use"
+import { useResize } from "stimulus-use"
 
 import {
   merge,
@@ -25,7 +25,6 @@ function serverDuration(header: string | null): number {
 /** Placeholder replaced by the place uuid in the URL pattern given by the template. */
 const UUID_PLACEHOLDER = "__uuid__"
 
-const SETTLE_DELAY_MS = 1000
 const MIN_ZOOM = 9
 
 export default class extends Controller<HTMLElement> {
@@ -41,7 +40,6 @@ export default class extends Controller<HTMLElement> {
     preciseAddress: Boolean,
   }
   static outlets = ["assistant-chrono"]
-  static debounces = [{ name: "refresh", wait: SETTLE_DELAY_MS }]
 
   declare readonly assistantChronoOutlets: { record(timing: Timing): void }[]
   declare readonly containerTarget: HTMLElement
@@ -63,7 +61,6 @@ export default class extends Controller<HTMLElement> {
   private pendingRequest: AbortController | null = null
 
   async connect() {
-    useDebounce(this)
     useResize(this)
 
     const [{ Map, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
@@ -145,7 +142,10 @@ export default class extends Controller<HTMLElement> {
     this.map?.resize()
   }
 
-  /** Debounced: called on every `moveend`, only acts once the map is still. */
+  /**
+   * Called on every `moveend`. No debounce: MapLibre only emits it once the
+   * gesture is over, and a request still in flight is aborted by the next one.
+   */
   refresh() {
     void this.#load()
   }
