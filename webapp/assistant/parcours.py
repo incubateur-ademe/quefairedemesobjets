@@ -6,6 +6,7 @@ than in the session makes every screen shareable and reloadable, and avoids
 server state to invalidate.
 """
 
+import math
 from dataclasses import dataclass
 
 PARAMS = ("fiche", "objet", "adresse", "longitude", "latitude", "precise")
@@ -60,11 +61,17 @@ class Parcours:
             "latitude": self.latitude,
             "precise": "true" if self.precise else "",
         }
-        return {key: str(value) for key, value in values.items() if value}
+        # `is not None`, not truthiness: a longitude of exactly 0.0 is a real
+        # position (the Greenwich meridian crosses Normandy).
+        return {
+            key: str(value) for key, value in values.items() if value not in (None, "")
+        }
 
 
 def _to_float(value) -> float | None:
+    """A finite float, or None: `float("nan")` parses, but is no position."""
     try:
-        return float(value)
+        number = float(value)
     except (TypeError, ValueError):
         return None
+    return number if math.isfinite(number) else None

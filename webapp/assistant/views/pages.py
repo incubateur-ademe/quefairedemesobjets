@@ -1,6 +1,7 @@
 from dataclasses import replace
 from urllib.parse import urlencode
 
+from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -11,6 +12,7 @@ from assistant.forms import SearchForm
 from assistant.lieu import gestes_of, offers_bonus, practical_info_of
 from assistant.objets import fiche_for_label
 from assistant.parcours import Parcours
+from assistant.objets import sous_categorie_ids_for
 from qfdmd.models import ProduitPage
 from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import GroupeAction
@@ -127,6 +129,9 @@ class SolutionsView(TurboFrameMixin, TemplateView):
             latitude=latitude,
             # The red marker only shows for a precise address (#3356).
             adresse_precise=parcours.precise and parcours.is_located,
+            # Server-rendered for the accessible list: the only path to the
+            # results without the map. The map itself fetches its own.
+            lieux=_nearest_lieux(gestes, parcours.fiche, longitude, latitude),
             **kwargs,
         )
 
@@ -165,6 +170,21 @@ def _requested_gestes(query) -> list[str]:
 def _groupes_in_order(codes: list[str]) -> list[GroupeAction]:
     by_code = {g.code: g for g in GroupeAction.objects.filter(code__in=codes)}
     return [by_code[code] for code in codes if code in by_code]
+
+
+def _nearest_lieux(gestes, slug, longitude, latitude):
+    if not gestes:
+        return []
+    try:
+        sous_categorie_ids = sous_categorie_ids_for(slug) if slug else []
+    except Http404:
+        sous_categorie_ids = []
+    return (
+        DisplayedActeur.objects.all()
+        .proposing(gestes, sous_categorie_ids)
+        .nearest_to(longitude, latitude)
+        .for_the_map()
+    )
 
 
 def _position_of(parcours: Parcours) -> tuple[float, float]:
