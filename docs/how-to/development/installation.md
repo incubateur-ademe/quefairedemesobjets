@@ -69,10 +69,10 @@ Provisionnement:
 
 Le `docker-compose.yml` à la racine expose deux profiles indépendants :
 
-| Profile   | Services                                                                                                                                                       |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lvao`    | `lvao-webapp-db` (PostGIS, port 6543), `lvao-warehouse-db` (8765), nginx local SSL (`nginx-local-only/` + mkcert, domaine `quefairedemesdechets.ademe.local`). |
-| `airflow` | `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM), `airflow-dag-processor` (8082).                                               |
+| Profile   | Services                                                                                                                                                                                                                     |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lvao`    | `lvao-webapp-db` (PostGIS, port `WEBAPP_DB_PORT`, 6543 par défaut, à définir dans le `.env` racine), `lvao-warehouse-db` (8765), nginx local SSL (`nginx-local-only/` + mkcert, domaine `quefairedemesdechets.ademe.local`). |
+| `airflow` | `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM), `airflow-dag-processor` (8082).                                                                                                             |
 
 > Pas de **Redis** ni de **mailcatcher** en local : le cache Django est stocké en base (`django.core.cache.backends.db.DatabaseCache`, table `qf_django_cache`).
 
