@@ -1486,7 +1486,7 @@ class AssistantPreview(LookbookPreview):
             "ui/components/assistant/carte.html",
             {
                 "geste": geste,
-                "objet": objet,
+                "fiche": objet,
                 "longitude": longitude,
                 "latitude": latitude,
                 "adresse_precise": precise,

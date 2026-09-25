@@ -32,15 +32,15 @@ Cette app ne possède **aucun modèle**. Elle orchestre :
 
 ```text
 assistant/
-├── forms.py        SearchForm (accueil) et LieuxForm (GeoJSON)
-├── parcours.py     objet + adresse transportés par l'URL, d'écran en écran
-├── objets.py       résolution d'un libellé saisi vers une ProduitPage
+├── forms.py        SearchForm (accueil)
+├── parcours.py     fiche + objet + adresse transportés par l'URL, d'écran en écran
+├── objets.py       libellé saisi → ProduitPage, suggestions d'objets
+├── adresses.py     suggestions d'adresses (proxy BAN)
 ├── consignes.py    consignes par geste, statiques en attendant #3284
 ├── lieu.py         ce que la fiche d'un lieu affiche
+├── api.py          API publique v1 : lieux, gestes, objets, adresses
 └── views/
     ├── pages.py    Home, Recherche, Produit, Solutions, Lieu
-    ├── geojson.py  LieuxGeoJSONView
-    ├── recherche.py / adresse.py   autocomplétions (JSON)
     └── mixins.py   TurboFrameMixin : gabarit réduit si en-tête Turbo-Frame
 ```
 
@@ -48,26 +48,27 @@ Tests : `unit_tests/assistant/` (seul dossier collecté par `make unit-test`).
 
 ## Routes
 
-| URL                            | Vue                 | Réponse                |
-| ------------------------------ | ------------------- | ---------------------- |
-| `/assistant/`                  | `HomeView`          | HTML                   |
-| `/assistant/recherche/`        | `SearchView`        | redirection vers fiche |
-| `/assistant/objet/<slug>/`     | `ProduitView`       | HTML                   |
-| `/assistant/solutions/`        | `SolutionsView`     | HTML (carte)           |
-| `/assistant/lieu/<uuid>/`      | `LieuView`          | HTML                   |
-| `/assistant/lieux.geojson`     | `LieuxGeoJSONView`  | GeoJSON                |
-| `/assistant/recherche/objet`   | `ObjetSearchView`   | JSON                   |
-| `/assistant/recherche/adresse` | `AdresseSearchView` | JSON                   |
+| URL                        | Vue             | Réponse                |
+| -------------------------- | --------------- | ---------------------- |
+| `/assistant/`              | `HomeView`      | HTML                   |
+| `/assistant/recherche/`    | `SearchView`    | redirection vers fiche |
+| `/assistant/objet/<slug>/` | `ProduitView`   | HTML                   |
+| `/assistant/solutions/`    | `SolutionsView` | HTML (carte)           |
+| `/assistant/lieu/<uuid>/`  | `LieuView`      | HTML                   |
+
+Les écrans sont les premiers clients de l'[API publique v1](../apis/v1.md) :
+la carte et les deux champs de recherche appellent `/api/v1/…`. Il n'existe
+pas de second chemin de code à tenir au niveau.
 
 Le contrat complet est dans le chapitre 10 des specs (branche
 `assistant-v2-specs`).
 
-### `lieux.geojson`
+### `/api/v1/lieux.geojson`
 
-Paramètres, validés par `LieuxForm` : `geste` (code d'un `GroupeAction`,
-obligatoire), `objet` (slug d'une fiche, facultatif), et soit `bbox` (zone
-visible, forme Leaflet) soit `lon` + `lat`. Une bbox illisible renvoie `400`
-sans repli sur le point.
+Paramètres, validés par `api.LieuxQuery` : `geste` (code d'un `GroupeAction`,
+obligatoire, répétable), `fiche` (slug d'une fiche, facultatif), et soit `bbox`
+(zone visible, forme Leaflet) soit `longitude` + `latitude`. Une bbox illisible
+renvoie `422` sans repli sur le point.
 
 ```json
 {
@@ -87,9 +88,9 @@ exposée : elle suit le geste choisi par l'usager, que le client connaît déjà
 
 ## Budget de performance
 
-| Endpoint        | Budget | Mesuré (p95, HTTPS) |
-| --------------- | ------ | ------------------- |
-| `lieux.geojson` | 50 ms  | 25 ms               |
+| Endpoint                | Budget | Mesuré (p95, HTTPS) |
+| ----------------------- | ------ | ------------------- |
+| `/api/v1/lieux.geojson` | 50 ms  | 25 ms               |
 
 L'en-tête `Server-Timing` de la réponse donne le temps passé en base ; le
 lookbook l'affiche dans un overlay (`debug=True`). Les décisions qui rendent
