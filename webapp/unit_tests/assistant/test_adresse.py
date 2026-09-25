@@ -50,21 +50,21 @@ def empty_cache():
 
 class TestAdresseSearch:
     def test_too_short_query_does_not_reach_the_ban(self, client):
-        with patch("assistant.views.adresse.requests.get") as request:
-            response = client.get(reverse("assistant:recherche-adresse"), {"q": "ab"})
+        with patch("assistant.adresses.requests.get") as request:
+            response = client.get(reverse("api_v1:adresses"), {"q": "ab"})
 
         assert response.json() == {"results": []}
         request.assert_not_called()
 
     def test_precise_address(self, client):
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             return_value=ban_response(
                 feature("8 Rue de Rivoli 75004 Paris", "housenumber")
             ),
         ):
             results = client.get(
-                reverse("assistant:recherche-adresse"), {"q": "8 rue de rivoli"}
+                reverse("api_v1:adresses"), {"q": "8 rue de rivoli"}
             ).json()["results"]
 
         assert results == [
@@ -89,12 +89,12 @@ class TestAdresseSearch:
     def test_only_a_municipality_is_not_precise(self, client, ban_type, precise):
         """The red marker only shows for a precise point (#3356)."""
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             return_value=ban_response(feature("Lyon", ban_type)),
         ):
-            results = client.get(
-                reverse("assistant:recherche-adresse"), {"q": "lyon"}
-            ).json()["results"]
+            results = client.get(reverse("api_v1:adresses"), {"q": "lyon"}).json()[
+                "results"
+            ]
 
         assert results[0]["precise"] is precise
 
@@ -102,12 +102,10 @@ class TestAdresseSearch:
         import requests
 
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             side_effect=requests.RequestException("unreachable"),
         ):
-            response = client.get(
-                reverse("assistant:recherche-adresse"), {"q": "paris"}
-            )
+            response = client.get(reverse("api_v1:adresses"), {"q": "paris"})
 
         assert response.status_code == 200
         assert response.json() == {"results": []}
@@ -118,18 +116,18 @@ class TestAdresseSearch:
         import requests
 
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             side_effect=requests.RequestException("unreachable"),
         ):
-            client.get(reverse("assistant:recherche-adresse"), {"q": "paris"})
+            client.get(reverse("api_v1:adresses"), {"q": "paris"})
 
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             return_value=ban_response(feature("Paris", "municipality")),
         ) as request:
-            results = client.get(
-                reverse("assistant:recherche-adresse"), {"q": "paris"}
-            ).json()["results"]
+            results = client.get(reverse("api_v1:adresses"), {"q": "paris"}).json()[
+                "results"
+            ]
 
         request.assert_called_once()
         assert results[0]["label"] == "Paris"
@@ -137,25 +135,25 @@ class TestAdresseSearch:
     @IN_MEMORY_CACHE
     def test_the_cache_avoids_a_second_call(self, client):
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             return_value=ban_response(feature("Auray", "municipality")),
         ) as request:
-            client.get(reverse("assistant:recherche-adresse"), {"q": "auray"})
-            client.get(reverse("assistant:recherche-adresse"), {"q": "AURAY"})
+            client.get(reverse("api_v1:adresses"), {"q": "auray"})
+            client.get(reverse("api_v1:adresses"), {"q": "AURAY"})
 
         request.assert_called_once()
 
     def test_unusable_feature_is_ignored(self, client):
         """The BAN may return a feature without label or without coordinates."""
         with patch(
-            "assistant.views.adresse.requests.get",
+            "assistant.adresses.requests.get",
             return_value=ban_response(
                 {"properties": {"type": "street"}, "geometry": {}},
                 feature("Auray", "municipality"),
             ),
         ):
-            results = client.get(
-                reverse("assistant:recherche-adresse"), {"q": "auray"}
-            ).json()["results"]
+            results = client.get(reverse("api_v1:adresses"), {"q": "auray"}).json()[
+                "results"
+            ]
 
         assert [r["label"] for r in results] == ["Auray"]

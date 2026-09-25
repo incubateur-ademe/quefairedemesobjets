@@ -313,10 +313,8 @@ GEOGRAPHIC_SCAN_THRESHOLD = 1_000
 MISS = object()
 
 
-def acteur_ids_offering(
-    groupe_action_code: str, sous_categorie_ids
-) -> list[str] | None:
-    """Ids of the acteurs offering this geste for this objet, France-wide.
+def acteur_ids_offering(groupe_action_codes, sous_categorie_ids) -> list[str] | None:
+    """Ids of the acteurs offering one of these gestes for this objet, France-wide.
 
     Returns `None` when they are too many to be listed: past the threshold,
     the geographic scan finds its 20 results effortlessly and the list is
@@ -332,15 +330,14 @@ def acteur_ids_offering(
     """
     from django.core.cache import cache
 
-    key = (
-        f"offres:{groupe_action_code}:{','.join(map(str, sorted(sous_categorie_ids)))}"
-    )
+    codes = ",".join(sorted(groupe_action_codes))
+    key = f"offres:{codes}:{','.join(map(str, sorted(sous_categorie_ids)))}"
     # `None` is a legitimate cached value ("too many"), so a miss needs its own
     # sentinel: otherwise the big pairs would be recomputed on every call.
     ids = cache.get(key, MISS)
     if ids is MISS:
         propositions = DisplayedPropositionService.objects.filter(
-            action__groupe_action__code=groupe_action_code,
+            action__groupe_action__code__in=groupe_action_codes,
             sous_categories__in=sous_categorie_ids,
         )
         found = list(
@@ -445,8 +442,11 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .order_by("distance")
         )
 
-    def proposing(self, groupe_action_code: str, sous_categorie_ids=None):
-        """Acteurs offering this geste, optionally for a given objet.
+    def proposing(self, groupe_action_codes, sous_categorie_ids=None):
+        """Acteurs offering one of these gestes, optionally for a given objet.
+
+        `groupe_action_codes` is a code or a list of codes: a block of the
+        fiche may span two gestes ("Donner ou revendre").
 
         A "geste" as the user sees it is a GroupeAction (5 in the database),
         not an Action (11): choosing "donner" must include the acteurs that
@@ -460,14 +460,19 @@ class DisplayedActeurQuerySet(models.QuerySet):
         rows: 9,363 acteurs have several propositions within one groupe, which
         would yield fewer than 20 distinct places.
         """
+        codes = (
+            [groupe_action_codes]
+            if isinstance(groupe_action_codes, str)
+            else list(groupe_action_codes)
+        )
         if sous_categorie_ids:
-            ids = acteur_ids_offering(groupe_action_code, sous_categorie_ids)
+            ids = acteur_ids_offering(codes, sous_categorie_ids)
             if ids is not None:
                 return self.filter(identifiant_unique__in=ids)
 
         propositions = DisplayedPropositionService.objects.filter(
             acteur=OuterRef("pk"),
-            action__groupe_action__code=groupe_action_code,
+            action__groupe_action__code__in=codes,
         )
         if sous_categorie_ids:
             propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
@@ -519,6 +524,35 @@ class DisplayedActeurQuerySet(models.QuerySet):
         property of the data to load, not of the page showing it.
         """
         return self.select_related("acteur_type").prefetch_related("labels", "sources")
+
+    def for_the_api(self):
+        """A place and everything the public API exposes, without cascading
+        queries: the opendata columns need every relation."""
+        return (
+            self.for_the_detail()
+            .select_related("epci")
+            .prefetch_related(
+                "proposition_services__action",
+                "proposition_services__sous_categories",
+                "acteur_services",
+                "perimetre_adomiciles",
+            )
+            .with_bonus()
+        )
+
+    def open_data(self):
+        """Acteurs that may be redistributed: at least one source under an
+        open licence.
+
+        Same rule as the opendata mart (`marts_opendata_filtered_acteur`): an
+        acteur is published if its source is open, and a parent if one of its
+        children is. `sources` already holds the children's sources of a
+        parent, so one EXISTS covers both.
+        """
+        open_sources = Source.objects.filter(
+            displayed_acteurs=OuterRef("pk"), licence=DataLicense.OPEN_LICENSE
+        )
+        return self.filter(Exists(open_sources))
 
     def as_geojson(self) -> dict:
         return {

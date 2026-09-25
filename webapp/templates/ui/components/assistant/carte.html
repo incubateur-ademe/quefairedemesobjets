@@ -3,10 +3,10 @@
     class="qfa-carte"
     data-controller="assistant-carte"
     data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
-    data-assistant-carte-url-value="{% url 'assistant:lieux-geojson' %}"
+    data-assistant-carte-url-value="{% url 'api_v1:lieux-geojson' %}"
     data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
     data-assistant-carte-geste-value="{{ geste }}"
-    data-assistant-carte-objet-value="{{ objet|default:'' }}"
+    data-assistant-carte-fiche-value="{{ fiche|default:'' }}"
     {% comment %}
     URL pattern of a place's page: the controller replaces `__uuid__` in it.
     `parametres_lieu` carries the journey (geste, objet, address) so that the

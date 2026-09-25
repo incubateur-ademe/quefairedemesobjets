@@ -7,7 +7,7 @@ qui décide de l'affichage de la punaise rouge (#3356).
 
 Trois caractères minimum : la BAN ne répond pas en deçà.
 {% endcomment %}
-{% url 'assistant:recherche-adresse' as url_recherche %}
+{% url 'api_v1:adresses' as url_recherche %}
 <div class="qfa-combobox"
      id="{{ id|default:'recherche-adresse' }}"
      data-controller="assistant-combobox"

@@ -20,7 +20,7 @@ import requests
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
-from assistant.views.geojson import sous_categorie_ids_for
+from assistant.objets import sous_categorie_ids_for
 from core.widgets import (
     SearchAutocompleteInput,
 )
@@ -1486,7 +1486,7 @@ class AssistantPreview(LookbookPreview):
             "ui/components/assistant/carte.html",
             {
                 "geste": geste,
-                "objet": objet,
+                "fiche": objet,
                 "longitude": longitude,
                 "latitude": latitude,
                 "adresse_precise": precise,
