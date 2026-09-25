@@ -1,139 +1,27 @@
-{% load analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar wagtailcore_tags %}
-
-{% comment %}
-SEO meta tags are mirrored from Sites Faciles templates:
-https://github.com/numerique-gouv/sites-faciles/blob/0e712bc21e392b8aea51db4df8ad9d0ea3d61019/content_manager/templates/content_manager/content_page.html#L13-L34
-This might not be aligned with the coding style of our project.
-
-We use {% firstof %} instead of |default for cross-context fallbacks (e.g., page.search_description
-to seo.description) because Django's |default filter evaluates both arguments during template
-parsing, which raises VariableDoesNotExist when seo is not in context (e.g., error pages).
-{% firstof %} only evaluates until it finds a truthy value, avoiding this issue.
-{% endcomment %}
-
-{% with contact_modal_id="contact" %}
-
+{% load static %}
 <!DOCTYPE html>
-<html
-    lang="fr"
-    class="qf-scroll-smooth"
->
-    <head>
-        <meta charset="utf-8">
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        />
-        {% block title %}
-            <title>{% firstof page.seo_title page.title %}</title>
-        {% endblock title %}
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% comment %}
+    Pas de bloc SEO : l'assistant est embarqué en iframe et n'a pas vocation à
+    être indexé (#3434). On s'en tient à ce qui sert l'accessibilité.
+    {% endcomment %}
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Assistant au tri, au réemploi et à la réparation{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'assistant.css' %}">
+    <script type="module" src="{% static 'assistant.js' %}"></script>
+  </head>
+  <body>
+    <a class="qfa-skiplink" href="#contenu">Aller au contenu</a>
 
-        {% block description %}
-            <meta name="description" content="{% firstof page.search_description seo.description %}" />
-        {% endblock description %}
+    {% block header %}{% endblock %}
 
-        {% canonical_url %}
+    <main id="contenu">
+      {% block main %}{% endblock %}
+    </main>
 
-        {% block social_media %}
-            <meta property="og:site_name" content="{{ request.get_host }}" />
-            <meta property="og:title" content="{% firstof page.seo_title page.title %}" />
-            <meta property="og:type" content="article" />
-            <meta property="og:description" content="{% firstof page.search_description seo.description %}" />
-            <meta property="og:locale" content="{{ LANGUAGE_CODE }}" />
-            {% if page.get_translations.live %}
-                {% for translation in page.get_translations.live %}
-                    <meta property="og:locale:alternate" content="{{ translation.locale.language_code }}" />
-                {% endfor %}
-            {% endif %}
-            <meta name="twitter:title" content="{% firstof page.seo_title page.title %}" />
-            <meta name="twitter:description" content="{% firstof page.search_description seo.description %}" />
-            <meta property="og:image" content="{% static 'assistant/og-image.jpg' %}" />
-        {% endblock social_media %}
-
-        {% if block_robots %}<meta name="robots" content="noindex, nofollow" />{% endif %}
-        {% favicon %}
-
-        {% comment %}
-        Preload https://developer.mozilla.org/fr/docs/Web/HTML/Attributes/rel/preload
-        {% endcomment %}
-
-        {% dsfr_css %}
-        <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
-        {# Sites Conformes css #}
-        <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
-
-        {% matomo assistant.MATOMO_ID %}
-
-        {% block extra_css %}
-        {% endblock extra_css %}
-
-        {% block extra_js %}
-        {% endblock extra_js %}
-    </head>
-
-    <body
-        class="qf-flex qf-flex-col qf-group
-        {% block body_classes %}{% endblock %}
-        {% if iframe %}
-        qf-rounded-lg !qf-border !qf-border-solid !qf-border-grey-900
-        {% endif %}"
-        {% if STIMULUS_DEBUG %}data-stimulus-debug="true"{% endif %}
-        {% block body_attrs %}{% endblock %}
-        data-controller="state analytics"
-        {# State #}
-        {% if location %}
-        data-map-location-value="{{ location }}"
-        {% endif %}
-        data-state-map-outlet="[data-controller='map']"
-        data-state-address-autocomplete-outlet="[data-controller='address-autocomplete']"
-        data-state-carte-address-autocomplete-outlet="[data-controller~='carte-address-autocomplete']"
-        data-state-search-solution-form-outlet="[data-controller='search-solution-form']"
-        {% posthog_data_attributes assistant.POSTHOG_KEY %}
-        data-analytics-initial-action-value="{% block analytics_action %}{% endblock %}"
-        {# Actions #}
-        data-action="address-autocomplete:change->state#setLocation carte-address-autocomplete:change->state#setLocation"
-    >
-        {# Skip links for accessibility - using DSFR component #}
-        {% dsfr_skiplinks skiplinks %}
-
-        {% wagtailuserbar %}
-
-        {% block header %}
-        {% include "ui/components/header/header.html" %}
-        {% endblock header %}
-        {% if settings.sites_conformes_content_manager.CmsDsfrConfig.notice_title or settings.sites_conformes_content_manager.CmsDsfrConfig.notice_description %}
-            {% include "blocks/notice.html" %}
-        {% endif %}
-
-
-        <main id="content" class="{% if iframe %}[@media(min-height:600px)]:qf-pb-2w qf-pb-3w{% endif %}" role="main">
-            {% block main %}
-            {% endblock main %}
-        </main>
-
-        {% block footer %}
-        {% include "ui/components/surfooter/surfooter.html" %}
-        {% include "ui/components/footer/footer.html" %}
-        {% endblock footer %}
-
-        {% dsfr_js %}
-        <script type="module" src="{% static 'qfdmd.js' %}"></script>
-        {% if "posthog" in request.GET %}
-            <div class="qf-bg-green-bourgeon-main-640 qf-text-white qf-text-center qf-w-screen qf-py-1v qf-text-xs">
-            Identifiant PostHog : {{ assistant.POSTHOG_KEY }} | Score de conversion : <span id="posthog-banner-conversion-score"></span>
-             </div>
-        {% endif %}
-        {% if "debug" in request.GET %}
-            <ul class="qf-list-none qf-flex qf-gap-4w">
-                <li>
-                SHA : {{ VERSION }}
-                </li>
-                <li>
-                APP : {{ APP }}
-                </li>
-            </ul>
-        {% endif %}
-    </body>
+    {% block footer %}{% endblock %}
+  </body>
 </html>
-
-{% endwith %}
