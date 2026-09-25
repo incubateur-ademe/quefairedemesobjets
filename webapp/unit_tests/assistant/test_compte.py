@@ -28,7 +28,7 @@ def reparer():
 
 
 def get_count(client, **params):
-    return client.get(reverse("assistant:solutions-compte"), {**ANGERS, **params})
+    return client.get(reverse("api_v1:lieux-compte"), {**ANGERS, **params})
 
 
 class TestSolutionsCount:
@@ -52,23 +52,21 @@ class TestSolutionsCount:
 
         assert payload == {"count": 2}
 
-    def test_returns_400_without_position(self, client, reparer):
-        response = client.get(
-            reverse("assistant:solutions-compte"), {"geste": "reparer"}
-        )
-        assert response.status_code == 400
+    def test_returns_422_without_position(self, client, reparer):
+        response = client.get(reverse("api_v1:lieux-compte"), {"geste": "reparer"})
+        assert response.status_code == 422
 
-    def test_returns_400_without_geste(self, client):
-        assert get_count(client).status_code == 400
+    def test_returns_422_without_geste(self, client):
+        assert get_count(client).status_code == 422
 
-    def test_returns_400_on_unknown_objet(self, client, reparer):
-        assert get_count(client, geste="reparer", fiche="inconnu").status_code == 400
+    def test_returns_404_on_unknown_objet(self, client, reparer):
+        assert get_count(client, geste="reparer", fiche="inconnu").status_code == 404
 
     def test_does_not_reflect_the_unknown_objet(self, client, reparer):
         """A reflected slug in an HTML body would be an XSS vector."""
         response = get_count(client, geste="reparer", fiche="<script>")
-        assert response.status_code == 400
-        assert response["Content-Type"] == "application/json"
+        assert response.status_code == 404
+        assert response["Content-Type"].startswith("application/json")
         assert b"<script>" not in response.content
 
     def test_is_cacheable(self, client, reparer):
