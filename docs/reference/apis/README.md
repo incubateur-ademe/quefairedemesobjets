@@ -5,12 +5,13 @@ instance defined in `webapp/core/api.py` and mounted in `webapp/core/urls.py`.
 
 ## Structure
 
-- `webapp/core/api.py` creates the `NinjaAPI` instance and registers routers.
-- Each domain app exposes a `router` that is attached to the main API.
-  Current routers are:
-  - `qfdmo.api` at `/api/qfdmo/`
-  - `stats.api` at `/api/stats`
-- `webapp/core/urls.py` mounts the API under the `/api/` path.
+- `webapp/core/api.py` creates two `NinjaAPI` instances and registers routers:
+  - `api`, the historical one, mounted at `/api/` (docs at `/api/docs`):
+    `qfdmo.api` at `/api/qfdmo/`, `stats.api` at `/api/stats`
+  - `api_v1`, the public versioned one, mounted at `/api/v1/` (docs at
+    `/api/v1/docs`): `assistant.api`, see [v1.md](v1.md)
+- `webapp/core/urls.py` mounts both; `api/v1/` comes first, or Django would
+  look for `v1/…` inside the historical API.
 
 ## How to add a new API
 
@@ -40,6 +41,7 @@ instance defined in `webapp/core/api.py` and mounted in `webapp/core/urls.py`.
 ```{toctree}
 :maxdepth: 2
 
+v1.md
 qfdmo.md
 stats.md
 ```
