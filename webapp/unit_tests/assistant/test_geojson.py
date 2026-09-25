@@ -15,12 +15,12 @@ from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
 from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
-PARIS = {"lat": "48.8534", "lon": "2.3488"}
+PARIS = {"latitude": "48.8534", "longitude": "2.3488"}
 PARIS_POINT = Point(2.3488, 48.8534, srid=4326)
 
 
 def get_lieux(client, **params):
-    return client.get(reverse("assistant:lieux-geojson"), {**PARIS, **params})
+    return client.get(reverse("api_v1:lieux-geojson"), {**PARIS, **params})
 
 
 def fiche_for(sous_categories):
@@ -43,22 +43,24 @@ def place_offering(groupe_code, *, at=PARIS_POINT, action_code=None, acteur_type
 
 @pytest.mark.django_db
 class TestParametres:
-    def test_returns_400_when_geste_missing(self, client):
-        assert client.get(reverse("assistant:lieux-geojson"), PARIS).status_code == 400
+    """Invalid input is a 422 (django-ninja's convention), never a 500."""
 
-    def test_returns_400_when_position_missing(self, client):
-        response = client.get(reverse("assistant:lieux-geojson"), {"geste": "reparer"})
-        assert response.status_code == 400
+    def test_returns_422_when_geste_missing(self, client):
+        assert client.get(reverse("api_v1:lieux-geojson"), PARIS).status_code == 422
 
-    def test_returns_400_on_non_numeric_coordinates(self, client):
-        assert get_lieux(client, geste="reparer", lat="ici").status_code == 400
+    def test_returns_422_when_position_missing(self, client):
+        response = client.get(reverse("api_v1:lieux-geojson"), {"geste": "reparer"})
+        assert response.status_code == 422
 
-    def test_returns_400_on_unreadable_bbox(self, client):
-        assert get_lieux(client, geste="reparer", bbox="pas-du-json").status_code == 400
+    def test_returns_422_on_non_numeric_coordinates(self, client):
+        assert get_lieux(client, geste="reparer", latitude="ici").status_code == 422
+
+    def test_returns_422_on_unreadable_bbox(self, client):
+        assert get_lieux(client, geste="reparer", bbox="pas-du-json").status_code == 422
 
     def test_unreadable_bbox_does_not_fall_back_to_coordinates(self, client):
         """A fallback would hide a client bug and show another area."""
-        assert get_lieux(client, geste="reparer", bbox="{}").status_code == 400
+        assert get_lieux(client, geste="reparer", bbox="{}").status_code == 422
 
     @pytest.mark.parametrize(
         "bbox",
@@ -69,11 +71,11 @@ class TestParametres:
             '{"southWest":{"lng":200,"lat":1},"northEast":{"lng":2,"lat":3}}',
         ],
     )
-    def test_returns_400_on_malformed_bbox_contents(self, client, bbox):
-        assert get_lieux(client, geste="reparer", bbox=bbox).status_code == 400
+    def test_returns_422_on_malformed_bbox_contents(self, client, bbox):
+        assert get_lieux(client, geste="reparer", bbox=bbox).status_code == 422
 
-    def test_returns_400_on_out_of_range_coordinates(self, client):
-        assert get_lieux(client, geste="reparer", lat="91").status_code == 400
+    def test_returns_422_on_out_of_range_coordinates(self, client):
+        assert get_lieux(client, geste="reparer", latitude="91").status_code == 422
 
 
 @pytest.mark.django_db
@@ -154,7 +156,7 @@ class TestReponse:
 
         page = fiche_for([meuble])
         payload = json.loads(
-            get_lieux(client, geste="reparer", objet=page.slug).content
+            get_lieux(client, geste="reparer", fiche=page.slug).content
         )
         assert len(payload["features"]) == 1
 
@@ -173,12 +175,12 @@ class TestReponse:
 
         page = fiche_for([meuble])
         payload = json.loads(
-            get_lieux(client, geste="reparer", objet=page.slug).content
+            get_lieux(client, geste="reparer", fiche=page.slug).content
         )
         assert payload["features"] == []
 
     def test_returns_404_on_unknown_object(self, client):
-        assert get_lieux(client, geste="reparer", objet="inconnu").status_code == 404
+        assert get_lieux(client, geste="reparer", fiche="inconnu").status_code == 404
 
     def test_is_cacheable(self, client):
         place_offering("reparer")
