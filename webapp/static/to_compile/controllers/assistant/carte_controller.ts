@@ -33,7 +33,7 @@ export default class extends Controller<HTMLElement> {
   static values = {
     url: String,
     geste: String,
-    objet: String,
+    fiche: String,
     lieuUrl: String,
     workerUrl: String,
     longitude: Number,
@@ -49,7 +49,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasMessageTarget: boolean
   declare urlValue: string
   declare gesteValue: string
-  declare objetValue: string
+  declare ficheValue: string
   declare lieuUrlValue: string
   declare workerUrlValue: string
   declare longitudeValue: number
@@ -202,7 +202,7 @@ export default class extends Controller<HTMLElement> {
         northEast: { lng: area.east, lat: area.north },
       }),
     })
-    if (this.objetValue) params.set("objet", this.objetValue)
+    if (this.ficheValue) params.set("fiche", this.ficheValue)
     return `${this.urlValue}?${params}`
   }
 
