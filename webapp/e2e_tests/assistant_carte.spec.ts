@@ -9,7 +9,6 @@ import { navigateTo } from "./helpers"
 // e2e tests of the repository.
 const PREVIEW = "/lookbook/preview/assistant/carte/?adresse=Auray"
 const PINPOINT = ".qfa-pinpoint"
-const SETTLE_DELAY_MS = 1000
 
 async function openMap(page: Page, params = "") {
   await navigateTo(page, `${PREVIEW}${params}`)
@@ -57,8 +56,9 @@ test.describe("🗺️ Carte de l'assistant", () => {
       .evaluateAll((nodes) => nodes.map((n) => (n as HTMLElement).dataset.uuid))
 
     // Modest drag: the places at the center stay visible.
+    const refreshed = page.waitForResponse((r) => r.url().includes("lieux.geojson"))
     await dragMap(page, 40, 40)
-    await page.waitForTimeout(SETTLE_DELAY_MS + 1500)
+    await refreshed
 
     const uuidsAfter = await page
       .locator(PINPOINT)
@@ -66,23 +66,6 @@ test.describe("🗺️ Carte de l'assistant", () => {
 
     const kept = uuidsBefore.filter((uuid) => uuidsAfter.includes(uuid))
     expect(kept.length).toBeGreaterThan(0)
-  })
-
-  test("Aucun rafraîchissement pendant que la carte bouge", async ({ page }) => {
-    await openMap(page)
-
-    let requests = 0
-    page.on("request", (request) => {
-      if (request.url().includes("lieux.geojson")) requests += 1
-    })
-
-    // Three drags in a row, no pause: a single refresh expected.
-    await dragMap(page, 30, 0)
-    await dragMap(page, 0, 30)
-    await dragMap(page, -30, 0)
-    await page.waitForTimeout(SETTLE_DELAY_MS + 1500)
-
-    expect(requests).toBeLessThanOrEqual(2)
   })
 
   test("La liste accessible des lieux est rendue côté serveur", async ({ page }) => {

@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from assistant.consignes import GESTES_ORDER, consignes_for
+from assistant.consignes import BLOCKS, consignes_for
 from assistant.parcours import Parcours
 from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
 from unit_tests.qfdmo.action_factory import GroupeActionFactory
@@ -29,43 +29,60 @@ def gestes():
 class TestConsignes:
     def test_hierarchy_repairable_good_out_of_use(self):
         """The display order is imposed by #3295, not left to the database."""
-        codes = [consigne["geste"] for consigne in consignes_for(None)]
+        codes = [consigne["code"] for consigne in consignes_for(None)]
 
-        assert codes == list(GESTES_ORDER)
-        assert codes[0] == "reparer"
-        assert codes[-1] == "trier"
+        assert codes == ["reparer", "donner_revendre", "trier"]
+
+    def test_the_fiche_has_the_three_blocks_of_the_mockup(self):
+        """Figma 30139:14476: "Donner ou revendre" spans two gestes."""
+        blocks = {c["code"]: c for c in consignes_for(None)}
+
+        assert len(blocks) == 3
+        assert blocks["donner_revendre"]["gestes"] == [
+            "donner_echanger_rapporter",
+            "vendre_acheter",
+        ]
+        assert blocks["donner_revendre"]["libelle"] == "Donner ou revendre"
+
+    def test_a_block_skips_the_gestes_missing_from_the_database(self):
+        from qfdmo.models.action import GroupeAction
+
+        GroupeAction.objects.filter(code="vendre_acheter").delete()
+
+        blocks = {c["code"]: c for c in consignes_for(None)}
+
+        assert blocks["donner_revendre"]["gestes"] == ["donner_echanger_rapporter"]
 
     def test_only_repair_carries_the_bonus(self):
         conditions = {
-            consigne["geste"]: {badge["condition"] for badge in consigne["badges"]}
+            consigne["code"]: {badge["condition"] for badge in consigne["badges"]}
             for consigne in consignes_for(None)
         }
 
         assert "bonus" in conditions["reparer"]
         assert all(
             "bonus" not in badges
-            for geste, badges in conditions.items()
-            if geste != "reparer"
+            for code, badges in conditions.items()
+            if code != "reparer"
         )
 
     def test_conditions_follow_the_spec(self):
         etats = {
-            consigne["geste"]: consigne["badges"][0]["condition"]
+            consigne["code"]: consigne["badges"][0]["condition"]
             for consigne in consignes_for(None)
         }
 
         assert etats["reparer"] == "reparable"
-        assert etats["donner_echanger_rapporter"] == "bon_etat"
+        assert etats["donner_revendre"] == "bon_etat"
         assert etats["trier"] == "mauvais_etat"
 
     def test_every_geste_has_a_non_empty_consigne(self):
         assert all(consigne["consigne"].strip() for consigne in consignes_for(None))
 
-    def test_labels_come_from_the_database(self):
-        labels = {c["geste"]: c["libelle"] for c in consignes_for(None)}
+    def test_labels_are_those_of_the_mockup(self):
+        labels = [c["libelle"] for c in consignes_for(None)]
 
-        assert labels["reparer"] == "Réparer"
-        assert labels["trier"] == "Déposer"
+        assert labels == ["Réparer", "Donner ou revendre", "Déposer"]
 
     def test_the_parcours_follows_in_the_call_to_action(self):
         parcours = Parcours(objet="Chaise", adresse="Auray", longitude=-2.9)
@@ -81,19 +98,26 @@ class TestConsignes:
 
         assert first["url"] == f"{reverse('assistant:solutions')}?geste=reparer"
 
+    def test_a_two_geste_block_repeats_geste_in_its_link(self):
+        donner = consignes_for(None)[1]
+
+        assert donner["url"].endswith(
+            "?geste=donner_echanger_rapporter&geste=vendre_acheter"
+        )
+
 
 class TestFicheObjet:
     @pytest.fixture
     def fiche(self):
         return ProduitPageFactory(parent=None)
 
-    def test_the_fiche_shows_the_five_gestes(self, client, fiche):
+    def test_the_fiche_shows_the_three_blocks(self, client, fiche):
         content = client.get(
             reverse("assistant:produit", args=[fiche.slug])
         ).content.decode()
 
-        for geste in GESTES_ORDER:
-            assert f'data-geste="{geste}"' in content
+        for block in BLOCKS:
+            assert f'data-gestes="{" ".join(block["gestes"])}"' in content
 
     def test_the_header_recalls_the_search(self, client, fiche):
         content = client.get(
