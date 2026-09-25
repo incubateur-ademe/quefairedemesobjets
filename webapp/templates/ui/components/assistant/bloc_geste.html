@@ -42,13 +42,19 @@ modèle, jamais échappé à la volée dans le gabarit.
     solutions est une page entière, qui n'en contient aucun — sans cela, Turbo
     affiche « Content missing ».
     {% endcomment %}
+    {% comment %}
+    `url_compte` : le nombre de solutions à proximité arrive après le rendu
+    (ADR 0010, compteur différé) et remplace le libellé ; sans solution, le
+    bouton passe en style secondaire mais reste un lien vers la carte.
+    {% endcomment %}
     <a class="qfa-bouton qfa-bouton--primaire"
        href="{{ url }}"
        data-turbo-frame="_top"
-       data-controller="assistant-prefetch"
+       data-controller="assistant-prefetch assistant-compteur"
+       data-assistant-compteur-url-value="{{ url_compte|default:'' }}"
        data-action="mouseenter->assistant-prefetch#prefetch
                     touchstart->assistant-prefetch#prefetch">
-        {{ appel_action|default:"Je découvre les solutions" }}
+        <span data-assistant-compteur-target="libelle">{{ appel_action|default:"Je découvre les solutions" }}</span>
         <span class="qfa-bouton__fleche" aria-hidden="true"></span>
     </a>
 </article>

@@ -25,6 +25,7 @@ from ninja.pagination import paginate
 from pydantic import field_validator, model_validator
 
 from assistant.adresses import suggest_adresses
+from assistant.compte import count_nearby
 from assistant.objets import sous_categorie_ids_for, suggest_objets
 from qfdmo.models.acteur import MAX_PLACES_ON_MAP, DataLicense, DisplayedActeur
 from qfdmo.models.action import GroupeAction
@@ -75,10 +76,7 @@ class LieuxQuery(Schema):
     @field_validator("geste")
     @classmethod
     def clean_geste(cls, codes: list[str]) -> list[str]:
-        codes = [code.strip() for code in codes if code.strip()]
-        if not codes:
-            raise ValueError("geste required")
-        return codes
+        return _clean_codes(codes)
 
     @field_validator("bbox")
     @classmethod
@@ -109,6 +107,32 @@ class LieuxQuery(Schema):
         if self.bbox:
             return acteurs.within(self.bbox)
         return acteurs.nearest_to(self.longitude, self.latitude)
+
+
+def _clean_codes(codes: list[str]) -> list[str]:
+    codes = [code.strip() for code in codes if code.strip()]
+    if not codes:
+        raise ValueError("geste required")
+    return codes
+
+
+class CompteQuery(Schema):
+    """Same words as `LieuxQuery`, but a point is required: "à proximité" is
+    a radius around the address, not a map area."""
+
+    geste: list[str] = Field(..., description="Code d'un GroupeAction, répétable.")
+    fiche: str = Field("", description="Slug d'une fiche objet. Inconnu : 404.")
+    longitude: float = Field(..., ge=-180, le=180)
+    latitude: float = Field(..., ge=-90, le=90)
+
+    @field_validator("geste")
+    @classmethod
+    def clean_geste(cls, codes: list[str]) -> list[str]:
+        return _clean_codes(codes)
+
+
+class CompteSchema(Schema):
+    count: int
 
 
 class PropositionSchema(Schema):
@@ -286,6 +310,21 @@ def lieux_geojson(request, response: HttpResponse, query: Query[LieuxQuery]):
     # debug overlay.
     response["Server-Timing"] = f'acteurs;dur={duration_ms:.1f};desc="lieux"'
     return payload
+
+
+@router.get(
+    "/lieux/compte",
+    response=CompteSchema,
+    url_name="lieux-compte",
+    summary="Nombre de lieux à moins de 20 km",
+)
+@decorate_view(CACHE_FIVE_MINUTES)
+def lieux_compte(request, query: Query[CompteQuery]):
+    """Ce que le bouton d'un bloc de la fiche affiche une fois la page rendue
+    (ADR 0010) : le compte est approché, par maille d'environ un kilomètre,
+    et mis en cache 12 h."""
+    ids = sous_categorie_ids_for(query.fiche) if query.fiche else []
+    return {"count": count_nearby(query.geste, ids, query.longitude, query.latitude)}
 
 
 @router.get(

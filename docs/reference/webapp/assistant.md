@@ -63,8 +63,9 @@ Tests : `unit_tests/assistant/` (seul dossier collecté par `make unit-test`).
 | `/assistant/lieu/<uuid>/`  | `LieuView`      | HTML                   |
 
 Les écrans sont les premiers clients de l'[API publique v1](../apis/v1.md) :
-la carte et les deux champs de recherche appellent `/api/v1/…`. Il n'existe
-pas de second chemin de code à tenir au niveau.
+la carte, les deux champs de recherche et le compteur de chaque bloc de la
+fiche appellent `/api/v1/…`. Il n'existe pas de second chemin de code à tenir
+au niveau.
 
 Le contrat complet est dans le chapitre 10 des specs (branche
 `assistant-v2-specs`).
