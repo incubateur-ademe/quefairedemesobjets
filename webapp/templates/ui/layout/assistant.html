@@ -15,6 +15,15 @@
     the rest crossfades. Browsers without the API just swap.
     {% endcomment %}
     <meta name="view-transition" content="same-origin">
+    {% comment %}
+    Pas d'aperçu depuis le cache d'instantanés : Turbo n'anime qu'une seule
+    fois par visite, et quand la destination est en cache il anime vers
+    l'aperçu, puis remplace la page réelle sans transition. Dès qu'un écran
+    a été visité, chaque retour se terminait donc par un remplacement sec, et
+    le contrôleur de la carte était connecté deux fois. Les réponses arrivent
+    en moins de 100 ms : l'aperçu n'apportait rien.
+    {% endcomment %}
+    <meta name="turbo-cache-control" content="no-preview">
     <title>{% block title %}Assistant au tri, au réemploi et à la réparation{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'assistant.css' %}">
     <script type="module" src="{% static 'assistant.js' %}"></script>
