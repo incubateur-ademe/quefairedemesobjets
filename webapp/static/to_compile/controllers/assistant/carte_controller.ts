@@ -89,9 +89,12 @@ export default class extends Controller<HTMLElement> {
 
     const existing = (canvas as HTMLElement & { assistantMap?: PersistedMap })
       .assistantMap
-    this.state = existing ?? (await this.#createMap(canvas))
-    if (!this.state) return
-    ;(canvas as HTMLElement & { assistantMap?: PersistedMap }).assistantMap = this.state
+    const state = existing ?? (await this.#createMap(canvas))
+    // Disconnected while the map was being created (a second render of the
+    // same screen): the next instance owns the canvas, this one steps aside.
+    if (!state || !this.element.isConnected) return
+    this.state = state
+    ;(canvas as HTMLElement & { assistantMap?: PersistedMap }).assistantMap = state
 
     if (existing) this.#reuse(existing)
 
@@ -108,7 +111,9 @@ export default class extends Controller<HTMLElement> {
     this.#placeAddressMarker()
 
     if (!existing) {
-      await this.state.map.once("load")
+      await state.map.once("load")
+      // `disconnect()` may have run during the wait: it cleared `this.state`.
+      if (this.state !== state) return
       // MapLibre opens the compact attribution on load; the mockup shows it
       // folded (30141:9028). It stays openable by the user.
       canvas
@@ -118,8 +123,8 @@ export default class extends Controller<HTMLElement> {
 
     // `moveend` is only wired after `load`: the resize and the style setup
     // emit it, which would trigger a second load identical to the first.
-    this.state.onMoveEnd = () => this.refresh()
-    this.state.map.on("moveend", this.state.onMoveEnd)
+    state.onMoveEnd = () => this.refresh()
+    state.map.on("moveend", state.onMoveEnd)
     await places
   }
 
