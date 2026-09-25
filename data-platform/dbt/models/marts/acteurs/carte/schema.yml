@@ -29,7 +29,7 @@ models:
       - name: location
         description: "La localisation de l'acteur"
       - name: telephone
-        description: "Le numéro de téléphone de l'acteur"
+        description: "Le numéro de téléphone publiable de l'acteur (vide si mobile 06/07 ou si l'acteur ou un de ses enfants vient de Carteco)"
       - name: nom_commercial
         description: "Le nom commercial de l'acteur"
       - name: nom_officiel
