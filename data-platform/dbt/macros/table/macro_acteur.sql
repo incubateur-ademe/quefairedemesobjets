@@ -34,7 +34,26 @@ SELECT DISTINCT efa.uuid,
     {{ field_empty('efa.url') }} AS url,
     {{ field_empty('efa.email') }} AS email,
     efa.location,
-    {{ field_empty('efa.telephone') }} AS telephone,
+    -- Téléphone tel qu'il peut être publié : les numéros mobiles (06/07) et
+    -- ceux issus de Carteco ne le sont pas. La règle vivait dans l'export
+    -- opendata seul ; la carte et l'API publique (/api/v1/lieux) lisent la
+    -- même table, elle s'applique donc ici, une fois pour toutes.
+    CASE
+        WHEN efa.telephone ~ '^0[67]' THEN ''
+        WHEN EXISTS (
+            SELECT 1
+            FROM {{ ref(ephemeral_filtered_acteur) }} AS carteco
+            INNER JOIN {{ ref('base_source') }} AS src
+                ON carteco.source_id = src.id
+            WHERE
+                src.code = 'carteco'
+                AND (
+                    carteco.identifiant_unique = efa.identifiant_unique
+                    OR carteco.parent_id = efa.identifiant_unique
+                )
+        ) THEN ''
+        ELSE {{ field_empty('efa.telephone') }}
+    END AS telephone,
     {{ field_empty('efa.nom_commercial') }} AS nom_commercial,
     {{ field_empty('efa.nom_officiel') }} AS nom_officiel,
     {{ field_empty('efa.siren') }} AS siren,
