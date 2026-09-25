@@ -65,6 +65,12 @@ class TestLayout:
         """RGAA 12.7: without {% dsfr_skiplinks %}, ours must be there."""
         assert "qfa-skiplink" in client.get(reverse("assistant:home")).content.decode()
 
+    def test_layout_forbids_snapshot_previews(self, client):
+        """Turbo animates once per visit: with a cached preview, the real page
+        then lands without transition and the map controller connects twice."""
+        content = client.get(reverse("assistant:home")).content.decode()
+        assert 'name="turbo-cache-control" content="no-preview"' in content
+
     def test_layout_is_not_indexed(self, client):
         """#3434: no SEO for content embedded in an iframe."""
         assert "noindex" in client.get(reverse("assistant:home")).content.decode()

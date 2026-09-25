@@ -25,7 +25,10 @@ Cette app ne possède **aucun modèle**. Elle orchestre :
   (`maplibre-worker.ts`, cible `worker`)
 - **Turbo Drive** actif : chaque écran est une page Django, Turbo remplace le
   `<body>` sans recharger, avec une View Transition ; la toile de la carte est
-  un élément permanent qui survit aux changements d'écran
+  un élément permanent qui survit aux changements d'écran. Les aperçus depuis
+  le cache d'instantanés sont coupés (`turbo-cache-control: no-preview`) :
+  Turbo n'anime qu'une fois par visite, et un aperçu prenait cette animation
+  avant un remplacement sec par la page réelle
 - **carte-facile** (IGN/DINUM) pour le fond de carte désaturé
 - **BAN** (`data.geopf.fr`) pour l'autocomplétion d'adresse
 - **Public Sans** (`@fontsource-variable/public-sans`), la police du Figma,
