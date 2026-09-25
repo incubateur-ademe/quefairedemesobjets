@@ -64,5 +64,12 @@ class TestSolutionsCount:
     def test_returns_400_on_unknown_objet(self, client, reparer):
         assert get_count(client, geste="reparer", fiche="inconnu").status_code == 400
 
+    def test_does_not_reflect_the_unknown_objet(self, client, reparer):
+        """A reflected slug in an HTML body would be an XSS vector."""
+        response = get_count(client, geste="reparer", fiche="<script>")
+        assert response.status_code == 400
+        assert response["Content-Type"] == "application/json"
+        assert b"<script>" not in response.content
+
     def test_is_cacheable(self, client, reparer):
         assert "max-age" in get_count(client, geste="reparer").headers["Cache-Control"]

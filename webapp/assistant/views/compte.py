@@ -1,7 +1,7 @@
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.core.cache import cache
-from django.http import Http404, HttpResponseBadRequest, JsonResponse
+from django.http import Http404, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_control
@@ -36,13 +36,15 @@ class SolutionsCountView(View):
         gestes = [g.strip() for g in request.GET.getlist("geste") if g.strip()]
         parcours = Parcours.from_query(request.GET)
         if not gestes or not parcours.is_located:
-            return HttpResponseBadRequest("geste and position required")
+            return _bad_request("geste and position required")
 
         slug = (request.GET.get("fiche") or "").strip()
         try:
             sous_categorie_ids = sous_categorie_ids_for(slug) if slug else []
         except Http404:
-            return HttpResponseBadRequest(f"unknown objet: {slug}")
+            # The slug is not echoed back: a reflected value in an HTML
+            # body is an XSS vector (CodeQL py/reflective-xss).
+            return _bad_request("unknown objet")
 
         cell = (
             round(parcours.longitude, COORDINATE_PRECISION),
@@ -59,6 +61,10 @@ class SolutionsCountView(View):
             count = _count(gestes, sous_categorie_ids, cell)
             cache.set(key, count, COUNT_CACHE_TTL)
         return JsonResponse({"count": count})
+
+
+def _bad_request(message: str) -> JsonResponse:
+    return JsonResponse({"error": message}, status=400)
 
 
 def _count(gestes, sous_categorie_ids, cell) -> int:
