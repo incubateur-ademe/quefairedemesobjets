@@ -216,5 +216,5 @@ class TestBlockLinks:
         )[0]
 
         assert without["url_compte"] == ""
-        assert located["url_compte"].startswith(reverse("assistant:solutions-compte"))
+        assert located["url_compte"].startswith(reverse("api_v1:lieux-compte"))
         assert "longitude=-0.56" in located["url_compte"]
