@@ -1,3 +1,6 @@
+"""Screens of the assistant. The JSON endpoints live in `assistant/api.py`,
+mounted at `/api/v1/`."""
+
 from django.urls import path
 
 from assistant import views
@@ -10,11 +13,4 @@ urlpatterns = [
     path("objet/<slug:slug>/", views.ProduitView.as_view(), name="produit"),
     path("solutions/", views.SolutionsView.as_view(), name="solutions"),
     path("lieu/<str:uuid>/", views.LieuView.as_view(), name="lieu"),
-    path("lieux.geojson", views.LieuxGeoJSONView.as_view(), name="lieux-geojson"),
-    path("recherche/objet", views.ObjetSearchView.as_view(), name="recherche-objet"),
-    path(
-        "recherche/adresse",
-        views.AdresseSearchView.as_view(),
-        name="recherche-adresse",
-    ),
 ]

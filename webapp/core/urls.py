@@ -31,7 +31,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from qfdmd.models import Synonyme
 
-from .api import api
+from .api import api, api_v1
 from .views import AutocompleteSynonyme, backlink, healthz, robots_txt
 
 info_dict = {
@@ -82,6 +82,8 @@ urlpatterns = (
     + sitemap_urlpatterns
     + [
         path("admin/", admin.site.urls),
+        # Before "api/": Django would otherwise try "v1/…" inside the old API.
+        path("api/v1/", api_v1.urls),
         path("api/", api.urls),
         path("healthz/", healthz),
         path("robots.txt", robots_txt),
