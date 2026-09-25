@@ -20,9 +20,10 @@ application.register("assistant-combobox", ComboboxController)
 application.register("assistant-prefetch", PrefetchController)
 application.register("assistant-submit", SubmitController)
 
-// The assistant lives in an iframe: taking over the host document's
-// navigation through Turbo Drive would make no sense.
-Turbo.session.drive = false
+// Turbo Drive is on: every screen change is a body swap, with view
+// transitions and prefetch for free. The assistant lives in an iframe, but
+// Drive only drives the iframe's own document, never the host page.
+Turbo.session.drive = true
 
 application.debug = Boolean(document.documentElement.dataset.stimulusDebug)
 

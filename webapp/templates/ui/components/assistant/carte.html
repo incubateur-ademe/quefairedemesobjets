@@ -26,12 +26,7 @@
     data-assistant-carte-precise-address-value="{{ adresse_precise|yesno:'true,false' }}"
     style="--qfa-geste-color: {{ couleur_geste }}"
 >
-    <div
-        class="qfa-carte__canvas"
-        data-assistant-carte-target="container"
-        role="application"
-        aria-label="Carte des lieux proposant ce geste"
-    ></div>
+    {% include "ui/components/assistant/carte_canvas.html" %}
 
     {% if debug %}
         <div class="qfa-chrono" data-controller="assistant-chrono">
