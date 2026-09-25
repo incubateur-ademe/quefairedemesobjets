@@ -108,7 +108,7 @@ SELECT
         AS site_web,
     -- Masqué en amont, dans le mart (macro acteur) : même règle pour la
     -- carte, l'API et l'export.
-    NULLIF(da.telephone, '')
+    nullif(da.telephone, '')
         AS telephone,
     -- Exclude addresses for actors 'A_DOMICILE'
     CASE
