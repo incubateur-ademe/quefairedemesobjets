@@ -1,3 +1,6 @@
+"""Screens of the assistant. The JSON endpoints live in `assistant/api.py`,
+mounted at `/api/v1/`."""
+
 from django.urls import path
 
 from assistant import views

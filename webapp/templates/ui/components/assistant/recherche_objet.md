@@ -20,7 +20,7 @@ Le composant émet `assistant-combobox:chosen` avec
 
 ## Endpoint dédié
 
-`GET /assistant/recherche/objet?q=chaise` renvoie du **JSON**, pas du HTML :
+`GET /api/v1/objets?q=chaise` renvoie du **JSON**, pas du HTML :
 
 ```json
 { "results": [{ "label": "Chaise", "slug": "meubles" }] }

@@ -7,7 +7,7 @@ qui décide de l'affichage de la punaise rouge (#3356).
 
 Trois caractères minimum : la BAN ne répond pas en deçà.
 {% endcomment %}
-{% comment %}ponytail: no suggestions endpoint yet, it comes with the API (#3434).{% endcomment %}
+{% url 'api_v1:adresses' as url_recherche %}
 <div class="qfa-combobox"
      id="{{ id|default:'recherche-adresse' }}"
      data-controller="assistant-combobox"
