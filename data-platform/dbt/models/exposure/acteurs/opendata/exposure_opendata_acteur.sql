@@ -106,19 +106,9 @@ SELECT
         AS type_dacteur,
     da.url
         AS site_web,
-    CASE
-        WHEN da.telephone ~ '^0[67]' THEN NULL
-        WHEN EXISTS (
-            SELECT 1
-            FROM {{ ref('marts_opendata_acteur_sources') }} AS das2
-            INNER JOIN {{ ref('base_source') }} AS s
-                ON das2.source_id = s.id
-            WHERE
-                das2.acteur_id = da.identifiant_unique
-                AND s.code = 'carteco'
-        ) THEN NULL
-        ELSE da.telephone
-    END
+    -- Masqué en amont, dans le mart (macro acteur) : même règle pour la
+    -- carte, l'API et l'export.
+    nullif(da.telephone, '')
         AS telephone,
     -- Exclude addresses for actors 'A_DOMICILE'
     CASE
