@@ -121,7 +121,7 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
                 "url": f"{reverse('assistant:solutions')}?{params}",
                 # Fetched after the page renders, only when there is a position.
                 "url_compte": (
-                    f"{reverse('assistant:solutions-compte')}?{params}"
+                    f"{reverse('api_v1:lieux-compte')}?{params}"
                     if parcours and parcours.is_located
                     else ""
                 ),
