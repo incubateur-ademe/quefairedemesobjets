@@ -8,6 +8,7 @@ from sites_conformes.content_manager.blocks import (
 from sites_conformes.content_manager.blocks import (
     CommonStreamBlock,
 )
+from sites_conformes.content_manager.constants import GRID_3_4_6_CHOICES
 from wagtail import blocks
 from wagtail.snippets.blocks import SnippetChooserBlock
 
@@ -76,6 +77,87 @@ class CarteBlock(blocks.StructBlock):
         icon = "map"
 
 
+# The three conditions of an objet, badges of the fiche (Figma 24381:25) and
+# values of the `etat` column in the consignes open data.
+ETAT_CHOICES = [
+    ("reparable", "Réparable"),
+    ("bon_etat", "Bon état"),
+    ("mauvais_etat", "Mauvais état"),
+]
+
+
+def action_choices():
+    """Action codes, the vocabulary of the acteurs open data: a reuser joins
+    a consigne to the places on `gestes` without a mapping table.
+
+    Every action, whatever `afficher` says: that flag hides an action from
+    the carte's filters, and `trier` is hidden there while being the geste
+    of every déchet consigne.
+    """
+    from qfdmo.models.action import Action
+
+    return list(Action.objects.order_by("order").values_list("code", "libelle"))
+
+
+class ConsigneBlock(blocks.StructBlock):
+    """One consigne: what to do with the objet or déchet for given gestes.
+
+    Typed fields rather than free badges so the content can be exported as
+    open data and read by the assistant (#3284).
+    """
+
+    titre = blocks.CharBlock(label="Titre")
+    contenu = blocks.RichTextBlock(
+        label="Contenu", features=["bold", "link", "ol", "ul"]
+    )
+    lien = blocks.PageChooserBlock(label="Lien vers une page du site", required=False)
+    gestes = blocks.MultipleChoiceBlock(
+        label="Gestes",
+        choices=action_choices,
+        help_text="Les gestes que cette consigne décrit (donner, revendre…)",
+    )
+    etat = blocks.ChoiceBlock(
+        label="État",
+        choices=ETAT_CHOICES,
+        required=False,
+        help_text="Objets uniquement",
+    )
+    lieu_de_depot = SnippetChooserBlock(
+        "qfdmd.LieuDeDepot",
+        label="Lieu de dépôt",
+        required=False,
+        help_text="Déchets uniquement",
+    )
+    bonus_reparation = blocks.BooleanBlock(
+        label="Éligible au bonus réparation", required=False
+    )
+
+    class Meta:
+        template = "ui/blocks/consigne.html"
+        icon = "list-ul"
+        label = "Consigne"
+
+
+class ConsignesBlock(blocks.StructBlock):
+    """A grid of consignes: the item grid of Sites conformes, with typed
+    cards. A page may hold several, for instance one per lieu de dépôt.
+    The column widths are those of the item grid, so a migrated row keeps
+    its layout."""
+
+    column_width = blocks.ChoiceBlock(
+        label="Largeur de colonne",
+        choices=[*GRID_3_4_6_CHOICES, ("12", "12/12")],
+        default="4",
+    )
+    consignes = blocks.ListBlock(ConsigneBlock(), label="Consignes", max_num=4)
+
+    class Meta:
+        template = "ui/blocks/consignes.html"
+        icon = "grip"
+        label = "Grille de consignes"
+        group = "3. Page structure"
+
+
 class CustomBlockMixin(CommonStreamBlock):
     """Mixin to add common custom blocks to any block class."""
 
@@ -108,6 +190,7 @@ STREAMFIELD_COMMON_BLOCKS = [
     *sites_conformes_BLOCKS,
     ("break", BreakBlock()),
     ("carte", CarteBlock(label="Carte")),
+    ("consignes", ConsignesBlock()),
     (
         "liens",
         blocks.ListBlock(

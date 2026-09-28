@@ -218,3 +218,88 @@ class TestBlockLinks:
         assert without["url_compte"] == ""
         assert located["url_compte"].startswith(reverse("api_v1:lieux-compte"))
         assert "longitude=-0.56" in located["url_compte"]
+
+
+class TestConsignesFromTheCms:
+    """Once a fiche carries a grid of consignes (#3284), the static text
+    gives way to the CMS content."""
+
+    @pytest.fixture
+    def fiche(self):
+        from qfdmd.models import LieuDeDepot
+        from unit_tests.qfdmd.test_consignes_block import consigne, grid, page_with
+
+        bac = LieuDeDepot.objects.get(code="bac_de_tri")
+        return page_with(
+            grid(
+                consigne(
+                    "Le faire réparer",
+                    id="rep",
+                    etat="reparable",
+                    bonus_reparation=True,
+                    gestes=["reparer"],
+                ),
+                consigne(
+                    "Donner ou revendre",
+                    id="don",
+                    etat="bon_etat",
+                    gestes=["donner", "revendre", "echanger"],
+                ),
+                consigne("Au bac", id="bac", lieu_de_depot=bac.pk, gestes=["trier"]),
+            ),
+            parent=None,
+        )
+
+    def test_the_cms_replaces_the_static_text(self, fiche):
+        consignes = consignes_for(fiche)
+
+        assert [c["code"] for c in consignes] == ["rep", "don", "bac"]
+        assert [c["libelle"] for c in consignes] == [
+            "Le faire réparer",
+            "Donner ou revendre",
+            "Au bac",
+        ]
+        assert "<p>Au bac</p>" in str(consignes[2]["consigne"])
+
+    def test_actions_become_groupes_without_repetition(self, fiche):
+        """`geste` on the solutions screen is a GroupeAction: donner, revendre
+        and echanger fold into two groupes, in the order of the actions."""
+        donner = consignes_for(fiche)[1]
+
+        assert donner["gestes"] == ["donner_echanger_rapporter", "vendre_acheter"]
+        assert donner["url"].endswith(
+            "?fiche="
+            + fiche.slug
+            + "&geste=donner_echanger_rapporter&geste=vendre_acheter"
+        )
+
+    def test_badges_follow_the_fields(self, fiche):
+        badges = {
+            c["code"]: [(b["condition"], b["libelle"]) for b in c["badges"]]
+            for c in consignes_for(fiche)
+        }
+
+        assert badges["rep"] == [
+            ("reparable", "Réparable"),
+            ("bonus", "Bonus Réparation"),
+        ]
+        assert badges["don"] == [("bon_etat", "Bon état")]
+        assert badges["bac"] == [("lieu_de_depot", "Bac de tri")]
+
+    def test_a_consigne_whose_actions_have_no_groupe_is_skipped(self):
+        from qfdmo.models.action import Action
+        from unit_tests.qfdmd.test_consignes_block import consigne, grid, page_with
+
+        Action.objects.filter(code="trier").update(groupe_action=None)
+        fiche = page_with(grid(consigne("Orphan", gestes=["trier"])), parent=None)
+
+        assert consignes_for(fiche) == []
+
+    def test_a_fiche_without_grid_keeps_the_static_text(self):
+        fiche = ProduitPageFactory(parent=None)
+
+        assert [c["code"] for c in consignes_for(fiche)] == [
+            "reparer",
+            "donner_revendre",
+            "trier",
+        ]
