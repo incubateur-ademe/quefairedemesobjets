@@ -156,7 +156,13 @@ def load_acteurs(
                 f"Invalid table name {table_name!r}. Only letters, digits, dots "
                 "and underscores are allowed."
             )
-        sql = f"SELECT * FROM {table_name}"
+        # Quote each schema/table component: unquoted identifiers are folded to
+        # lowercase by Postgres, but the acteurs table is created by pandas
+        # `to_sql` with quotes, so its case (e.g. the `T` in the run-id
+        # timestamp) is preserved. Without quotes the read would target the
+        # lowercased name and fail with "relation ... does not exist".
+        qualified = ".".join(f'"{part}"' for part in table_name.split("."))
+        sql = f"SELECT * FROM {qualified}"
         logger.info("Querying acteurs from table: %s", table_name)
         df = pl.read_database_uri(sql, uri=database_uri)
         logger.info("Found %d acteurs", len(df))

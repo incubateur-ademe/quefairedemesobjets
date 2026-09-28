@@ -14,8 +14,10 @@
 # at boot): registry_image, registry, scw_access_key, scw_secret_key,
 # ssh_public_key.
 
-ssh_authorized_keys:
-  - ${ssh_public_key}
+# Log all cloud-init output (including runcmd) so failures are visible in
+# /var/log/cloud-init-output.log.
+output:
+  all: "| tee -a /var/log/cloud-init-output.log"
 
 write_files:
   - path: /etc/ml-deduplication.env
@@ -26,11 +28,29 @@ write_files:
       SCW_SECRET_KEY=${scw_secret_key}
 
 runcmd:
-  # Single shell script: cloud-init runs each runcmd entry in its own shell, so
-  # all provisioning steps share one process (env sourcing persists).
+  # Single shell script: cloud-init runs each runcmd entry in its own shell
+  # (via /bin/sh, dash on Ubuntu), so all provisioning steps share one process
+  # (env sourcing persists). Use only POSIX-safe shell options: `set -o
+  # pipefail` is a bash-ism that would make dash abort this block immediately,
+  # silently skipping every provisioning step below.
   - |
-    set -euxo pipefail
+    set -eu
+    if [ -n "${BASH_VERSION:-}" ]; then set -o pipefail; fi
     . /etc/ml-deduplication.env
+
+    # 0. Authorize the DAG's SSH key for root. Scaleway's Ubuntu images log in
+    #    as root, and cloud-init's ssh_authorized_keys directive only targets the
+    #    default non-root user. Also, Scaleway's scw-fetch-ssh-keys regenerates
+    #    /root/.ssh/authorized_keys at every boot from project keys + the file
+    #    /root/.ssh/instance_keys, so appending to authorized_keys directly would
+    #    be wiped on reboot. Instead, drop the key into instance_keys (imported by
+    #    scw-fetch-ssh-keys) and regenerate authorized_keys to include it now.
+    mkdir -p /root/.ssh
+    chmod 0700 /root/.ssh
+    grep -qxF '${ssh_public_key}' /root/.ssh/instance_keys 2>/dev/null \
+      || printf '%s\n' '${ssh_public_key}' >> /root/.ssh/instance_keys
+    chmod 0600 /root/.ssh/instance_keys
+    scw-fetch-ssh-keys --upgrade || true
 
     # 1. Install Docker Engine + Compose plugin (official repo)
     apt-get update
@@ -44,7 +64,7 @@ runcmd:
     systemctl enable --now docker
 
     # 2. Authenticate to the (private) Scaleway container registry
-    set +x; echo "$SCW_SECRET_KEY" | docker login "$REGISTRY" -u nologin --password-stdin; set -x
+    echo "$SCW_SECRET_KEY" | docker login "$REGISTRY" -u nologin --password-stdin
 
     # 3. Pull the inference image so a later `docker run` starts instantly
     docker pull "$REGISTRY_IMAGE"

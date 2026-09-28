@@ -52,6 +52,17 @@ RUN apt-get install -y --no-install-recommends \
 # Installation du client Scaleway CLI
 RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
 
+# Client Docker CLI (sans daemon) pour le mode local d'inférence ML:
+# il permet d'exécuter `docker run` de l'image d'inférence en s'appuyant sur le
+# socket Docker du host (monté en lecture seule via docker-compose). Nécessaire
+# uniquement pour le mode `run_locally` du DAG ml_deduplication.
+RUN DOCKER_ARCH="$(uname -m | sed 's/x86_64/x86_64/; s/aarch64/aarch64/; s/armv7l/armhf/')" \
+    && curl -fsSL "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-27.3.1.tgz" -o /tmp/docker.tgz \
+    && tar -xzf /tmp/docker.tgz -C /tmp \
+    && mv /tmp/docker/docker /usr/local/bin/docker \
+    && rm -rf /tmp/docker /tmp/docker.tgz \
+    && docker --version
+
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
 ENV VIRTUAL_ENV=/opt/airflow/.venv \

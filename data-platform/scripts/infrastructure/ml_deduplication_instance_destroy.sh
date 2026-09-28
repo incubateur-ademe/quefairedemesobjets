@@ -5,9 +5,15 @@
 
 set -euo pipefail
 
+# Local mode: no Scaleway instance was created, so this is a no-op.
+if [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "1" ] || [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "true" ]; then
+  echo "ml-deduplication: local mode, skipping instance termination"
+  exit 0
+fi
+
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-1}"
+ZONE="${ZONE:-fr-par-2}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 SECURITY_GROUP_NAME="${INSTANCE_NAME}-sg"
 

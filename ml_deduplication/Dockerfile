@@ -18,11 +18,11 @@ WORKDIR /app
 # System deps: git for uv, libpq for psycopg2, build tools for wheels
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-      ca-certificates \
-      curl \
-      git \
-      libpq-dev \
-      build-essential \
+    ca-certificates \
+    curl \
+    git \
+    libpq-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv (official installer)

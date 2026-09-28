@@ -10,11 +10,27 @@
 
 set -euo pipefail
 
+# Local mode: no Scaleway instance to wait for, so this is a no-op.
+if [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "1" ] || [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "true" ]; then
+  echo "ml-deduplication: local mode, skipping instance readiness wait"
+  exit 0
+fi
+
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-1}"
+ZONE="${ZONE:-fr-par-2}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
-SSH_KEY="${ML_DEDUPLICATION_SSH_KEY:?ML_DEDUPLICATION_SSH_KEY (path to SSH private key) must be set}"
+# Private SSH key: prefer the base64-encoded value injected as a container
+# secret (ML_DEDUPLICATION_SSH_KEY_B64, e.g. from Terraform); decode it to a
+# temp file. Otherwise fall back to a pre-placed key file path (ML_DEDUPLICATION_SSH_KEY).
+if [ -n "${ML_DEDUPLICATION_SSH_KEY_B64:-}" ]; then
+  SSH_KEY="$(mktemp)"
+  chmod 0600 "${SSH_KEY}"
+  printf '%s' "${ML_DEDUPLICATION_SSH_KEY_B64}" | base64 -d > "${SSH_KEY}"
+  trap 'rm -f "${SSH_KEY}"' EXIT
+else
+  SSH_KEY="${ML_DEDUPLICATION_SSH_KEY:?ML_DEDUPLICATION_SSH_KEY (path to SSH private key) must be set}"
+fi
 SSH_USER="${ML_DEDUPLICATION_SSH_USER:-root}"
 IMAGE_REF="${ML_DEDUPLICATION_IMAGE:?ML_DEDUPLICATION_IMAGE must be set (full registry image ref)}"
 TIMEOUT="${ML_DEDUPLICATION_WAIT_TIMEOUT:-600}"

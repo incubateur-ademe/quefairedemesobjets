@@ -1,6 +1,6 @@
 [project]
 name = "ml-deduplication"
-version = "0.1.0"
+version = "0.2.0"
 description = "Machine learning project for acteur deduplication."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -20,6 +20,8 @@ dependencies = [
     "tqdm>=4.69.0",
     "sentence-transformers>=5.7.0",
     "polars-distance>=0.5.3",
+    "psycopg2>=2.9.12",
+    "pandas>=3.0.3",
 ]
 
 [dependency-groups]
@@ -28,7 +30,6 @@ dev = ["ipykernel>=7.3.0", "pandas>=3.0.3", "py-spy>=0.4.2", "ruff>=0.15.18"]
 training = [
     "dedupe>=3.0.3",
     "plotly>=6.9.0",
-    "psycopg2>=2.9.12",
     "splink>=4,<5",
     "tqdm-joblib>=0.0.5",
     "spatial-polars>=0.3.0",
