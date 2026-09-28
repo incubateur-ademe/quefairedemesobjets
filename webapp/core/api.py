@@ -1,5 +1,6 @@
 from assistant.api import router as assistant_router
 from ninja import NinjaAPI
+from qfdmd.api import router as fiches_router
 from qfdmo.api import router as qfdmo_router
 from stats.api import router as stats_router
 
@@ -20,3 +21,4 @@ api_v1 = NinjaAPI(
     ),
 )
 api_v1.add_router("/", assistant_router, tags=["Assistant"])
+api_v1.add_router("/", fiches_router, tags=["Fiches"])
