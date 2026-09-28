@@ -10,13 +10,25 @@
 
 set -euo pipefail
 
+# Local mode: no Scaleway instance is needed, so this is a no-op.
+if [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "1" ] || [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "true" ]; then
+  echo "ml-deduplication: local mode, skipping instance creation"
+  exit 0
+fi
+
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-1}"
+ZONE="${ZONE:-fr-par-2}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 SECURITY_GROUP_NAME="${INSTANCE_NAME}-sg"
-INSTANCE_TYPE="${ML_DEDUPLICATION_INSTANCE_TYPE:-PRO2-XXS}"
-VOLUME_SIZE="${ML_DEDUPLICATION_VOLUME_SIZE:-60}"
+INSTANCE_TYPE="${ML_DEDUPLICATION_INSTANCE_TYPE:-L4-1-24G}"
+VOLUME_SIZE="${ML_DEDUPLICATION_VOLUME_SIZE:-125}"
+
+# OS image for the instance. Defaults to the Ubuntu 24.04 Noble GPU image
+# ("Ubuntu Noble GPU OS 13 (Nvidia)") which ships NVIDIA drivers — required for
+# GPU instance types (L4, H100, ...). Plain CPU images (ubuntu_jammy) are not
+# offered for GPU commercial types.
+IMAGE_LABEL="${ML_DEDUPLICATION_OS_IMAGE:-ubuntu_noble_gpu_os_13_nvidia}"
 
 # Inference image published by CI (single full reference, e.g.
 # rg.fr-par.scw.cloud/ns-.../ml-deduplication-inference:latest)
@@ -30,6 +42,12 @@ CLOUD_INIT_TPL="/opt/airflow/scripts/infrastructure/ml_deduplication_cloud_init.
 # Public key injected into the instance so the DAG can SSH in to drive it
 # (wait for readiness + run inference). See ML_DEDUPLICATION_SSH_KEY (private key).
 SSH_PUB_KEY="${ML_DEDUPLICATION_SSH_PUB_KEY:?ML_DEDUPLICATION_SSH_PUB_KEY must be set}"
+
+# Scaleway's scw-fetch-ssh-keys imports keys from server tags named
+# "AUTHORIZED_KEY=<pubkey>" (spaces replaced with underscores). This is more
+# reliable than cloud-init injection because the tag is set at the API level and
+# fetched at every boot, and it also works with the image's own user provisioning.
+AUTHORIZED_KEY_TAG="AUTHORIZED_KEY=$(printf '%s' "${SSH_PUB_KEY}" | tr ' ' '_')"
 
 render_user_data() {
   # Replace the brace-delimited `${var}` placeholders in the cloud-init template.
@@ -85,9 +103,8 @@ printf '%s\n' "${user_data}" > "${tmp_cloud_init}"
 instance_id="$(scw instance server create \
   zone="${ZONE}" \
   type="${INSTANCE_TYPE}" \
-  image=ubuntu_jammy \
+  image="${IMAGE_LABEL}" \
   name="${INSTANCE_NAME}" \
-  root-volume="${VOLUME_SIZE}GB" \
   ip=new \
   security-group-id="${security_group_id}" \
   cloud-init="@${tmp_cloud_init}" \
@@ -95,6 +112,7 @@ instance_id="$(scw instance server create \
   tags.1="${PREFIX}" \
   tags.2=ml-deduplication \
   tags.3=inference \
+  tags.4="${AUTHORIZED_KEY_TAG}" \
   -o json | jq -r '.server.id')"
 
 echo "ml-deduplication: instance created: ${instance_id}"

@@ -77,7 +77,6 @@ def block_df(
     from features l
     inner join features r on l.siren=r.siren
     where l.identifiant_unique < r.identifiant_unique
-    AND l.siren=r.siren
     AND {business_rules_filter_sql})
 """)
 
@@ -92,9 +91,8 @@ def block_df(
             l.identifiant_unique as identifiant_unique_l,
             r.identifiant_unique as identifiant_unique_r
         from features l
-        inner join features r on l.siren=r.siren
+        inner join features r on l.code_postal[:2]=r.code_postal[:2]
         where l.identifiant_unique < r.identifiant_unique
-        AND l.code_postal[:2]=r.code_postal[:2]
         AND {business_rules_filter_sql})
     """)
     logger.info(
@@ -108,13 +106,12 @@ def block_df(
                 l.identifiant_unique as identifiant_unique_l,
                 r.identifiant_unique as identifiant_unique_r
             from features l
-            inner join features r on l.siren=r.siren
-            where l.identifiant_unique < r.identifiant_unique
-            AND ST_DWithin_Spheroid(
+            inner join features r on ST_DWithin_Spheroid(
                 ST_Point2D(l.latitude,l.longitude),
                 ST_Point2D(r.latitude,r.longitude),
                 30000
             )
+            where l.identifiant_unique < r.identifiant_unique
             AND {business_rules_filter_sql})
         """)
 

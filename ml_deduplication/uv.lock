@@ -1621,14 +1621,16 @@ wheels = [
 
 [[package]]
 name = "ml-deduplication"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "connectorx" },
     { name = "duckdb" },
+    { name = "pandas" },
     { name = "polars" },
     { name = "polars-distance" },
     { name = "psycopg", extra = ["binary"] },
+    { name = "psycopg2" },
     { name = "pyarrow" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
@@ -1669,9 +1671,11 @@ training = [
 requires-dist = [
     { name = "connectorx", specifier = ">=0.4.5" },
     { name = "duckdb", specifier = ">=1.5.5" },
+    { name = "pandas", specifier = ">=3.0.3" },
     { name = "polars", specifier = ">=1.44.1" },
     { name = "polars-distance", specifier = ">=0.5.3" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
+    { name = "psycopg2", specifier = ">=2.9.12" },
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "scikit-learn", specifier = ">=1.9.0" },
     { name = "sentence-transformers", specifier = ">=5.7.0" },
