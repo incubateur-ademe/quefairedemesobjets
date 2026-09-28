@@ -14,6 +14,7 @@ from django.db import (
 )
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.html import escape
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from wagtail.views import serve as wagtail_serve
@@ -922,3 +923,50 @@ def dechet_detail(request: HttpRequest, slug: str) -> HttpResponse:
         return wagtail_serve(request, request.path)
     except Http404:
         return SynonymeDetailView.as_view()(request, slug=slug)
+
+
+def generate_consignes(request: HttpRequest, id: str) -> HttpResponse:
+    """Fill the "Grille de consignes" block of a ProduitPage from its first
+    row of cards, by the rules of the spec.
+
+    GET shows a confirmation page. POST converts and saves a draft revision,
+    then redirects to the editor for review.
+    """
+    from qfdmd.consignes_migration import apply_plan, plan_conversion
+
+    page = get_object_or_404(Page, pk=id).specific
+    if not isinstance(page, ProduitPage):
+        messages.error(
+            request, "Cette action n'est disponible que pour les pages Produit."
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    if request.method == "POST":
+        plan = plan_conversion(page)
+        count = apply_plan(page, plan, user=request.user)
+        details = [f"{u.titre} : {u.reason}" for u in plan.unresolved] + plan.notes
+        detail = ("<br/>" + "<br/>".join(escape(d) for d in details)) if details else ""
+
+        if not count:
+            messages.warning(
+                request,
+                mark_safe(
+                    "Aucune carte de la première rangée n'a pu être convertie." + detail
+                ),
+            )
+            return redirect("wagtailadmin_pages:edit", id)
+
+        messages.success(
+            request,
+            mark_safe(
+                f"{count} consigne(s) générée(s) dans un brouillon : relisez-les"
+                " avant de publier." + detail
+            ),
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    return render(
+        request,
+        "admin/qfdmd/confirm_generate_consignes.html",
+        {"page": page, "already": bool(page.consignes)},
+    )
