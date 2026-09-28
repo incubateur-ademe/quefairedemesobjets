@@ -1,19 +1,16 @@
 """Sorting consignes per geste.
 
-Static content until the dedicated field on `ProduitPage` exists (#3284). When
-it does, `consignes_for()` will read it and this module will disappear without
-any caller changing: that is the point of the pivot function.
-
-No transitional derivation from the acteurs' propositions de service: it would
-produce plausible but wrong consignes, harder to dislodge than an obviously
-generic text.
+Read from the fiche's grid of consignes (#3284) when it has one. Until the
+existing pages are migrated to that block, a fiche without grid still shows
+the static text below, so the assistant never renders an empty fiche.
 """
 
 from urllib.parse import urlencode
 
 from django.urls import reverse
 
-from qfdmo.models.action import GroupeAction
+from qfdmd.blocks import ETAT_CHOICES
+from qfdmo.models.action import Action, GroupeAction
 
 # Display hierarchy imposed by #3295: repairable, then good condition, then
 # out of use. The codes are those of the GroupeAction in the database, not
@@ -83,48 +80,107 @@ def block_for(gestes) -> dict | None:
 def consignes_for(produit_page, parcours=None) -> list[dict]:
     """Blocks of the fiche, in the display order of the spec.
 
-    `produit_page` is not read yet: it will be once the CMS field exists
-    (#3284). The parameter is there so the signature does not change that day.
-
     `parcours` builds the link to the solutions: the objet and the address
     must follow the user from one screen to the next. A block spanning several
     gestes repeats `geste` in the query string.
 
     A block is skipped when none of its gestes exists in the database.
     """
-    known = set(GroupeAction.objects.values_list("code", flat=True))
     base = parcours.as_params() if parcours else {}
     # The slug spares the solutions screen a label lookup, and the counter
     # needs it to narrow the places to the objet.
     if produit_page is not None and getattr(produit_page, "slug", None):
         base = {**base, "fiche": produit_page.slug}
+    url_compte = bool(parcours and parcours.is_located)
 
-    consignes = []
-    for block in BLOCKS:
-        gestes = [code for code in block["gestes"] if code in known]
-        if not gestes:
-            continue
+    cms = produit_page.consignes if produit_page is not None else []
+    if cms:
+        return [
+            block
+            for block in (_from_cms(child, base, url_compte) for child in cms)
+            if block
+        ]
 
-        etat, etat_label = block["etat"]
-        badges = [{"condition": etat, "libelle": etat_label}]
-        if block["bonus"]:
-            badges.append({"condition": "bonus", "libelle": "Bonus Réparation"})
-
-        params = urlencode({**base, "geste": gestes}, doseq=True)
-        consignes.append(
-            {
-                "code": block["code"],
-                "gestes": gestes,
-                "libelle": block["libelle"],
-                "consigne": block["consigne"],
-                "badges": badges,
-                "url": f"{reverse('assistant:solutions')}?{params}",
-                # Fetched after the page renders, only when there is a position.
-                "url_compte": (
-                    f"{reverse('api_v1:lieux-compte')}?{params}"
-                    if parcours and parcours.is_located
-                    else ""
-                ),
-            }
+    known = set(GroupeAction.objects.values_list("code", flat=True))
+    return [
+        block
+        for block in (
+            _from_static(static, known, base, url_compte) for static in BLOCKS
         )
-    return consignes
+        if block
+    ]
+
+
+def _links(gestes, base, url_compte) -> dict:
+    params = urlencode({**base, "geste": gestes}, doseq=True)
+    return {
+        "url": f"{reverse('assistant:solutions')}?{params}",
+        # Fetched after the page renders, only when there is a position.
+        "url_compte": (
+            f"{reverse('api_v1:lieux-compte')}?{params}" if url_compte else ""
+        ),
+    }
+
+
+def _from_static(block, known, base, url_compte) -> dict | None:
+    gestes = [code for code in block["gestes"] if code in known]
+    if not gestes:
+        return None
+
+    etat, etat_label = block["etat"]
+    badges = [{"condition": etat, "libelle": etat_label}]
+    if block["bonus"]:
+        badges.append({"condition": "bonus", "libelle": "Bonus Réparation"})
+
+    return {
+        "code": block["code"],
+        "gestes": gestes,
+        "libelle": block["libelle"],
+        "consigne": block["consigne"],
+        "badges": badges,
+        **_links(gestes, base, url_compte),
+    }
+
+
+def _from_cms(child, base, url_compte) -> dict | None:
+    """A consigne of the CMS block, in the shape of the static ones.
+
+    The block stores Action codes (the open data vocabulary); the solutions
+    screen wants GroupeAction codes, once each, in the order of the actions.
+    """
+    value = child.value
+    gestes = list(dict.fromkeys(_groupes_of(value["gestes"])))
+    if not gestes:
+        return None
+
+    badges = []
+    if value["etat"]:
+        badges.append(
+            {"condition": value["etat"], "libelle": dict(ETAT_CHOICES)[value["etat"]]}
+        )
+    if value["lieu_de_depot"]:
+        badges.append(
+            {"condition": "lieu_de_depot", "libelle": value["lieu_de_depot"].libelle}
+        )
+    if value["bonus_reparation"]:
+        badges.append({"condition": "bonus", "libelle": "Bonus Réparation"})
+
+    return {
+        "code": child.id,
+        "gestes": gestes,
+        "libelle": value["titre"],
+        # RichText: rendered as HTML by the template, never escaped.
+        "consigne": value["contenu"],
+        "badges": badges,
+        **_links(gestes, base, url_compte),
+    }
+
+
+def _groupes_of(action_codes) -> list[str]:
+    # ponytail: one query per consigne, a fiche holds a handful of them.
+    groupes = dict(
+        Action.objects.filter(
+            code__in=action_codes, groupe_action__isnull=False
+        ).values_list("code", "groupe_action__code")
+    )
+    return [groupes[code] for code in action_codes if code in groupes]
