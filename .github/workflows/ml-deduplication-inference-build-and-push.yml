@@ -16,7 +16,6 @@ on:
 
 env:
   SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
-  SCALEWAY_NAMESPACE: ns-ml-deduplication-inference
   IMAGE_NAME: ml-deduplication-inference
 
 jobs:
@@ -27,6 +26,8 @@ jobs:
     environment: prod
     permissions:
       contents: read
+    env:
+      SCALEWAY_NAMESPACE: ns-ml-deduplication-inference-prod
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.0
@@ -64,6 +65,8 @@ jobs:
     environment: preprod
     permissions:
       contents: read
+    env:
+      SCALEWAY_NAMESPACE: ns-ml-deduplication-inference-preprod
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.0
