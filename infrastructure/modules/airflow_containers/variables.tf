@@ -181,3 +181,10 @@ variable "POSTHOG_PERSONAL_API_KEY" {
   type        = string
   sensitive   = true
 }
+
+variable "custom_domain" {
+  description = "Public hostname served by the nginx gateway (e.g. airflow.preprod.quefairedemesobjets.ademe.fr). Used for Airflow BASE_URL. Null or empty keeps the Scaleway-generated domain in generated links."
+  type        = string
+  default     = null
+  nullable    = true
+}

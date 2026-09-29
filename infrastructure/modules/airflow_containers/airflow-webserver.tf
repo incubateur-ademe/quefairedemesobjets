@@ -1,3 +1,7 @@
+locals {
+  custom_domain_enabled = var.custom_domain != null && var.custom_domain != ""
+}
+
 resource "scaleway_container" "airflow_webserver" {
   name           = "${var.prefix}-airflow-webserver"
   tags           = [var.environment, var.prefix, "airflow", "webserver"]
@@ -21,31 +25,39 @@ resource "scaleway_container" "airflow_webserver" {
     interval          = "30s"
   }
 
-  environment_variables = {
-    _AIRFLOW_DB_MIGRATE                                   = "true"
-    _AIRFLOW_WWW_USER_CREATE                              = "true"
-    _PIP_ADDITIONAL_REQUIREMENTS                          = ""
-    AIRFLOW__API__AUTH_BACKENDS                           = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
-    AIRFLOW__API__THEME                                   = jsonencode({ "globalCss" : { "[data-scope=\"dialog\"][data-part=\"content\"]" : { "max-width" : "95vw !important" } } })
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION            = "true"
-    AIRFLOW__CORE__DAGS_FOLDER                            = "/opt/airflow/dags"
-    AIRFLOW__CORE__ENABLE_XCOM_PICKLING                   = "true"
-    AIRFLOW__CORE__EXECUTOR                               = "LocalExecutor"
-    AIRFLOW__CORE__FERNET_KEY                             = ""
-    AIRFLOW__CORE__LOAD_EXAMPLES                          = "false"
-    AIRFLOW__CORE__AUTH_MANAGER                           = "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
-    AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = var.AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP
-    AIRFLOW__LOGGING__ENCRYPT_S3_LOGS                     = "false"
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER              = "s3://${var.prefix}-${var.environment}-airflow"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID                  = "scalewaylogs"
-    AIRFLOW__LOGGING__REMOTE_LOGGING                      = "true"
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK               = "true"
-    AIRFLOW__WEBSERVER__EXPOSE_CONFIG                     = "true"
-    AIRFLOW__WEBSERVER__INSTANCE_NAME                     = var.AIRFLOW__WEBSERVER__INSTANCE_NAME
-    AIRFLOW__WEBSERVER__WORKERS                           = "1"
-    AIRFLOW_WEBSERVER_WARN_DEPLOYMENT_EXPOSURE            = "false"
-    ENVIRONMENT                                           = var.environment
-  }
+  environment_variables = merge(
+    {
+      _AIRFLOW_DB_MIGRATE                                   = "true"
+      _AIRFLOW_WWW_USER_CREATE                              = "true"
+      _PIP_ADDITIONAL_REQUIREMENTS                          = ""
+      AIRFLOW__API__AUTH_BACKENDS                           = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW__API__THEME                                   = jsonencode({ "globalCss" : { "[data-scope=\"dialog\"][data-part=\"content\"]" : { "max-width" : "95vw !important" } } })
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION            = "true"
+      AIRFLOW__CORE__DAGS_FOLDER                            = "/opt/airflow/dags"
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING                   = "true"
+      AIRFLOW__CORE__EXECUTOR                               = "LocalExecutor"
+      AIRFLOW__CORE__FERNET_KEY                             = ""
+      AIRFLOW__CORE__LOAD_EXAMPLES                          = "false"
+      AIRFLOW__CORE__AUTH_MANAGER                           = "airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager"
+      AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = var.AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP
+      AIRFLOW__LOGGING__ENCRYPT_S3_LOGS                     = "false"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER              = "s3://${var.prefix}-${var.environment}-airflow"
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID                  = "scalewaylogs"
+      AIRFLOW__LOGGING__REMOTE_LOGGING                      = "true"
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK               = "true"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG                     = "true"
+      AIRFLOW__WEBSERVER__INSTANCE_NAME                     = var.AIRFLOW__WEBSERVER__INSTANCE_NAME
+      AIRFLOW__WEBSERVER__WORKERS                           = "1"
+      AIRFLOW_WEBSERVER_WARN_DEPLOYMENT_EXPOSURE            = "false"
+      ENVIRONMENT                                           = var.environment
+    },
+    local.custom_domain_enabled ? {
+      AIRFLOW__API__BASE_URL               = "https://${var.custom_domain}"
+      AIRFLOW__WEBSERVER__BASE_URL         = "https://${var.custom_domain}"
+      AIRFLOW__FAB__ENABLE_PROXY_FIX       = "True"
+      AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX = "True"
+    } : {},
+  )
   secret_environment_variables = {
     _AIRFLOW_WWW_USER_USERNAME          = var._AIRFLOW_WWW_USER_USERNAME
     _AIRFLOW_WWW_USER_PASSWORD          = var._AIRFLOW_WWW_USER_PASSWORD
