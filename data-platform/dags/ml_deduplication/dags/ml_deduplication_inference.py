@@ -276,6 +276,12 @@ def ml_deduplication_inference():
         # run_inference runs the image locally with docker instead of on a
         # Scaleway instance.
         "ML_DEDUPLICATION_RUN_LOCAL": "{{ '1' if params.run_locally else '0' }}",
+        # Zone chosen by create_instance (pushed as XCom from its stdout) where
+        # the Scaleway instance was created, so wait/run/destroy query the same
+        # zone. Falls back to the script default when not set (e.g. local mode).
+        "ML_DEDUPLICATION_ZONE": (
+            "{{ ti.xcom_pull(task_ids='" + TASKS.CREATE_INSTANCE + "') or '' }}"
+        ),
     }
 
     instance_ops = {
@@ -337,7 +343,7 @@ if __name__ == "__main__":
     ml_deduplication_inference_dag.test(
         run_conf={
             "dry_run": False,
-            "image_ref": "ml-deduplication-inference:latest",
+            "image_ref": "rg.fr-par.scw.cloud/ns-ml-deduplication-inference/ml-deduplication-inference:019c92ceaefbf084640b0698d296cf9478e1af42-preprod",
             "output_table": "ml_deduplication",
             "acteurs_table": None,
             "linkage_column": None,
@@ -377,7 +383,7 @@ if __name__ == "__main__":
             "dedup_enrich_exclude_sources": [],
             "dedup_enrich_priority_sources": [],
             "dedup_enrich_keep_parent_data_by_default": True,
-            "run_locally": True,
-            "limit_acteurs": 10000,
+            "run_locally": False,
+            "limit_acteurs": 60000,
         }
     )

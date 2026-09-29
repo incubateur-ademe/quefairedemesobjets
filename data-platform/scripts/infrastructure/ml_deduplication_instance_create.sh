@@ -18,11 +18,45 @@ fi
 
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-2}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 SECURITY_GROUP_NAME="${INSTANCE_NAME}-sg"
 INSTANCE_TYPE="${ML_DEDUPLICATION_INSTANCE_TYPE:-L4-1-24G}"
-VOLUME_SIZE="${ML_DEDUPLICATION_VOLUME_SIZE:-125}"
+VOLUME_SIZE="${ML_DEDUPLICATION_VOLUME_SIZE:-125GB}"
+
+# Candidate zones. GPU commercial types (L4, H100, ...) are frequently out of
+# stock in a given zone, so we pick the first zone where the instance type is
+# actually available. An explicitly set ZONE is tried first, then the defaults.
+DEFAULT_ZONES=("fr-par-1" "fr-par-2" "pl-waw-2")
+CANDIDATE_ZONES=()
+if [ -n "${ZONE:-}" ]; then
+  CANDIDATE_ZONES+=("${ZONE}")
+fi
+for z in "${DEFAULT_ZONES[@]}"; do
+  if [ "${ZONE:-}" != "${z}" ]; then
+    CANDIDATE_ZONES+=("${z}")
+  fi
+done
+
+# Pick the first zone where the instance type is available. An instance type
+# with availability != "available" (e.g. "shortage", "scarce") may fail to be
+# created or be out of stock in that zone.
+ZONE=""
+for z in "${CANDIDATE_ZONES[@]}"; do
+  availability="$(scw instance server-type list zone="${z}" -o json 2>/dev/null \
+    | jq -r ".[] | select(.name==\"${INSTANCE_TYPE}\") | .availability" | head -n1 || true)"
+  echo "ml-deduplication: instance type ${INSTANCE_TYPE} availability in ${z}: ${availability:-unknown}"
+  if [ "${availability}" = "available" -o "${availability}" = "scarce" ]; then
+    ZONE="${z}"
+    break
+  fi
+done
+
+if [ -z "${ZONE}" ]; then
+  echo "ml-deduplication: ERROR instance type ${INSTANCE_TYPE} is not available in any zone (${CANDIDATE_ZONES[*]})" >&2
+  exit 1
+fi
+
+echo "ml-deduplication: using zone ${ZONE}"
 
 # OS image for the instance. Defaults to the Ubuntu 24.04 Noble GPU image
 # ("Ubuntu Noble GPU OS 13 (Nvidia)") which ships NVIDIA drivers — required for
@@ -65,7 +99,7 @@ existing_id="$(scw instance server list zone="${ZONE}" -o json 2>/dev/null \
 
 if [ -n "${existing_id}" ]; then
   echo "ml-deduplication: instance ${INSTANCE_NAME} already exists (${existing_id}), reusing it"
-  echo "${existing_id}"
+  echo "${ZONE}"
   exit 0
 fi
 
@@ -107,6 +141,7 @@ instance_id="$(scw instance server create \
   name="${INSTANCE_NAME}" \
   ip=new \
   security-group-id="${security_group_id}" \
+  root-volume=b:${VOLUME_SIZE} \
   cloud-init="@${tmp_cloud_init}" \
   tags.0="${ENVIRONMENT}" \
   tags.1="${PREFIX}" \
@@ -116,4 +151,6 @@ instance_id="$(scw instance server create \
   -o json | jq -r '.server.id')"
 
 echo "ml-deduplication: instance created: ${instance_id}"
-echo "${instance_id}"
+# Last line of stdout is pushed as XCom by the BashOperator and read back by
+# the wait/run/destroy scripts to know which zone the instance lives in.
+echo "${ZONE}"

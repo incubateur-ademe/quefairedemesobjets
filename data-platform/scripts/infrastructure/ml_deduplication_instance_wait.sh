@@ -18,7 +18,8 @@ fi
 
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-2}"
+# Zone chosen at instance creation (propagated via XCom as ML_DEDUPLICATION_ZONE).
+ZONE="${ML_DEDUPLICATION_ZONE:-${ZONE:-fr-par-2}}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 # Private SSH key: prefer the base64-encoded value injected as a container
 # secret (ML_DEDUPLICATION_SSH_KEY_B64, e.g. from Terraform); decode it to a

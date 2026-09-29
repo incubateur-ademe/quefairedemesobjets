@@ -64,7 +64,7 @@ runcmd:
     systemctl enable --now docker
 
     # 2. Authenticate to the (private) Scaleway container registry
-    echo "$SCW_SECRET_KEY" | docker login "$REGISTRY" -u nologin --password-stdin
+    . /etc/ml-deduplication.env | echo "$SCW_SECRET_KEY" | docker login "$REGISTRY" -u nologin --password-stdin
 
     # 3. Pull the inference image so a later `docker run` starts instantly
     docker pull "$REGISTRY_IMAGE"

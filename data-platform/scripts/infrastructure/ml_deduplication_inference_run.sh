@@ -12,7 +12,8 @@ set -euo pipefail
 
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-2}"
+# Zone chosen at instance creation (propagated via XCom as ML_DEDUPLICATION_ZONE).
+ZONE="${ML_DEDUPLICATION_ZONE:-${ZONE:-fr-par-2}}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 IMAGE_REF="${ML_DEDUPLICATION_IMAGE:?ML_DEDUPLICATION_IMAGE must be set (full registry image ref)}"
 # Local mode: when set, we skip the remote instance entirely and run the image

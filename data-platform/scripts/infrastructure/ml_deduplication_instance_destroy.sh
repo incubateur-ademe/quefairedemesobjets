@@ -13,7 +13,8 @@ fi
 
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
-ZONE="${ZONE:-fr-par-2}"
+# Zone chosen at instance creation (propagated via XCom as ML_DEDUPLICATION_ZONE).
+ZONE="${ML_DEDUPLICATION_ZONE:-${ZONE:-fr-par-2}}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 SECURITY_GROUP_NAME="${INSTANCE_NAME}-sg"
 
