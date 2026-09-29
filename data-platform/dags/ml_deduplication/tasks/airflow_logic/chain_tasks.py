@@ -1,31 +1,31 @@
 """Assemble the ML-deduplication DAG task graph."""
 
 from airflow.sdk.bases.operator import chain
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_acteurs_select_task import (
+from ml_deduplication.tasks.airflow_logic.acteurs_select_task import (
     ml_deduplication_acteurs_select_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_cleanup_task import (
+from ml_deduplication.tasks.airflow_logic.cleanup_task import (
     ml_deduplication_cleanup_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_clusters_select_task import (
+from ml_deduplication.tasks.airflow_logic.clusters_select_task import (
     ml_deduplication_clusters_select_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_config_create_task import (
+from ml_deduplication.tasks.airflow_logic.config_create_task import (
     ml_deduplication_config_create_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_parents_choose_data_task import (
+from ml_deduplication.tasks.airflow_logic.parents_choose_data_task import (
     ml_deduplication_parents_choose_data_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_parents_choose_new_task import (
+from ml_deduplication.tasks.airflow_logic.parents_choose_new_task import (
     ml_deduplication_parents_choose_new_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_suggestions_failing_task import (
+from ml_deduplication.tasks.airflow_logic.suggestions_failing_task import (
     ml_deduplication_suggestions_failing_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_suggestions_prepare_task import (
+from ml_deduplication.tasks.airflow_logic.suggestions_prepare_task import (
     ml_deduplication_suggestions_prepare_task,
 )
-from ml_deduplication.tasks.airflow_logic.ml_deduplication_suggestions_to_db_task import (
+from ml_deduplication.tasks.airflow_logic.suggestions_to_db_task import (
     ml_deduplication_suggestions_to_db_task,
 )
 
