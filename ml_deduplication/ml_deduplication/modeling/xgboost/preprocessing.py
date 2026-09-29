@@ -11,6 +11,27 @@ logger = logging.getLogger(__name__)
 
 
 def strip_ville_from_name(data: dict) -> str:
+    """Remove the city name from an entity's concatenated name.
+
+    Given a dict holding the cleaned name, the raw city name and the cleaned
+    city name, remove any occurrence of the city from the name. This avoids
+    duplicating the city information that is already stored in a dedicated
+    column.
+
+    Parameters
+    ----------
+    data : dict
+        Mapping with keys ``nom``, ``ville`` and ``ville_clean``. ``nom`` is the
+        concatenation of the nominal and commercial names. ``ville`` is the raw
+        (possibly hyphenated) city name; ``ville_clean`` is its normalised form
+        (lowercased, ``st`` expanded to ``saint``, hyphens replaced by spaces).
+
+    Returns
+    -------
+    str
+        The ``nom`` value with the city name removed. If ``ville`` is ``None``
+        or empty, ``nom`` is returned unchanged.
+    """
     if (data["ville"] is None) or (data["ville"].strip() == ""):
         return data["nom"]
     nom_clean = data["nom"].replace(data["ville"].strip(), "")
