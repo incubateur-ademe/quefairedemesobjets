@@ -45,9 +45,20 @@ SCRIPTS = "/opt/airflow/scripts/infrastructure"
 # (base64-encoded private key, decoded to a temp file by the scripts to SSH in).
 # The scripts also accept ML_DEDUPLICATION_SSH_KEY as a pre-placed key file path.
 
-DEFAULT_IMAGE = "rg.fr-par.scw.cloud/ns-ml-deduplication-inference/ml-deduplication-inference:eeb3b20bd6d7c69a7f4b6e9f836087c7fdf22cd0-preprod"  # noqa: E501
-
 ENVIRONMENT = config("ENVIRONMENT", default="development")
+
+# Inference image registry namespace, per environment. CI pushes preprod images
+# to ns-ml-deduplication-inference-preprod and prod images (main) to
+# ns-ml-deduplication-inference-prod (see
+# .github/workflows/ml-deduplication-inference-build-and-push.yml).
+IMAGE_NAMESPACE = (
+    "ns-ml-deduplication-inference-preprod"
+    if ENVIRONMENT == "preprod"
+    else "ns-ml-deduplication-inference-prod"
+)
+
+# Default to the latest image published for the current environment.
+DEFAULT_IMAGE = f"rg.fr-par.scw.cloud/{IMAGE_NAMESPACE}/ml-deduplication-inference:latest"  # noqa: E501
 
 # When set to 1/true, the DAG bypasses the on-demand Scaleway instance and runs
 # the inference image directly with docker (requires the docker CLI/socket to be
@@ -343,8 +354,7 @@ if __name__ == "__main__":
     ml_deduplication_inference_dag.test(
         run_conf={
             "dry_run": False,
-            "image_ref": "rg.fr-par.scw.cloud/ns-ml-deduplication-inference/"
-            "ml-deduplication-inference:019c92ceaefbf084640b0698d296cf9478e1af42-preprod",
+            "image_ref": DEFAULT_IMAGE,
             "output_table": "ml_deduplication",
             "acteurs_table": None,
             "linkage_column": None,
