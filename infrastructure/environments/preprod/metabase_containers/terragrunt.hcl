@@ -39,4 +39,7 @@ inputs = {
   MB_SITE_NAME             = "LVAO preprod"
   MB_ENCRYPTION_SECRET_KEY = "[MB_ENCRYPTION_SECRET_KEY]"
   MB_DB_CONNECTION_URI     = "postgres://${dependency.database.outputs.metabase_db_username}:${dependency.database.outputs.metabase_db_password}@${dependency.database.outputs.metabase_endpoint_ip}:${dependency.database.outputs.metabase_endpoint_port}/${dependency.database.outputs.metabase_database_name}?sslmode=require"
+
+  # Public hostname routed by nginx_containers (wildcard CNAME).
+  custom_domain = "metabase.preprod.quefairedemesobjets.ademe.fr"
 }
