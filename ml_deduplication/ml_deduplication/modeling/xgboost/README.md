@@ -36,7 +36,7 @@ python -m ml_deduplication.training.xgboost.training_pipeline_xgboost \
 
 - K-fold cross-validation selects the best cluster threshold and the number of
   boosting rounds (`n_estimators`).
-- `--mode tuning` runs Optuna hyperparameter search over `n_trials`.
+- `--mode tuning` runs random hyperparameter search over `n_trials`.
 - Artifacts (in `logs/training_<mode>_<timestamp>/`): `model.json`,
   `calibrator.pkl`, `hyperparameters.json`, `training_results.json`, plus
   test-set predictions and clusters parquet files.
