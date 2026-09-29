@@ -1,9 +1,11 @@
+import base64
 import logging
 from urllib.parse import urlparse, urlunparse
 
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import Resolver404, resolve
+from django.utils.cache import add_never_cache_headers
 from wagtail.admin.viewsets.base import reverse
 
 from core.utils import has_explicit_perm
@@ -42,6 +44,12 @@ class RequestEnhancementMiddleware:
         # Prepare request
         if url_to_redirect := self._check_redirect_from_legacy_domains(request):
             return redirect(url_to_redirect, permanent=True)
+        if url_to_redirect := self._redirect_beta_hosts_to_assistant_v2(request):
+            response = redirect(url_to_redirect)
+            # The whitelist changes without a deploy: never let nginx or the
+            # browser pin a host to one assistant.
+            add_never_cache_headers(response)
+            return response
 
         self._prepare_request_if_iframe(request)
         response = self.get_response(request)
@@ -73,6 +81,45 @@ class RequestEnhancementMiddleware:
         # return self._handle_host_redirects(request)
         return None
 
+    # Legacy routes that `iframe.js` opens, and their assistant V2 counterparts.
+    ASSISTANT_V2_ROUTES = {
+        "qfdmd:home": "assistant:home",
+        "qfdmd:synonyme-detail": "assistant:produit",
+    }
+
+    def _redirect_beta_hosts_to_assistant_v2(self, request) -> str | None:
+        """Send whitelisted embedders to the assistant V2, script unchanged.
+
+        `iframe.js` carries the host page URL in `ref` (base64): it is the only
+        thing that tells one embedder from another, so the switch is decided
+        here rather than in the script. `data-objet` becomes the fiche's slug;
+        a fiche that does not exist in V2 stays on the legacy assistant rather
+        than 404ing.
+        """
+        if "ref" not in request.GET:
+            return None
+        try:
+            match = resolve(request.path)
+        except Resolver404:
+            return None
+        if not (target := self.ASSISTANT_V2_ROUTES.get(match.view_name)):
+            return None
+        if self._referrer_host(request) not in settings.ASSISTANT["V2_HOSTS"]:
+            return None
+        if slug := match.kwargs.get("slug"):
+            from qfdmd.models import ProduitPage
+
+            if not ProduitPage.objects.live().filter(slug=slug).exists():
+                return None
+        return self._build_redirect_url(target, request.GET, [], **match.kwargs)
+
+    @staticmethod
+    def _referrer_host(request) -> str | None:
+        try:
+            return urlparse(base64.b64decode(request.GET["ref"]).decode()).hostname
+        except (KeyError, ValueError, UnicodeDecodeError):
+            return None
+
     def _handle_special_query_params(self, request) -> str | None:
         try:
             if resolve(request.path).view_name != "qfdmd:home":
@@ -101,6 +148,7 @@ class RequestEnhancementMiddleware:
         view_name: str,
         get_params,
         params_to_remove: list,
+        **url_kwargs,
     ) -> str:
         from urllib.parse import urljoin
 
@@ -110,7 +158,7 @@ class RequestEnhancementMiddleware:
             get_params_copy.pop(param, None)  # Use pop() to avoid KeyError
 
         query_string = get_params_copy.urlencode()
-        relative_url = reverse(view_name)
+        relative_url = reverse(view_name, kwargs=url_kwargs)
 
         base_url = settings.BASE_URL.rstrip("/")
         absolute_url = urljoin(base_url, relative_url.lstrip("/"))
