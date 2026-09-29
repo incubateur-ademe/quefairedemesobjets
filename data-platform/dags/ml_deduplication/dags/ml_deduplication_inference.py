@@ -343,7 +343,8 @@ if __name__ == "__main__":
     ml_deduplication_inference_dag.test(
         run_conf={
             "dry_run": False,
-            "image_ref": "rg.fr-par.scw.cloud/ns-ml-deduplication-inference/ml-deduplication-inference:019c92ceaefbf084640b0698d296cf9478e1af42-preprod",
+            "image_ref": "rg.fr-par.scw.cloud/ns-ml-deduplication-inference/"
+            "ml-deduplication-inference:019c92ceaefbf084640b0698d296cf9478e1af42-preprod",
             "output_table": "ml_deduplication",
             "acteurs_table": None,
             "linkage_column": None,
