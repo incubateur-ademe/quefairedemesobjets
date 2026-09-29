@@ -2,8 +2,6 @@
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
 PYTHON := uv run python
-SAMPLE_DB_URL ?= $(if $(DB_WEBAPP_SAMPLE),$(DB_WEBAPP_SAMPLE),$(DB_URL))
-SAMPLE_DUMP_FILE ?= tmpbackup-sample/sample.custom
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 
@@ -156,6 +154,25 @@ webapp-integration-test:
 data-platform-dags-test:
 	$(MAKE) -C data-platform dags-test
 
+# --- E2E tests -------------------------------------------------------------
+# `e2e-prepare` checks the prerequisites, builds the sample database through
+# the `compute_sample_acteur` DAG and prepares the webapp; `e2e` then runs
+# the Playwright suite. Both require a restored `webapp` database
+# (make db-restore-local-from-prod).
+.PHONY: e2e-prepare
+e2e-prepare:
+	./scripts/e2e_prepare.sh
+
+# Same, without rebuilding the sample database.
+.PHONY: e2e-prepare-fast
+e2e-prepare-fast:
+	./scripts/e2e_prepare.sh --skip-dag
+
+.PHONY: e2e
+e2e:
+	$(MAKE) e2e-prepare
+	$(MAKE) webapp-e2e-test
+
 .PHONY: webapp-e2e-test
 webapp-e2e-test:
 	$(MAKE) -C webapp e2e-test
@@ -226,13 +243,6 @@ dump-preprod:
 dump-prod-quiet:
 	bash scripts/infrastructure/backup-db.sh --quiet $(if $(filter true,$(USE_LATEST_BACKUP)),--latest)
 
-.PHONY: dump-sample
-dump-sample:
-	@[ -n "$(REMOTE_SAMPLE_DATABASE_URL)" ] || { echo "REMOTE_SAMPLE_DATABASE_URL is not set"; exit 1; }
-	mkdir -p $(dir $(SAMPLE_DUMP_FILE))
-	pg_dump --format=custom --no-acl --no-owner --no-privileges "$(REMOTE_SAMPLE_DATABASE_URL)" --file="$(SAMPLE_DUMP_FILE)"
-
-
 # Restore targets — all run psql/pg_restore inside Docker for version compatibility.
 # The script handles extension creation before restore.
 # drop-schema-public / create-schema-public are defined once above.
@@ -254,15 +264,6 @@ load-preprod-dump:
 	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
-.PHONY: load-sample-dump
-load-sample-dump:
-	@DUMP_FILE=$(SAMPLE_DUMP_FILE); \
-	[ -f "$$DUMP_FILE" ] || DUMP_FILE=$$(find tmpbackup-sample -type f -name "*.custom" -print -quit); \
-	[ -n "$$DUMP_FILE" ] || { echo "No sample dump found"; exit 1; }; \
-	psql -d '$(SAMPLE_DB_URL)' -f scripts/sql/create_extensions.sql && \
-	psql -d '$(SAMPLE_DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
-	pg_restore -d '$(SAMPLE_DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
-
 .PHONY: load-dump-to-loc
 load-dump-to-loc:
 	./scripts/db_restore.sh $(ENV) $(TMPDIR) $(PG_RESTORE_JOBS)
@@ -293,10 +294,11 @@ db-restore-preprod-from-prod:
 	$(MAKE) drop-all-tables
 	$(MAKE) load-prod-dump
 
+# The sample database is built from the local `webapp` database by the
+# `compute_sample_acteur` DAG.
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
-	$(MAKE) dump-sample
-	./scripts/db_restore.sh sample tmpbackup-sample
+	./scripts/e2e_run_sample_dag.sh
 
 .PHONY: db-restore-local-for-tests
 db-restore-local-for-tests:

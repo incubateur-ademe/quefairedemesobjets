@@ -142,9 +142,14 @@ Pour le setup local (base de données d'échantillon, etc.), voir
 ### Tous les tests
 
 ```bash
-npm run e2e_test --workspace webapp
-# ou, avec préparation de la base d'échantillon :
-make prepare-e2e-test-local && make e2e-test
+# Depuis la racine : prépare tout (stack Docker, pont FDW, DAG
+# `compute_sample_acteur`, migrations, index, build JS) puis lance les tests.
+make e2e
+
+# Préparation seule
+make e2e-prepare
+# Sans reconstruire l'échantillon (pour gagner du temps si on est sûr d'avoir une db sample à jour)
+make e2e-prepare-fast && make webapp-e2e-test
 ```
 
 ### Un fichier spécifique

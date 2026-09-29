@@ -49,8 +49,16 @@ RUN apt-get install -y unzip curl
 RUN apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev jq
 
-# Installation du client Scaleway CLI
-RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
+# Scaleway CLI, download a pinned version
+# rather than through the official get.sh installer, because it resolves the latest
+# release through an unauthenticated GitHub API call and fails under rate
+# limiting.
+# It is used by a DAG (purge_log_db)
+ARG SCW_CLI_VERSION=2.62.0
+RUN ARCH="$(dpkg --print-architecture)" && \
+    curl -fsSL -o /usr/local/bin/scw \
+      "https://github.com/scaleway/scaleway-cli/releases/download/v${SCW_CLI_VERSION}/scaleway-cli_${SCW_CLI_VERSION}_linux_${ARCH}" && \
+    chmod +x /usr/local/bin/scw
 
 # Client Docker CLI (sans daemon) pour le mode local d'inférence ML:
 # il permet d'exécuter `docker run` de l'image d'inférence en s'appuyant sur le

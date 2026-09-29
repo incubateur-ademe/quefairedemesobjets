@@ -3,10 +3,13 @@
 #
 # Nginx listens on the Scaleway container port (8000) and proxies to
 # gunicorn on 127.0.0.1:8001, matching production's two-tier setup.
-#
-# Django management commands (migrate, createcachetable, etc.) are run
-# once during the database seed — not on every cold start.
 set -euo pipefail
+
+
+if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
+  echo "Applying database migrations..."
+  python manage.py migrate --noinput
+fi
 
 # Start nginx in the background (proxies :8000 → :8001).
 # If nginx dies, the liveness probe on :8000 will fail and Scaleway

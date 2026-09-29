@@ -1,0 +1,329 @@
+from types import SimpleNamespace
+
+import pytest
+from django.urls import reverse
+from wagtail.models import Page
+
+from qfdmd.legacy_migration import (
+    MigrationError,
+    finalize_produit_migration,
+    migrate_produit,
+    revert_produit_migration,
+)
+from qfdmd.models import (
+    CATEGORIES_INDEX_SLUG,
+    LEGACY_PRODUIT_INDEX_SLUG,
+    Produit,
+    ProduitIndexPage,
+    ProduitPage,
+    SearchTag,
+)
+from qfdmd.wagtail_hooks import (
+    MigrateProduitsBulkAction,
+    RevertProduitsMigrationBulkAction,
+)
+from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
+
+pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def index_dechet():
+    root_page = Page.objects.get(depth=1)
+    page = ProduitIndexPage(title="Déchets", slug=LEGACY_PRODUIT_INDEX_SLUG)
+    root_page.add_child(instance=page)
+    page.save()
+    return page
+
+
+def test_migrate_puis_revert_restaure_l_etat_initial(index_dechet):
+    produit = ProduitFactory(nom="Baignoire")
+    synonyme = SynonymeFactory(produit=produit, nom="Sabot de bain")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+    page_pk = report.page.pk
+    synonyme.refresh_from_db()
+    tag_pk = synonyme.legacy_imported_as_search_tag_id
+    assert tag_pk is not None
+
+    revert_produit_migration(produit)
+
+    produit.refresh_from_db()
+    synonyme.refresh_from_db()
+    assert produit.legacy_imported_as_produit_page is None
+    assert synonyme.legacy_imported_as_search_tag is None
+    assert not ProduitPage.objects.filter(pk=page_pk).exists()
+    # The SearchTag created by the migration was orphan: deleted.
+    assert not SearchTag.objects.filter(pk=tag_pk).exists()
+    # The produit is eligible for migration again.
+    assert Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+
+def test_revert_conserve_les_search_tags_encore_utilises(index_dechet):
+    produit = ProduitFactory(nom="Chaise")
+    synonyme = SynonymeFactory(produit=produit, nom="Tabouret")
+    migrate_produit(produit, index_page=index_dechet)
+    synonyme.refresh_from_db()
+    tag = synonyme.legacy_imported_as_search_tag
+
+    # Another synonyme, manually imported, still references the tag.
+    autre = SynonymeFactory(nom="Banc")
+    autre.imported_as_search_tag = tag
+    autre.save(update_fields=["imported_as_search_tag"])
+
+    revert_produit_migration(produit)
+
+    assert SearchTag.objects.filter(pk=tag.pk).exists()
+
+
+def test_revert_refuse_un_produit_non_migre(index_dechet):
+    produit = ProduitFactory(nom="Vélo")
+    with pytest.raises(MigrationError):
+        revert_produit_migration(produit)
+
+
+def test_revert_refuse_une_page_non_migree_automatiquement(index_dechet):
+    produit = ProduitFactory(nom="Table")
+    page = ProduitPage(title="Table", slug="table")
+    index_dechet.add_child(instance=page)
+    page.save_revision().publish()
+    produit.legacy_imported_as_produit_page = page
+    produit.save(update_fields=["legacy_imported_as_produit_page"])
+
+    with pytest.raises(MigrationError):
+        revert_produit_migration(produit)
+
+
+def test_migrate_n_importe_pas_le_synonyme_principal_comme_tag(index_dechet):
+    """The main synonyme (same nom as the produit) was used to build the
+    page itself: it must not also appear as one of the page's own search
+    synonymes."""
+    produit = ProduitFactory(nom="Acétone")
+    main_synonyme = SynonymeFactory(produit=produit, nom="Acétone")
+    autre_synonyme = SynonymeFactory(produit=produit, nom="Dissolvant")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    main_synonyme.refresh_from_db()
+    autre_synonyme.refresh_from_db()
+    assert main_synonyme.legacy_imported_as_search_tag is None
+    assert autre_synonyme.legacy_imported_as_search_tag is not None
+
+    tag_names = [
+        item.tag.name for item in report.page.search_tags_items.select_related("tag")
+    ]
+    assert "Acétone" not in tag_names
+    assert "Dissolvant" in tag_names
+
+
+def test_migrate_refuse_un_produit_deja_migre(index_dechet):
+    produit = ProduitFactory(nom="Fauteuil")
+    migrate_produit(produit, index_page=index_dechet)
+    produit.refresh_from_db()
+    with pytest.raises(MigrationError):
+        migrate_produit(produit, index_page=index_dechet)
+
+
+def test_migrate_utilise_le_slug_du_synonyme_principal(index_dechet):
+    """Produit.slug is a single legacy field that can only hold one
+    historic URL, even though each synonyme had its own — it can hold an
+    unrelated synonyme's slug instead of the produit's own. The main
+    synonyme (same nom as the produit) carries the slug that actually
+    matches the produit and must be preferred for SEO continuity.
+    """
+    produit = ProduitFactory(nom="Matériaux du bâtiment en pierre", slug="Ardoises")
+    SynonymeFactory(produit=produit, nom="Ardoises")
+    main_synonyme = SynonymeFactory(
+        produit=produit, nom="Matériaux du bâtiment en pierre"
+    )
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    assert report.page.slug == main_synonyme.slug
+    assert report.page.slug == "materiaux-du-batiment-en-pierre"
+
+
+def test_migrate_utilise_produit_slug_si_pas_de_synonyme_principal(index_dechet):
+    """Falls back to Produit.slug (then nom) when no synonyme matches the
+    produit's own nom."""
+    produit = ProduitFactory(nom="Canapé", slug="canape-convertible")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    assert report.page.slug == "canape-convertible"
+
+
+def test_bulk_action_migrate_ignore_les_produits_non_eligibles(index_dechet):
+    eligible = ProduitFactory(nom="Matelas")
+    deja_migre = ProduitFactory(nom="Sommier")
+    migrate_produit(deja_migre, index_page=index_dechet)
+    deja_migre.refresh_from_db()
+
+    instance = SimpleNamespace()
+    migrated, _ = MigrateProduitsBulkAction.execute_action(
+        [eligible, deja_migre], self=instance
+    )
+
+    eligible.refresh_from_db()
+    assert migrated == 1
+    assert eligible.legacy_imported_as_produit_page is not None
+    assert len(instance.errors) == 1
+    assert "Sommier" in instance.errors[0]
+
+
+def test_bulk_action_revert_annule_la_migration(index_dechet):
+    produit = ProduitFactory(nom="Armoire")
+    migrate_produit(produit, index_page=index_dechet)
+    produit.refresh_from_db()
+
+    instance = SimpleNamespace()
+    reverted, _ = RevertProduitsMigrationBulkAction.execute_action(
+        [produit], self=instance
+    )
+
+    produit.refresh_from_db()
+    assert reverted == 1
+    assert instance.errors == []
+    assert produit.legacy_imported_as_produit_page is None
+
+
+def test_vue_migrate_affiche_une_confirmation_sur_get(admin_client, index_dechet):
+    produit = ProduitFactory(nom="Baignoire")
+    SynonymeFactory(produit=produit, nom="Sabot de bain")
+
+    response = admin_client.get(reverse("migrate_single_produit", args=[produit.pk]))
+
+    assert response.status_code == 200
+    assert "admin/qfdmd/confirm_migrate_produit.html" in [
+        t.name for t in response.templates
+    ]
+    content = response.content.decode()
+    assert "Baignoire" in content
+    assert "1" in str(response.context["nb_synonymes"])
+
+
+def test_vue_revert_affiche_une_confirmation_sur_get(admin_client, index_dechet):
+    produit = ProduitFactory(nom="Armoire")
+    migrate_produit(produit, index_page=index_dechet)
+    produit.refresh_from_db()
+
+    response = admin_client.get(reverse("revert_single_produit", args=[produit.pk]))
+
+    assert response.status_code == 200
+    assert "admin/qfdmd/confirm_revert_produit.html" in [
+        t.name for t in response.templates
+    ]
+    assert "Armoire" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_produit_sans_synonyme_a_migrer_n_est_pas_a_migrer():
+    """Produit 159 case: every synonyme already redirected to a new page,
+    nothing left to migrate, so it must not show up as "à migrer"."""
+    from unit_tests.qfdmd.qfdmod_factory import ProduitFactory, SynonymeFactory
+
+    produit = ProduitFactory(nom="Flacon de parfum (en verre)")
+    tag = SearchTag.objects.create(name="Flacon de parfum", slug="flacon-de-parfum")
+    SynonymeFactory(nom="Flacon de parfum", produit=produit, imported_as_search_tag=tag)
+    assert not Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+    SynonymeFactory(nom="Bouteille de parfum", produit=produit)
+    assert Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+
+@pytest.fixture
+def index_categories():
+    root_page = Page.objects.get(depth=1)
+    page = ProduitIndexPage(title="Catégories", slug=CATEGORIES_INDEX_SLUG)
+    root_page.add_child(instance=page)
+    page.save()
+    return page
+
+
+def test_migrate_verrouille_la_page(index_dechet):
+    produit = ProduitFactory(nom="Baignoire")
+
+    report = migrate_produit(produit, index_page=index_dechet)
+
+    assert report.page.locked is True
+    assert report.page.locked_by is None
+
+
+def test_finalize_deplace_la_page_et_convertit_les_liens(
+    index_dechet, index_categories
+):
+    produit = ProduitFactory(nom="Baignoire")
+    synonyme = SynonymeFactory(produit=produit, nom="Sabot de bain")
+    page = migrate_produit(produit, index_page=index_dechet).page
+    synonyme.refresh_from_db()
+    tag = synonyme.legacy_imported_as_search_tag
+
+    finalize_produit_migration(page)
+
+    page.refresh_from_db()
+    produit.refresh_from_db()
+    synonyme.refresh_from_db()
+    assert page.get_parent().pk == index_categories.pk
+    assert page.url_path.endswith(f"/{CATEGORIES_INDEX_SLUG}/baignoire/")
+    assert page.live is True
+    assert page.locked is False
+    assert page.automatically_migrated_from_legacy_produit is False
+    # Automatic links replaced by the manual ones.
+    assert produit.legacy_imported_as_produit_page is None
+    assert produit.next_wagtail_page.page.pk == page.pk
+    assert synonyme.legacy_imported_as_search_tag is None
+    assert synonyme.imported_as_search_tag == tag
+    # No longer "migré", and the produit stays out of "à migrer".
+    assert not ProduitPage.objects.filter(
+        pk=page.pk, automatically_migrated_from_legacy_produit=True
+    ).exists()
+    assert not Produit.objects.to_migrate().filter(pk=produit.pk).exists()
+
+
+def test_finalize_suffixe_le_slug_en_cas_de_conflit(index_dechet, index_categories):
+    existing = ProduitPage(title="Baignoire", slug="baignoire")
+    index_categories.add_child(instance=existing)
+    produit = ProduitFactory(nom="Baignoire")
+    page = migrate_produit(produit, index_page=index_dechet).page
+
+    finalize_produit_migration(page)
+
+    page.refresh_from_db()
+    assert page.slug == "baignoire-2"
+
+
+def test_finalize_refuse_une_page_non_migree_automatiquement(index_categories):
+    page = ProduitPage(title="Manuelle", slug="manuelle")
+    index_categories.add_child(instance=page)
+
+    with pytest.raises(MigrationError):
+        finalize_produit_migration(page)
+
+
+def test_vue_finalize_affiche_une_confirmation_sur_get(
+    admin_client, index_dechet, index_categories
+):
+    produit = ProduitFactory(nom="Armoire")
+    page = migrate_produit(produit, index_page=index_dechet).page
+
+    response = admin_client.get(reverse("finalize_page_migration", args=[page.pk]))
+
+    assert response.status_code == 200
+    assert "admin/qfdmd/confirm_finalize_migration.html" in [
+        t.name for t in response.templates
+    ]
+    assert "Armoire" in response.content.decode()
+
+
+def test_vue_finalize_deplace_la_page_sur_post(
+    admin_client, index_dechet, index_categories
+):
+    produit = ProduitFactory(nom="Armoire")
+    page = migrate_produit(produit, index_page=index_dechet).page
+
+    response = admin_client.post(reverse("finalize_page_migration", args=[page.pk]))
+
+    page.refresh_from_db()
+    assert response.status_code == 302
+    assert page.get_parent().pk == index_categories.pk
+    assert page.locked is False

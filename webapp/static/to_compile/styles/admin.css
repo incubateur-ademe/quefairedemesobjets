@@ -50,3 +50,54 @@ a:not(
   ):not(:focus) {
   @apply qf-no-underline;
 }
+
+/*
+Django 6.1 stacks form labels above their inputs (accessibility change in
+django/contrib/admin/static/admin/css/forms.css). Restore the pre-6.1
+side-by-side layout: 160px label column, input on the right, help text and
+errors under the input. Checkbox rows keep Django's layout.
+*/
+.aligned .flex-container:not(.checkbox-row, .form-multiline) {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 4px;
+  align-items: start;
+}
+
+.aligned .flex-container:not(.checkbox-row, .form-multiline) > label {
+  grid-column: 1;
+  grid-row: 1;
+  padding-top: 4px;
+  overflow-wrap: break-word;
+}
+
+.aligned .flex-container:not(.checkbox-row, .form-multiline) > :not(label) {
+  grid-column: 2;
+}
+
+/* Column 2 order: input, then errors, then help text */
+.aligned .flex-container:not(.checkbox-row, .form-multiline) > ul.errorlist {
+  order: 1;
+  margin: 0;
+}
+
+.aligned .flex-container:not(.checkbox-row, .form-multiline) > div.help {
+  order: 2;
+  margin: 0;
+  padding: 0;
+}
+
+/* Map widget: address search on the label row, map below at full width */
+.aligned .flex-container > [data-controller="map-search"] {
+  grid-row: 1;
+}
+
+.aligned .flex-container > .dj_map_wrapper {
+  float: none;
+  width: 100%;
+}
+
+.aligned .flex-container .dj_map {
+  width: 100%;
+}
