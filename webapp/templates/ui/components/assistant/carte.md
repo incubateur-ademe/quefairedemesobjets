@@ -7,7 +7,7 @@ pendant l'exploration.
 
 ```django
 {% include "ui/components/assistant/carte.html" with
-   geste="reparer"
+   gestes=gestes
    fiche="telephone-mobile"
    longitude=2.3488
    latitude=48.8534
@@ -19,7 +19,7 @@ pendant l'exploration.
 
 | Paramètre         | Requis | Rôle                                                                 |
 | ----------------- | ------ | -------------------------------------------------------------------- |
-| `geste`           | ✅     | code d'un `GroupeAction` — voir ci-dessous                           |
+| `gestes`          | ✅     | codes de `GroupeAction` — voir ci-dessous ; plusieurs pour un bloc   |
 | `longitude`       | ✅     | centre initial                                                       |
 | `latitude`        | ✅     | centre initial                                                       |
 | `couleur_geste`   | ✅     | couleur des pinpoints, issue de `GroupeAction.couleur`               |
@@ -60,39 +60,47 @@ elle se teste en Jest (`visible_places.test.ts`), sans monter de carte.
 Toutes viennent de la spec
 [#3356](https://app.notion.com/p/3a06523d57d780589476d537f8776008).
 
-### Rafraîchissement après une seconde d'immobilité
+### Rafraîchissement à chaque déplacement
 
-```typescript
-static debounces = [{ name: "refresh", wait: SETTLE_DELAY_MS }]
-```
+Le contrôleur écoute `moveend`, que MapLibre n'émet qu'une fois le geste
+terminé : pas de requête pendant un glissement. Il n'y a pas de temporisation
+supplémentaire ; une requête encore en vol est annulée par la suivante (voir
+« Requêtes annulables »).
 
-Rien ne se passe pendant que l'usager déplace ou zoome. `useDebounce` de
-`stimulus-use` applique les défauts `leading: false, trailing: true`, soit
-exactement « attendre que ça s'arrête ».
-
-### Un point visible ne disparaît pas
+### Les lieux chargés restent
 
 C'est la règle la plus subtile, et la raison pour laquelle l'endpoint renvoie
 du GeoJSON plutôt que du HTML : le client doit posséder l'état des marqueurs
-pour comparer l'ancien et le nouveau.
+pour l'enrichir au fil de l'exploration.
 
 ```typescript
-const kept = shown.filter((place) => isInArea(place, area))
-const merged = new Map(kept.map((place) => [place.uuid, place]))
+const merged = new Map(loaded.map((place) => [place.uuid, place]))
 for (const place of incoming) {
-  if (merged.size >= cap) break
+  if (added >= cap) break
+  if (merged.has(place.uuid)) continue
   merged.set(place.uuid, place)
+  added += 1
 }
 ```
 
-Les lieux conservés sont insérés **en premier** : ce sont eux qui remplissent
-le plafond de 20. Un lieu sous les yeux de l'usager ne saute donc jamais, ce
-qui répond à un retour de test explicite.
+Tout ce qui a déjà été chargé est conservé, dans le cadre ou juste en dehors :
+un lieu vu par l'usager ne saute jamais (#3356, étendu à l'exploration). Chaque
+requête ajoute au plus 20 lieux nouveaux, donc l'ensemble grandit en
+parcourant la carte. La mémoire est bornée à 200 lieux : au-delà, les lieux
+hors cadre les plus éloignés du centre sont retirés en premier, jamais ceux
+qui sont à l'écran.
 
 ### Dézoom : masqués, pas perdus
 
-Sous le zoom d'un département, les marqueurs sont retirés de la carte mais
-`this.places` est conservé. Un rezoom les réaffiche **sans requête**.
+Sous le zoom d'un département, les punaises sont masquées par CSS
+(`data-zoomed-out` sur le composant), mais restent dans le DOM et en mémoire.
+Un rezoom les réaffiche **immédiatement, sans requête**, et rien n'est
+reconstruit. Le message d'état est posé **sur** la carte, jamais dans le flux :
+un message qui pousserait la toile la ferait changer de taille, et MapLibre
+redessinerait tout à chaque apparition, d'où un saut visible.
+
+Une même zone n'est jamais redemandée deux fois de suite : MapLibre émet aussi
+`moveend` quand son conteneur change de taille, sans que la vue ait bougé.
 
 ### Requêtes annulables
 
@@ -120,14 +128,6 @@ disconnect() {
 Sans `carte.remove()`, le contexte WebGL fuit à chaque navigation de Turbo
 Frame. Le problème a déjà été rencontré sur la carte V1.
 
-### Une méthode débouncée ne peut pas être `await`ée
-
-`useDebounce` remplace la méthode par une enveloppe qui **ne retourne rien**.
-`await this.refresh()` résout immédiatement sur `undefined`, et
-`.catch()` lève. C'est pourquoi `refresh()` reste synchrone et délègue à
-`#load()`, qui gère ses propres erreurs : un
-rejet non capturé deviendrait une _unhandled promise rejection_ silencieuse.
-
 ### MapLibre est chargé dynamiquement
 
 ```typescript
@@ -143,7 +143,8 @@ aucune carte.
 Un même acteur s'affiche en bleu si l'usager a choisi « donner » et en brun
 s'il a choisi « revendre ». La couleur vient donc du template
 (`--qfa-geste-color`, alimenté par `GroupeAction.couleur` en base), jamais
-d'une propriété du lieu. Seul le Bonus Réparation prend le pas.
+d'une propriété du lieu. Seul le Bonus Réparation prend le pas, et
+ajoute la pastille « % » sur l'épaule droite de la goutte (30141:9028).
 
 ## Accessibilité
 

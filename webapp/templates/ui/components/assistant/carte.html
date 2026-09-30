@@ -5,7 +5,11 @@
     data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
     data-assistant-carte-url-value="{% url 'api_v1:lieux-geojson' %}"
     data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
-    data-assistant-carte-geste-value="{{ geste }}"
+    {% comment %}
+    One or several GroupeAction codes, comma separated: the controller repeats
+    `geste` in the request for each of them.
+    {% endcomment %}
+    data-assistant-carte-geste-value="{{ gestes|join:',' }}"
     data-assistant-carte-fiche-value="{{ fiche|default:'' }}"
     {% comment %}
     URL pattern of a place's page: the controller replaces `__uuid__` in it.
@@ -36,12 +40,22 @@
         </div>
     {% endif %}
 
+    {% comment %}
+    Status of the map ("aucun lieu", "zoomez"), styled as the alert component
+    (Figma 24420:507) and laid over the map next to the zoom control
+    (30162:9443). Present from the start so screen readers announce changes;
+    hidden while empty.
+    {% endcomment %}
     <p
-        class="qfa-carte__message"
+        class="qfa-alerte qfa-carte__message"
         data-assistant-carte-target="message"
         role="status"
         aria-live="polite"
-    ></p>
+        hidden
+    >
+        <span class="qfa-alerte__icone" aria-hidden="true"></span>
+        <span data-assistant-carte-target="messageText"></span>
+    </p>
 
     {% comment %}
     A MapLibre map is neither keyboard-navigable nor readable by a screen
