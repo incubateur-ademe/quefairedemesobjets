@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -151,6 +152,7 @@ def _cluster_acteurs_read_base(
     est_parent: bool,
     only_active: bool = True,
     limit: int | None = None,
+    dtype: Any = object,
 ) -> tuple[pd.DataFrame, str]:
     """
     Reading actors from DB (orphans or parents).
@@ -172,6 +174,9 @@ def _cluster_acteurs_read_base(
 
         ➕ limit (int | None): maximum number of actors to select (LIMIT).
             None = no limit. Useful for quick local tests on a small sample.
+
+        ➕ dtype (Any): dtype for columns of the resulting df
+            (by default all columns will be casted to object dtype)
 
     Returns:
         tuple[pd.DataFrame, str]: DataFrame of actors and SQL query used
@@ -224,7 +229,7 @@ def _cluster_acteurs_read_base(
     # 2) DataFrame
     # -----------------------------------
     sql = django_model_queryset_to_sql(query)
-    df = django_model_queryset_to_df(query, fields, dtype=None)
+    df = django_model_queryset_to_df(query, fields, dtype=dtype)
 
     if df.empty:
         return df, sql
