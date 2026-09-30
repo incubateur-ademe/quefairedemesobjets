@@ -16,6 +16,13 @@ if [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "1" ] || [ "${ML_DEDUPLICATION_RUN_LOC
   exit 0
 fi
 
+# Route the whole ml-deduplication infrastructure process through the dedicated
+# _INFRA Scaleway credentials (exposed as env vars by the scheduler container
+# secret). The scw CLI and the cloud-init registry login read SCW_ACCESS_KEY /
+# SCW_SECRET_KEY, so we map the infra credentials onto those standard names.
+export SCW_ACCESS_KEY="${SCW_ACCESS_KEY_INFRA:?SCW_ACCESS_KEY_INFRA must be set (infra credentials)}"
+export SCW_SECRET_KEY="${SCW_SECRET_KEY_INFRA:?SCW_SECRET_KEY_INFRA must be set (infra credentials)}"
+
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
@@ -88,8 +95,8 @@ render_user_data() {
   sed \
     -e "s|\${registry_image}|${REGISTRY_IMAGE}|g" \
     -e "s|\${registry}|${REGISTRY}|g" \
-    -e "s|\${scw_access_key}|${SCW_ACCESS_KEY:-}|g" \
-    -e "s|\${scw_secret_key}|${SCW_SECRET_KEY:-}|g" \
+    -e "s|\${scw_access_key_infra}|${SCW_ACCESS_KEY_INFRA:-}|g" \
+    -e "s|\${scw_secret_key_infra}|${SCW_SECRET_KEY_INFRA:-}|g" \
     -e "s|\${ssh_public_key}|${SSH_PUB_KEY}|g" \
     "${CLOUD_INIT_TPL}"
 }
