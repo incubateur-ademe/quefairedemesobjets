@@ -21,6 +21,10 @@ IMAGE_REF="${ML_DEDUPLICATION_IMAGE:?ML_DEDUPLICATION_IMAGE must be set (full re
 # scheduler container with the docker socket mounted). Requires docker + a
 # warehouse DB URI reachable from that machine.
 RUN_LOCAL="${ML_DEDUPLICATION_RUN_LOCAL:-0}"
+# When "1"/"true", pass --gpus to docker run and force the SentenceTransformer
+# onto the GPU (--device cuda). Requires a GPU-capable image (CUDA base) and an
+# NVIDIA GPU reachable from the container (--gpus / nvidia-container-toolkit).
+USE_GPU="${ML_DEDUPLICATION_USE_GPU:-0}"
 # Warehouse DB already exported in the scheduler container (DB_WAREHOUSE). The
 # inference reads acteurs from it and writes clusters/predictions back to it.
 DATABASE_CONNECTION_URI="${DATABASE_CONNECTION_URI:-${DB_WAREHOUSE:?DB_WAREHOUSE or DATABASE_CONNECTION_URI must be set}}"
@@ -47,6 +51,11 @@ args="--model-path /model --output-dir /outputs --run-id ${RUN_ID}"
 [ -n "${MODEL_THRESHOLD}" ] && args="${args} --model-threshold ${MODEL_THRESHOLD}"
 [ -n "${LINKAGE_COLUMN}" ] && args="${args} --linkage-column ${LINKAGE_COLUMN}"
 [ "${SPLIT_BY_DEPARTEMENT}" = "1" ] && args="${args} --split-by-departement"
+if [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ]; then
+  args="${args} --device cuda"
+else
+  args="${args} --device auto"
+fi
 [ -n "${OUTPUT_TABLE}" ] && args="${args} --output-table ${OUTPUT_TABLE}"
 if [ -n "${ACTEURS_TABLE}" ]; then
   args="${args} --acteurs-table ${ACTEURS_TABLE}"
@@ -62,7 +71,12 @@ if [ "${RUN_LOCAL}" = "1" ] || [ "${RUN_LOCAL}" = "true" ]; then
   # host-reachable warehouse URI (ML_DEDUPLICATION_DATABASE_URI), not the
   # compose-internal one used by the scheduler container.
   LOCAL_DB_URI="${ML_DEDUPLICATION_DATABASE_URI:-${DATABASE_CONNECTION_URI}}"
+  GPU_ARGS=""
+  if [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ]; then
+    GPU_ARGS="--gpus all"
+  fi
   docker run --rm \
+    ${GPU_ARGS} \
     -e DATABASE_CONNECTION_URI="${LOCAL_DB_URI}" \
     $( [ -n "${DOCKER_NETWORK}" ] && printf -- "--network %s" "${DOCKER_NETWORK}" ) \
     -v "${OUTPUT_DIR}":/outputs \
@@ -97,6 +111,7 @@ ssh -i "${SSH_KEY}" \
     -o UserKnownHostsFile=/dev/null \
     "${SSH_USER}@${public_ip}" \
     "docker run --rm \
+      $( [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ] && printf -- '--gpus all' ) \
       -e DATABASE_CONNECTION_URI='${DATABASE_CONNECTION_URI}' \
       -v /var/lib/ml-deduplication/outputs:/outputs \
       ${IMAGE_REF} ${PYTHON_CMD} ${args}"

@@ -116,6 +116,15 @@ def parse_args() -> argparse.Namespace:
         "each tagged with run_id. Requires --database-uri. When not set, results are "
         "only written to parquet in --output-dir.",
     )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="auto",
+        help="Device for the SentenceTransformer embedding model: 'auto', 'cpu' or "
+        "'cuda'. 'auto' lets the library pick (CUDA if available, else CPU). Use "
+        "'cuda' to force the GPU (requires a GPU-capable image and `--gpus` at "
+        "docker run), 'cpu' to force CPU.",
+    )
 
     return parser.parse_args()
 
@@ -272,7 +281,12 @@ def main():
     df_embeddings = None
     if args.embeddings_filepath is not None:
         df_embeddings = pl.read_parquet(args.embeddings_filepath)
-    embedding_model = SentenceTransformer("Lajavaness/sentence-camembert-large")
+    # "auto" lets the library pick the best available device; pass None so the
+    # library performs its own detection (torch.device("auto") is invalid).
+    embedding_device = None if args.device == "auto" else args.device
+    embedding_model = SentenceTransformer(
+        "Lajavaness/sentence-camembert-large", device=embedding_device
+    )
 
     model = XGBoostBusinessRulesModel.load(
         xgb_model_path=model_path / "model.json",
