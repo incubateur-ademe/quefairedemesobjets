@@ -194,3 +194,27 @@ class TestLinksLeavingTheFrame:
         ).content.decode()
 
         assert 'id="assistant-fiche"' not in content
+
+
+class TestBlockLinks:
+    def test_the_link_carries_the_fiche_slug_when_known(self):
+        from assistant.consignes import consignes_for
+        from assistant.parcours import Parcours
+
+        fiche = ProduitPageFactory(parent=None)
+        first = consignes_for(fiche, Parcours(objet="Chaise"))[0]
+
+        assert f"fiche={fiche.slug}" in first["url"]
+
+    def test_the_counter_url_needs_a_position(self):
+        from assistant.consignes import consignes_for
+        from assistant.parcours import Parcours
+
+        without = consignes_for(None, Parcours(objet="Chaise"))[0]
+        located = consignes_for(
+            None, Parcours(objet="Chaise", longitude=-0.56, latitude=47.47)
+        )[0]
+
+        assert without["url_compte"] == ""
+        assert located["url_compte"].startswith(reverse("api_v1:lieux-compte"))
+        assert "longitude=-0.56" in located["url_compte"]

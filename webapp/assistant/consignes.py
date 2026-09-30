@@ -94,6 +94,10 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
     """
     known = set(GroupeAction.objects.values_list("code", flat=True))
     base = parcours.as_params() if parcours else {}
+    # The slug spares the solutions screen a label lookup, and the counter
+    # needs it to narrow the places to the objet.
+    if produit_page is not None and getattr(produit_page, "slug", None):
+        base = {**base, "fiche": produit_page.slug}
 
     consignes = []
     for block in BLOCKS:
@@ -115,6 +119,12 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
                 "consigne": block["consigne"],
                 "badges": badges,
                 "url": f"{reverse('assistant:solutions')}?{params}",
+                # Fetched after the page renders, only when there is a position.
+                "url_compte": (
+                    f"{reverse('api_v1:lieux-compte')}?{params}"
+                    if parcours and parcours.is_located
+                    else ""
+                ),
             }
         )
     return consignes
