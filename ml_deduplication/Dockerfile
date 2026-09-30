@@ -1,5 +1,5 @@
 ############################################
-# Runtime stage: Python 3.13 inference image
+# Single-stage: Python 3.13 GPU-capable inference image
 ############################################
 FROM python:3.13-slim-bookworm
 
@@ -39,6 +39,12 @@ RUN /root/.local/bin/uv sync --frozen --no-dev
 # Use the venv for subsequent RUN/CMD
 ENV VIRTUAL_ENV="/app/.venv" \
     PATH="/app/.venv/bin:${PATH}"
+
+# The image is GPU-capable via the torch cu13 wheels in the lock, which bundle
+# all the CUDA runtime libraries (nvidia-cudnn-cu13, cublas, nvrtc, etc.). No
+# CUDA base image is required; the NVIDIA *driver* is provided at runtime by the
+# host via `docker run --gpus` (nvidia-container-toolkit). Without `--gpus`,
+# torch falls back to the CPU.
 
 # Bake the trained model artifacts into the image at /model.
 COPY ${MODEL_DIR} /model

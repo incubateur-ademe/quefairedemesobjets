@@ -66,6 +66,12 @@ DEFAULT_IMAGE = f"rg.fr-par.scw.cloud/{IMAGE_NAMESPACE}/ml-deduplication-inferen
 # when the docker socket is mounted). Defaults from env so local dev can opt in.
 RUN_LOCAL = config("ML_DEDUPLICATION_RUN_LOCAL", default=False, cast=bool)
 
+# When set to 1/true, the inference container is granted access to an NVIDIA GPU
+# (docker run --gpus) and the SentenceTransformer embedding model runs on CUDA.
+# The inference image is CUDA-based (torch cu13 wheels) and the instance type is
+# GPU-capable, so this can be enabled per environment. Defaults from env.
+USE_GPU = config("ML_DEDUPLICATION_USE_GPU", default=True, cast=bool)
+
 # Create dropdowns
 mapping_source_id_by_code = {
     source["code"]: source["id"] for source in get_sources_from_webapp()
@@ -248,6 +254,14 @@ PARAMS = {
         type="boolean",
         description_md="Run inference split per departement.",
     ),
+    "use_gpu": Param(
+        USE_GPU,
+        type="boolean",
+        description_md=(
+            "Run the SentenceTransformer embedding model on the NVIDIA GPU of the "
+            "inference instance (docker run --gpus + --device cuda)."
+        ),
+    ),
 }
 
 
@@ -287,6 +301,9 @@ def ml_deduplication_inference():
         # run_inference runs the image locally with docker instead of on a
         # Scaleway instance.
         "ML_DEDUPLICATION_RUN_LOCAL": "{{ '1' if params.run_locally else '0' }}",
+        # GPU: when "1"/"true", run_inference passes --gpus + --device cuda so the
+        # SentenceTransformer runs on the NVIDIA GPU of the instance.
+        "ML_DEDUPLICATION_USE_GPU": "{{ '1' if params.use_gpu else '0' }}",
         # Zone chosen by create_instance (pushed as XCom from its stdout) where
         # the Scaleway instance was created, so wait/run/destroy query the same
         # zone. Falls back to the script default when not set (e.g. local mode).
