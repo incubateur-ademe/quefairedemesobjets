@@ -1,0 +1,22 @@
+{% load static %}
+{% comment %}
+Pied de page de l'assistant (Figma 24395:12728).
+
+L'assistant est servi en iframe : le lien s'ouvre dans le contexte parent,
+sinon la page de destination se retrouve enfermée dans le cadre.
+{% endcomment %}
+<footer class="qfa-footer">
+    <a class="qfa-bouton qfa-bouton--tertiaire"
+       href="{{ url_en_savoir_plus|default:'https://quefairedemesdechets.ademe.fr' }}"
+       target="_blank"
+       rel="noopener">
+        En savoir plus sur cet outil
+        <span class="qfa-bouton__externe" aria-hidden="true"></span>
+    </a>
+
+    <p class="qfa-footer__marques">
+        <img src="{% static 'assistant/logos/republique-francaise.svg' %}" alt="République française" width="50" height="44">
+        <img src="{% static 'assistant/logos/ademe.svg' %}" alt="ADEME" width="40" height="47">
+        <img src="{% static 'assistant/logos/que-faire.svg' %}" alt="Que faire de mes objets et déchets" width="60" height="36">
+    </p>
+</footer>
