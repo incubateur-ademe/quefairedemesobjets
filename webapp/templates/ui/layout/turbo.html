@@ -1,2 +1,11 @@
-{% block content %}
-{% endblock content %}
+{% comment %}
+Gabarit des réponses destinées à un Turbo Frame : Turbo n'extrait que le frame
+correspondant, rendre le document entier serait du travail jeté.
+
+Les deux blocs coexistent volontairement : la V1 (`qfdmo/views/adresses.py`)
+définit `content`, les pages de l'assistant définissent `main`. N'en garder
+qu'un rendrait une réponse vide de l'autre côté — c'est exactement le bug qui
+faisait retomber l'assistant sur un rechargement complet.
+{% endcomment %}
+{% block content %}{% endblock content %}
+{% block main %}{% endblock main %}
