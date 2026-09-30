@@ -173,7 +173,11 @@ def load_acteurs(
         qualified = ".".join(f'"{part}"' for part in table_name.split("."))
         sql = f"SELECT * FROM {qualified}"
         logger.info("Querying acteurs from table: %s", table_name)
-        df = pl.read_database_uri(sql, uri=database_uri)
+        df = pl.read_database_uri(
+            sql,
+            uri=database_uri,
+            schema_overrides=OPTIMIZED_SCHEMA,
+        )
         logger.info("Found %d acteurs", len(df))
         return df
 

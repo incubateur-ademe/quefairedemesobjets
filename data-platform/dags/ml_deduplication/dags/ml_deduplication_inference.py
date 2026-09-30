@@ -262,6 +262,16 @@ PARAMS = {
             "inference instance (docker run --gpus + --device cuda)."
         ),
     ),
+    "skip_cleanup": Param(
+        False,
+        type="boolean",
+        description_md=(
+            "🧹 **IGNORER LE NETTOYAGE**: si coché, la table temporaire du pool "
+            "d'acteurs n'est **PAS supprimée** à la fin du run, pour pouvoir "
+            "l'inspecter en debug. ⚠️ Ne pas laisser coché en production "
+            "(risque d'accumulation de tables temporaires)."
+        ),
+    ),
 }
 
 

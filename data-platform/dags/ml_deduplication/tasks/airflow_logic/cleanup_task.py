@@ -26,13 +26,15 @@ def task_info_get():
     🎯 pourquoi: éviter d'accumuler des tables temporaires dans le warehouse
 
     🏗️ comment: drop de la table (idempotent) si un run_id est connu
+        (ignoré si skip_cleanup=True, pour debug)
     """
 
 
-def ml_deduplication_cleanup_wrapper(ti) -> None:
+def ml_deduplication_cleanup_wrapper(ti, params) -> None:
     logger.info(task_info_get())
     run_id: str | None = xcom_pull(ti, XCOMS.RUN_ID)
-    ml_deduplication_cleanup(run_id)
+    skip = bool(getattr(params, "skip_cleanup", False))
+    ml_deduplication_cleanup(run_id, skip=skip)
 
 
 def ml_deduplication_cleanup_task() -> PythonOperator:

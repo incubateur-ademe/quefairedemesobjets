@@ -38,6 +38,7 @@ def ml_deduplication_acteurs_select(
         est_parent=False,
         only_active=True,
         limit=config.limit_acteurs,
+        dtype=None,
     )
 
     if df.empty:
