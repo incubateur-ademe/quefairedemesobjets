@@ -87,6 +87,13 @@ if [ "${RUN_LOCAL}" = "1" ] || [ "${RUN_LOCAL}" = "true" ]; then
 fi
 
 # --- Remote (Scaleway) path -------------------------------------------------
+# Route the whole ml-deduplication infrastructure process through the dedicated
+# _INFRA Scaleway credentials (exposed as env vars by the scheduler container
+# secret). The scw CLI reads SCW_ACCESS_KEY / SCW_SECRET_KEY, so we map the
+# infra credentials onto those standard names.
+export SCW_ACCESS_KEY="${SCW_ACCESS_KEY_INFRA:?SCW_ACCESS_KEY_INFRA must be set (infra credentials)}"
+export SCW_SECRET_KEY="${SCW_SECRET_KEY_INFRA:?SCW_SECRET_KEY_INFRA must be set (infra credentials)}"
+
 # Private SSH key: prefer the base64-encoded value injected as a container
 # secret (ML_DEDUPLICATION_SSH_KEY_B64, e.g. from Terraform); decode it to a
 # temp file. Otherwise fall back to a pre-placed key file path (ML_DEDUPLICATION_SSH_KEY).

@@ -16,6 +16,13 @@ if [ "${ML_DEDUPLICATION_RUN_LOCAL:-0}" = "1" ] || [ "${ML_DEDUPLICATION_RUN_LOC
   exit 0
 fi
 
+# Route the whole ml-deduplication infrastructure process through the dedicated
+# _INFRA Scaleway credentials (exposed as env vars by the scheduler container
+# secret). The scw CLI reads SCW_ACCESS_KEY / SCW_SECRET_KEY, so we map the
+# infra credentials onto those standard names.
+export SCW_ACCESS_KEY="${SCW_ACCESS_KEY_INFRA:?SCW_ACCESS_KEY_INFRA must be set (infra credentials)}"
+export SCW_SECRET_KEY="${SCW_SECRET_KEY_INFRA:?SCW_SECRET_KEY_INFRA must be set (infra credentials)}"
+
 ENVIRONMENT="${ENVIRONMENT:?ENVIRONMENT must be set (prod|preprod)}"
 PREFIX="${PREFIX:-lvao}"
 # Zone chosen at instance creation (propagated via XCom as ML_DEDUPLICATION_ZONE).

@@ -11,7 +11,7 @@
 #
 # Substituted variables (only the brace-delimited placeholders below are
 # templated; everything else is left literal so cloud-init's shell can expand it
-# at boot): registry_image, registry, scw_access_key, scw_secret_key,
+# at boot): registry_image, registry, scw_access_key_infra, scw_secret_key_infra,
 # ssh_public_key.
 
 # Log all cloud-init output (including runcmd) so failures are visible in
@@ -24,8 +24,8 @@ write_files:
     content: |
       REGISTRY_IMAGE=${registry_image}
       REGISTRY=${registry}
-      SCW_ACCESS_KEY=${scw_access_key}
-      SCW_SECRET_KEY=${scw_secret_key}
+      SCW_ACCESS_KEY_INFRA=${scw_access_key_infra}
+      SCW_SECRET_KEY_INFRA=${scw_secret_key_infra}
 
 runcmd:
   # Single shell script: cloud-init runs each runcmd entry in its own shell
@@ -64,7 +64,7 @@ runcmd:
     systemctl enable --now docker
 
     # 2. Authenticate to the (private) Scaleway container registry
-    . /etc/ml-deduplication.env | echo "$SCW_SECRET_KEY" | docker login "$REGISTRY" -u nologin --password-stdin
+    . /etc/ml-deduplication.env | echo "$SCW_SECRET_KEY_INFRA" | docker login "$REGISTRY" -u nologin --password-stdin
 
     # 3. Pull the inference image so a later `docker run` starts instantly
     docker pull "$REGISTRY_IMAGE"
