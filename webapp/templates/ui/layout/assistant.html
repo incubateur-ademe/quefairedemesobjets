@@ -9,6 +9,21 @@
     être indexé (#3434). On s'en tient à ce qui sert l'accessibilité.
     {% endcomment %}
     <meta name="robots" content="noindex, nofollow">
+    {% comment %}
+    Turbo Drive animates each screen change with the View Transitions API:
+    the header (`view-transition-name: entete`) morphs between its states,
+    the rest crossfades. Browsers without the API just swap.
+    {% endcomment %}
+    <meta name="view-transition" content="same-origin">
+    {% comment %}
+    Pas d'aperçu depuis le cache d'instantanés : Turbo n'anime qu'une seule
+    fois par visite, et quand la destination est en cache il anime vers
+    l'aperçu, puis remplace la page réelle sans transition. Dès qu'un écran
+    a été visité, chaque retour se terminait donc par un remplacement sec, et
+    le contrôleur de la carte était connecté deux fois. Les réponses arrivent
+    en moins de 100 ms : l'aperçu n'apportait rien.
+    {% endcomment %}
+    <meta name="turbo-cache-control" content="no-preview">
     <title>{% block title %}Assistant au tri, au réemploi et à la réparation{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'assistant.css' %}">
     <script type="module" src="{% static 'assistant.js' %}"></script>
@@ -23,5 +38,14 @@
     </main>
 
     {% block footer %}{% endblock %}
+
+    {% comment %}
+    The map's canvas is a permanent element: Turbo carries it from page to
+    page, so leaving the solutions screen and coming back reuses the same
+    MapLibre instance, tiles and pins. Off the solutions screen it is parked
+    here, hidden by the stylesheet; the solutions screen places it inside
+    the map component instead.
+    {% endcomment %}
+    {% block carte_parking %}{% include "ui/components/assistant/carte_canvas.html" %}{% endblock %}
   </body>
 </html>

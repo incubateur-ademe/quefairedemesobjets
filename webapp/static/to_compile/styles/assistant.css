@@ -152,10 +152,32 @@ body {
   display: none;
 }
 
-/* Sous le zoom d'un département, les lieux sont masqués mais conservés ; la
-   punaise de l'adresse reste, elle dit où l'usager se trouve. */
-.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address) {
-  display: none;
+/* Les punaises apparaissent en fondu (insertion) et disparaissent de même,
+   que ce soit sous le zoom d'un département ou à leur retrait de la mémoire.
+   `!important` : MapLibre peut poser une opacité en ligne sur ses marqueurs,
+   et une animation ou une déclaration importante la surclasse ; `visibility`
+   suit avec un délai pour que la punaise masquée sorte aussi de l'ordre de
+   tabulation. La punaise de l'adresse reste, elle dit où l'usager se trouve. */
+@keyframes qfa-pinpoint-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.qfa-pinpoint:not(.qfa-pinpoint--address) {
+  animation: qfa-pinpoint-in 200ms ease-out;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 0s;
+}
+
+.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address),
+.qfa-pinpoint--leaving {
+  opacity: 0 !important;
+  visibility: hidden;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 200ms;
 }
 
 .qfa-pinpoint {
@@ -346,8 +368,18 @@ body {
   opacity: 1;
 }
 
+/* `view-transition-name` fait de chaque champ et du bandeau un contexte
+   d'empilement : le z-index de la liste ne compte plus qu'à l'intérieur du
+   champ. L'ordre est donc posé ici : le bandeau au-dessus de ce qui le suit
+   (blocs, carte), et le champ d'objet au-dessus du champ d'adresse, sur
+   lequel sa liste se déploie. */
 .qfa-combobox {
   position: relative;
+  z-index: 1;
+}
+
+#recherche-objet {
+  z-index: 2;
 }
 
 /* Question posée au-dessus du champ (30139:14308) : c'est elle qui tient lieu
@@ -895,12 +927,96 @@ body {
   width: 100%;
   padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
   background: var(--qfa-geste-reparation-fond);
+  /* Un seul bandeau par écran : d'un écran à l'autre, la View Transition le
+     fait glisser et se redimensionner vers son nouvel état. */
+  view-transition-name: entete;
+  /* Contexte d'empilement (voir `.qfa-combobox`) : au-dessus de la carte,
+     pour que les listes de suggestions la recouvrent. */
+  position: relative;
+  z-index: 2;
+}
+
+/* Les éléments du bandeau présents sur plusieurs écrans voyagent chacun pour
+   soi : le champ d'adresse glisse de sa place sur la fiche à sa place sous le
+   bouton de geste, sans fondu, et le bouton vert se transforme de « Réparer »
+   en « Revenir aux solutions ». Un nom par écran, jamais deux : un seul champ
+   d'adresse, un seul champ d'objet, un seul bouton de geste. */
+#recherche-adresse {
+  view-transition-name: champ-adresse;
+}
+
+#recherche-objet {
+  view-transition-name: champ-objet;
+}
+
+.qfa-changer-geste {
+  view-transition-name: bouton-geste;
+}
+
+/* Le bouton vert est le même élément sur les solutions (« Réparer ») et sur
+   le lieu (« Revenir aux solutions ») : sa boîte et son chevron restent en
+   place sans fondu, les icônes de geste sortent seules, et seul le libellé
+   se fond d'un texte à l'autre. Chaque partie nommée sort de l'image de la
+   boîte, qui devient identique sur les deux écrans. */
+.qfa-changer-geste__icones {
+  view-transition-name: bouton-geste-icones;
+}
+
+.qfa-changer-geste__libelle {
+  view-transition-name: bouton-geste-libelle;
+}
+
+::view-transition-old(bouton-geste) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(bouton-geste) {
+  animation: none;
+}
+
+/* Le libellé change de largeur (« Réparer » → « Revenir aux solutions ») :
+   sans cela, l'ancienne image est étirée à la nouvelle largeur pendant le
+   fondu et le texte semble grossir. Chaque image garde sa largeur naturelle,
+   alignée à gauche, et seul le fondu reste. */
+::view-transition-old(bouton-geste-libelle),
+::view-transition-new(bouton-geste-libelle) {
+  width: auto;
+  height: 100%;
+}
+
+/* Le champ d'adresse ne fait que se déplacer : ni fondu sortant ni fondu
+   entrant, seule la nouvelle image bouge. */
+::view-transition-old(champ-adresse) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(champ-adresse) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  .qfa-pinpoint {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* Sur la fiche, le panneau vit dans un formulaire : sans cela, la colonne
    centrée le rétrécit à la largeur de son contenu. */
 .qfa-ecran > form {
   width: 100%;
+}
+
+/* Parquée hors de l'écran solutions (enfant direct de `body`, voir
+   `layout/assistant.html`), la toile de la carte est masquée mais vit
+   toujours : Turbo la ramène telle quelle dans le composant carte. */
+body > #assistant-carte-canvas {
+  display: none;
 }
 
 /* Bandeau et carte se touchent (30141:9302) : ce conteneur les soustrait à
