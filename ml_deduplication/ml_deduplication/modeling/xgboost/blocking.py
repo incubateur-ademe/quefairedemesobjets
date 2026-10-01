@@ -14,7 +14,7 @@ DUCKDB_TEMP_DIR = os.environ.get("DUCKDB_TEMP_DIR", "/tmp/duckdb")
 # Bound duckdb's in-memory footprint so the (potentially very large) blocking
 # joins and the materialized feature table spill to disk instead of competing
 # with the rest of the inference process for RAM. Overridable via the env var.
-DUCKDB_MEMORY_LIMIT = os.environ.get("DUCKDB_MEMORY_LIMIT", "4GB")
+DUCKDB_MEMORY_LIMIT = os.environ.get("DUCKDB_MEMORY_LIMIT", None)
 
 
 def _rss_mb() -> float:
@@ -48,7 +48,9 @@ def _prepare_pairs_final_table(
         and is left open for the caller to build its final table and stream over.
     """
     os.makedirs(DUCKDB_TEMP_DIR, exist_ok=True)
-    config = {"temp_directory": DUCKDB_TEMP_DIR, "memory_limit": DUCKDB_MEMORY_LIMIT}
+    config = {"temp_directory": DUCKDB_TEMP_DIR}
+    if DUCKDB_MEMORY_LIMIT is not None:
+        config["memory_limit"] = DUCKDB_MEMORY_LIMIT
     con = duckdb.connect(config=config)
     con.install_extension("spatial")
     con.load_extension("spatial")
