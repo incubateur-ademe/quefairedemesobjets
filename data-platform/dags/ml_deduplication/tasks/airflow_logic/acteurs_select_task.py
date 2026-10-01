@@ -50,7 +50,6 @@ def ml_deduplication_acteurs_select_wrapper(ti) -> None:
         raise AirflowSkipException("Aucun acteur sélectionné, on s'arrête là")
 
     log.preview("table temporaire du pool d'acteurs", table_name)
-    xcom_push(ti, XCOMS.DF_READ, df)
     xcom_push(ti, XCOMS.ACTEURS_VIEW, table_name)
 
 
