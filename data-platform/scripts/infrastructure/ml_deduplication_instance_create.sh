@@ -28,7 +28,7 @@ PREFIX="${PREFIX:-lvao}"
 INSTANCE_NAME="${PREFIX}-${ENVIRONMENT}-ml-deduplication"
 SECURITY_GROUP_NAME="${INSTANCE_NAME}-sg"
 INSTANCE_TYPE="${ML_DEDUPLICATION_INSTANCE_TYPE:-L4-1-24G}"
-VOLUME_SIZE="${ML_DEDUPLICATION_VOLUME_SIZE:-250GB}"
+VOLUME_SIZE="${ML_DEDUPLICATION_VOLUME_SIZE:-512GB}"
 
 # Candidate zones. GPU commercial types (L4, H100, ...) are frequently out of
 # stock in a given zone, so we pick the first zone where the instance type is
