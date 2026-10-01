@@ -14,7 +14,6 @@ class XCOMS:
     CONFIG: str = "config"
     RUN_ID: str = "run_id"
     ACTEURS_VIEW: str = "acteurs_view"
-    DF_READ: str = "df_read"
     DF_CLUSTERS_SELECT: str = "df_clusters_select"
     DF_PARENTS_CHOOSE_NEW: str = "df_parents_choose_new"
     DF_PARENTS_CHOOSE_DATA: str = "df_parents_choose_data"
