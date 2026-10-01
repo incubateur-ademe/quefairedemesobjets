@@ -25,7 +25,10 @@ from ml_deduplication.modeling.xgboost.model import (
     DEFAULT_SHOULD_BE_EQUAL_FIELDS,
     XGBoostBusinessRulesModel,
 )
-from ml_deduplication.modeling.xgboost.preprocessing import preprocess_entities_df
+from ml_deduplication.modeling.xgboost.preprocessing import (
+    preprocess_entities_df,
+    preprocess_entities_df_batched,
+)
 from ml_deduplication.modeling.xgboost.schema import OPTIMIZED_SCHEMA
 from ml_deduplication.training.xgboost.training import apply_calibrator
 
@@ -111,10 +114,9 @@ def parse_args() -> argparse.Namespace:
         "--output-table",
         type=str,
         default=None,
-        help="Base name of the database table(s) to upload results to. Clusters go "
-        "to <output-table>_clusters and candidate pairs to <output-table>_predictions, "
-        "each tagged with run_id. Requires --database-uri. When not set, results are "
-        "only written to parquet in --output-dir.",
+        help="Base name of the database table to upload results to. Clusters go to "
+        "<output-table>_clusters, tagged with run_id. Requires --database-uri. When "
+        "not set, results are only written to parquet in --output-dir.",
     )
     parser.add_argument(
         "--device",
@@ -124,6 +126,15 @@ def parse_args() -> argparse.Namespace:
         "'cuda'. 'auto' lets the library pick (CUDA if available, else CPU). Use "
         "'cuda' to force the GPU (requires a GPU-capable image and `--gpus` at "
         "docker run), 'cpu' to force CPU.",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=0,
+        help="Candidate-pair batch size for streaming inference. When > 0, pairs "
+        "are scored in batches of this size to bound memory for very large pair "
+        "counts; when 0 (default), the full pairs frame is built and scored at "
+        "once (only suitable for small inputs).",
     )
 
     return parser.parse_args()
@@ -192,7 +203,7 @@ def linkage_rule(column: str) -> tuple[list[str], list[str]]:
     Returns ``(additional_business_rules_sql_exprs, additional_columns_to_keep)``
     that restrict blocking to cross-dataset (A vs B) candidate pairs only.
     """
-    business_rule = f"coalesce(l.{column},'') <> coalesce(r.{column},'')"
+    business_rule = f"coalesce({column}_l,'') <> coalesce({column}_r,'')"
     return [business_rule], [column]
 
 
@@ -201,13 +212,15 @@ def save_results_to_db(
     output_table: str,
     run_id: str,
     df_clusters: pl.DataFrame,
-    df_predictions: pl.DataFrame,
 ) -> None:
-    """Upload clusters and predictions to the database.
+    """Upload clusters to the database.
 
-    Clusters are written to ``<output_table>_clusters`` and candidate pairs to
-    ``<output_table>_predictions``, each tagged with ``run_id`` to distinguish
-    runs. Tables are created if missing and appended to.
+    Clusters are written to ``<output_table>_clusters``, tagged with ``run_id``
+    to distinguish runs. The table is created if missing and appended to.
+
+    The full candidate-pairs predictions are intentionally NOT persisted here:
+    with streaming inference the pairs frame is never fully materialized and can
+    be far too large (hundreds of millions of rows) for a relational table.
     """
     if not database_uri:
         raise ValueError(
@@ -222,19 +235,13 @@ def save_results_to_db(
 
     from sqlalchemy import create_engine
 
-    engine = create_engine(database_uri)
+    engine = create_engine(database_uri.replace("postgres", "postgresql+psycopg2"))
 
     clusters_table = f"{output_table}_clusters"
     df_clusters.with_columns(pl.lit(run_id).alias("run_id")).write_database(
         clusters_table, connection=engine, if_table_exists="append"
     )
     logger.info("Wrote %d cluster rows to %s", len(df_clusters), clusters_table)
-
-    preds_table = f"{output_table}_predictions"
-    df_predictions.with_columns(pl.lit(run_id).alias("run_id")).write_database(
-        preds_table, connection=engine, if_table_exists="append"
-    )
-    logger.info("Wrote %d prediction rows to %s", len(df_predictions), preds_table)
 
 
 def main():
@@ -315,6 +322,7 @@ def main():
             threshold = training_results["best_threshold"]
     logger.info("This run will use the value %s as threshold", threshold)
 
+    df_calibrated_predictions = None
     if split_by_departement:
         dfs_predictions = []
         dfs_clusters = []
@@ -342,7 +350,7 @@ def main():
                     ],
                     include_label=False,
                     additional_business_rules_sql_exprs=[
-                        "coalesce(l.parent_id,-1) <> coalesce(r.parent_id,-2)",
+                        "coalesce(parent_id_l,'-1') <> coalesce(parent_id_r,'-2')",
                         *linkage_sql_exprs,
                     ],
                 )
@@ -372,38 +380,96 @@ def main():
                             ).alias("cluster_id")
                         )
                     )
-        df_predictions = pl.concat(dfs_predictions, how="vertical")
+        df_calibrated_predictions = pl.concat(dfs_predictions, how="vertical")
         df_clusters = pl.concat(dfs_clusters, how="vertical")
     else:
-        X = preprocess_entities_df(
-            df_acteurs,
-            embedding_model=embedding_model,
-            additional_columns_to_keep=[
-                *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
-                *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
-                "parent_id",
-                *linkage_columns_to_keep,
-            ],
-            include_label=False,
-            additional_business_rules_sql_exprs=[
-                "coalesce(l.parent_id,'-1') <> coalesce(r.parent_id,'-2')",
-                *linkage_sql_exprs,
-            ],
-            df_embeddings=df_embeddings,
-        )
-        if (X is None) or (len(X) == 0):
+        additional_columns_to_keep = [
+            *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+            *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
+            "parent_id",
+            *linkage_columns_to_keep,
+        ]
+        additional_business_rules_sql_exprs = [
+            "coalesce(parent_id_l,'-1') <> coalesce(parent_id_r,'-2')",
+            *linkage_sql_exprs,
+        ]
+
+        def keep_positive(df_scores: pl.DataFrame) -> pl.DataFrame:
+            return df_scores.filter(pl.col("score_true_calibrated") >= threshold)
+
+        positive_frames = []
+        n_pairs_total = 0
+
+        if args.batch_size > 0:
+            # Stream candidate pairs in batches from duckdb so the heavy
+            # features matrix is never fully materialized in memory. Only the
+            # positive pairs (score >= threshold) are kept for clustering.
+            logger.info("Scoring candidate pairs in batches of %d", args.batch_size)
+            with logging_redirect_tqdm():
+                for batch in tqdm(
+                    preprocess_entities_df_batched(
+                        df_acteurs,
+                        embedding_model=embedding_model,
+                        additional_columns_to_keep=additional_columns_to_keep,
+                        include_label=False,
+                        additional_business_rules_sql_exprs=(
+                            additional_business_rules_sql_exprs
+                        ),
+                        df_embeddings=df_embeddings,
+                        batch_size=args.batch_size,
+                    ),
+                    desc="Scoring candidate pairs",
+                ):
+                    n_pairs_total += len(batch)
+                    df_predictions_tmp = model.predict(batch, slim=True)
+                    df_calibrated_tmp = apply_calibrator(calibrator, df_predictions_tmp)
+                    df_positive_tmp = keep_positive(df_calibrated_tmp)
+                    if len(df_positive_tmp) > 0:
+                        positive_frames.append(df_positive_tmp)
+        else:
+            # Non-batched path: the full pairs frame is built and scored at
+            # once. Only suitable for small inputs (see --batch-size).
+            X = preprocess_entities_df(
+                df_acteurs,
+                embedding_model=embedding_model,
+                additional_columns_to_keep=additional_columns_to_keep,
+                include_label=False,
+                additional_business_rules_sql_exprs=(
+                    additional_business_rules_sql_exprs
+                ),
+                df_embeddings=df_embeddings,
+            )
+            if (X is None) or (len(X) == 0):
+                n_pairs_total = 0
+            else:
+                n_pairs_total = len(X)
+                df_predictions = model.predict(X, slim=True)
+                df_calibrated = apply_calibrator(calibrator, df_predictions)
+                df_positive = keep_positive(df_calibrated)
+                if len(df_positive) > 0:
+                    positive_frames.append(df_positive)
+
+        if n_pairs_total == 0:
             logger.warning(
                 "No candidate pairs found after blocking. Nothing to predict; exiting."
             )
             raise SystemExit(0)
-        # Step 3 : predict
-        df_predictions = model.predict(X)
-        df_calibrated_predictions = apply_calibrator(calibrator, df_predictions)
 
+        n_positive = len(pl.concat(positive_frames)) if positive_frames else 0
+        logger.info(
+            "Scored %d candidate pairs, %d above threshold.",
+            n_pairs_total,
+            n_positive,
+        )
+        if not positive_frames:
+            logger.warning(
+                "No candidate pairs above threshold. Nothing to cluster; exiting."
+            )
+            raise SystemExit(0)
+
+        df_edges = pl.concat(positive_frames)
         _, df_clusters = model.cluster(
-            df_calibrated_predictions.with_columns(
-                pl.col("score_true_calibrated").alias("score_true")
-            ),
+            df_edges.with_columns(pl.col("score_true_calibrated").alias("score_true")),
             df_entities=df_acteurs,
             threshold=threshold,
         )
@@ -420,9 +486,10 @@ def main():
 
     # Step 7: Save outputs
     df_clusters.write_parquet(output_dir / f"inference_clusters_{run_id}.parquet")
-    df_calibrated_predictions.write_parquet(
-        output_dir / f"inference_predictions_{run_id}.parquet"
-    )
+    if df_calibrated_predictions is not None and len(df_calibrated_predictions) > 0:
+        df_calibrated_predictions.write_parquet(
+            output_dir / f"inference_predictions_{run_id}.parquet"
+        )
 
     # Step 8: Upload to database if an output table was requested
     if args.output_table is not None:
@@ -431,7 +498,6 @@ def main():
             args.output_table,
             run_id,
             df_clusters,
-            df_calibrated_predictions,
         )
 
     logger.info("Inference complete!")

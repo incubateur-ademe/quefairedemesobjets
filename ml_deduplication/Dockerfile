@@ -53,6 +53,15 @@ COPY ${MODEL_DIR} /model
 # root ownership + world-read permissions are enough; we avoid `chown -R`ing
 # them because that would duplicate the whole venv into a new layer (+5.9GB).
 RUN useradd --create-home --uid 1000 dedup
+
+# Writable directory for duckdb spill-to-disk during the blocking step. The
+# blocking code points duckdb's temp_directory here (DUCKDB_TEMP_DIR); without
+# it duckdb tries to create a `.tmp` dir in the read-only /app CWD and fails
+# with "Permission denied".
+ENV DUCKDB_TEMP_DIR=/home/dedup/duckdb-tmp
+RUN mkdir -p "${DUCKDB_TEMP_DIR}" \
+    && chown dedup:dedup "${DUCKDB_TEMP_DIR}"
+
 USER dedup
 
 # Inputs are mounted at runtime; the model is baked in at /model.

@@ -3,8 +3,14 @@ import logging
 import polars as pl
 from sentence_transformers import SentenceTransformer
 
-from ml_deduplication.modeling.xgboost.blocking import block_df
-from ml_deduplication.modeling.xgboost.features_engineering import generate_features
+from ml_deduplication.modeling.xgboost.blocking import (
+    block_df,
+    block_features_batches,
+)
+from ml_deduplication.modeling.xgboost.features_engineering import (
+    build_adresse_lookup,
+    generate_features,
+)
 from ml_deduplication.modeling.xgboost.schema import OPTIMIZED_SCHEMA
 
 logger = logging.getLogger(__name__)
@@ -133,6 +139,57 @@ def preprocess_features(
     return df_features_preprocessed
 
 
+def preprocess_entities_df_batched(
+    df_entities: pl.DataFrame,
+    embedding_model: SentenceTransformer,
+    include_label: bool = True,
+    additional_columns_to_keep: None | list[str] = None,
+    additional_business_rules_sql_exprs: list[str] | None = None,
+    df_embeddings: pl.DataFrame | None = None,
+    batch_size: int = 1_000_000,
+):
+    """Stream candidate pairs as batches of generated features.
+
+    Streaming counterpart of :func:`preprocess_entities_df`. Runs the duckdb
+    blocking step once, then yields one polars :class:`DataFrame` of generated
+    features per batch of ``batch_size`` candidate pairs. This keeps the heavy
+    features matrix (and the per-batch adresse-vector distance computation)
+    bounded in memory regardless of the total number of candidate pairs.
+    """
+    logger.info("Starting data preprocessing...")
+    df_features_preprocessed = preprocess_features(
+        df_entities, embedding_model, df_embeddings
+    )
+
+    additional_columns_to_keep = additional_columns_to_keep or []
+    if include_label:
+        additional_columns_to_keep.extend(["cluster_id", "cluster_id_split"])
+    additional_columns_to_keep = list(set(additional_columns_to_keep))
+
+    logger.info("Starting blocking...")
+    # Features are computed directly in duckdb (block_features_batches) so each
+    # streamed batch is slim and never materializes the fat pair join.
+    for batch_features in block_features_batches(
+        df_features_preprocessed,
+        additional_business_rules_sql_exprs,
+        additional_columns_to_keep,
+        batch_size=batch_size,
+    ):
+        logger.info("Streaming batch of %d feature pairs...", len(batch_features))
+        if include_label:
+            batch_features = batch_features.with_columns(
+                pl.coalesce(
+                    (pl.col("cluster_id_l") == pl.col("cluster_id_r")), False
+                ).alias("label"),
+                pl.when("label")
+                .then("cluster_id_l")
+                .otherwise(None)
+                .alias("cluster_id"),
+            )
+        yield batch_features
+    logger.info("Finished generating features.")
+
+
 def preprocess_entities_df(
     df_entities: pl.DataFrame,
     embedding_model: SentenceTransformer,
@@ -162,13 +219,14 @@ def preprocess_entities_df(
     if len(df_pairs) == 0:
         return None
     logger.info("Starting generating features...")
+    adresse_lookup = build_adresse_lookup(
+        df_features_preprocessed.select("identifiant_unique", "adresse_clean_vector")
+    )
     df_pairs_features = generate_features(
         df_pairs,
         include_label,
         additional_columns_to_keep,
-        df_embeddings=df_features_preprocessed.select(
-            "identifiant_unique", "adresse_clean_vector"
-        ),
+        adresse_lookup=adresse_lookup,
     )
     logger.info("Finished generating features.")
     X = df_pairs_features
