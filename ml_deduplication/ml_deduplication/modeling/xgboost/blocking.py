@@ -1,6 +1,7 @@
 import logging
 import os
 import resource
+import sys
 
 import duckdb
 import polars as pl
@@ -18,8 +19,15 @@ DUCKDB_MEMORY_LIMIT = os.environ.get("DUCKDB_MEMORY_LIMIT", None)
 
 
 def _rss_mb() -> float:
-    """Return the current resident set size in MB (peak RSS of the process)."""
-    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 / 1024
+    """Return the current peak resident set size in MB.
+
+    ``ru_maxrss`` is reported in bytes on macOS but in kilobytes on Linux, so the
+    unit must be converted per-platform for the log to be meaningful.
+    """
+    ru_maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    if sys.platform == "darwin":
+        return ru_maxrss / 1024 / 1024
+    return ru_maxrss / 1024
 
 
 def _prepare_pairs_final_table(

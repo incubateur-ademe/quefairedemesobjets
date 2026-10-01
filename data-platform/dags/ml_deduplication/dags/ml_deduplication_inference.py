@@ -327,7 +327,7 @@ def ml_deduplication_inference():
         "ML_DEDUPLICATION_ZONE": (
             "{{ ti.xcom_pull(task_ids='" + TASKS.CREATE_INSTANCE + "') or '' }}"
         ),
-        "DUCDKB_MEMORY_LIMIT": "{{ params.duckdb_memory_limit }}",
+        "DUCKDB_MEMORY_LIMIT": "{{ params.duckdb_memory_limit }}",
     }
 
     instance_ops = {
