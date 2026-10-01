@@ -102,7 +102,7 @@ class XGBoostBusinessRulesModel:
 
         return self
 
-    def predict(self, X: pl.DataFrame) -> pl.DataFrame:
+    def predict(self, X: pl.DataFrame, slim: bool = False) -> pl.DataFrame:
         if len(missing_columns := (set(self._feature_columns)) - set(X.columns)) > 0:
             raise Exception(f"Missing columns in X_train dataset: {missing_columns}")
 
@@ -112,12 +112,34 @@ class XGBoostBusinessRulesModel:
             y_pred_scores, schema=["score_false", "score_true"]
         )
 
-        df_pairs_scores = pl.concat(
-            [X, df_y_pred_scores],
-            how="horizontal_extend",
-        )
+        if not slim:
+            # Full output (X + scores), preserved for training/evaluation where
+            # every feature column is needed downstream.
+            return pl.concat([X, df_y_pred_scores], how="horizontal_extend")
 
-        return df_pairs_scores
+        # Slim output: only the columns clustering needs. The heavy *_l/*_r
+        # string columns (nom_clean, ville_clean, siren, siret, ...) carried by
+        # X are dropped here, dramatically reducing the resident memory of the
+        # frames accumulated across inference batches.
+        slim_columns = [
+            "identifiant_unique_l",
+            "identifiant_unique_r",
+            *self._feature_columns,
+        ]
+        conflict_fields = set(
+            self._should_be_different_fields + self._should_be_equal_fields
+        )
+        for field in conflict_fields:
+            slim_columns.extend([f"{field}_l", f"{field}_r"])
+
+        # Dedupe while preserving order (e.g. acteur_type_id_* appears both in
+        # the feature columns and in the conflict fields).
+        slim_columns = list(dict.fromkeys(slim_columns))
+
+        return pl.concat(
+            [X.select(slim_columns), df_y_pred_scores.select("score_true")],
+            how="horizontal",
+        )
 
     def _conflict_expr(self) -> pl.Expr:
         """Vectorized twin of _has_conflict, evaluated over the whole pairs df at once."""

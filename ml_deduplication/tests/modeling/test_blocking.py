@@ -8,7 +8,7 @@ frames and assert on the resulting candidate pairs.
 
 import polars as pl
 
-from ml_deduplication.modeling.xgboost.blocking import block_df
+from ml_deduplication.modeling.xgboost.blocking import block_df, block_df_batches
 
 
 def _frame(rows: list[dict]) -> pl.DataFrame:
@@ -267,3 +267,38 @@ class TestBlocking:
         out = block_df(df, additional_columns_to_keep=["ville_clean"])
         assert "ville_clean_l" in out.columns
         assert "ville_clean_r" in out.columns
+
+
+class TestBlockDfBatches:
+    def test_batches_concatenate_to_block_df(self):
+        # 4 entities with the same siren, department and geo location generate
+        # 4*3/2 = 6 candidate pairs. A batch_size of 2 must split them into
+        # several ordered batches whose concatenation equals block_df's output.
+        df = _frame(
+            [
+                {
+                    "id": f"e{i}",
+                    "siren": "1",
+                    "code_postal": "75001",
+                    "lat": 48.85 + 1e-4 * i,
+                    "lon": 2.35 + 1e-4 * i,
+                    "source": i + 1,
+                    "type": 1,
+                }
+                for i in range(4)
+            ]
+        )
+        out_full = block_df(df).sort(["identifiant_unique_l", "identifiant_unique_r"])
+        batches = list(block_df_batches(df, batch_size=2))
+        assert len(batches) > 1
+        for batch in batches:
+            assert len(batch) <= 2
+        out_batched = pl.concat(batches).sort(
+            ["identifiant_unique_l", "identifiant_unique_r"]
+        )
+        assert out_full.columns == out_batched.columns
+        assert out_full.equals(out_batched)
+
+    def test_empty_input_yields_no_batches(self):
+        df = _frame([])
+        assert list(block_df_batches(df, batch_size=2)) == []

@@ -6,24 +6,19 @@ import polars_distance as pld
 from tqdm import tqdm
 
 
-def _adresse_clean_distance(
-    df_pairs: pl.DataFrame,
-    df_embeddings: pl.DataFrame | None,
-    chunk_size: int = 5_000,
-) -> pl.Expr:
-    """Cosine similarity of address embeddings computed on a compact matrix.
+def build_adresse_lookup(df_embeddings: pl.DataFrame | None) -> dict | None:
+    """Precompute the compact unit-vector matrix + id lookup, once.
 
-    The 1024-dim vectors are never broadcast through the (potentially huge)
-    pairs frame. Instead we build an (N x 1024) Float32 matrix from the entity
-    embeddings, gather left/right rows by entity id, and compute the cosine on
-    compact Float32 columns. Rows are processed in chunks so that only a few
-    hundred MB are allocated at a time, regardless of the pair count.
+    Builds an (N x 1024) Float32 matrix of unit-normalized address embeddings
+    plus the sorted entity-id array used to map pairs to matrix rows. Returns
+    ``None`` when there is nothing usable to look up.
 
-    The id -> row lookup is vectorized (sorted ids + binary search) to avoid a
-    Python-level loop over every pair.
+    This is meant to be computed a single time and reused across all batches,
+    instead of rebuilding the matrix (a large transient allocation) on every
+    batch of pairs.
     """
     if df_embeddings is None or df_embeddings.is_empty():
-        return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
+        return None
 
     embeddings = (
         df_embeddings.select("identifiant_unique", "adresse_clean_vector")
@@ -31,7 +26,7 @@ def _adresse_clean_distance(
         .unique(subset="identifiant_unique")
     )
     if embeddings.is_empty():
-        return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
+        return None
 
     embeddings = embeddings.sort("identifiant_unique")
     vectors = np.asarray(
@@ -41,8 +36,34 @@ def _adresse_clean_distance(
     norms[norms == 0] = 1.0
     unit_vectors = vectors / norms
 
-    known_ids = embeddings.get_column("identifiant_unique")
-    known_ids_np = known_ids.to_numpy()
+    return {
+        "unit_vectors": unit_vectors,
+        "known_ids_np": embeddings.get_column("identifiant_unique").to_numpy(),
+    }
+
+
+def _adresse_clean_distance(
+    df_pairs: pl.DataFrame,
+    adresse_lookup: dict | None,
+    chunk_size: int = 5_000,
+) -> pl.Expr:
+    """Cosine similarity of address embeddings computed on a compact matrix.
+
+    The 1024-dim vectors are never broadcast through the (potentially huge)
+    pairs frame. Instead we use the precomputed (N x 1024) Float32 unit-vector
+    matrix (see :func:`build_adresse_lookup`), gather left/right rows by entity
+    id, and compute the cosine on compact Float32 columns. Rows are processed
+    in chunks so that only a few hundred MB are allocated at a time, regardless
+    of the pair count.
+
+    The id -> row lookup is vectorized (sorted ids + binary search) to avoid a
+    Python-level loop over every pair.
+    """
+    if adresse_lookup is None:
+        return pl.lit(None, dtype=pl.Float32).alias("adresse_clean_distance")
+
+    unit_vectors = adresse_lookup["unit_vectors"]
+    known_ids_np = adresse_lookup["known_ids_np"]
 
     def gather_positions(id_col: str) -> np.ndarray:
         ids = df_pairs.get_column(id_col).to_numpy()
@@ -81,6 +102,7 @@ def generate_features(
     include_label: bool = True,
     additional_columns_to_keep: None | list[str] = None,
     df_embeddings: pl.DataFrame | None = None,
+    adresse_lookup: dict | None = None,
 ) -> pl.DataFrame:
     df_pairs_features = df_pairs.with_columns(
         pld.col("nom_clean_l")
@@ -101,8 +123,10 @@ def generate_features(
             == pl.col("code_postal_r").str.slice(0, 2)
         ).alias("departement_match"),
     )
+    if adresse_lookup is None:
+        adresse_lookup = build_adresse_lookup(df_embeddings)
     df_pairs_features = df_pairs_features.with_columns(
-        _adresse_clean_distance(df_pairs_features, df_embeddings)
+        _adresse_clean_distance(df_pairs_features, adresse_lookup)
     )
 
     columns_to_select: list[str | pl.Expr] = [
