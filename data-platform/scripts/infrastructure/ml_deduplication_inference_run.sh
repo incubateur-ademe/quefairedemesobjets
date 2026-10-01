@@ -80,6 +80,7 @@ if [ "${RUN_LOCAL}" = "1" ] || [ "${RUN_LOCAL}" = "true" ]; then
   docker run --rm \
     ${GPU_ARGS} \
     -e DATABASE_CONNECTION_URI="${LOCAL_DB_URI}" \
+    -e DUCKDB_MEMORY_LIMIT="${DUCKDB_MEMORY_LIMIT}" \
     $( [ -n "${DOCKER_NETWORK}" ] && printf -- "--network %s" "${DOCKER_NETWORK}" ) \
     -v "${OUTPUT_DIR}":/outputs \
     "${IMAGE_REF}" ${PYTHON_CMD} ${args}
