@@ -262,6 +262,13 @@ PARAMS = {
             "inference instance (docker run --gpus + --device cuda)."
         ),
     ),
+    "duckdb_memory_limit": Param(
+        "24GB",
+        type=["null", "string"],
+        description_md=(
+            "Mémoire maximale à utiliser pour la partie blocking de l'inférence."
+        ),
+    ),
     "skip_cleanup": Param(
         False,
         type="boolean",
@@ -320,6 +327,7 @@ def ml_deduplication_inference():
         "ML_DEDUPLICATION_ZONE": (
             "{{ ti.xcom_pull(task_ids='" + TASKS.CREATE_INSTANCE + "') or '' }}"
         ),
+        "DUCDKB_MEMORY_LIMIT": "{{ params.duckdb_memory_limit }}",
     }
 
     instance_ops = {
