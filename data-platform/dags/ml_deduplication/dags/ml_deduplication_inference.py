@@ -269,6 +269,15 @@ PARAMS = {
             "Mémoire maximale à utiliser pour la partie blocking de l'inférence."
         ),
     ),
+    "batch_size": Param(
+        1000000,
+        type=["integer", "null"],
+        description_md=(
+            "Taille des lots de paires candidates pour l'inférence en streaming. "
+            "> 0 active le chemin par lots (mémoire bornée) ; 0 désactive le "
+            "streaming et score toutes les paires d'un coup (non recommandé)."
+        ),
+    ),
     "skip_cleanup": Param(
         False,
         type="boolean",
@@ -328,6 +337,7 @@ def ml_deduplication_inference():
             "{{ ti.xcom_pull(task_ids='" + TASKS.CREATE_INSTANCE + "') or '' }}"
         ),
         "DUCKDB_MEMORY_LIMIT": "{{ params.duckdb_memory_limit }}",
+        "ML_DEDUPLICATION_BATCH_SIZE": "{{ params.batch_size or '' }}",
     }
 
     instance_ops = {

@@ -43,6 +43,9 @@ DOCKER_NETWORK="${ML_DEDUPLICATION_DOCKER_NETWORK:-}"
 OUTPUT_DIR="${ML_DEDUPLICATION_OUTPUT_DIR:-/tmp/ml-deduplication-outputs}"
 
 DUCKDB_MEMORY_LIMIT="${DUCKDB_MEMORY_LIMIT:-}"
+# Candidate-pair batch size for streaming inference (see run_inference --batch-size).
+# Defaults to 1_000_000 so the DAG uses the memory-bounded batched path.
+BATCH_SIZE="${ML_DEDUPLICATION_BATCH_SIZE:-1000000}"
 
 # Build the container CLI arguments. We invoke the entrypoint module
 # explicitly (instead of relying on the image CMD) because the CMD is in exec
@@ -53,6 +56,7 @@ args="--model-path /model --output-dir /outputs --run-id ${RUN_ID}"
 [ -n "${MODEL_THRESHOLD}" ] && args="${args} --model-threshold ${MODEL_THRESHOLD}"
 [ -n "${LINKAGE_COLUMN}" ] && args="${args} --linkage-column ${LINKAGE_COLUMN}"
 [ "${SPLIT_BY_DEPARTEMENT}" = "1" ] && args="${args} --split-by-departement"
+[ -n "${BATCH_SIZE}" ] && args="${args} --batch-size ${BATCH_SIZE}"
 if [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ]; then
   args="${args} --device cuda"
 else
