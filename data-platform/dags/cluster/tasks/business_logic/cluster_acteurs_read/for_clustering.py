@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -147,9 +148,11 @@ def _cluster_acteurs_read_base(
     include_source_ids: list[int],
     include_acteur_type_ids: list[int],
     include_only_if_regex_matches_nom: str | None,
-    include_if_all_fields_filled: list[str],
+    include_if_all_fields_filled: list[str] | None,
     est_parent: bool,
     only_active: bool = True,
+    limit: int | None = None,
+    dtype: Any = object,
 ) -> tuple[pd.DataFrame, str]:
     """
     Reading actors from DB (orphans or parents).
@@ -168,6 +171,12 @@ def _cluster_acteurs_read_base(
 
         ➕ include_if_all_fields_filled (list[str]): actors included
             If ALL fields are filled
+
+        ➕ limit (int | None): maximum number of actors to select (LIMIT).
+            None = no limit. Useful for quick local tests on a small sample.
+
+        ➕ dtype (Any): dtype for columns of the resulting df
+            (by default all columns will be casted to object dtype)
 
     Returns:
         tuple[pd.DataFrame, str]: DataFrame of actors and SQL query used
@@ -189,7 +198,11 @@ def _cluster_acteurs_read_base(
     # -----------------------------------
     # 1) Django queryset
     # -----------------------------------
-    query = django_model_queryset_generate(VueActeur, include_if_all_fields_filled)
+
+    if include_if_all_fields_filled is not None:
+        query = django_model_queryset_generate(VueActeur, include_if_all_fields_filled)
+    else:
+        query = VueActeur.objects
     if include_source_ids:
         if est_parent:
             query = query.filter(sources__id__in=include_source_ids)
@@ -204,6 +217,10 @@ def _cluster_acteurs_read_base(
     query = query.filter(parent_id__isnull=True)
     query = query.filter(est_parent=est_parent)
 
+    # Apply a LIMIT when a sample size is requested (e.g. quick local tests).
+    if limit is not None:
+        query = query[: max(1, int(limit))]
+
     # Prefetch sources to avoid N+1 queries
     if est_parent:
         query = query.prefetch_related("sources")
@@ -212,7 +229,7 @@ def _cluster_acteurs_read_base(
     # 2) DataFrame
     # -----------------------------------
     sql = django_model_queryset_to_sql(query)
-    df = django_model_queryset_to_df(query, fields)
+    df = django_model_queryset_to_df(query, fields, dtype=dtype)
 
     if df.empty:
         return df, sql

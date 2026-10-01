@@ -39,6 +39,7 @@ class TAGS:
     DB: str = "db"
     DBT: str = "dbt"
     DECHETTERIE: str = "déchetterie"
+    DEDUPLICATION: str = "deduplication"
     DEPARTEMENT: str = "département"
     DEPRECATED: str = "deprecated"
     DEV_TOOLS: str = "dev tools"
@@ -67,6 +68,7 @@ class TAGS:
     LOGS: str = "logs"
     LUB: str = "LUB"  # Fillière Lubrifiant
     MAINTENANCE: str = "maintenance"
+    ML: str = "ml"
     NETTOYAGE: str = "nettoyage"
     OCA: str = "OCA"  # Organisme Coordonnateur Agrée
     OCAB: str = "ocab"  # OCA

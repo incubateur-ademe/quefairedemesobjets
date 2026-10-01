@@ -12,6 +12,13 @@ x-airflow-common: &airflow-common
     - ./data-platform/logs:/opt/airflow/logs
     - ./data-platform/plugins:/opt/airflow/plugins
     - ./data-platform/scripts:/opt/airflow/scripts
+    # Docker socket (lecture seule) pour exécuter l'inférence ML localement via
+    # `docker run` (mode run_locally du DAG ml_deduplication), sans provisionner
+    # d'instance Scaleway. Mis ici (et non dans la seule tâche scheduler) car
+    # redéfinir `volumes` sur une service REMPLACE la liste de l'anchor au lieu
+    # de la fusionner : une entrée sur le scheduler seul supprimerait tous les
+    # autres montages (dont /opt/airflow/dags).
+    - /var/run/docker.sock:/var/run/docker.sock
   # Voir la doc et s'assurer que AIRFLOW_UID est
   # définit dans le .env pour correspondre à votre UID
   # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
@@ -134,7 +141,7 @@ services:
       resources:
         limits:
           # TODO: read AIRFLOW_SCHEDULER_MEMORY_LIMIT from .env doesn't works
-          memory: 12G
+          memory: ${AIRFLOW_SCHEDULER_MEMORY_LIMIT:-12G}
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s

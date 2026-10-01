@@ -40,6 +40,7 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE          = "false"
     ENVIRONMENT                                           = var.environment
     WEBAPP_URL                                            = var.WEBAPP_URL
+    ML_DEDUPLICATION_SSH_PUB_KEY                          = var.ML_DEDUPLICATION_SSH_PUB_KEY
   }
   secret_environment_variables = {
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
@@ -61,6 +62,7 @@ resource "scaleway_container" "airflow_scheduler" {
     SCW_DEFAULT_ORGANIZATION_ID             = var.SCW_DEFAULT_ORGANIZATION_ID
     SCW_DEFAULT_PROJECT_ID                  = var.SCW_DEFAULT_PROJECT_ID
     SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
+    ML_DEDUPLICATION_SSH_KEY_B64            = var.ML_DEDUPLICATION_SSH_KEY_B64
     SECRET_KEY                              = var.SECRET_KEY
     MATTERMOST_WEBHOOK_URL                  = var.MATTERMOST_WEBHOOK_URL
     POSTHOG_PERSONAL_API_KEY                = var.POSTHOG_PERSONAL_API_KEY

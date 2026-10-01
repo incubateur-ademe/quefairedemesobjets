@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 def suggestion_context_generate(
     df_cluster: pd.DataFrame,
-    cluster_fields_exact: list[str],
-    cluster_fields_fuzzy: list[str],
+    cluster_fields_exact: list[str] = [],
+    cluster_fields_fuzzy: list[str] = [],
 ) -> dict | None:
     """Generates a dict for use in Suggestion.contexte field"""
     from data.models.change import COL_CHANGE_MODEL_NAME
