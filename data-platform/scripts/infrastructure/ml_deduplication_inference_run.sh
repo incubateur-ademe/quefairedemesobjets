@@ -120,11 +120,17 @@ public_ip="$(scw instance server list zone="${ZONE}" -o json \
 
 echo "ml-deduplication: running inference on ${public_ip} (run_id=${RUN_ID})…"
 
+# The inference container runs as non-root user dedup (UID 1000). Its /outputs
+# dir is a bind-mount of the host /var/lib/ml-deduplication/outputs, which
+# Docker auto-creates as root:root when missing. Ensure the host dir is owned
+# by UID 1000 so the container can write the parquet artifacts there.
 ssh -i "${SSH_KEY}" \
     -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     "${SSH_USER}@${public_ip}" \
-    "docker run --rm \
+    "mkdir -p /var/lib/ml-deduplication/outputs \
+      && chown 1000:1000 /var/lib/ml-deduplication/outputs \
+      && docker run --rm \
       $( [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ] && printf -- '--gpus all' ) \
       -e DATABASE_CONNECTION_URI='${DATABASE_CONNECTION_URI}' \
       -e DUCKDB_MEMORY_LIMIT='${DUCKDB_MEMORY_LIMIT}' \
