@@ -28,7 +28,6 @@ XCOM_SOURCES: dict[str, XComSource] = {
         "task_id": TASKS.SELECTION,
         "xcom_key": XCOMS.ACTEURS_VIEW,
     },
-    XCOMS.DF_READ: {"task_id": TASKS.SELECTION, "xcom_key": XCOMS.DF_READ},
     XCOMS.DF_CLUSTERS_SELECT: {
         "task_id": TASKS.CLUSTERS_SELECT,
         "xcom_key": XCOMS.DF_CLUSTERS_SELECT,
