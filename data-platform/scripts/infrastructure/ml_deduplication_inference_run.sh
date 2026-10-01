@@ -42,6 +42,8 @@ DOCKER_NETWORK="${ML_DEDUPLICATION_DOCKER_NETWORK:-}"
 # container). Defaults to /tmp/ml-deduplication-outputs for local runs.
 OUTPUT_DIR="${ML_DEDUPLICATION_OUTPUT_DIR:-/tmp/ml-deduplication-outputs}"
 
+DUCKDB_MEMORY_LIMIT="${DUCKDB_MEMORY_LIMIT:-}"
+
 # Build the container CLI arguments. We invoke the entrypoint module
 # explicitly (instead of relying on the image CMD) because the CMD is in exec
 # form: passing extra args after the image would REPLACE the CMD rather than
@@ -120,6 +122,7 @@ ssh -i "${SSH_KEY}" \
     "docker run --rm \
       $( [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ] && printf -- '--gpus all' ) \
       -e DATABASE_CONNECTION_URI='${DATABASE_CONNECTION_URI}' \
+      -e DUCKDB_MEMORY_LIMIT='${DUCKDB_MEMORY_LIMIT}' \
       -v /var/lib/ml-deduplication/outputs:/outputs \
       ${IMAGE_REF} ${PYTHON_CMD} ${args}"
 
