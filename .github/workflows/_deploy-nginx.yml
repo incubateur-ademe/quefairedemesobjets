@@ -1,0 +1,42 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      tag_name:
+        type: string
+        required: true
+
+jobs:
+  nginx_docker:
+    name: 🐳 Nginx gateway Docker
+    uses: ./.github/workflows/_nginx-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      image_tag: ${{ inputs.tag_name }}
+      environment: ${{ inputs.environment }}
+
+  get_container_id:
+    name: 🔑 Get nginx container ID
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      nginx_id: ${{ steps.get_id.outputs.nginx_id }}
+    steps:
+      - name: Get container ID from environment
+        id: get_id
+        run: |
+          echo "nginx_id=${{ vars.SCALEWAY_NGINX_CONTAINER_ID }}" >> $GITHUB_OUTPUT
+
+  deploy_scaleway_nginx:
+    name: 🟣⏳ Scaleway nginx gateway
+    secrets: inherit # pragma: allowlist secret`
+    uses: ./.github/workflows/_scaleway-container-deploy.yml
+    needs: [nginx_docker, get_container_id]
+    with:
+      container_id: ${{ needs.get_container_id.outputs.nginx_id }}
+      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway', inputs.tag_name) }}
+
+permissions:
+  contents: read
