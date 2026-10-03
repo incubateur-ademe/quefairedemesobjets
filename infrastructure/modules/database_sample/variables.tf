@@ -1,21 +1,21 @@
-variable "webapp_instance_id" {
-  description = "ID de l'instance RDB webapp (depuis le module database)"
+variable "instance_id" {
+  description = "ID de l'instance RDB existante"
   type        = string
 }
 
-variable "webapp_db_sample_name" {
-  description = "Nom de la base de données sample pour webapp (optionnel)"
+variable "db_name" {
+  description = "Nom de la base de données à ajouter sur l'instance (optionnel)"
   type        = string
   default     = null
 }
 
-variable "webapp_db_sample_username" {
-  description = "Nom d'utilisateur de la base de données sample webapp"
+variable "db_username" {
+  description = "Nom d'utilisateur de la base de données ajoutée"
   type        = string
 }
 
-variable "webapp_db_sample_password" {
-  description = "Mot de passe de la base de données sample webapp"
+variable "db_password" {
+  description = "Mot de passe de la base de données ajoutée"
   type        = string
   sensitive   = true
 }
