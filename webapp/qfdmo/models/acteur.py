@@ -501,11 +501,12 @@ class BaseActeur(TimestampedModel):
         blank=True,
     )
     exclusivite_de_reprisereparation = models.BooleanField(
-        null=True,
-        blank=True,
+        null=False,
+        default=False,
+        blank=False,
         verbose_name="Exclusivité de reprise/réparation",
     )
-    uniquement_sur_rdv = models.BooleanField(null=True, blank=True)
+    uniquement_sur_rdv = models.BooleanField(null=False, blank=False, default=False)
     action_principale = models.ForeignKey(
         Action,
         on_delete=models.SET_NULL,
@@ -993,6 +994,12 @@ class RevisionActeur(BaseActeur, LatLngPropertiesMixin, DisplayedActeurLinkMixin
         db_default="",
         validators=[EmptyEmailValidator()],
     )
+    exclusivite_de_reprisereparation = models.BooleanField(
+        null=True,
+        blank=True,
+        verbose_name="Exclusivité de reprise/réparation",
+    )
+    uniquement_sur_rdv = models.BooleanField(null=True, blank=True)
 
     @property
     def is_parent(self):

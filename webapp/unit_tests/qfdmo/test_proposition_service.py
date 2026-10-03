@@ -1,16 +1,14 @@
 import pytest
 from django.contrib.gis.geos import Point
-
 from qfdmo.models import (
     Acteur,
     Action,
     CategorieObjet,
     PropositionService,
-    RevisionActeur,
     RevisionPropositionService,
     SousCategorieObjet,
 )
-from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory
+from unit_tests.qfdmo.acteur_factory import ActeurTypeFactory, RevisionActeurFactory
 
 
 class TestActionNomAsNaturalKeyHeritage:
@@ -55,11 +53,11 @@ class TestActionNomAsNaturalKeyHeritage:
     @pytest.fixture
     def revision_acteur(self):
         acteur_type = ActeurTypeFactory(code="fake")
-        return RevisionActeur.objects.create(
+        return RevisionActeurFactory.create(
             nom="fake revision acteur",
             location=Point(1, 1),
             identifiant_unique="1",
-            acteur_type_id=acteur_type.id,
+            acteur_type=acteur_type,
         )
 
     @pytest.fixture
