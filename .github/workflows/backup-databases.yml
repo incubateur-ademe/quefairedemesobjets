@@ -1,0 +1,86 @@
+name: "Backup databases"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environnement Scaleway à sauvegarder"
+        type: choice
+        options:
+          - prod
+          - preprod
+        default: prod
+      use_latest_backup:
+        description: "Réutiliser le dernier backup prêt au lieu d'en créer un"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 5 * * 1" # lundi 5h UTC (prod uniquement)
+
+env:
+  SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+  SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+  SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+  SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+  SCW_DEFAULT_REGION: fr-par
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: backup-databases-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Backup ${{ inputs.environment }} / ${{ matrix.database }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        database:
+          - webapp
+          # - warehouse
+          - metabase
+          - airflow
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Use Scaleway CLI
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+        with:
+          save-config: true
+          export-config: true
+          version: v2.56.0
+          access-key: ${{ env.SCW_ACCESS_KEY }}
+          secret-key: ${{ env.SCW_SECRET_KEY }}
+          default-project-id: ${{ env.SCW_DEFAULT_PROJECT_ID }}
+          default-organization-id: ${{ env.SCW_DEFAULT_ORGANIZATION_ID }}
+
+      - name: Create and download ${{ matrix.database }} backup
+        env:
+          USE_LATEST_BACKUP: ${{ inputs.use_latest_backup }}
+        run: |
+          set -euo pipefail
+          ARGS=(--quiet --env "${{ inputs.environment }}" --database "${{ matrix.database }}" --output-dir backups)
+          if [ "${USE_LATEST_BACKUP}" = "true" ]; then
+            ARGS+=(--latest)
+          fi
+          bash scripts/infrastructure/backup-db.sh "${ARGS[@]}"
+          ls -lh backups/*.custom
+
+      - name: Upload ${{ matrix.database }} .custom artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.environment }}-${{ matrix.database }}
+          path: backups/*.custom
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+permissions:
+  contents: read
