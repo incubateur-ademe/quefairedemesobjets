@@ -30,12 +30,13 @@ resource "scaleway_container" "nginx" {
   protocol       = "http1"
   http_option    = "redirected"
 
-  health_check {
+  liveness_probe {
     http {
       path = "/healthz"
     }
     failure_threshold = 5
     interval          = "30s"
+    timeout           = "10s"
   }
 
   environment_variables = local.route_environment_variables

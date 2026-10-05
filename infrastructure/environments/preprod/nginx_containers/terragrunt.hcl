@@ -1,3 +1,8 @@
+locals {
+  env              = read_terragrunt_config(find_in_parent_folders("env.hcl"))
+  metabase_enabled = local.env.locals.metabase_enabled
+}
+
 terraform {
   source = "../../../modules/nginx_containers"
 }
@@ -13,6 +18,7 @@ dependency "airflow_containers" {
 
 dependency "metabase_containers" {
   config_path = "../metabase_containers"
+  enabled     = local.metabase_enabled
 
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
@@ -21,7 +27,10 @@ dependency "metabase_containers" {
 }
 
 dependencies {
-  paths = ["../airflow_containers", "../metabase_containers"]
+  paths = concat(
+    ["../airflow_containers"],
+    local.metabase_enabled ? ["../metabase_containers"] : [],
+  )
 }
 
 include {
@@ -38,14 +47,18 @@ inputs = {
 
   # CNAME *.preprod.quefairedemesobjets.ademe.fr -> terragrunt output domain_name
   # must already resolve before apply (ACME HTTP-01 challenge per hostname).
-  routes = {
-    airflow = {
-      hostname = "airflow.preprod.quefairedemesobjets.ademe.fr"
-      upstream = dependency.airflow_containers.outputs.domain_name
-    }
-    metabase = {
-      hostname = "metabase.preprod.quefairedemesobjets.ademe.fr"
-      upstream = dependency.metabase_containers.outputs.domain_name
-    }
-  }
+  routes = merge(
+    {
+      airflow = {
+        hostname = "airflow.preprod.quefairedemesobjets.ademe.fr"
+        upstream = dependency.airflow_containers.outputs.domain_name
+      }
+    },
+    local.metabase_enabled ? {
+      metabase = {
+        hostname = "metabase.preprod.quefairedemesobjets.ademe.fr"
+        upstream = dependency.metabase_containers.outputs.domain_name
+      }
+    } : {},
+  )
 }

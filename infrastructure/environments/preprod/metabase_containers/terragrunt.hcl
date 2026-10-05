@@ -1,3 +1,13 @@
+locals {
+  env              = read_terragrunt_config(find_in_parent_folders("env.hcl"))
+  metabase_enabled = local.env.locals.metabase_enabled
+}
+
+exclude {
+  if      = !local.metabase_enabled
+  actions = ["all"]
+}
+
 terraform {
   source = "../../../modules/metabase_containers"
 }
@@ -38,7 +48,9 @@ inputs = {
 
   MB_SITE_NAME             = "LVAO preprod"
   MB_ENCRYPTION_SECRET_KEY = "[MB_ENCRYPTION_SECRET_KEY]"
-  MB_DB_CONNECTION_URI     = "postgres://${dependency.database.outputs.metabase_db_username}:${dependency.database.outputs.metabase_db_password}@${dependency.database.outputs.metabase_endpoint_ip}:${dependency.database.outputs.metabase_endpoint_port}/${dependency.database.outputs.metabase_database_name}?sslmode=require"
+  # Placeholder while the unit is excluded. Real outputs are read only once
+  # metabase_enabled is true and the database stack exposes them.
+  MB_DB_CONNECTION_URI = local.metabase_enabled ? "postgres://${dependency.database.outputs.metabase_db_username}:${dependency.database.outputs.metabase_db_password}@${dependency.database.outputs.metabase_endpoint_ip}:${dependency.database.outputs.metabase_endpoint_port}/${dependency.database.outputs.metabase_database_name}?sslmode=require" : "postgres://unused:unused@127.0.0.1:5432/unused?sslmode=disable" # pragma: allowlist secret
 
   # Public hostname routed by nginx_containers (wildcard CNAME).
   custom_domain = "metabase.preprod.quefairedemesobjets.ademe.fr"
