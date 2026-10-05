@@ -25,6 +25,11 @@ on:
         type: string
         required: false
         default: "false"
+      isoprod:
+        description: "Whether the preview replicates production: database seeded from the latest production backup, container always on (preview:isoprod label)"
+        type: string
+        required: false
+        default: "false"
     outputs:
       endpoint:
         description: "Public URL of the preview container"
@@ -65,6 +70,7 @@ jobs:
       NOTION_CONTACT_FORM_DATABASE_ID: ${{ secrets.NOTION_CONTACT_FORM_DATABASE_ID }}
       SAMPLE_DB_URI: ${{ secrets.SAMPLE_DB_URI }}
       CLEAR_DB: ${{ inputs.clear_db }}
+      ISOPROD: ${{ inputs.isoprod }}
 
       TG_NON_INTERACTIVE: "true"
 
