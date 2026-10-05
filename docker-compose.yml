@@ -1,4 +1,7 @@
 ---
+x-airflow-build-args: &airflow-build-args
+  AIRFLOW_VERSION: ${AIRFLOW_VERSION:-3.3.1}
+
 x-airflow-common: &airflow-common
   tmpfs:
     - /tmp
@@ -107,6 +110,8 @@ services:
     build:
       context: .
       dockerfile: data-platform/airflow-webserver.Dockerfile
+      args:
+        <<: *airflow-build-args
     deploy:
       resources:
         limits:
@@ -130,6 +135,8 @@ services:
     build:
       context: .
       dockerfile: data-platform/airflow-scheduler.Dockerfile
+      args:
+        <<: *airflow-build-args
     deploy:
       resources:
         limits:
@@ -154,6 +161,8 @@ services:
     build:
       context: .
       dockerfile: data-platform/airflow-dag-processor.Dockerfile
+      args:
+        <<: *airflow-build-args
     ports:
       - "8082:80"
     healthcheck:
