@@ -76,14 +76,17 @@ resource "null_resource" "seed_from_sample" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     environment = {
-      INSTANCE_ID       = local.instance_uuid
-      DB_NAME           = var.preview_db_name
-      DB_USERNAME       = var.preview_db_username
-      DB_PASSWORD       = random_password.preview.result
-      PREVIEW_DB_URL    = local.preview_db_url
-      EXTENSIONS_SCRIPT = var.create_extensions_script_path
-      IMAGE_TAG         = var.image_tag
-      SAMPLE_DB_URI     = var.sample_db_uri
+      INSTANCE_ID           = local.instance_uuid
+      DB_NAME               = var.preview_db_name
+      DB_USERNAME           = var.preview_db_username
+      DB_PASSWORD           = random_password.preview.result
+      PREVIEW_DB_URL        = local.preview_db_url
+      EXTENSIONS_SCRIPT     = var.create_extensions_script_path
+      IMAGE_TAG             = var.image_tag
+      SAMPLE_DB_URI         = var.sample_db_uri
+      ISOPROD               = var.isoprod ? "true" : "false"
+      PROD_INSTANCE_NAME    = var.prod_instance_name
+      WAGTAIL_FRENCH_SCRIPT = var.wagtail_french_script_path
     }
     command = <<-EOT
       set -euo pipefail
@@ -112,67 +115,101 @@ resource "null_resource" "seed_from_sample" {
       done
       psql "$PREVIEW_DB_URL" -f "$EXTENSIONS_SCRIPT"
 
-      # Dump the sample database to a temp file.
+      # Seed source: the preprod sample by default, or the latest ready
+      # Scaleway backup of the production `webapp` database when the PR
+      # carries the preview:isoprod label.
       # An unseeded preview looks healthy but is useless — fail loudly
       # instead of shipping an empty database.
-      if [[ -z "$${SAMPLE_DB_URI:-}" ]]; then
-        echo "ERROR: SAMPLE_DB_URI is not set — refusing to ship an unseeded preview" >&2
-        exit 1
-      fi
-      DUMP_FILE="$(mktemp)"
+      DUMP_DIR="$(mktemp -d)"
       RESTORE_LOG="$(mktemp)"
-      if pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE"; then
-        # --clean emits DROP/ALTER for objects it assumes exist; against
-        # the freshly emptied database those pre-drops fail with exit 1.
-        # That's benign — but anything above 1 is a real restore error.
-        set +e
-        pg_restore -d "$PREVIEW_DB_URL" \
-            --schema=public --no-acl --no-owner --no-privileges \
-            "$DUMP_FILE" > "$RESTORE_LOG" 2>&1
-        RESTORE_RC=$?
-        set -e
-
-        # Show restore errors (first 30 lines)
-        if grep -i 'error' "$RESTORE_LOG" | head -30; then
-          echo "--- pg_restore errors above (may be benign DROP/ALTER on fresh DB) ---"
-        fi
-
-        if [ "$RESTORE_RC" -gt 1 ]; then
-          echo "pg_restore failed with exit code $RESTORE_RC" >&2
-          exit "$RESTORE_RC"
-        fi
-        rm -f "$DUMP_FILE" "$RESTORE_LOG"
-
-        # Verify that data was actually restored — show row counts.
-        echo "Table row counts:"
-        psql "$PREVIEW_DB_URL" -t -c "
-          SELECT relname, n_live_tup
-          FROM pg_stat_user_tables
-          WHERE schemaname = 'public'
-            AND n_live_tup > 0
-          ORDER BY n_live_tup DESC
-          LIMIT 30;
-        "
-        TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
-          "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
-        if [ "$${TABLE_COUNT:-0}" -eq 0 ]; then
-          echo "ERROR: seed produced an empty database" >&2
+      if [[ "$ISOPROD" == "true" ]]; then
+        PROD_INSTANCE_ID="$(scw rdb instance list name="$PROD_INSTANCE_NAME" -o json \
+          | jq -r '.[0].id // empty')"
+        if [[ -z "$PROD_INSTANCE_ID" ]]; then
+          echo "ERROR: RDB instance $PROD_INSTANCE_NAME not found — refusing to ship an unseeded preview" >&2
           exit 1
         fi
-        # Tables can exist while rows were skipped (RESTORE_RC=1) —
-        # require actual data, not just schema.
-        ROW_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
-          "SELECT coalesce(sum(n_live_tup), 0) FROM pg_stat_user_tables WHERE schemaname='public'")"
-        if [ "$${ROW_COUNT:-0}" -eq 0 ]; then
-          echo "ERROR: seed restored $TABLE_COUNT tables but zero rows" >&2
+        # Reuses an existing backup (the instance takes one every 24h)
+        # rather than creating one: no extra load on production. Filtered
+        # on the database, the instance may hold backups of other ones.
+        BACKUP_ID="$(scw rdb backup list instance-id="$PROD_INSTANCE_ID" \
+            order-by=created_at_desc -o json \
+          | jq -r '[.[] | select(.status == "ready" and .database_name == "webapp")][0].id // empty')"
+        if [[ -z "$BACKUP_ID" ]]; then
+          echo "ERROR: no ready backup of the production webapp database — refusing to ship an unseeded preview" >&2
           exit 1
         fi
-        echo "Seed complete: $TABLE_COUNT tables, $ROW_COUNT rows restored"
+        echo "Seeding from production backup $BACKUP_ID"
+        (cd "$DUMP_DIR" && scw rdb backup download "$BACKUP_ID")
+        DUMP_FILE="$(find "$DUMP_DIR" -type f -name '*.custom' -print -quit)"
+        if [[ -z "$DUMP_FILE" ]]; then
+          echo "ERROR: production backup download produced no .custom file" >&2
+          exit 1
+        fi
+        # Same order as `make load-prod-dump`: the production dump refers
+        # to the wagtail_french text search configuration.
+        psql "$PREVIEW_DB_URL" -f "$WAGTAIL_FRENCH_SCRIPT"
+        RESTORE_JOBS=4
       else
-        echo "ERROR: pg_dump from sample DB failed — refusing to ship an unseeded preview" >&2
-        rm -f "$DUMP_FILE"
+        if [[ -z "$${SAMPLE_DB_URI:-}" ]]; then
+          echo "ERROR: SAMPLE_DB_URI is not set — refusing to ship an unseeded preview" >&2
+          exit 1
+        fi
+        DUMP_FILE="$DUMP_DIR/sample.custom"
+        if ! pg_dump -Fc --no-acl --no-owner --no-privileges "$SAMPLE_DB_URI" > "$DUMP_FILE"; then
+          echo "ERROR: pg_dump from sample DB failed — refusing to ship an unseeded preview" >&2
+          exit 1
+        fi
+        RESTORE_JOBS=1
+      fi
+
+      # --clean emits DROP/ALTER for objects it assumes exist; against
+      # the freshly emptied database those pre-drops fail with exit 1.
+      # That's benign — but anything above 1 is a real restore error.
+      set +e
+      pg_restore -d "$PREVIEW_DB_URL" \
+          --schema=public --no-acl --no-owner --no-privileges \
+          --jobs="$RESTORE_JOBS" \
+          "$DUMP_FILE" > "$RESTORE_LOG" 2>&1
+      RESTORE_RC=$?
+      set -e
+
+      # Show restore errors (first 30 lines)
+      if grep -i 'error' "$RESTORE_LOG" | head -30; then
+        echo "--- pg_restore errors above (may be benign DROP/ALTER on fresh DB) ---"
+      fi
+
+      if [ "$RESTORE_RC" -gt 1 ]; then
+        echo "pg_restore failed with exit code $RESTORE_RC" >&2
+        exit "$RESTORE_RC"
+      fi
+      rm -rf "$DUMP_DIR" "$RESTORE_LOG"
+
+      # Verify that data was actually restored — show row counts.
+      echo "Table row counts:"
+      psql "$PREVIEW_DB_URL" -t -c "
+        SELECT relname, n_live_tup
+        FROM pg_stat_user_tables
+        WHERE schemaname = 'public'
+          AND n_live_tup > 0
+        ORDER BY n_live_tup DESC
+        LIMIT 30;
+      "
+      TABLE_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
+        "SELECT count(*) FROM pg_tables WHERE schemaname='public'")"
+      if [ "$${TABLE_COUNT:-0}" -eq 0 ]; then
+        echo "ERROR: seed produced an empty database" >&2
         exit 1
       fi
+      # Tables can exist while rows were skipped (RESTORE_RC=1) —
+      # require actual data, not just schema.
+      ROW_COUNT="$(psql "$PREVIEW_DB_URL" -t -c \
+        "SELECT coalesce(sum(n_live_tup), 0) FROM pg_stat_user_tables WHERE schemaname='public'")"
+      if [ "$${ROW_COUNT:-0}" -eq 0 ]; then
+        echo "ERROR: seed restored $TABLE_COUNT tables but zero rows" >&2
+        exit 1
+      fi
+      echo "Seed complete: $TABLE_COUNT tables, $ROW_COUNT rows restored"
 
       # Run Django management commands against the freshly seeded database.
       # Uses the Docker image that was just built; only runs when the seed
@@ -197,8 +234,11 @@ resource "null_resource" "seed_from_sample" {
   }
 
   triggers = {
-    image_tag      = var.clear_db ? var.image_tag : "reuse"
-    sample_db_hash = md5(var.sample_db_uri)
+    image_tag = var.clear_db ? var.image_tag : "reuse"
+    # Folded into the existing key rather than a new one: adding a key
+    # would re-seed every running preview. Toggling preview:isoprod on a PR
+    # changes the hash, so its database is re-seeded from the other source.
+    sample_db_hash = md5(var.isoprod ? "isoprod" : var.sample_db_uri)
     seed_version   = "5" # bump to force re-seed (e.g. when changing restore logic)
     db_exists      = data.external.db_exists.result.exists
   }
