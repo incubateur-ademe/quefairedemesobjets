@@ -363,8 +363,9 @@ stack and posts a sticky comment on the PR with the environment URL.</p></li>
 <li><p>Every push to the PR rebuilds the image and redeploys the same
 environment (same URL).</p></li>
 <li><p>The environment is destroyed when the PR is closed or the <code class="docutils literal notranslate"><span class="pre">preview</span></code>
-label is removed. A nightly cron also reaps any preview older than
-7 days as a safety net.</p></li>
+label is removed. A nightly garbage collector also destroys any preview
+whose PR has been closed for more than 24 hours, or is open without the
+<code class="docutils literal notranslate"><span class="pre">preview</span></code> label.</p></li>
 </ol>
 </section>
 <section id="decisions">
@@ -398,9 +399,13 @@ label is removed. A nightly cron also reaps any preview older than
 <td><p><strong><code class="docutils literal notranslate"><span class="pre">pg_dump</span></code> sample DB → <code class="docutils literal notranslate"><span class="pre">pg_restore</span></code></strong></p></td>
 <td><p>Realistic data on the carte from the preprod sample database.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Cleanup TTL</p></td>
-<td><p><strong>7 days</strong> (nightly cron)</p></td>
-<td><p>With PR keying + destroy-on-close the cron is only a safety net for missed destroys. A shorter TTL would kill envs of still-open PRs and dead URLs in their PR comment.</p></td>
+<tr class="row-odd"><td><p>Teardown</p></td>
+<td><p><strong>Scaleway CLI by naming convention</strong></p></td>
+<td><p>No terraform state needed to destroy, so a failed or partial apply can always be cleaned up. <code class="docutils literal notranslate"><span class="pre">preview_destroy.sh</span></code> is shared by destroy-on-close and the nightly GC.</p></td>
+</tr>
+<tr class="row-even"><td><p>GC rule</p></td>
+<td><p><strong>PR state, not resource age</strong></p></td>
+<td><p>A preview is wanted iff its PR is open and labeled <code class="docutils literal notranslate"><span class="pre">preview</span></code>. Closed PRs get a 24h grace so a reopened PR keeps its environment.</p></td>
 </tr>
 </tbody>
 </table>
@@ -430,8 +435,7 @@ Per-PR resources (state: lvao-terraform-state/preview/pr-&lt;n&gt;/…):
 │                   see Limitations)
 └── container       serverless container in the shared
                     qfdmod-preview namespace, min_scale=0,
-                    tagged preview / preview-pr-&lt;n&gt; /
-                    created-at-&lt;unix&gt;
+                    tagged preview / preview-pr-&lt;n&gt;
 
 Shared (one-time):
 └── qfdmod-preview container namespace
@@ -444,12 +448,16 @@ redeploy.</p>
 <p>State keys and the <code class="docutils literal notranslate"><span class="pre">environment</span></code> terragrunt input (<code class="docutils literal notranslate"><span class="pre">pr-&lt;n&gt;</span></code>) derive from
 the materialised directory path through <code class="docutils literal notranslate"><span class="pre">root.hcl</span></code> — the per-PR stacks
 carry no backend overrides.</p>
-<p>Teardown paths, all converging on <code class="docutils literal notranslate"><span class="pre">terragrunt</span> <span class="pre">run-all</span> <span class="pre">destroy</span></code> plus state
-object deletion:</p>
+<p>Teardown does not use terragrunt: <code class="docutils literal notranslate"><span class="pre">scripts/infrastructure/preview_destroy.sh</span></code>
+finds the container, database, user, bucket and state objects of a PR by
+name and deletes them with the <code class="docutils literal notranslate"><span class="pre">scw</span></code>/<code class="docutils literal notranslate"><span class="pre">aws</span></code> CLIs. It is idempotent and takes
+<code class="docutils literal notranslate"><span class="pre">--dry-run</span></code>. Three paths call it:</p>
 <ol class="arabic simple">
 <li><p>PR closed or <code class="docutils literal notranslate"><span class="pre">preview</span></code> label removed → <code class="docutils literal notranslate"><span class="pre">preview-down.yml</span></code></p></li>
-<li><p>Nightly cron (<code class="docutils literal notranslate"><span class="pre">preview-cleanup.yml</span></code>) dispatches <code class="docutils literal notranslate"><span class="pre">preview-down.yml</span></code> for
-anything whose <code class="docutils literal notranslate"><span class="pre">created-at-&lt;unix&gt;</span></code> tag is older than 7 days</p></li>
+<li><p>Nightly GC (<code class="docutils literal notranslate"><span class="pre">preview-cleanup.yml</span></code>): lists every preview resource left in
+Scaleway, and destroys those whose PR is closed for more than 24h
+(<code class="docutils literal notranslate"><span class="pre">grace_hours</span></code> input) or open without the <code class="docutils literal notranslate"><span class="pre">preview</span></code> label. Supports
+<code class="docutils literal notranslate"><span class="pre">dry_run=true</span></code>.</p></li>
 <li><p>Manual <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code> of <code class="docutils literal notranslate"><span class="pre">preview-down.yml</span></code> with a PR number</p></li>
 </ol>
 <p>Old <code class="docutils literal notranslate"><span class="pre">pr-*</span></code> image tags are reaped by the existing weekly
@@ -491,8 +499,8 @@ container namespace (interactive: review the plan before approving).</p></li>
 <li><p>[ ] A second push updates the same env, same URL</p></li>
 <li><p>[ ] Removing the label (or closing the PR) destroys all three stacks</p></li>
 <li><p>[ ] State objects gone from <code class="docutils literal notranslate"><span class="pre">lvao-terraform-state/preview/pr-&lt;n&gt;/</span></code></p></li>
-<li><p>[ ] Cron dry-run (<code class="docutils literal notranslate"><span class="pre">preview-cleanup.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">dry_run=true</span></code>) lists an
-artificially aged container as stale</p></li>
+<li><p>[ ] GC dry-run (<code class="docutils literal notranslate"><span class="pre">preview-cleanup.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">dry_run=true</span></code>) lists the
+previews of closed PRs and keeps open labeled ones</p></li>
 </ul>
 </section>
 <section id="limitations-out-of-scope">
