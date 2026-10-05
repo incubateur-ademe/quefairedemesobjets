@@ -17,7 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 # Gate: only PRs carrying the "preview" label get an environment.
-# - labeled: fire only when the preview label itself is added
+# - labeled: fire only when the preview label itself is added, or when
+#   preview:isoprod is added to a PR that already has a preview
 # - synchronize/reopened: fire only when the label is already present
 jobs:
   resolve:
@@ -25,6 +26,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.action == 'labeled' && github.event.label.name == 'preview') ||
+      (github.event.action == 'labeled' && github.event.label.name == 'preview:isoprod' &&
+       contains(github.event.pull_request.labels.*.name, 'preview')) ||
       (contains(fromJSON('["synchronize", "reopened"]'), github.event.action) &&
        contains(github.event.pull_request.labels.*.name, 'preview'))
     runs-on: ubuntu-latest
@@ -35,6 +38,7 @@ jobs:
       sha: ${{ steps.out.outputs.sha }}
       image_tag: ${{ steps.out.outputs.image_tag }}
       clear_db: ${{ steps.out.outputs.clear_db }}
+      isoprod: ${{ steps.out.outputs.isoprod }}
     steps:
       - id: out
         env:
@@ -58,10 +62,18 @@ jobs:
             CLEAR_DB="false"
           fi
 
+          # preview:isoprod: seed from production, keep the container warm
+          if echo "$LABELS" | grep -q 'preview:isoprod'; then
+            ISOPROD="true"
+          else
+            ISOPROD="false"
+          fi
+
           echo "pr_number=$PR_NUMBER"                    >> "$GITHUB_OUTPUT"
           echo "sha=$SHA"                                >> "$GITHUB_OUTPUT"
           echo "image_tag=pr-${PR_NUMBER}-${SHA:0:7}"    >> "$GITHUB_OUTPUT"
           echo "clear_db=$CLEAR_DB"                      >> "$GITHUB_OUTPUT"
+          echo "isoprod=$ISOPROD"                        >> "$GITHUB_OUTPUT"
 
   build:
     name: 🐳 Build webapp image
@@ -84,6 +96,7 @@ jobs:
       environment: preview
       ref: ${{ needs.resolve.outputs.sha }}
       clear_db: ${{ needs.resolve.outputs.clear_db }}
+      isoprod: ${{ needs.resolve.outputs.isoprod }}
 
   sync-media:
     name: 🖼️ Sync media from production
