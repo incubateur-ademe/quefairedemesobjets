@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 MAIN_OPENDATA_FILENAME = "acteurs.csv"
 
 
-def run_psql_copy(dsn: str, table: str, stdout: TextIO) -> None:
+def run_psql_safely(dsn: str, cmd: str, stdout: TextIO) -> None:
     try:
         subprocess.run(
-            ["psql", "-c", f"COPY {table} TO STDOUT WITH CSV HEADER"],
+            ["psql", "-c", cmd],
             env=psql_env_from_dsn(dsn),
             check=True,
             stdout=stdout,
@@ -41,9 +41,13 @@ def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
         permatent_filename = MAIN_OPENDATA_FILENAME
         tempfile_path = Path(temp_dir, filename)
         with open(tempfile_path, "w") as f:
-            run_psql_copy(
+            run_psql_safely(
                 settings.DB_WAREHOUSE,
-                export_opendata_config.opendata_table,
+                (
+                    "COPY "
+                    f"{export_opendata_config.opendata_table} "
+                    "TO STDOUT WITH CSV HEADER"
+                ),
                 f,
             )
 
