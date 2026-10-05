@@ -459,6 +459,47 @@ postdeploy: bash bin/post_deploy
 </ol>
 </section>
 </section>
+<section id="recherche-autocomplete">
+<h2>Recherche (autocomplete)<a class="headerlink" href="#recherche-autocomplete" title="Lien vers cette rubrique">¶</a></h2>
+<p>La recherche objet présent dans le header et sur la page d’accueil s’appuie sur
+la recherche Fuzzy (par trigrammes) de django-modelsearch, embarquée avec Wagtail.
+Chaque résultat porte deux valeurs :</p>
+<ul class="simple">
+<li><p><strong>Raw</strong> : similarité brute, sans bonus. Décide <em>si</em> le résultat s’affiche.</p></li>
+<li><p><strong>Score</strong> : similarité pondérée (normalisation par longueur du titre, bonus
+de préfixe). Décide <em>à quelle position</em> le résultat apparait dans l’autocomplete.</p></li>
+</ul>
+<p>Les règles appliquées dans <code class="docutils literal notranslate"><span class="pre">webapp/search/ranking.py</span></code> :</p>
+<ul class="simple">
+<li><p>affichage si <code class="docutils literal notranslate"><span class="pre">raw</span> <span class="pre">≥</span> <span class="pre">SEARCH_RAW_SIMILARITY_SUFFICIENT</span></code>, ou si
+<code class="docutils literal notranslate"><span class="pre">SEARCH_RAW_SIMILARITY_MINIMUM</span> <span class="pre">≤</span> <span class="pre">raw</span></code> et <code class="docutils literal notranslate"><span class="pre">score</span> <span class="pre">≥</span> <span class="pre">SEARCH_SCORE_MINIMUM</span></code> ;</p></li>
+<li><p>tri par raw décroissant, puis par score décroissant.</p></li>
+</ul>
+<p>Ces trois seuils sont des variables d’environnement, modifiables dans
+Scalingo/Scaleway. Aucune réindexation n’est nécessaire après leur mise à jour :</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Défaut</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEARCH_RAW_SIMILARITY_MINIMUM</span></code></p></td>
+<td><p>0.5</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEARCH_RAW_SIMILARITY_SUFFICIENT</span></code></p></td>
+<td><p>0.75</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEARCH_SCORE_MINIMUM</span></code></p></td>
+<td><p>1.2</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Les utilisateurs disposant de la permission <code class="docutils literal notranslate"><span class="pre">can_see_beta_search</span></code> voient le
+détail du score et les seuils sous chaque résultat.</p>
+</section>
 </section>
 
         </article>
@@ -529,6 +570,7 @@ postdeploy: bash bin/post_deploy
 <li><a class="reference internal" href="#ajouter-une-nouvelle-tache">Ajouter une nouvelle tâche</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#recherche-autocomplete">Recherche (autocomplete)</a></li>
 </ul>
 </li>
 </ul>
