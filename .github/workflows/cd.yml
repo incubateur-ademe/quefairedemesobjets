@@ -32,6 +32,15 @@ jobs:
       environment: preprod
       tag_name: ${{ github.sha }}
 
+  nginx:
+    name: 🟠 Nginx gateway
+    uses: ./.github/workflows/_deploy-nginx.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+      tag_name: ${{ github.sha }}
+
   e2e:
     name: 🪤 E2E
     uses: ./.github/workflows/e2e.yml

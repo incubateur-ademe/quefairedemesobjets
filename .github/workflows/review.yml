@@ -39,6 +39,15 @@ jobs:
       environment: preprod
       tag_name: pr-${{ github.event.pull_request.number }}
 
+  nginx:
+    name: 🟠 Nginx gateway
+    uses: ./.github/workflows/_deploy-nginx.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+      tag_name: pr-${{ github.event.pull_request.number }}
+
   e2e:
     name: 🪤 E2E
     permissions:

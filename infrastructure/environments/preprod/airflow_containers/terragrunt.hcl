@@ -72,6 +72,9 @@ inputs = {
   airflow_dag_processor_max_scale      = 1
   airflow_dag_processor_timeout        = 300
 
+  # Public hostname routed by nginx_containers (wildcard CNAME).
+  custom_domain = "airflow.preprod.quefairedemesobjets.ademe.fr"
+
   AIRFLOW__WEBSERVER__INSTANCE_NAME   = "✅✅✅✅ PREPROD ✅✅✅✅"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = "postgresql://${dependency.database.outputs.airflow_db_username}:${dependency.database.outputs.airflow_db_password}@${dependency.database.outputs.airflow_endpoint_ip}:${dependency.database.outputs.airflow_endpoint_port}/${dependency.database.outputs.airflow_database_name}"
   AIRFLOW_METADATA_DB_URL             = "postgresql+psycopg2://${dependency.database.outputs.airflow_db_username}:${dependency.database.outputs.airflow_db_password}@${dependency.database.outputs.airflow_endpoint_ip}:${dependency.database.outputs.airflow_endpoint_port}/${dependency.database.outputs.airflow_database_name}"
