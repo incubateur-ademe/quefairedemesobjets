@@ -88,21 +88,64 @@ server {
     }
 
     # PostHog proxy - keeps analytics traffic on our domain, bypasses ad-blockers
+    # https://posthog.com/docs/advanced/proxy/nginx
+    # Hosts are set via variables so nginx re-resolves them (valid=300s) instead
+    # of caching the IP forever at startup. Use the system nameservers (Docker's
+    # 127.0.0.11, Scalingo's resolver) - public DNS may be blocked from the
+    # container. ipv6=off: PostHog answers AAAA first and containers are IPv4 only.
+<%
+  nameservers = File.read("/etc/resolv.conf").scan(/^nameserver\s+(\d+\.\d+\.\d+\.\d+)/).flatten rescue []
+  nameservers = ["8.8.8.8", "8.8.4.4"] if nameservers.empty?
+%>
+    resolver <%= nameservers.join(" ") %> valid=300s ipv6=off;
+    resolver_timeout 5s;
+    set $posthog_api_host eu.i.posthog.com;
+    set $posthog_assets_host eu-assets.i.posthog.com;
+    # proxy_pass with a variable passes its URI verbatim, so each location
+    # strips the /ph prefix with a rewrite instead of in proxy_pass.
+
+    # SDK and static files
     location /ph/static/ {
-        proxy_pass https://eu-assets.i.posthog.com/static/;
+        rewrite ^/ph(/.*)$ $1 break;
+        proxy_pass https://$posthog_assets_host;
+        proxy_set_header Host $posthog_assets_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
         proxy_ssl_server_name on;
-        proxy_set_header Host eu-assets.i.posthog.com;
+        proxy_ssl_name $posthog_assets_host;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
-    location /ph/ {
-        proxy_pass https://eu.i.posthog.com/;
+    # SDK remote config (feature flags, conditions, sampling)
+    location /ph/array/ {
+        rewrite ^/ph(/.*)$ $1 break;
+        proxy_pass https://$posthog_assets_host;
+        proxy_set_header Host $posthog_assets_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
         proxy_ssl_server_name on;
-        proxy_set_header Host eu.i.posthog.com;
+        proxy_ssl_name $posthog_assets_host;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+    }
+
+    # Events and API calls
+    location /ph/ {
+        rewrite ^/ph(/.*)$ $1 break;
+        proxy_pass https://$posthog_api_host;
+        proxy_set_header Host $posthog_api_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;
         # Strip Origin/Referer so PostHog doesn't reject requests from local/unknown domains
         proxy_set_header Origin "";
         proxy_set_header Referer "";
+        proxy_ssl_server_name on;
+        proxy_ssl_name $posthog_api_host;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
     location /admin {
