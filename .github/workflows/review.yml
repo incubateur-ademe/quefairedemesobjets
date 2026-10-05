@@ -113,6 +113,15 @@ jobs:
         if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: exit 1
 
+  nginx:
+    name: 🟠 Nginx gateway
+    uses: ./.github/workflows/_deploy-nginx.yml
+    secrets: inherit # pragma: allowlist secret`
+    needs: [ci]
+    with:
+      environment: preprod
+      tag_name: pr-${{ github.event.pull_request.number }}
+
   e2e:
     name: 🪤 E2E
     if: ${{ needs.scope.outputs.skip != 'true' }}
