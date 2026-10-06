@@ -397,7 +397,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #key(): string {
-    return `${this.gesteValue}|${this.objetValue}`
+    return `${this.gesteValue}|${this.ficheValue}`
   }
 
   /** The permanent canvas, by id: the node may come from another page's parking. */

@@ -13,15 +13,7 @@
         {% endcomment %}
         <div class="qfa-haut-de-page">
             <div class="qfa-panneau qfa-panneau--solutions">
-                <a class="qfa-changer-geste" href="{{ url_fiche }}">
-                    <span class="qfa-changer-geste__retour" aria-hidden="true"></span>
-                    <span class="qfa-changer-geste__icones">
-                        {% for geste in gestes %}
-                            {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
-                        {% endfor %}
-                    </span>
-                    <span class="qfa-changer-geste__libelle">{{ libelle_geste }}</span>
-                </a>
+                {% include "ui/components/assistant/bouton_changer_geste.html" with url=url_fiche libelle=libelle_geste %}
 
                 <form action="" method="get" data-controller="assistant-submit"
                       data-action="assistant-combobox:chosen->assistant-submit#submit">
