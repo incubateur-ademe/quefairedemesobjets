@@ -45,10 +45,10 @@
     "postcss-nesting": "^14.0.2",
     "svgo": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "ts-jest": "^29.4.11",
+    "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.71.0"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.6.0"
