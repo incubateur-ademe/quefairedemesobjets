@@ -17,6 +17,8 @@ UNKNOWN_OBJET_MESSAGE = (
     "Nous ne connaissons pas cet objet. Choisissez une suggestion dans la liste."
 )
 MISSING_ADRESSE_MESSAGE = "Indiquez une adresse ou une commune."
+# Nothing typed is not an unknown objet: the mockup has its own wording (30144:16015).
+MISSING_OBJET_MESSAGE = "Veuillez d'abord saisir un objet ou un déchet"
 
 
 class SearchForm(forms.Form):
@@ -69,7 +71,9 @@ class SearchForm(forms.Form):
         the same path as the autocomplete, otherwise the two would diverge.
         """
         label = (data.get("objet") or "").strip()
-        fiche = fiche_for_label(label) if label else None
+        if not label:
+            raise forms.ValidationError({"objet": MISSING_OBJET_MESSAGE})
+        fiche = fiche_for_label(label)
         if fiche is None:
             raise forms.ValidationError({"objet": UNKNOWN_OBJET_MESSAGE})
         return fiche
