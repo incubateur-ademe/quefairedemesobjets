@@ -41,6 +41,11 @@ class TestScriptRedirect:
         assert "s=1" in response.url and "ref=" in response.url
         assert response.headers["Cache-Control"].startswith("max-age=0, no-cache")
 
+    def test_assistant_v2_can_live_on_its_own_domain(self, client, settings):
+        settings.ASSISTANT = {**BETA, "V2_BASE_URL": "https://betatest.qfdmo.fr/"}
+        response = client.get("/", {"ref": ref("https://beta.example.fr/")})
+        assert response.url.startswith("https://betatest.qfdmo.fr/assistant/?")
+
     def test_the_script_route_reaches_assistant_v2(self, client):
         """`iframe.js` opens `/dechet`, which the legacy app already sends home."""
         response = client.get(

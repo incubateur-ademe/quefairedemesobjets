@@ -71,7 +71,12 @@ ASSISTANT = {
     # Hosts whose `iframe.js` embed opens the assistant V2 rather than the
     # legacy one: beta testers switch case by case, with no change to the
     # script they already pasted.
-    "V2_HOSTS": decouple.config("ASSISTANT_V2_HOSTS", default="", cast=decouple.Csv()),
+    "V2_HOSTS": decouple.config(
+        "ASSISTANT_V2_BETA_TESTERS_HOSTS", default="", cast=decouple.Csv()
+    ),
+    # Where those embeds land, e.g. https://betatest.quefairedemesdechets.ademe.fr.
+    # Empty: BASE_URL. The host must also be in ALLOWED_HOSTS.
+    "V2_BASE_URL": decouple.config("ASSISTANT_V2_BASE_URL", default="", cast=str),
 }
 
 # Carte settings
