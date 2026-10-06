@@ -101,10 +101,10 @@ resource "null_resource" "seed_from_sample" {
       if scw rdb user list instance-id="$INSTANCE_ID" -o json \
            | grep -q "\"name\":\"$DB_USERNAME\""; then
         scw rdb user update instance-id="$INSTANCE_ID" name="$DB_USERNAME" \
-          password="$DB_PASSWORD"
+          password="$DB_PASSWORD" > /dev/null
       else
         scw rdb user create instance-id="$INSTANCE_ID" name="$DB_USERNAME" \
-          password="$DB_PASSWORD" generate-password=false is-admin=false
+          password="$DB_PASSWORD" generate-password=false is-admin=false > /dev/null
       fi
 
       scw rdb privilege set instance-id="$INSTANCE_ID" \
@@ -134,7 +134,7 @@ resource "null_resource" "seed_from_sample" {
         # on the database, the instance may hold backups of other ones.
         BACKUP_ID="$(scw rdb backup list instance-id="$PROD_INSTANCE_ID" \
             order-by=created_at_desc -o json \
-          | jq -r '[.[] | select(.status == "ready" and .database_name == "webapp")][0].id // empty')"
+          | jq -r '[.[] | select(.status == "ready" and .database_name == "webapp")][0].ID // empty')"
         if [[ -z "$BACKUP_ID" ]]; then
           echo "ERROR: no ready backup of the production webapp database — refusing to ship an unseeded preview" >&2
           exit 1
