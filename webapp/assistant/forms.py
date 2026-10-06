@@ -1,9 +1,9 @@
 """Forms of the assistant.
 
-The objet + address pair is typed through autocomplete: the visible field
-carries a label, the hidden fields carry what the server actually uses, the
-targeted fiche and the coordinates. Validating both together is a form's job,
-not a chain of `if` in the view.
+The objet is typed through autocomplete: the visible field carries a label,
+the hidden field the targeted fiche. The address is optional and travels in
+the URL: `Parcours` reads it and tolerates a malformed value rather than
+blocking the search.
 
 The parameters of the places endpoint are validated by `api.LieuxQuery`.
 """
@@ -41,11 +41,6 @@ class SearchForm(forms.Form):
         required=False,
         error_messages={"invalid_choice": UNKNOWN_OBJET_MESSAGE},
     )
-    # Optional: without an address, the fiche offers geolocation (30495:2279).
-    adresse = forms.CharField(required=False, max_length=200)
-    longitude = forms.FloatField(required=False)
-    latitude = forms.FloatField(required=False)
-    precise = forms.BooleanField(required=False)
 
     def clean(self):
         data = super().clean()

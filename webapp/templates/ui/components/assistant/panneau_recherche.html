@@ -6,7 +6,7 @@ relancer une recherche, d'où le bouton masqué quand `bouton` est faux.
 {% endcomment %}
 <div class="qfa-panneau">
     {% include "ui/components/assistant/recherche_objet.html" with objet=parcours.objet fiche=parcours.fiche erreur=erreurs.objet.0 %}
-    {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise erreur=erreurs.adresse.0 %}
+    {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise %}
 
     {% if bouton %}
         <button type="submit" class="qfa-bouton qfa-bouton--primaire qfa-bouton--pleine-largeur">
