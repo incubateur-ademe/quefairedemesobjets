@@ -16,7 +16,6 @@ from qfdmd.models import ProduitPage
 UNKNOWN_OBJET_MESSAGE = (
     "Nous ne connaissons pas cet objet. Choisissez une suggestion dans la liste."
 )
-MISSING_ADRESSE_MESSAGE = "Indiquez une adresse ou une commune."
 # Nothing typed is not an unknown objet: the mockup has its own wording (30144:16015).
 MISSING_OBJET_MESSAGE = "Veuillez d'abord saisir un objet ou un déchet"
 
@@ -42,16 +41,11 @@ class SearchForm(forms.Form):
         required=False,
         error_messages={"invalid_choice": UNKNOWN_OBJET_MESSAGE},
     )
+    # Optional: without an address, the fiche offers geolocation (30495:2279).
     adresse = forms.CharField(required=False, max_length=200)
     longitude = forms.FloatField(required=False)
     latitude = forms.FloatField(required=False)
     precise = forms.BooleanField(required=False)
-
-    def clean_adresse(self) -> str:
-        adresse = (self.cleaned_data.get("adresse") or "").strip()
-        if not adresse:
-            raise forms.ValidationError(MISSING_ADRESSE_MESSAGE)
-        return adresse
 
     def clean(self):
         data = super().clean()
