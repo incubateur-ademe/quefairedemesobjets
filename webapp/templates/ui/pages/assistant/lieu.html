@@ -20,8 +20,12 @@
         <article class="qfa-lieu">
             <header class="qfa-lieu__identite">
                 <h1 class="qfa-lieu__nom">{{ lieu.nom_commercial|default:lieu.nom }}</h1>
-                {% if lieu.acteur_type %}
-                    <p class="qfa-lieu__type">{{ lieu.acteur_type.libelle }}</p>
+                {% comment %}
+                La distance n'existe que si l'usager a donné une position :
+                adresse saisie ou géolocalisation (30170:10209).
+                {% endcomment %}
+                {% if lieu.acteur_type or lieu.distance %}
+                    <p class="qfa-lieu__type">{{ lieu.acteur_type.libelle }}{% if lieu.acteur_type and lieu.distance %} - {% endif %}{% if lieu.distance %}{{ lieu.distance.km|floatformat:1 }}km{% endif %}</p>
                 {% endif %}
 
                 {% comment %}
