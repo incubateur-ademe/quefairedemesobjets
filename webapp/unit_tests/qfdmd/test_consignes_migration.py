@@ -2,8 +2,10 @@
 the spec: deterministic, and the text moves untouched."""
 
 import json
+from io import StringIO
 
 import pytest
+from django.core.management import call_command
 from django.urls import reverse
 from wagtail.models import PageLogEntry, Site
 
@@ -11,6 +13,7 @@ from qfdmd.consignes_migration import (
     apply_plan,
     badge_texts,
     first_row_of_cards,
+    generate_on_deploy,
     normalise,
     plan_conversion,
 )
@@ -550,3 +553,117 @@ class TestAdminAction:
         ).content.decode()
 
         assert reverse("generate_consignes", args=[page.pk]) in content
+
+
+def live_types(page):
+    page.refresh_from_db()
+    return [b.block_type for b in page.body]
+
+
+def generate():
+    call_command("generate_consignes", stdout=StringIO())
+
+
+class TestGenerateOnDeploy:
+    """`manage.py generate_consignes`, run by every deploy: publishes the grid
+    of the live fiches that convert cleanly, leaves a draft for the others,
+    and does nothing on a fiche that already has one."""
+
+    def test_a_clean_live_fiche_is_published_with_its_grid(self):
+        page = objet_page()
+
+        generate()
+
+        assert live_types(page)[:2] == ["paragraph", "consignes"]
+        assert not page.has_unpublished_changes
+
+    def test_a_second_deploy_is_a_no_op(self):
+        page = objet_page()
+        generate()
+        before = page.revisions.count()
+
+        generate()
+
+        assert page.revisions.count() == before
+
+    def test_a_fiche_that_is_not_live_is_left_alone(self):
+        page = objet_page()
+        page.live = False
+        page.save()
+
+        generate()
+
+        assert "consignes" not in live_types(page)
+        assert page.revisions.count() == 0
+
+    def test_a_fiche_with_an_unresolved_card_gets_a_draft_only(self):
+        page = ProduitPageFactory(
+            live=True,
+            body=json.dumps(
+                [
+                    {
+                        "type": "item_grid",
+                        "id": "grid",
+                        "value": {
+                            "items": [
+                                card("Les piles", "<p>…</p>", "Point de collecte"),
+                                card("Réparer", "<p>…</p>", "Réparable"),
+                            ]
+                        },
+                    }
+                ]
+            ),
+        )
+
+        generate()
+        generate()
+
+        assert "consignes" not in live_types(page)
+        assert page.has_unpublished_changes
+        assert "consignes" in draft_types(page)
+        assert page.revisions.count() == 1
+
+    def test_a_pending_editor_draft_is_kept_and_converted_too(self):
+        page = objet_page(title="Chaise")
+        page.title = "Chaise (relue)"
+        page.save_revision()
+
+        generate()
+
+        page.refresh_from_db()
+        assert page.title == "Chaise"
+        assert "consignes" in live_types(page)
+        draft = page.get_latest_revision_as_object()
+        assert page.has_unpublished_changes
+        assert draft.title == "Chaise (relue)"
+        assert "consignes" in [b.block_type for b in draft.body]
+
+    def test_a_pending_draft_already_holding_a_grid_is_a_no_op(self):
+        page = objet_page()
+        apply_plan(page, plan_conversion(page))  # the admin action's draft
+        page.refresh_from_db()
+        before = page.revisions.count()
+
+        generate()
+
+        assert "consignes" not in live_types(page)
+        assert page.revisions.count() == before
+
+    def test_a_failing_fiche_does_not_stop_the_others(self, mocker):
+        broken, page = objet_page(), objet_page()
+        real = generate_on_deploy
+
+        def fail_on_broken(p):
+            if p.pk == broken.pk:
+                raise ValueError("boom")
+            return real(p)
+
+        mocker.patch(
+            "qfdmd.management.commands.generate_consignes.generate_on_deploy",
+            side_effect=fail_on_broken,
+        )
+
+        generate()
+
+        assert "consignes" not in live_types(broken)
+        assert "consignes" in live_types(page)
