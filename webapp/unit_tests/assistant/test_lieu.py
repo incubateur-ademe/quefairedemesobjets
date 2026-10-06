@@ -120,6 +120,24 @@ class TestLieuPage:
 
         assert "Dernière mise à jour" in content
 
+    def test_more_about_the_lieu_lists_its_type_and_labels(self, client):
+        """One heading per section, one value per line (30170:10434)."""
+        lieu = DisplayedActeurFactory()
+        lieu.labels.add(
+            LabelQualiteFactory(code="ess", libelle="ESS"),
+            LabelQualiteFactory(code="reparacteurs", libelle="Répar'Acteurs"),
+        )
+
+        content = client.get(
+            reverse("assistant:lieu", args=[lieu.uuid])
+        ).content.decode()
+
+        assert "<dt>Type d'enseigne</dt>" in content
+        assert f"<dd>{lieu.acteur_type.libelle}</dd>" in content
+        assert "<dt>Labels</dt>" in content
+        assert "<dd>ESS</dd>" in content
+        assert "<dd>Répar&#x27;Acteurs</dd>" in content
+
     def test_the_prefetch_avoids_cascading_queries(self, client):
         """`for_the_detail()` loads the lieu, its labels and its sources at once.
 
