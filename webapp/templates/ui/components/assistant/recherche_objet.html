@@ -34,6 +34,17 @@ porte le libellé choisi par l'usager.
     </span>
 
     {% comment %}
+    Juste après le cadre : la liste, en position absolue, s'ouvre sous le champ
+    et recouvre le message d'erreur au lieu de s'afficher en dessous.
+    {% endcomment %}
+    <ul class="qfa-combobox__liste"
+        id="{{ id|default:'recherche-objet' }}-liste"
+        role="listbox"
+        data-assistant-combobox-target="list"
+        data-action="click->assistant-combobox#chooseFromClick"
+        hidden></ul>
+
+    {% comment %}
     Le champ porte le nom attendu par `SearchForm` ; `data-key` reste
     `slug`, la clé que l'endpoint JSON renvoie pour chaque suggestion.
     {% endcomment %}
@@ -45,13 +56,6 @@ porte le libellé choisi par l'usager.
             {{ erreur }}
         </p>
     {% endif %}
-
-    <ul class="qfa-combobox__liste"
-        id="{{ id|default:'recherche-objet' }}-liste"
-        role="listbox"
-        data-assistant-combobox-target="list"
-        data-action="click->assistant-combobox#chooseFromClick"
-        hidden></ul>
 
     <p class="qfa-sr-only" role="status" aria-live="polite"
        data-assistant-combobox-target="status"></p>
