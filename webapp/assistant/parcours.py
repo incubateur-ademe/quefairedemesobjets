@@ -8,8 +8,6 @@ server state to invalidate.
 
 from dataclasses import dataclass
 
-PARAMS = ("fiche", "objet", "adresse", "longitude", "latitude", "precise")
-
 
 @dataclass(frozen=True)
 class Parcours:
