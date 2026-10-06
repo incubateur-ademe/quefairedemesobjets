@@ -1,3 +1,5 @@
+from html.parser import HTMLParser
+
 import pytest
 from django.urls import reverse
 
@@ -90,6 +92,18 @@ class TestSearchView:
             reverse("assistant:produit", kwargs={"slug": fiche.slug})
         )
 
+    def test_the_address_is_optional(self, client, fiche):
+        """Without an address, the fiche offers geolocation (30495:2279)."""
+        response = client.get(
+            reverse("assistant:recherche"), {"fiche": fiche.slug, "objet": fiche.title}
+        )
+
+        assert response.status_code == 302
+        assert response.url.startswith(
+            reverse("assistant:produit", kwargs={"slug": fiche.slug})
+        )
+        assert "adresse=" not in response.url
+
     def test_the_parcours_follows_to_the_fiche(self, client, fiche):
         response = client.get(
             reverse("assistant:recherche"),
@@ -111,12 +125,12 @@ class TestSearchView:
         "params",
         [
             {"objet": "zzz inconnu", "adresse": "Auray"},  # unresolved objet
-            {"objet": "Emballages"},  # no address
+            {"objet": "zzz inconnu"},  # unresolved objet, no address
         ],
     )
     def test_incomplete_input_shows_the_home_page_again(self, client, params):
-        """Both fields are required (#3295). The home page is rendered again
-        with its messages rather than redirected to: a redirect would lose them."""
+        """The objet is required. The home page is rendered again with its
+        messages rather than redirected to: a redirect would lose them."""
         response = client.get(reverse("assistant:recherche"), params)
 
         assert response.status_code == 200
@@ -124,10 +138,17 @@ class TestSearchView:
 
 
 class TestHome:
-    def test_both_fields_are_required(self, client):
+    def test_only_the_objet_is_required(self, client):
         content = client.get(reverse("assistant:home")).content.decode()
+        inputs = {}
+        parser = HTMLParser()
+        parser.handle_starttag = lambda tag, attrs: (
+            tag == "input" and inputs.setdefault(dict(attrs).get("name"), dict(attrs))
+        )
+        parser.feed(content)
 
-        assert content.count("required") >= 2
+        assert "required" in inputs["objet"]
+        assert "required" not in inputs["adresse"]
 
     def test_the_hidden_address_fields_are_present(self, client):
         """Without them, the map has no position to show."""
@@ -205,12 +226,6 @@ class TestSearchForm:
         content = response.content.decode()
         assert "qfa-combobox__erreur" in content
         assert 'aria-invalid="true"' in content
-
-    def test_a_missing_address_shows_an_error(self, client, fiche):
-        response = client.get(reverse("assistant:recherche"), {"fiche": fiche.slug})
-
-        assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
 
     def test_the_input_is_kept_when_refused(self, client):
         content = client.get(

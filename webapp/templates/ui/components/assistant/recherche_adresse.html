@@ -33,7 +33,6 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
                aria-autocomplete="list"
                autocomplete="off"
                {% if erreur %}aria-describedby="{{ id|default:'recherche-adresse' }}-erreur" aria-invalid="true"{% endif %}
-               required
                placeholder="{{ placeholder|default:'ex : une adresse ou commune' }}">
     </span>
 
