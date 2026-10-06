@@ -708,7 +708,8 @@ body {
 }
 
 .qfa-bouton__fleche,
-.qfa-bouton__externe {
+.qfa-bouton__externe,
+.qfa-bouton__localisation {
   width: 16px;
   height: 16px;
   background: currentColor;
@@ -728,6 +729,11 @@ body {
 .qfa-bouton__externe {
   -webkit-mask-image: url("../images/assistant/ui/lien-externe.svg");
   mask-image: url("../images/assistant/ui/lien-externe.svg");
+}
+
+.qfa-bouton__localisation {
+  -webkit-mask-image: url("../images/assistant/ui/localisation.svg");
+  mask-image: url("../images/assistant/ui/localisation.svg");
 }
 
 .qfa-bloc-geste {
@@ -771,6 +777,34 @@ body {
 .qfa-bloc-geste .qfa-bouton {
   width: 100%;
   max-width: 300px;
+}
+
+/* « Je découvre les solutions près de moi » tient sur une ligne dans la
+   maquette (30495:2279) : à 320 px, il manque 5 px avec les marges de 16 px. */
+.qfa-bouton--pres-de-moi {
+  padding-inline: var(--qfa-espace-3v);
+  white-space: nowrap;
+}
+
+/* Tant que la fenêtre du navigateur demande l'accord de géolocalisation
+   (30495:10893) : l'épingle devient une roue, un tour en 0,7 s. */
+.qfa-bouton--pres-de-moi[aria-busy="true"] .qfa-bouton__localisation {
+  -webkit-mask-image: url("../images/assistant/ui/chargement.svg");
+  mask-image: url("../images/assistant/ui/chargement.svg");
+  animation: qfa-rotation 0.7s linear infinite;
+}
+
+@keyframes qfa-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Le libellé dit déjà que la localisation est en cours. */
+@media (prefers-reduced-motion: reduce) {
+  .qfa-bouton--pres-de-moi[aria-busy="true"] .qfa-bouton__localisation {
+    animation: none;
+  }
 }
 
 /* Toute la largeur, gouttières de 12 px comprises : l'assistant vit en iframe,
