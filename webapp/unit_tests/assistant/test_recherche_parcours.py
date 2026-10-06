@@ -107,6 +107,16 @@ class TestSearchView:
         )
         assert "adresse=" not in response.url
 
+    def test_a_malformed_coordinate_does_not_block_the_search(self, client, fiche):
+        """The address is optional: a bad coordinate must not send the user
+        back home with an error no field shows."""
+        response = client.get(
+            reverse("assistant:recherche"),
+            {"fiche": fiche.slug, "objet": fiche.title, "longitude": "abc"},
+        )
+
+        assert response.status_code == 302
+
     def test_the_parcours_follows_to_the_fiche(self, client, fiche):
         response = client.get(
             reverse("assistant:recherche"),
