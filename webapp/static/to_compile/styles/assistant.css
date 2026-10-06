@@ -863,8 +863,7 @@ body {
   border-top: 0;
 }
 
-/* Fond blanc, comme sur la maquette d'écran (I30170:10155) : la bibliothèque
-   montre un fond vert d'eau, mais c'est l'usage réel qui fait foi. Les
+/* Fermé, fond blanc (I30170:10155) ; ouvert, vert d'eau (30170:10197). Les
    séparateurs haut et bas viennent des bordures du conteneur. */
 .qfa-accordeon__entete {
   display: flex;
@@ -913,12 +912,41 @@ body {
   mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain no-repeat;
 }
 
+.qfa-accordeon[open] .qfa-accordeon__entete {
+  background: var(--qfa-geste-reparation-fond); /* green-menthe-975 */
+}
+
 .qfa-accordeon[open] .qfa-accordeon__chevron {
   transform: rotate(0deg);
 }
 
 .qfa-accordeon__contenu {
-  padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+  padding: var(--qfa-espace-4v);
+  color: var(--qfa-texte-titre);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.qfa-accordeon__contenu p {
+  margin: 0;
+}
+
+/* « En savoir plus sur ce lieu » : un intitulé gras par rubrique, une valeur
+   par ligne, une ligne vide entre rubriques (30170:10434). */
+.qfa-lieu__infos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  margin: 0;
+}
+
+.qfa-lieu__infos dt {
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.qfa-lieu__infos dd {
+  margin: 0;
 }
 
 .qfa-footer {
