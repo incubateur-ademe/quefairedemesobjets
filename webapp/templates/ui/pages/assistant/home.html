@@ -11,7 +11,12 @@
     GET et non POST : la recherche ne modifie rien, et l'URL résultante est
     partageable. Les deux champs sont obligatoires (#3295).
     {% endcomment %}
-    <form class="qfa-ecran" action="{% url 'assistant:recherche' %}" method="get">
+    {% comment %}
+    `novalidate` : la bulle du navigateur masquerait le message de la maquette
+    (30144:16015). Le serveur valide et réaffiche l'accueil avec l'erreur ; les
+    champs gardent `required`, que les lecteurs d'écran annoncent.
+    {% endcomment %}
+    <form class="qfa-ecran" action="{% url 'assistant:recherche' %}" method="get" novalidate>
         {% include "ui/components/assistant/panneau_recherche.html" with bouton=True %}
         {% include "ui/components/assistant/footer.html" %}
     </form>
