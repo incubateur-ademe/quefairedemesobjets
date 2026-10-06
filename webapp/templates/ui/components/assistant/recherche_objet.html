@@ -4,7 +4,7 @@ Champ « objet » (maquette 30139:14309).
 `slug` est caché : c'est lui qui identifie la fiche, alors que le champ visible
 porte le libellé choisi par l'usager.
 {% endcomment %}
-{% url 'assistant:recherche-objet' as url_recherche %}
+{% comment %}ponytail: no suggestions endpoint yet, it comes with the API (#3434).{% endcomment %}
 <div class="qfa-combobox"
      id="{{ id|default:'recherche-objet' }}"
      data-controller="assistant-combobox"
