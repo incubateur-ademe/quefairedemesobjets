@@ -92,6 +92,7 @@ body {
   --qfa-texte-courant: #3a3a3a;
   --qfa-accent: #37635f; /* green-menthe-sun-373 : boutons, intitulés */
   --qfa-bordure: #dddddd;
+  --qfa-erreur: #ce0500; /* border-plain-error, text-action-high-error */
   --qfa-fond-survol: #f6f6f6;
 
   /* Échelle d'espacement du Figma : un pas vaut 4px. */
@@ -1158,13 +1159,15 @@ turbo-frame {
 
 /* État d'erreur d'un champ (maquette 30144:16020). Le cadre passe au rouge et
    le message s'affiche dessous, relié au champ par `aria-describedby`. */
+/* Erreur de saisie (30144:16015) : cadre et message au rouge erreur du DSFR,
+   message en corps 16, 4 px sous le champ. */
 .qfa-combobox__cadre[data-erreur="true"] {
-  border-color: var(--qfa-user-address);
+  border-color: var(--qfa-erreur);
 }
 
 .qfa-combobox__erreur {
   margin: var(--qfa-espace-1v) 0 0;
-  color: var(--qfa-user-address);
-  font-size: 12px;
+  color: var(--qfa-erreur);
+  font-size: 16px;
   line-height: 1.5;
 }

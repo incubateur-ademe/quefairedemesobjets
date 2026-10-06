@@ -206,6 +206,21 @@ class TestSearchForm:
         assert "qfa-combobox__erreur" in content
         assert 'aria-invalid="true"' in content
 
+    def test_a_missing_objet_shows_its_own_message(self, client):
+        """Not "unknown objet": nothing was typed (30144:16015)."""
+        content = client.get(
+            reverse("assistant:recherche"), {"objet": "", "adresse": "Auray"}
+        ).content.decode()
+
+        assert "Veuillez d&#x27;abord saisir un objet ou un déchet" in content
+        assert "Nous ne connaissons pas cet objet" not in content
+
+    def test_the_home_form_leaves_validation_to_the_server(self, client):
+        """The browser tooltip would hide the designed message (30144:16015)."""
+        content = client.get(reverse("assistant:home")).content.decode()
+
+        assert "novalidate" in content
+
     def test_a_missing_address_shows_an_error(self, client, fiche):
         response = client.get(reverse("assistant:recherche"), {"fiche": fiche.slug})
 
