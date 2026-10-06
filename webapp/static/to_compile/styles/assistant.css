@@ -253,6 +253,15 @@ body {
   width: 21.92px;
   height: 21.96px;
 }
+
+/* « Réparer » s'inverse : goutte pleine à la couleur du geste, icône blanche. */
+.qfa-pinpoint[data-geste="reparer"]::before {
+  background: currentColor;
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icon {
+  background: #fff;
+}
 .qfa-pinpoint[data-geste="vendre_acheter"] .qfa-pinpoint__icon {
   -webkit-mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
   mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
