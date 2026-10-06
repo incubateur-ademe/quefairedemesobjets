@@ -2,6 +2,8 @@ import json
 
 import pytest
 from django.contrib.gis.geos import Point
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from unit_tests.qfdmo.acteur_factory import (
@@ -51,6 +53,18 @@ class TestSolutionsCount:
         )
 
         assert payload == {"count": 2}
+
+    def test_counts_without_jit_nor_parallel_workers(self, client, reparer):
+        # Both cost ten times the query itself (see `assistant.compte._count`).
+        place_offering(reparer, -0.55, 47.47)
+
+        with CaptureQueriesContext(connection) as queries:
+            payload = json.loads(get_count(client, geste="reparer").content)
+
+        statements = [query["sql"] for query in queries]
+        assert payload == {"count": 1}
+        assert "SET LOCAL jit = off" in statements
+        assert "SET LOCAL max_parallel_workers_per_gather = 0" in statements
 
     def test_returns_422_without_position(self, client, reparer):
         response = client.get(reverse("api_v1:lieux-compte"), {"geste": "reparer"})
