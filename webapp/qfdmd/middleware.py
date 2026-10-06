@@ -115,7 +115,7 @@ class RequestEnhancementMiddleware:
             target,
             request.GET,
             [],
-            base_url=settings.ASSISTANT.get("V2_BASE_URL") or settings.BASE_URL,
+            base_url=settings.ASSISTANT["V2_BASE_URL"] or settings.BASE_URL,
             **match.kwargs,
         )
 
