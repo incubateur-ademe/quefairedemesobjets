@@ -5,6 +5,7 @@ import CarteController from "../../controllers/assistant/carte_controller"
 import ChronoController from "../../controllers/assistant/chrono_controller"
 import ComboboxController from "../../controllers/assistant/combobox_controller"
 import CompteurController from "../../controllers/assistant/compteur_controller"
+import GeolocalisationController from "../../controllers/assistant/geolocalisation_controller"
 import PrefetchController from "../../controllers/assistant/prefetch_controller"
 import SubmitController from "../../controllers/assistant/submit_controller"
 
@@ -19,6 +20,7 @@ application.register("assistant-carte", CarteController)
 application.register("assistant-chrono", ChronoController)
 application.register("assistant-combobox", ComboboxController)
 application.register("assistant-compteur", CompteurController)
+application.register("assistant-geolocalisation", GeolocalisationController)
 application.register("assistant-prefetch", PrefetchController)
 application.register("assistant-submit", SubmitController)
 
