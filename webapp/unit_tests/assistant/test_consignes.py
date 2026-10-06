@@ -119,6 +119,18 @@ class TestFicheObjet:
         for block in BLOCKS:
             assert f'data-gestes="{" ".join(block["gestes"])}"' in content
 
+    def test_without_address_the_buttons_offer_geolocation(self, client, fiche):
+        url = reverse("assistant:produit", args=[fiche.slug])
+        without = client.get(url, {"objet": "Chaise"}).content.decode()
+        located = client.get(
+            url, {"objet": "Chaise", "longitude": "-0.56", "latitude": "47.47"}
+        ).content.decode()
+
+        assert "Je découvre les solutions près de moi" in without
+        assert "assistant-geolocalisation" in without
+        assert "assistant-geolocalisation" not in located
+        assert "assistant-compteur" in located
+
     def test_the_header_recalls_the_search(self, client, fiche):
         content = client.get(
             reverse("assistant:produit", args=[fiche.slug]),
