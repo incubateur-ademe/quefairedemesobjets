@@ -1,4 +1,7 @@
+import re
+
 import pytest
+from django.contrib.gis.geos import Point
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
@@ -119,6 +122,21 @@ class TestLieuPage:
         ).content.decode()
 
         assert "Dernière mise à jour" in content
+
+    def test_the_distance_follows_the_type_when_located(self, client):
+        """ "Service de réparation - 8,7km" (30170:10209)."""
+        lieu = DisplayedActeurFactory(location=Point(-0.40, 47.40, srid=4326))
+        url = reverse("assistant:lieu", args=[lieu.uuid])
+
+        located = client.get(
+            url, {"longitude": "-0.5616", "latitude": "47.4675"}
+        ).content.decode()
+        not_located = client.get(url).content.decode()
+
+        match = re.search(r" - (\d+),(\d)km<", located)
+        assert match, "distance missing"
+        assert 13 <= int(match[1]) <= 15  # Angers to ~14 km south-east
+        assert "km<" not in not_located
 
     def test_more_about_the_lieu_lists_its_type_and_labels(self, client):
         """One heading per section, one value per line (30170:10434)."""
