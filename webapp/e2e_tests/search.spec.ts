@@ -139,7 +139,7 @@ test.describe("Recherche de produits", () => {
   test("Les résultats SearchTag portent les data attributes de tracking et non des paramètres URL", async ({
     page,
   }) => {
-    await typeSearchQuery(page, "canapé d'angle")
+    await typeSearchQuery(page, "canapé-lit")
     const results = await waitForResults(page)
 
     const count = await results.count()
@@ -185,7 +185,7 @@ test.describe("Recherche de produits", () => {
     page,
   }) => {
     // Étape 1 : rechercher via un synonyme (SearchTag) et naviguer vers la fiche
-    await typeSearchQuery(page, "canapé d'angle")
+    await typeSearchQuery(page, "canapé-lit")
     const results = await waitForResults(page)
     const count = await results.count()
     expect(count).toBeGreaterThan(0)
