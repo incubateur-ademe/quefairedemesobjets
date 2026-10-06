@@ -64,7 +64,7 @@
     "static/to_compile/embed/infotri-configurator.ts",
     "static/to_compile/embed/infotri.ts",
     "static/to_compile/infotri-child.ts",
-    "static/to_compile/qfdmd.ts",
+    "static/to_compile/quefaire.ts",
     "static/to_compile/assistant.ts",
     "static/to_compile/qfdmo.ts"
   ],

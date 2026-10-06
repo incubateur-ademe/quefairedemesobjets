@@ -1,0 +1,21 @@
+{% comment %}
+Rappel de l'objet et de l'adresse, réutilisable pour changer de recherche sans
+quitter l'écran (#3295).
+
+Le formulaire cible le frame de la fiche : changer d'objet recharge le contenu,
+pas la page. `data-turbo-action="advance"` pousse l'URL dans l'historique, pour
+que le bouton « précédent » du navigateur fasse ce qu'on attend.
+{% endcomment %}
+<form class="qfa-entete"
+      action="{% url 'assistant:recherche' %}"
+      method="get"
+      data-turbo-frame="assistant-fiche"
+      data-turbo-action="advance">
+    {% include "ui/components/assistant/recherche_objet.html" with objet=parcours.objet %}
+    {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise %}
+
+    <button type="submit" class="qfa-bouton qfa-bouton--primaire">
+        Rechercher
+        <span class="qfa-bouton__fleche" aria-hidden="true"></span>
+    </button>
+</form>

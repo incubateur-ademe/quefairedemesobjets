@@ -1,0 +1,32 @@
+{% extends base_template %}
+
+{% block title %}{{ produit.title }}{% endblock %}
+
+{% block main %}
+    {% comment %}
+    Le frame enveloppe l'écran entier, panneau de saisie compris : Turbo Drive
+    est désactivé pour l'assistant (il vit en iframe), et un formulaire hors
+    frame retomberait sur une navigation classique, rechargeant toute la page.
+
+    La maquette (30139:14476) n'affiche pas le nom de l'objet en titre : le
+    champ de recherche, rempli, le rappelle déjà.
+    {% endcomment %}
+    <turbo-frame id="assistant-fiche" class="qfa-ecran">
+        {% comment %}
+        Pas de bouton sur cette maquette (30139:14478) : choisir une suggestion
+        relance la recherche. `requestSubmit` déclenche la validation HTML,
+        contrairement à `submit`, donc un champ vidé ne part pas.
+        {% endcomment %}
+        <form action="{% url 'assistant:recherche' %}"
+              method="get"
+              data-turbo-action="advance"
+              data-controller="assistant-submit"
+              data-action="assistant-combobox:chosen->assistant-submit#submit">
+            {% include "ui/components/assistant/panneau_recherche.html" %}
+        </form>
+
+        {% include "ui/components/assistant/bloc_gestes.html" with blocs=consignes %}
+
+        {% include "ui/components/assistant/footer.html" %}
+    </turbo-frame>
+{% endblock main %}

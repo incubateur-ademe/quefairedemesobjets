@@ -9,7 +9,7 @@ A preview picks its stack through the `assets` attribute of its class:
     class AssistantPreview(LookbookPreview):
         assets = "assistant"
 
-By default the legacy stack (DSFR + qfdmd) is served, leaving the existing
+By default the legacy stack (DSFR + quefaire) is served, leaving the existing
 previews untouched.
 {% endcomment %}
 <!DOCTYPE html>
@@ -23,7 +23,7 @@ previews untouched.
     <link rel="stylesheet" href="{% static 'assistant.css' %}">
   {% else %}
     {% dsfr_css %}
-    <link rel="stylesheet" href="{% static 'qfdmd.css' %}">
+    <link rel="stylesheet" href="{% static 'quefaire.css' %}">
     {# Sites Conformes css #}
     <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
   {% endif %}
@@ -43,7 +43,7 @@ previews untouched.
     <script type="module" src="{% static 'assistant.js' %}"></script>
   {% else %}
     {% dsfr_js %}
-    <script type="module" src="{% static 'qfdmd.js' %}"></script>
+    <script type="module" src="{% static 'quefaire.js' %}"></script>
   {% endif %}
 </body>
 </html>
