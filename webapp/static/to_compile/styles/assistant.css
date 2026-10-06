@@ -63,7 +63,6 @@ body {
   --qfa-geste-tri: #a558a0; /* purple-glycine-main-494 */
 
   --qfa-bonus-color: var(--qfa-geste-reparation);
-  --qfa-bonus-pastille: #efcb3a; /* yellow-tournesol-850 */
   --qfa-user-address: #e1000f; /* red-marianne, cf. maquette carte */
 
   /* Fonds pastel des étiquettes de geste. */
@@ -87,7 +86,6 @@ body {
   --qfa-texte-courant: #3a3a3a;
   --qfa-accent: #37635f; /* green-menthe-sun-373 : boutons, intitulés */
   --qfa-bordure: #dddddd;
-  --qfa-fond-contraste: #eeeeee;
   --qfa-fond-survol: #f6f6f6;
 
   /* Échelle d'espacement du Figma : un pas vaut 4px. */
@@ -667,32 +665,6 @@ body {
   }
 }
 
-.qfa-fiche {
-  display: flex;
-  flex-direction: column;
-  gap: var(--qfa-espace-4v);
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: var(--qfa-espace-4v);
-}
-
-.qfa-fiche__titre {
-  margin: 0;
-  color: var(--qfa-texte-titre);
-  font-size: 1.5rem;
-  line-height: 1.3;
-}
-
-/* Rappel de la recherche, en tête de fiche et d'écran solutions. */
-.qfa-entete {
-  display: flex;
-  flex-direction: column;
-  gap: var(--qfa-espace-2v);
-  padding: var(--qfa-espace-3v);
-  border-radius: var(--qfa-rayon-md);
-  background: var(--qfa-geste-reparation-fond);
-}
-
 /* Fiche d'un lieu (maquette 30142:9565) : même colonne que les autres écrans,
    gouttières de 12 px comprises. */
 .qfa-lieu {
@@ -767,18 +739,9 @@ body {
 
 /* `turbo-frame` est un élément inconnu du navigateur, donc `display: inline`
    par défaut. Quand il enveloppe le contenu d'un écran, il devient l'unique
-   enfant du conteneur flex : l'espacement s'applique alors à lui seul, et le
-   contenu qu'il porte se retrouve collé. En faire un conteneur flex à son tour
-   rétablit le rythme vertical. */
+   enfant du conteneur flex : l'espacement s'applique alors à lui seul. */
 turbo-frame {
   display: block;
-}
-
-.qfa-fiche > turbo-frame,
-.qfa-lieu > turbo-frame {
-  display: flex;
-  flex-direction: column;
-  gap: var(--qfa-espace-4v);
 }
 
 /* Le bouton de recherche porte une loupe avant son libellé (30139:14339). */
