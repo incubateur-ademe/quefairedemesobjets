@@ -10,6 +10,7 @@ data only moves with the imports.
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.core.cache import cache
+from django.db import connection, transaction
 
 from qfdmo.models.acteur import DisplayedActeur
 
@@ -41,10 +42,18 @@ def count_nearby(gestes, sous_categorie_ids, longitude, latitude) -> int:
 
 def _count(gestes, sous_categorie_ids, cell) -> int:
     center = Point(cell[0], cell[1], srid=4326)
-    return (
+    queryset = (
         DisplayedActeur.objects.all()
         .proposing(gestes, sous_categorie_ids)
         .physical()
         .filter(location__dwithin=(center, D(km=RADIUS_KM)))
-        .count()
     )
+    # The planner overestimates this query (cost ~140,000), so PostgreSQL
+    # JIT-compiles it and starts parallel workers: both cost more than the
+    # ~100 ms of actual work. Measured in Paris: 1.3 s as is, 107 ms without
+    # them. `SET LOCAL` keeps the change to this transaction, whatever
+    # connection the pool hands out.
+    with transaction.atomic(), connection.cursor() as cursor:
+        cursor.execute("SET LOCAL jit = off")
+        cursor.execute("SET LOCAL max_parallel_workers_per_gather = 0")
+        return queryset.count()
