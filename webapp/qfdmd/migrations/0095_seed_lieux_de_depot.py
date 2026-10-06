@@ -31,7 +31,7 @@ def seed(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("qfdmd", "0096_consignes_column_width_back"),
+        ("qfdmd", "0094_lieudedepot_and_consignes_block"),
     ]
 
     operations = [
