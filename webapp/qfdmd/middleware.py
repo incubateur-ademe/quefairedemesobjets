@@ -46,8 +46,8 @@ class RequestEnhancementMiddleware:
             return redirect(url_to_redirect, permanent=True)
         if url_to_redirect := self._redirect_beta_hosts_to_assistant_v2(request):
             response = redirect(url_to_redirect)
-            # The whitelist changes without a deploy: never let nginx or the
-            # browser pin a host to one assistant.
+            # ASSISTANT_V2_BETA_TESTERS_HOSTS can change at any time: a cached
+            # redirect would keep a host on the wrong assistant.
             add_never_cache_headers(response)
             return response
 
