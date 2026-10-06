@@ -37,6 +37,17 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
                placeholder="{{ placeholder|default:'ex : une adresse ou commune' }}">
     </span>
 
+    {% comment %}
+    Juste après le cadre : la liste, en position absolue, s'ouvre sous le champ
+    et recouvre le message d'erreur au lieu de s'afficher en dessous.
+    {% endcomment %}
+    <ul class="qfa-combobox__liste"
+        id="{{ id|default:'recherche-adresse' }}-liste"
+        role="listbox"
+        data-assistant-combobox-target="list"
+        data-action="click->assistant-combobox#chooseFromClick"
+        hidden></ul>
+
     <input type="hidden" name="longitude" value="{{ longitude|default:'' }}"
            data-assistant-combobox-target="hidden" data-key="longitude">
     <input type="hidden" name="latitude" value="{{ latitude|default:'' }}"
@@ -49,13 +60,6 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
             {{ erreur }}
         </p>
     {% endif %}
-
-    <ul class="qfa-combobox__liste"
-        id="{{ id|default:'recherche-adresse' }}-liste"
-        role="listbox"
-        data-assistant-combobox-target="list"
-        data-action="click->assistant-combobox#chooseFromClick"
-        hidden></ul>
 
     <p class="qfa-sr-only" role="status" aria-live="polite"
        data-assistant-combobox-target="status"></p>
