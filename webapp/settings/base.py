@@ -68,6 +68,10 @@ ASSISTANT = {
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
         cast=str,
     ),
+    # Hosts whose `iframe.js` embed opens the assistant V2 rather than the
+    # legacy one: beta testers switch case by case, with no change to the
+    # script they already pasted.
+    "V2_HOSTS": decouple.config("ASSISTANT_V2_HOSTS", default="", cast=decouple.Csv()),
 }
 
 # Carte settings
@@ -171,6 +175,7 @@ INSTALLED_APPS = [
     "qfdmd",
     "qfdmo",
     "infotri",
+    "assistant",
     "data",
     "adminsortable2",
     "corsheaders",
