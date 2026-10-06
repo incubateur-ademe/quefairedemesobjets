@@ -9,7 +9,6 @@ class TurboFrameMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         in_frame = bool(self.request.headers.get("Turbo-Frame"))
-        context["in_frame"] = in_frame
         context["base_template"] = (
             "ui/layout/turbo.html" if in_frame else "ui/layout/assistant.html"
         )
