@@ -15,6 +15,11 @@ from django.urls import reverse
 
 from qfdmo.models.action import GroupeAction
 
+# TODO: the counter on the buttons is out of the MVP (ADR 0010, #3295), and its
+# 20 km count does not match the 20 markers of the map. Set back to True once
+# product and design agree on what the number means.
+COUNTER_ENABLED = False
+
 # Display hierarchy imposed by #3295: repairable, then good condition, then
 # out of use. The codes are those of the GroupeAction in the database, not
 # labels: "déposer" in the spec corresponds to the `trier` groupe.
@@ -122,7 +127,7 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
                 # Fetched after the page renders, only when there is a position.
                 "url_compte": (
                     f"{reverse('api_v1:lieux-compte')}?{params}"
-                    if parcours and parcours.is_located
+                    if COUNTER_ENABLED and parcours and parcours.is_located
                     else ""
                 ),
             }

@@ -206,7 +206,15 @@ class TestBlockLinks:
 
         assert f"fiche={fiche.slug}" in first["url"]
 
-    def test_the_counter_url_needs_a_position(self):
+    def test_the_counter_is_disabled(self):
+        located = consignes_for(
+            None, Parcours(objet="Chaise", longitude=-0.56, latitude=47.47)
+        )[0]
+
+        assert located["url_compte"] == ""
+
+    def test_the_counter_url_needs_a_position(self, monkeypatch):
+        monkeypatch.setattr("assistant.consignes.COUNTER_ENABLED", True)
         from assistant.consignes import consignes_for
         from assistant.parcours import Parcours
 
