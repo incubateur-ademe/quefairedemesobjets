@@ -7,6 +7,7 @@ from pathlib import Path
 from clone.tasks.business_logic.fix_corrupted_utf8 import fix_corrupted_utf8_file
 from pydantic import AnyUrl
 from shared.config.airflow import TMP_FOLDER
+from shared.psql.utils import psql_env_from_dsn
 from utils import logging_utils as log
 from utils.cmd import cmd_run
 
@@ -16,17 +17,20 @@ logger = logging.getLogger(__name__)
 def command_psql_copy_from_csv(
     table_name: str,
     delimiter: str,
-) -> str:
-    """Command to load CSV into DB, factored out for reuse"""
+) -> tuple[str, dict[str, str]]:
+    """Command to load CSV into DB, factored out for reuse.
+
+    The DSN is passed through libpq environment variables. A failed ``psql``
+    must not print it: ``CalledProcessError`` and shell traces stringify argv.
+    """
     from utils.django import django_setup_full
 
     django_setup_full()
     from django.conf import settings
 
-    db_dsn = settings.DB_WAREHOUSE
     cmd_from = f'stdin WITH (FORMAT csv, HEADER true, DELIMITER "{delimiter}");'
-    cmd = f"psql -d '{db_dsn}' -c '\\copy {table_name} FROM {cmd_from}'"
-    return cmd
+    cmd = f"psql -c '\\copy {table_name} FROM {cmd_from}'"
+    return cmd, psql_env_from_dsn(settings.DB_WAREHOUSE)
 
 
 def command_ogr2ogr_import_geojson(
@@ -72,35 +76,29 @@ def command_ogr2ogr_import_geojson(
 def command_ogr2ogr_import_geojson_from_stdin(
     table_name: str,
     geometry_column_name: str = "contours_administratifs",
-) -> str:
-    """Command to load GeoJSON into DB using ogr2ogr from stdin"""
+) -> tuple[str, dict[str, str]]:
+    """Command to load GeoJSON into DB using ogr2ogr from stdin.
+
+    ogr2ogr talks to PostgreSQL through libpq, which reads the same ``PG*``
+    variables as psql. The datasource stays ``PG:`` so a failure cannot print
+    credentials: GDAL includes that name in its error.
+    """
     from utils.django import django_setup_full
 
     django_setup_full()
     from django.conf import settings
 
-    warehouse_db_settings = settings.DATABASES["warehouse"]
-
-    # Build PostgreSQL connection string for ogr2ogr
-    pg_connection_string = (
-        f'PG:"dbname={warehouse_db_settings["NAME"]} '
-        f'user={warehouse_db_settings["USER"]} '
-        f'password={warehouse_db_settings["PASSWORD"]} '
-        f'host={warehouse_db_settings["HOST"]} '
-        f'port={warehouse_db_settings["PORT"]}"'
-    )
-
     # Use /vsistdin/ to read from stdin (ogr2ogr auto-detects GeoJSON format)
     cmd = (
-        f'ogr2ogr -f "PostgreSQL" {pg_connection_string} '
-        f"/vsistdin/ "
-        f"-overwrite "
+        'ogr2ogr -f "PostgreSQL" "PG:" '
+        "/vsistdin/ "
+        "-overwrite "
         f"-lco GEOMETRY_NAME={geometry_column_name} "
-        f"-lco FID=id "
-        f"-lco PRECISION=NO "
+        "-lco FID=id "
+        "-lco PRECISION=NO "
         f"-nln {table_name}"
     )
-    return cmd
+    return cmd, psql_env_from_dsn(settings.DB_WAREHOUSE)
 
 
 def commands_stream_directly(
@@ -119,23 +117,38 @@ def commands_stream_directly(
 
     if is_geojson:
         # For GeoJSON, stream directly using ogr2ogr with /vsistdin/
-        cmd_ogr2ogr = command_ogr2ogr_import_geojson_from_stdin(table_name=table_name)
+        cmd_ogr2ogr, psql_env = command_ogr2ogr_import_geojson_from_stdin(
+            table_name=table_name
+        )
         if str(data_endpoint).endswith(".gz"):
             cmd_run(
-                f"curl -s '{data_endpoint}' | zcat | {cmd_ogr2ogr}",
+                f"curl -sSL '{data_endpoint}' | zcat | {cmd_ogr2ogr}",
                 dry_run=dry_run,
+                env=psql_env,
             )
         else:
-            cmd_run(f"curl -s '{data_endpoint}' | {cmd_ogr2ogr}", dry_run=dry_run)
+            cmd_run(
+                f"curl -sSL '{data_endpoint}' | {cmd_ogr2ogr}",
+                dry_run=dry_run,
+                env=psql_env,
+            )
     else:
         # For CSV files, stream directly to DB
-        cmd_psql = command_psql_copy_from_csv(
+        cmd_psql, psql_env = command_psql_copy_from_csv(
             table_name=table_name, delimiter=delimiter
         )
         if str(data_endpoint).endswith(".gz") or str(data_endpoint).endswith(".zip"):
-            cmd_run(f"curl -s '{data_endpoint}' | zcat | {cmd_psql}", dry_run=dry_run)
+            cmd_run(
+                f"curl -sSL '{data_endpoint}' | zcat | {cmd_psql}",
+                dry_run=dry_run,
+                env=psql_env,
+            )
         else:
-            cmd_run(f"curl -s '{data_endpoint}' | {cmd_psql}", dry_run=dry_run)
+            cmd_run(
+                f"curl -sSL '{data_endpoint}' | {cmd_psql}",
+                dry_run=dry_run,
+                env=psql_env,
+            )
 
 
 def commands_download_to_disk_first(
@@ -196,10 +209,14 @@ def commands_download_to_disk_first(
 
         # Load into DB
         if file_unpacked.endswith(".csv"):
-            cmd_psql = command_psql_copy_from_csv(
+            cmd_psql, psql_env = command_psql_copy_from_csv(
                 table_name=table_name, delimiter=delimiter
             )
-            cmd_run(f"cat {folder}/{file_unpacked} | {cmd_psql}", dry_run=dry_run)
+            cmd_run(
+                f"cat {folder}/{file_unpacked} | {cmd_psql}",
+                dry_run=dry_run,
+                env=psql_env,
+            )
         elif file_unpacked.endswith(".geojson"):
             geojson_file_path = f"{folder}/{file_unpacked}"
             cmd_ogr2ogr = command_ogr2ogr_import_geojson(

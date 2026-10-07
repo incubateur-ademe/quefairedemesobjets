@@ -22,10 +22,15 @@ acteur_sources AS (
     SELECT * FROM nochild_acteur_labels
     UNION ALL
     SELECT * FROM parentacteur_labels
+),
+deduplicated_acteur_sources AS (
+    SELECT acteur_id, source_id, identifiant_externe FROM acteur_sources
+    GROUP BY acteur_id, source_id, identifiant_externe
 )
 
-SELECT ROW_NUMBER() OVER (ORDER BY acteur_id, s.source_id) AS id, s.*
-FROM acteur_sources AS s
+
+SELECT ROW_NUMBER() OVER (ORDER BY s.acteur_id, s.source_id) AS id, s.*
+FROM deduplicated_acteur_sources AS s
 INNER JOIN {{ ref(acteur) }} AS a ON a.identifiant_unique = acteur_id
 
 {%- endmacro -%}
