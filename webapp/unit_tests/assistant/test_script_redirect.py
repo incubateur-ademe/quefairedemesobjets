@@ -9,7 +9,7 @@ from django.test import RequestFactory
 from qfdmd.middleware import RequestEnhancementMiddleware
 from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
 
-BETA = {"V2_HOSTS": ["beta.example.fr"]}
+BETA = {"V2_HOSTS": ["beta.example.fr"], "V2_BASE_URL": ""}
 
 
 def ref(url):
