@@ -19,7 +19,7 @@
     "@iframe-resizer/parent": "^5.5.9",
     "@sentry/browser": "^11.1.0",
     "bowser": "^2.14.1",
-    "carte-facile": "^0.10.0",
+    "carte-facile": "^0.10.2",
     "eslint-config-prettier": "^10.1.8",
     "maplibre-gl": "^6.11.2",
     "posthog-js": "^1.434.7",
