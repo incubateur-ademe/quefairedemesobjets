@@ -45,6 +45,20 @@ body {
   font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 }
 
+/* Cadre de l'iframe, iso maquette (nœud 30174:11403). Posé ici et non par
+   `iframe.js` : le script est commun à l'assistant actuel et à la V2, seule la
+   V2 doit l'avoir. `overflow` sur html empêche celui de body de remonter au
+   viewport, pour que body rogne lui-même ses coins arrondis. */
+html {
+  overflow: auto;
+}
+
+body {
+  border: 3px solid var(--qfa-cadre);
+  border-radius: 4px;
+  overflow: clip;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -92,6 +106,7 @@ body {
   --qfa-texte-courant: #3a3a3a;
   --qfa-accent: #37635f; /* green-menthe-sun-373 : boutons, intitulés */
   --qfa-bordure: #dddddd;
+  --qfa-cadre: #4f9d91; /* contour de l'iframe */
   --qfa-erreur: #ce0500; /* border-plain-error, text-action-high-error */
   --qfa-fond-survol: #f6f6f6;
 
