@@ -55,6 +55,19 @@ jobs:
           POSTGRES_DB: webapp
 
     steps:
+      - name: Validate trusted checkout ref
+        shell: bash
+        run: |
+          REF="${{ inputs.ref }}"
+          if [[ "$REF" =~ ^refs/pull/ ]]; then
+            echo "Ref '$REF' is not allowed for this reusable workflow."
+            echo "Only trusted branch/tag refs are permitted."
+            exit 1
+          fi
+          if [[ ! "$REF" =~ ^refs/heads/ && ! "$REF" =~ ^refs/tags/ ]]; then
+            echo "Ref '$REF' is not a trusted branch/tag ref."
+            exit 1
+          fi
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
