@@ -43,6 +43,11 @@ updates:
       # typescript-eslint require typescript <7. Drop once they support it.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # @swc/core >=1.16.12 refuses to load its native binding on Scalingo
+      # (ERR_SWC_NATIVE_CACHE: build dir parent is group-writable). Pinned via
+      # `overrides` in package.json; drop both once SWC relaxes the check.
+      - dependency-name: "@swc/core*"
+        versions: [">=1.16.12"]
     groups:
       # Named groups (specific packages get their own PRs)
       babel:
