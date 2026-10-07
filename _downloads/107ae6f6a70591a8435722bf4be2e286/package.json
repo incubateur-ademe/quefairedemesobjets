@@ -9,5 +9,8 @@
   ],
   "devDependencies": {
     "prettier": "^3.9.8"
+  },
+  "overrides": {
+    "@swc/core": "1.16.2"
   }
 }
