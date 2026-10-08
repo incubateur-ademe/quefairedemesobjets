@@ -6,7 +6,12 @@ le fait que la saisie désigne une adresse précise plutôt qu'une commune — c
 qui décide de l'affichage de la punaise rouge (#3356).
 
 Trois caractères minimum : la BAN ne répond pas en deçà.
+
+Les coordonnées sont rendues sans localisation : en français, « -1,55 »
+n'est plus un nombre, et la position serait perdue à chaque réaffichage du
+champ.
 {% endcomment %}
+{% load l10n %}
 {% url 'api_v1:adresses' as url_recherche %}
 <div class="qfa-combobox"
      id="{{ id|default:'recherche-adresse' }}"
@@ -49,9 +54,9 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
                      click->assistant-combobox#chooseFromClick"
         hidden></ul>
 
-    <input type="hidden" name="longitude" value="{{ longitude|default:'' }}"
+    <input type="hidden" name="longitude" value="{{ longitude|default:''|unlocalize }}"
            data-assistant-combobox-target="hidden" data-key="longitude">
-    <input type="hidden" name="latitude" value="{{ latitude|default:'' }}"
+    <input type="hidden" name="latitude" value="{{ latitude|default:''|unlocalize }}"
            data-assistant-combobox-target="hidden" data-key="latitude">
     <input type="hidden" name="precise" value="{{ precise|default:'' }}"
            data-assistant-combobox-target="hidden" data-key="precise">
