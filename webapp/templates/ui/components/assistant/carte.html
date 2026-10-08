@@ -1,0 +1,59 @@
+{% load l10n static %}
+<div
+    class="qfa-carte"
+    data-controller="assistant-carte"
+    data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
+    {% comment %}ponytail: no places endpoint yet, it comes with the API (#3434).{% endcomment %}
+    data-assistant-carte-url-value=""
+    data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
+    data-assistant-carte-geste-value="{{ geste }}"
+    data-assistant-carte-objet-value="{{ objet|default:'' }}"
+    {% comment %}
+    URL pattern of a place's page: the controller replaces `__uuid__` in it.
+    `parametres_lieu` carries the journey (geste, objet, address) so that the
+    place page can lead back to the same solutions.
+    {% endcomment %}
+    data-assistant-carte-lieu-url-value="{% url 'assistant:lieu' uuid='__uuid__' %}{% if parametres_lieu %}?{{ parametres_lieu }}{% endif %}"
+    {% comment %}
+    `unlocalize` is required: the French locale formats decimals with a comma,
+    which Number() reads as NaN.
+    {% endcomment %}
+    data-assistant-carte-longitude-value="{{ longitude|unlocalize }}"
+    data-assistant-carte-latitude-value="{{ latitude|unlocalize }}"
+    data-assistant-carte-precise-address-value="{{ adresse_precise|yesno:'true,false' }}"
+    style="--qfa-geste-color: {{ couleur_geste }}"
+>
+    <div
+        class="qfa-carte__canvas"
+        data-assistant-carte-target="container"
+        role="application"
+        aria-label="Carte des lieux proposant ce geste"
+    ></div>
+
+    {% if debug %}
+        <div class="qfa-chrono" data-controller="assistant-chrono">
+            <strong data-assistant-chrono-target="value">—</strong>
+            <span data-assistant-chrono-target="detail"></span>
+        </div>
+    {% endif %}
+
+    <p
+        class="qfa-carte__message"
+        data-assistant-carte-target="message"
+        role="status"
+        aria-live="polite"
+    ></p>
+
+    {% comment %}
+    A MapLibre map is neither keyboard-navigable nor readable by a screen
+    reader. This list is the only accessible path to the results until the
+    list/map toggle exists.
+    {% endcomment %}
+    <ul class="qfa-carte__accessible-list">
+        {% for lieu in lieux %}
+            <li>{{ lieu.nom_commercial|default:lieu.nom }}</li>
+        {% empty %}
+            <li>Aucun lieu à proximité pour ce geste.</li>
+        {% endfor %}
+    </ul>
+</div>

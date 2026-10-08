@@ -1,5 +1,13 @@
+from django.urls import path
+
+from assistant import views
+
 app_name = "assistant"
 
-# ponytail: no route yet. The suggestions endpoints come with the API (#3434),
-# the screens with the coquille (#3429).
-urlpatterns = []
+urlpatterns = [
+    path("", views.HomeView.as_view(), name="home"),
+    path("recherche/", views.SearchView.as_view(), name="recherche"),
+    path("objet/<slug:slug>/", views.ProduitView.as_view(), name="produit"),
+    path("solutions/", views.SolutionsView.as_view(), name="solutions"),
+    path("lieu/<str:uuid>/", views.LieuView.as_view(), name="lieu"),
+]
