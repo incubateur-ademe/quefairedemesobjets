@@ -20,8 +20,12 @@
         <article class="qfa-lieu">
             <header class="qfa-lieu__identite">
                 <h1 class="qfa-lieu__nom">{{ lieu.nom_commercial|default:lieu.nom }}</h1>
-                {% if lieu.acteur_type %}
-                    <p class="qfa-lieu__type">{{ lieu.acteur_type.libelle }}</p>
+                {% comment %}
+                La distance n'existe que si l'usager a donné une position :
+                adresse saisie ou géolocalisation (30170:10209).
+                {% endcomment %}
+                {% if lieu.acteur_type or lieu.distance %}
+                    <p class="qfa-lieu__type">{{ lieu.acteur_type.libelle }}{% if lieu.acteur_type and lieu.distance %} - {% endif %}{% if lieu.distance %}{{ lieu.distance.km|floatformat:1 }}km{% endif %}</p>
                 {% endif %}
 
                 {% comment %}
@@ -79,16 +83,40 @@
                         <span class="qfa-accordeon__chevron" aria-hidden="true"></span>
                     </summary>
                     <div class="qfa-accordeon__contenu">
-                        {% if lieu.sources.all %}
-                            <p>
-                                Source{{ lieu.sources.all|pluralize }} :
-                                {% for source in lieu.sources.all %}{{ source.libelle }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                            </p>
-                        {% endif %}
-                        {% if infos_pratiques %}
-                            <ul>{% for info in infos_pratiques %}<li>{{ info }}</li>{% endfor %}</ul>
-                        {% endif %}
-                        <p>Dernière mise à jour : {{ lieu.modifie_le|date:"j F Y" }}</p>
+                        <dl class="qfa-lieu__infos">
+                            {% if lieu.sources.all %}
+                                <div>
+                                    <dt>Source{{ lieu.sources.all|pluralize }}</dt>
+                                    {% for source in lieu.sources.all %}<dd>{{ source.libelle }}</dd>{% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if lieu.acteur_type %}
+                                <div>
+                                    <dt>Type d'enseigne</dt>
+                                    <dd>{{ lieu.acteur_type.libelle }}</dd>
+                                </div>
+                            {% endif %}
+                            {% if lieu.labels.all %}
+                                <div>
+                                    <dt>Label{{ lieu.labels.all|pluralize }}</dt>
+                                    {% for label in lieu.labels.all %}<dd>{{ label.libelle }}</dd>{% endfor %}
+                                </div>
+                            {% endif %}
+                            {% comment %}
+                            Absents de la maquette, gardés : ce qu'il faut savoir
+                            avant d'y aller, et la fraîcheur de l'information (#3295).
+                            {% endcomment %}
+                            {% if infos_pratiques %}
+                                <div>
+                                    <dt>Infos pratiques</dt>
+                                    {% for info in infos_pratiques %}<dd>{{ info }}</dd>{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <dt>Dernière mise à jour</dt>
+                                <dd>{{ lieu.modifie_le|date:"j F Y" }}</dd>
+                            </div>
+                        </dl>
                     </div>
                 </details>
             </div>

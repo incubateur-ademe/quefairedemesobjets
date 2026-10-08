@@ -1,6 +1,8 @@
 from dataclasses import replace
 from urllib.parse import urlencode
 
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -201,7 +203,14 @@ class LieuView(TurboFrameMixin, DetailView):
     context_object_name = "lieu"
 
     def get_queryset(self):
-        return DisplayedActeur.objects.all().for_the_detail()
+        queryset = DisplayedActeur.objects.all().for_the_detail()
+        parcours = Parcours.from_query(self.request.GET)
+        if not parcours.is_located:
+            return queryset
+        # Typed address or geolocation alike (30170:10209), computed by
+        # PostGIS in the same query as the lieu.
+        position = Point(parcours.longitude, parcours.latitude, srid=4326)
+        return queryset.annotate(distance=Distance("location", position))
 
     def get_context_data(self, **kwargs):
         parcours = Parcours.from_query(self.request.GET)
