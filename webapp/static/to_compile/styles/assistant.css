@@ -48,12 +48,20 @@ body {
 /* Cadre de l'iframe, iso maquette (nœud 30174:11403). Posé ici et non par
    `iframe.js` : le script est commun à l'assistant actuel et à la V2, seule la
    V2 doit l'avoir. `overflow` sur html empêche celui de body de remonter au
-   viewport, pour que body rogne lui-même ses coins arrondis. */
+   viewport, pour que body rogne lui-même ses coins arrondis.
+
+   Le cadre est plafonné à la largeur max de l'assistant, vérifiée dans le
+   Figma : 800 px, la largeur des maquettes desktop des quatre écrans (Accueil,
+   Consignes, Carte, Fiche détaillée — planche « Maquettes itération 1
+   Assistant V2 »). Au-delà de 800 px, le cadre est centré dans l'iframe : la
+   bordure encadre le contenu, elle ne court pas sur les bords de l'iframe. */
 html {
   overflow: auto;
 }
 
 body {
+  max-width: 800px;
+  margin: 0 auto;
   border: 3px solid var(--qfa-cadre);
   border-radius: 4px;
   overflow: clip;
@@ -948,8 +956,8 @@ body {
 }
 
 /* Gabarit d'écran, relevé sur les maquettes 30136:8533 (320 px) et
-   30174:11316 (800 px). Le contenu est bordé à 800 px : au-delà, la maquette
-   ne centre pas une colonne large, elle garde la même. */
+   30174:11316 (800 px) : il remplit le cadre (body), plafonné à la largeur
+   max de l'assistant — voir le commentaire du cadre ci-dessus. */
 .qfa-ecran {
   display: flex;
   flex-direction: column;
