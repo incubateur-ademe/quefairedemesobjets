@@ -132,6 +132,16 @@ class TestHome:
 
         assert content.count("required") >= 2
 
+    def test_the_coordinates_are_rendered_unlocalized(self, client):
+        """French formatting writes "-1,55", which does not parse back: the
+        position would be lost each time the field is shown again."""
+        content = client.get(
+            reverse("assistant:home"), {"longitude": "-1.555335", "latitude": "47.2"}
+        ).content.decode()
+
+        assert 'value="-1.555335"' in content
+        assert 'value="47.2"' in content
+
     def test_the_hidden_address_fields_are_present(self, client):
         """Without them, the map has no position to show."""
         content = client.get(reverse("assistant:home")).content.decode()
