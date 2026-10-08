@@ -183,11 +183,16 @@ def _from_cms(child, base, url_compte) -> dict | None:
     }
 
 
+# Out of the MVP: no consigne explains prêter / louer yet. Filtered when the
+# fiche is read too, since a grid edited in the CMS may still list them.
+EXCLUDED_GROUPES = {"emprunter_preter_louer"}
+
+
 def _groupes_of(action_codes) -> list[str]:
     # ponytail: one query per consigne, a fiche holds a handful of them.
     groupes = dict(
-        Action.objects.filter(
-            code__in=action_codes, groupe_action__isnull=False
-        ).values_list("code", "groupe_action__code")
+        Action.objects.filter(code__in=action_codes, groupe_action__isnull=False)
+        .exclude(groupe_action__code__in=EXCLUDED_GROUPES)
+        .values_list("code", "groupe_action__code")
     )
     return [groupes[code] for code in action_codes if code in groupes]
