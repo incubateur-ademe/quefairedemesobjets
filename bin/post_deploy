@@ -6,6 +6,10 @@ cd /app/webapp
 python manage.py createcachetable
 python manage.py migrate
 
+# Grid of consignes of the live fiches, from their first row of cards.
+# No-op on a fiche that already has one.
+python manage.py generate_consignes
+
 # TEMPORARY, required to have search function after deploy
 python manage.py enable_unaccent
 python manage.py enable_trigram

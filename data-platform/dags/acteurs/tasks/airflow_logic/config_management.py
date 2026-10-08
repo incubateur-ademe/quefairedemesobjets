@@ -6,3 +6,4 @@ class ExportOpendataConfig(BaseModel):
     remote_dir: str
     s3_connection_id: str
     opendata_table: str
+    fiches_remote_dir: str
