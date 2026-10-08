@@ -4,6 +4,9 @@ from django.urls import reverse
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPageSearchTerm
 
+# The server's message, as opposed to the hidden "aucun résultat" one.
+SERVER_ERROR = 'data-assistant-combobox-target="erreur"'
+
 pytestmark = pytest.mark.django_db
 
 
@@ -120,7 +123,7 @@ class TestSearchView:
         response = client.get(reverse("assistant:recherche"), params)
 
         assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
+        assert SERVER_ERROR in response.content.decode()
 
 
 class TestHome:
@@ -180,7 +183,7 @@ class TestSearchForm:
         )
 
         assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
+        assert SERVER_ERROR in response.content.decode()
 
     def test_the_explicit_fiche_wins_over_the_label(self, client, fiche):
         """The autocomplete already decided: do not resolve again."""
@@ -203,7 +206,7 @@ class TestSearchForm:
 
         assert response.status_code == 200
         content = response.content.decode()
-        assert "qfa-combobox__erreur" in content
+        assert SERVER_ERROR in content
         assert 'aria-invalid="true"' in content
 
     def test_a_missing_objet_shows_its_own_message(self, client):
@@ -212,8 +215,11 @@ class TestSearchForm:
             reverse("assistant:recherche"), {"objet": "", "adresse": "Auray"}
         ).content.decode()
 
-        assert "Veuillez d&#x27;abord saisir un objet ou un déchet" in content
-        assert "Nous ne connaissons pas cet objet" not in content
+        # The hidden "aucun résultat" message carries the other words: only the
+        # server's message, the objet's, counts here.
+        message = content.split(SERVER_ERROR)[1].split("</p>")[0]
+        assert "Veuillez d&#x27;abord saisir un objet ou un déchet" in message
+        assert "Nous ne connaissons pas cet objet" not in message
 
     def test_the_home_form_leaves_validation_to_the_server(self, client):
         """The browser tooltip would hide the designed message (30144:16015)."""
@@ -225,7 +231,7 @@ class TestSearchForm:
         response = client.get(reverse("assistant:recherche"), {"fiche": fiche.slug})
 
         assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
+        assert SERVER_ERROR in response.content.decode()
 
     def test_the_input_is_kept_when_refused(self, client):
         content = client.get(

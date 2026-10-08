@@ -17,7 +17,7 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
         {{ label|default:"Où souhaitez-vous trouver des solutions ?" }}
     </label>
 
-    <span class="qfa-combobox__cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
+    <span class="qfa-combobox__cadre" data-assistant-combobox-target="cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
                id="{{ id|default:'recherche-adresse' }}-champ"
@@ -38,14 +38,15 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
     </span>
 
     {% comment %}
-    Juste après le cadre : la liste, en position absolue, s'ouvre sous le champ
-    et recouvre le message d'erreur au lieu de s'afficher en dessous.
+    Juste après le cadre : la liste s'ouvre sous le champ, dans le flux, et
+    masque le message d'erreur tant qu'elle est ouverte.
     {% endcomment %}
     <ul class="qfa-combobox__liste"
         id="{{ id|default:'recherche-adresse' }}-liste"
         role="listbox"
         data-assistant-combobox-target="list"
-        data-action="click->assistant-combobox#chooseFromClick"
+        data-action="mousedown->assistant-combobox#keepFocus
+                     click->assistant-combobox#chooseFromClick"
         hidden></ul>
 
     <input type="hidden" name="longitude" value="{{ longitude|default:'' }}"
@@ -56,10 +57,19 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
            data-assistant-combobox-target="hidden" data-key="precise">
 
     {% if erreur %}
-        <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-adresse' }}-erreur">
+        <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ id|default:'recherche-adresse' }}-erreur">
             {{ erreur }}
         </p>
     {% endif %}
+
+    {% comment %}
+    État « aucun résultat » du composant champ (maquette) : affiché par le
+    contrôleur quand la saisie ne donne aucune suggestion.
+    {% endcomment %}
+    <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-adresse' }}-aucun-resultat"
+       data-assistant-combobox-target="aucunResultat" hidden>
+        Nous ne connaissons pas cette adresse. Choisissez une suggestion dans la liste.
+    </p>
 
     <p class="qfa-sr-only" role="status" aria-live="polite"
        data-assistant-combobox-target="status"></p>
