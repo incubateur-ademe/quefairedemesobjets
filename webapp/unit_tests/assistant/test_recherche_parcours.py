@@ -1,3 +1,5 @@
+from html.parser import HTMLParser
+
 import pytest
 from django.urls import reverse
 
@@ -73,6 +75,10 @@ class TestParcours:
         assert arrival == departure
 
 
+# An address as the autocomplete sends it: chosen, hence located.
+AURAY = {"adresse": "Auray", "longitude": "-2.98", "latitude": "47.67"}
+
+
 @pytest.fixture
 def fiche():
     """A live fiche: `ModelChoiceField` checks that it really exists."""
@@ -85,13 +91,59 @@ class TestSearchView:
     def test_complete_input_leads_to_the_fiche(self, client, fiche):
         response = client.get(
             reverse("assistant:recherche"),
-            {"fiche": fiche.slug, "objet": fiche.title, "adresse": "Auray"},
+            {"fiche": fiche.slug, "objet": fiche.title, **AURAY},
         )
 
         assert response.status_code == 302
         assert response.url.startswith(
             reverse("assistant:produit", kwargs={"slug": fiche.slug})
         )
+
+    def test_the_address_is_optional(self, client, fiche):
+        """Without an address, the fiche offers geolocation (30495:2279)."""
+        response = client.get(
+            reverse("assistant:recherche"), {"fiche": fiche.slug, "objet": fiche.title}
+        )
+
+        assert response.status_code == 302
+        assert response.url.startswith(
+            reverse("assistant:produit", kwargs={"slug": fiche.slug})
+        )
+        assert "adresse=" not in response.url
+
+    def test_a_malformed_coordinate_does_not_block_the_search(self, client, fiche):
+        """The address is optional: a bad coordinate must not send the user
+        back home with an error no field shows."""
+        response = client.get(
+            reverse("assistant:recherche"),
+            {"fiche": fiche.slug, "objet": fiche.title, "longitude": "abc"},
+        )
+
+        assert response.status_code == 302
+
+    def test_an_address_typed_without_a_suggestion_is_refused(self, client, fiche):
+        """Text the BAN did not resolve would be silently ignored by the map."""
+        response = client.get(
+            reverse("assistant:recherche"),
+            {"fiche": fiche.slug, "objet": fiche.title, "adresse": "zzz nulle part"},
+        )
+
+        assert response.status_code == 200
+        assert "Nous ne connaissons pas cette adresse" in response.content.decode()
+
+    def test_a_chosen_address_goes_through(self, client, fiche):
+        response = client.get(
+            reverse("assistant:recherche"),
+            {
+                "fiche": fiche.slug,
+                "objet": fiche.title,
+                "adresse": "Nantes",
+                "longitude": "-1.55",
+                "latitude": "47.21",
+            },
+        )
+
+        assert response.status_code == 302
 
     def test_the_parcours_follows_to_the_fiche(self, client, fiche):
         response = client.get(
@@ -114,12 +166,12 @@ class TestSearchView:
         "params",
         [
             {"objet": "zzz inconnu", "adresse": "Auray"},  # unresolved objet
-            {"objet": "Emballages"},  # no address
+            {"objet": "zzz inconnu"},  # unresolved objet, no address
         ],
     )
     def test_incomplete_input_shows_the_home_page_again(self, client, params):
-        """Both fields are required (#3295). The home page is rendered again
-        with its messages rather than redirected to: a redirect would lose them."""
+        """The objet is required. The home page is rendered again with its
+        messages rather than redirected to: a redirect would lose them."""
         response = client.get(reverse("assistant:recherche"), params)
 
         assert response.status_code == 200
@@ -127,10 +179,17 @@ class TestSearchView:
 
 
 class TestHome:
-    def test_both_fields_are_required(self, client):
+    def test_only_the_objet_is_required(self, client):
         content = client.get(reverse("assistant:home")).content.decode()
+        inputs = {}
+        parser = HTMLParser()
+        parser.handle_starttag = lambda tag, attrs: (
+            tag == "input" and inputs.setdefault(dict(attrs).get("name"), dict(attrs))
+        )
+        parser.feed(content)
 
-        assert content.count("required") >= 2
+        assert "required" in inputs["objet"]
+        assert "required" not in inputs["adresse"]
 
     def test_the_coordinates_are_rendered_unlocalized(self, client):
         """French formatting writes "-1,55", which does not parse back: the
@@ -169,7 +228,7 @@ class TestSearchForm:
         term.save()
 
         response = client.get(
-            reverse("assistant:recherche"), {"objet": "Bidule test", "adresse": "Auray"}
+            reverse("assistant:recherche"), {"objet": "Bidule test", **AURAY}
         )
 
         assert response.status_code == 302
@@ -199,7 +258,7 @@ class TestSearchForm:
         """The autocomplete already decided: do not resolve again."""
         response = client.get(
             reverse("assistant:recherche"),
-            {"objet": "peu importe", "fiche": fiche.slug, "adresse": "Auray"},
+            {"objet": "peu importe", "fiche": fiche.slug, **AURAY},
         )
 
         assert response.url.startswith(
@@ -236,12 +295,6 @@ class TestSearchForm:
         content = client.get(reverse("assistant:home")).content.decode()
 
         assert "novalidate" in content
-
-    def test_a_missing_address_shows_an_error(self, client, fiche):
-        response = client.get(reverse("assistant:recherche"), {"fiche": fiche.slug})
-
-        assert response.status_code == 200
-        assert SERVER_ERROR in response.content.decode()
 
     def test_the_input_is_kept_when_refused(self, client):
         content = client.get(
