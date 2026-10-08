@@ -96,40 +96,41 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
     # needs it to narrow the places to the objet.
     if produit_page is not None and getattr(produit_page, "slug", None):
         base = {**base, "fiche": produit_page.slug}
-    url_compte = bool(parcours and parcours.is_located)
+    localise = bool(parcours and parcours.is_located)
 
     cms = produit_page.consignes if produit_page is not None else []
     if cms:
         return [
             block
-            for block in (_from_cms(child, base, url_compte) for child in cms)
+            for block in (_from_cms(child, base, localise) for child in cms)
             if block
         ]
 
     known = set(GroupeAction.objects.values_list("code", flat=True))
     return [
         block
-        for block in (
-            _from_static(static, known, base, url_compte) for static in BLOCKS
-        )
+        for block in (_from_static(static, known, base, localise) for static in BLOCKS)
         if block
     ]
 
 
-def _links(gestes, base, url_compte) -> dict:
+def _links(gestes, base, localise) -> dict:
     params = urlencode({**base, "geste": gestes}, doseq=True)
     return {
         "url": f"{reverse('assistant:solutions')}?{params}",
+        # Without a position, the button offers geolocation instead. Decided
+        # here, not from `url_compte`: the counter can be off with a position.
+        "localise": localise,
         # Fetched after the page renders, only when there is a position.
         "url_compte": (
             f"{reverse('api_v1:lieux-compte')}?{params}"
-            if COUNTER_ENABLED and url_compte
+            if COUNTER_ENABLED and localise
             else ""
         ),
     }
 
 
-def _from_static(block, known, base, url_compte) -> dict | None:
+def _from_static(block, known, base, localise) -> dict | None:
     gestes = [code for code in block["gestes"] if code in known]
     if not gestes:
         return None
@@ -145,11 +146,11 @@ def _from_static(block, known, base, url_compte) -> dict | None:
         "libelle": block["libelle"],
         "consigne": block["consigne"],
         "badges": badges,
-        **_links(gestes, base, url_compte),
+        **_links(gestes, base, localise),
     }
 
 
-def _from_cms(child, base, url_compte) -> dict | None:
+def _from_cms(child, base, localise) -> dict | None:
     """A consigne of the CMS block, in the shape of the static ones.
 
     The block stores Action codes (the open data vocabulary); the solutions
@@ -179,7 +180,7 @@ def _from_cms(child, base, url_compte) -> dict | None:
         # RichText: rendered as HTML by the template, never escaped.
         "consigne": value["contenu"],
         "badges": badges,
-        **_links(gestes, base, url_compte),
+        **_links(gestes, base, localise),
     }
 
 

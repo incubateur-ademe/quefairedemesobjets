@@ -8,13 +8,14 @@ Unité de la fiche objet : badges d'état, titre, consigne, appel à l'action.
 {% include "ui/components/assistant/bloc_geste.html" with gestes=gestes libelle="Réparer" consigne=consigne badges=badges url=url %}
 ```
 
-| Paramètre      | Rôle                                                                                                                    |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `gestes`       | codes des `GroupeAction` du bloc, une icône chacun                                                                      |
-| `consigne`     | contenu CMS, **déjà marqué sûr en amont**                                                                               |
-| `badges`       | liste de `{condition, libelle}`                                                                                         |
-| `appel_action` | libellé du bouton (défaut « Je découvre les solutions »)                                                                |
-| `url_compte`   | endpoint du nombre de solutions, chargé après le rendu ; vide sans adresse : le bouton propose alors la géolocalisation |
+| Paramètre      | Rôle                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| `gestes`       | codes des `GroupeAction` du bloc, une icône chacun                                           |
+| `consigne`     | contenu CMS, **déjà marqué sûr en amont**                                                    |
+| `badges`       | liste de `{condition, libelle}`                                                              |
+| `appel_action` | libellé du bouton (défaut « Je découvre les solutions »)                                     |
+| `url_compte`   | endpoint du nombre de solutions, chargé après le rendu (vide tant que le compteur est coupé) |
+| `localise`     | vrai quand le parcours porte une position ; faux : le bouton propose la géolocalisation      |
 
 ## L'ordre n'est pas décidé ici
 
