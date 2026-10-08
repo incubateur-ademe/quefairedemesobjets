@@ -4,6 +4,9 @@ from django.urls import reverse
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPageSearchTerm
 
+# The server's message, as opposed to the hidden "aucun résultat" one.
+SERVER_ERROR = 'data-assistant-combobox-target="erreur"'
+
 pytestmark = pytest.mark.django_db
 
 
@@ -120,7 +123,7 @@ class TestSearchView:
         response = client.get(reverse("assistant:recherche"), params)
 
         assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
+        assert SERVER_ERROR in response.content.decode()
 
 
 class TestHome:
@@ -128,6 +131,16 @@ class TestHome:
         content = client.get(reverse("assistant:home")).content.decode()
 
         assert content.count("required") >= 2
+
+    def test_the_coordinates_are_rendered_unlocalized(self, client):
+        """French formatting writes "-1,55", which does not parse back: the
+        position would be lost each time the field is shown again."""
+        content = client.get(
+            reverse("assistant:home"), {"longitude": "-1.555335", "latitude": "47.2"}
+        ).content.decode()
+
+        assert 'value="-1.555335"' in content
+        assert 'value="47.2"' in content
 
     def test_the_hidden_address_fields_are_present(self, client):
         """Without them, the map has no position to show."""
@@ -180,7 +193,7 @@ class TestSearchForm:
         )
 
         assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
+        assert SERVER_ERROR in response.content.decode()
 
     def test_the_explicit_fiche_wins_over_the_label(self, client, fiche):
         """The autocomplete already decided: do not resolve again."""
@@ -203,14 +216,32 @@ class TestSearchForm:
 
         assert response.status_code == 200
         content = response.content.decode()
-        assert "qfa-combobox__erreur" in content
+        assert SERVER_ERROR in content
         assert 'aria-invalid="true"' in content
+
+    def test_a_missing_objet_shows_its_own_message(self, client):
+        """Not "unknown objet": nothing was typed (30144:16015)."""
+        content = client.get(
+            reverse("assistant:recherche"), {"objet": "", "adresse": "Auray"}
+        ).content.decode()
+
+        # The hidden "aucun résultat" message carries the other words: only the
+        # server's message, the objet's, counts here.
+        message = content.split(SERVER_ERROR)[1].split("</p>")[0]
+        assert "Veuillez d&#x27;abord saisir un objet ou un déchet" in message
+        assert "Nous ne connaissons pas cet objet" not in message
+
+    def test_the_home_form_leaves_validation_to_the_server(self, client):
+        """The browser tooltip would hide the designed message (30144:16015)."""
+        content = client.get(reverse("assistant:home")).content.decode()
+
+        assert "novalidate" in content
 
     def test_a_missing_address_shows_an_error(self, client, fiche):
         response = client.get(reverse("assistant:recherche"), {"fiche": fiche.slug})
 
         assert response.status_code == 200
-        assert "qfa-combobox__erreur" in response.content.decode()
+        assert SERVER_ERROR in response.content.decode()
 
     def test_the_input_is_kept_when_refused(self, client):
         content = client.get(

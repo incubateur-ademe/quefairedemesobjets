@@ -32,8 +32,12 @@ type PersistedMap = {
   addressMarker: Marker | null
   /** Gestes + objet: when they change, the pins are wrong and start over. */
   key: string
+  /** Address the map was centered on: the view only moves when it changes. */
+  address: [number, number]
   /** Last viewport requested: the same one is never asked twice in a row. */
   lastRequestedUrl: string
+  /** The first places found around a new address frame the view, once. */
+  needsFit: boolean
   onMoveEnd: (() => void) | null
 }
 
@@ -50,6 +54,10 @@ const UUID_PLACEHOLDER = "__uuid__"
 
 const MIN_ZOOM = 9
 const INITIAL_ZOOM = 13
+/** A single nearby place must not zoom down to the street. */
+const FIT_MAX_ZOOM = 16
+/** Pins are anchored at their bottom: the top needs room for their height. */
+const FIT_PADDING = { top: 64, bottom: 32, left: 32, right: 32 }
 /** Matches the fade of `.qfa-pinpoint--leaving` in the stylesheet. */
 const LEAVE_MS = 200
 
@@ -166,7 +174,9 @@ export default class extends Controller<HTMLElement> {
       places: [],
       addressMarker: null,
       key: this.#key(),
+      address: [this.longitudeValue, this.latitudeValue],
       lastRequestedUrl: "",
+      needsFit: true,
       onMoveEnd: null,
     }
   }
@@ -187,18 +197,20 @@ export default class extends Controller<HTMLElement> {
       state.key = this.#key()
     }
 
-    // Another address: recenter as a first display would.
-    const center = state.map.getCenter()
-    const moved =
-      Math.abs(center.lng - this.longitudeValue) > 1e-6 ||
-      Math.abs(center.lat - this.latitudeValue) > 1e-6
-    if (moved && !state.places.length) {
+    // Another address: recenter as a first display would. The same address
+    // keeps the view where the user left it, pans and zooms included: the
+    // spec forbids any automatic recentering after the first display (#3356).
+    const [lng, lat] = state.address
+    const addressChanged =
+      Math.abs(lng - this.longitudeValue) > 1e-6 ||
+      Math.abs(lat - this.latitudeValue) > 1e-6
+    if (addressChanged) {
+      state.address = [this.longitudeValue, this.latitudeValue]
+      state.needsFit = true
       state.map.jumpTo({
         center: [this.longitudeValue, this.latitudeValue],
         zoom: INITIAL_ZOOM,
       })
-    } else if (moved) {
-      state.map.jumpTo({ center: [this.longitudeValue, this.latitudeValue] })
     }
   }
 
@@ -308,6 +320,7 @@ export default class extends Controller<HTMLElement> {
       this.assistantChronoOutlets.forEach((chrono) => chrono.record(timing))
       const area = this.#visibleArea()
       state.places = merge(state.places, incoming, area)
+      this.#fitOnce(incoming)
       this.#draw()
       this.#announce(
         state.places.some((place) => isInArea(place, area))
@@ -322,6 +335,33 @@ export default class extends Controller<HTMLElement> {
         "Les lieux n'ont pas pu être chargés. Déplacez la carte pour réessayer.",
       )
     }
+  }
+
+  /**
+   * Frames the first places found around the address, with the address
+   * itself, so the pins fill the map instead of a corner of it. Only once per
+   * address: after that the view belongs to the user (#3356).
+   */
+  #fitOnce(places: Place[]) {
+    const state = this.state
+    if (!state?.needsFit || places.length === 0) return
+    state.needsFit = false
+
+    const points: [number, number][] = places.map((place) => [
+      place.longitude,
+      place.latitude,
+    ])
+    if (this.preciseAddressValue) points.push(state.address)
+    const lngs = points.map(([lng]) => lng)
+    const lats = points.map(([, lat]) => lat)
+    state.map.fitBounds(
+      [
+        [Math.min(...lngs), Math.min(...lats)],
+        [Math.max(...lngs), Math.max(...lats)],
+      ],
+      // Instant: the pins appear already framed rather than sliding in.
+      { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, duration: 0 },
+    )
   }
 
   #placesUrl(): string {

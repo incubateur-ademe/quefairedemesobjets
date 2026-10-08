@@ -13,7 +13,7 @@ porte le libellé choisi par l'usager.
         {{ label|default:"Quel objet ou déchet souhaitez-vous recycler, donner, revendre ou réparer ?" }}
     </label>
 
-    <span class="qfa-combobox__cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
+    <span class="qfa-combobox__cadre" data-assistant-combobox-target="cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
                id="{{ id|default:'recherche-objet' }}-champ"
@@ -34,6 +34,18 @@ porte le libellé choisi par l'usager.
     </span>
 
     {% comment %}
+    Juste après le cadre : la liste s'ouvre sous le champ, dans le flux, et
+    masque le message d'erreur tant qu'elle est ouverte.
+    {% endcomment %}
+    <ul class="qfa-combobox__liste"
+        id="{{ id|default:'recherche-objet' }}-liste"
+        role="listbox"
+        data-assistant-combobox-target="list"
+        data-action="mousedown->assistant-combobox#keepFocus
+                     click->assistant-combobox#chooseFromClick"
+        hidden></ul>
+
+    {% comment %}
     Le champ porte le nom attendu par `SearchForm` ; `data-key` reste
     `slug`, la clé que l'endpoint JSON renvoie pour chaque suggestion.
     {% endcomment %}
@@ -41,17 +53,19 @@ porte le libellé choisi par l'usager.
            data-assistant-combobox-target="hidden" data-key="slug">
 
     {% if erreur %}
-        <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-objet' }}-erreur">
+        <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ id|default:'recherche-objet' }}-erreur">
             {{ erreur }}
         </p>
     {% endif %}
 
-    <ul class="qfa-combobox__liste"
-        id="{{ id|default:'recherche-objet' }}-liste"
-        role="listbox"
-        data-assistant-combobox-target="list"
-        data-action="click->assistant-combobox#chooseFromClick"
-        hidden></ul>
+    {% comment %}
+    État « aucun résultat » du composant champ (maquette) : affiché par le
+    contrôleur quand la saisie ne donne aucune suggestion.
+    {% endcomment %}
+    <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-objet' }}-aucun-resultat"
+       data-assistant-combobox-target="aucunResultat" hidden>
+        Nous ne connaissons pas cet objet. Choisissez une suggestion dans la liste.
+    </p>
 
     <p class="qfa-sr-only" role="status" aria-live="polite"
        data-assistant-combobox-target="status"></p>

@@ -24,7 +24,15 @@ type Suggestion = {
  * (#3295) explicitly rules out a list open from the start.
  */
 export default class extends Controller<HTMLElement> {
-  static targets = ["input", "list", "status", "hidden"]
+  static targets = [
+    "input",
+    "list",
+    "status",
+    "hidden",
+    "cadre",
+    "aucunResultat",
+    "erreur",
+  ]
   static values = {
     url: String,
     minLength: { type: Number, default: 2 },
@@ -34,6 +42,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly listTarget: HTMLElement
   declare readonly statusTarget: HTMLElement
   declare readonly hasStatusTarget: boolean
+  declare readonly cadreTarget: HTMLElement
+  declare readonly hasCadreTarget: boolean
+  /** "Nous ne connaissons pas…", shown while the query matches nothing. */
+  declare readonly aucunResultatTarget: HTMLElement
+  declare readonly hasAucunResultatTarget: boolean
+  /** The server's message, from the previous submission. */
+  declare readonly erreurTargets: HTMLElement[]
   /** Hidden fields filled on choice, so that the form submits them. */
   declare readonly hiddenTargets: HTMLInputElement[]
   declare urlValue: string
@@ -64,8 +79,13 @@ export default class extends Controller<HTMLElement> {
     // text without choosing again would submit the previous address's
     // coordinates.
     this.#clearHidden()
+    // The server judged the previous input, not this one.
+    for (const erreur of this.erreurTargets) erreur.remove()
 
-    if (query.length < this.minLengthValue) return this.#close()
+    if (query.length < this.minLengthValue) {
+      this.#showNoResult(false)
+      return this.#close()
+    }
 
     this.pendingRequest?.abort()
     this.pendingRequest = new AbortController()
@@ -77,7 +97,9 @@ export default class extends Controller<HTMLElement> {
       if (!response.ok) throw new Error(`response ${response.status}`)
       const { results } = await response.json()
       this.suggestions = results
-      this.#render()
+      this.#showNoResult(!results.length)
+      if (results.length) this.#render()
+      else this.#close()
     } catch (error) {
       if ((error as Error).name === "AbortError") return
       this.#close()
@@ -98,6 +120,15 @@ export default class extends Controller<HTMLElement> {
 
     event.preventDefault()
     action()
+  }
+
+  /**
+   * Keeps the focus in the field while a suggestion is pressed. Otherwise, on
+   * mobile, the field blurs first: the keyboard closes, the layout moves, and
+   * the click lands beside the suggestion it was aimed at.
+   */
+  keepFocus(event: MouseEvent) {
+    event.preventDefault()
   }
 
   chooseFromClick(event: MouseEvent) {
@@ -143,7 +174,7 @@ export default class extends Controller<HTMLElement> {
     this.listTarget.innerHTML = this.suggestions
       .map((suggestion, index) => {
         const detail = suggestion.detail
-          ? ` <span class="qfa-combobox__detail">${escape(suggestion.detail)}</span>`
+          ? ` <span class="qfa-combobox__detail">- ${escape(suggestion.detail)}</span>`
           : ""
         return (
           `<li role="option" data-index="${index}" id="${this.#optionId(index)}"` +
@@ -164,6 +195,23 @@ export default class extends Controller<HTMLElement> {
         ? `${this.suggestions.length} suggestion${this.suggestions.length > 1 ? "s" : ""}`
         : "Aucune suggestion",
     )
+  }
+
+  /**
+   * The "aucun résultat" state of the field component (mockup): red frame and
+   * message under the field, as long as the query matches nothing.
+   */
+  #showNoResult(shown: boolean) {
+    if (!this.hasAucunResultatTarget) return
+    this.aucunResultatTarget.hidden = !shown
+    if (this.hasCadreTarget) this.cadreTarget.dataset.erreur = String(shown)
+    if (shown) {
+      this.inputTarget.setAttribute("aria-invalid", "true")
+      this.inputTarget.setAttribute("aria-describedby", this.aucunResultatTarget.id)
+    } else {
+      this.inputTarget.removeAttribute("aria-invalid")
+      this.inputTarget.removeAttribute("aria-describedby")
+    }
   }
 
   #close() {

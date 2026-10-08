@@ -42,7 +42,32 @@ html {
    preflight ; le retirer (ADR 0009 Q2) l'a laissée revenir. */
 body {
   margin: 0;
+  /* Le texte sans couleur propre prend celle des titres, jamais le noir pur
+     du navigateur. */
+  color: var(--qfa-texte-titre);
   font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
+}
+
+/* Cadre de l'iframe, iso maquette (nœud 30174:11403). Posé ici et non par
+   `iframe.js` : le script est commun à l'assistant actuel et à la V2, seule la
+   V2 doit l'avoir. `overflow` sur html empêche celui de body de remonter au
+   viewport, pour que body rogne lui-même ses coins arrondis.
+
+   Le cadre est plafonné à la largeur max de l'assistant, vérifiée dans le
+   Figma : 800 px, la largeur des maquettes desktop des quatre écrans (Accueil,
+   Consignes, Carte, Fiche détaillée — planche « Maquettes itération 1
+   Assistant V2 »). Au-delà de 800 px, le cadre est centré dans l'iframe : la
+   bordure encadre le contenu, elle ne court pas sur les bords de l'iframe. */
+html {
+  overflow: auto;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  border: 3px solid var(--qfa-cadre);
+  border-radius: 4px;
+  overflow: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -92,6 +117,8 @@ body {
   --qfa-texte-courant: #3a3a3a;
   --qfa-accent: #37635f; /* green-menthe-sun-373 : boutons, intitulés */
   --qfa-bordure: #dddddd;
+  --qfa-cadre: #4f9d91; /* contour de l'iframe */
+  --qfa-erreur: #ce0500; /* border-plain-error, text-action-high-error */
   --qfa-fond-survol: #f6f6f6;
 
   /* Échelle d'espacement du Figma : un pas vaut 4px. */
@@ -253,6 +280,15 @@ body {
   width: 21.92px;
   height: 21.96px;
 }
+
+/* « Réparer » s'inverse : goutte pleine à la couleur du geste, icône blanche. */
+.qfa-pinpoint[data-geste="reparer"]::before {
+  background: currentColor;
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icon {
+  background: #fff;
+}
 .qfa-pinpoint[data-geste="vendre_acheter"] .qfa-pinpoint__icon {
   -webkit-mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
   mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
@@ -385,7 +421,7 @@ body {
 .qfa-combobox__label {
   display: block;
   margin-bottom: var(--qfa-espace-2v);
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 14px;
   font-weight: 600;
   line-height: normal;
@@ -420,7 +456,7 @@ body {
   flex: none;
   width: 24px;
   height: 24px;
-  background: var(--qfa-texte-titre);
+  background: var(--qfa-accent);
   -webkit-mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain
     no-repeat;
   mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain no-repeat;
@@ -451,26 +487,54 @@ body {
   outline: none;
 }
 
+/* Dans le flux, et non en surimpression : la liste allonge le panneau, donc
+   l'iframe, au lieu de recouvrir ce qui suit.
+
+   Champ et liste ouverte forment un seul bloc (maquette 30156:9213) : la
+   liste prolonge la bordure du cadre sur les côtés et en bas, et le cadre
+   perd sa bordure basse et ses coins bas. */
 .qfa-combobox__liste {
-  position: absolute;
-  z-index: 20;
-  width: 100%;
-  margin: var(--qfa-espace-1v) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   background: #fff;
-  border: 1px solid var(--qfa-bordure);
-  border-radius: var(--qfa-rayon-sm);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  border: 2px solid var(--qfa-accent);
+  border-top: 0;
+  border-radius: 0 0 var(--qfa-rayon-sm) var(--qfa-rayon-sm);
+  overflow: clip;
 }
 
-/* Suggestion : 45 px de haut dans le Figma (nœud 24395:189). */
+/* La bordure basse retirée, son épaisseur passe dans le remplissage : le
+   champ garde sa hauteur à l'ouverture de la liste. */
+.qfa-combobox__cadre:has(+ .qfa-combobox__liste:not([hidden])) {
+  padding-bottom: calc(10px + 2px);
+  border-bottom: 0;
+  border-radius: var(--qfa-rayon-sm) var(--qfa-rayon-sm) 0 0;
+}
+
+/* L'anneau de focus, décalé de 2 px, couperait le haut de la liste : tant
+   qu'elle est ouverte, le curseur et la suggestion active montrent le focus. */
+.qfa-combobox__cadre:focus-within:has(+ .qfa-combobox__liste:not([hidden])) {
+  outline: none;
+}
+
+/* La liste ouverte prend la place du message d'erreur : choisir une
+   suggestion le rendra caduc. */
+.qfa-combobox__liste:not([hidden]) ~ .qfa-combobox__erreur {
+  display: none;
+}
+
+/* Suggestion (maquette 30156:9213) : 12 px de remplissage vertical, 16 px
+   horizontal, un filet gris au-dessus et au-dessous ; le premier sépare la
+   liste du champ. Un libellé trop long passe à la ligne. */
 .qfa-combobox__option {
-  /* 45 px de haut dans la maquette = 2×12 (remplissage) + 21 (ligne). */
-  padding: var(--qfa-espace-3v);
+  padding: var(--qfa-espace-3v) var(--qfa-espace-4v);
+  border-top: 1px solid var(--qfa-bordure);
+  border-bottom: 1px solid var(--qfa-bordure);
+  color: var(--qfa-texte-titre);
   cursor: pointer;
   font-size: 14px;
-  line-height: 21px;
+  line-height: 1.5;
 }
 
 .qfa-combobox__option[aria-selected="true"],
@@ -685,6 +749,14 @@ body {
   color: #fff;
 }
 
+/* Sans solution à proximité : le bouton reste un lien vers la carte, mais
+   ne promet plus rien. Contour au lieu d'aplat. */
+.qfa-bouton--secondaire {
+  border: 1px solid var(--qfa-accent);
+  background: #fff;
+  color: var(--qfa-accent);
+}
+
 .qfa-bouton--tertiaire {
   background: none;
   color: var(--qfa-accent);
@@ -756,6 +828,16 @@ body {
   color: var(--qfa-texte-titre);
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* Paragraphes du texte riche de la grille de consignes : 8 px entre eux,
+   rien autour, le bloc espace déjà ses enfants. */
+.qfa-bloc-geste__consigne > * {
+  margin: 0;
+}
+
+.qfa-bloc-geste__consigne > * + * {
+  margin-top: var(--qfa-espace-2v);
 }
 
 .qfa-bloc-geste .qfa-bouton {
@@ -901,12 +983,11 @@ body {
    secondaire par rapport au libellé. */
 .qfa-combobox__detail {
   color: var(--qfa-texte-courant);
-  font-size: 0.85em;
 }
 
 /* Gabarit d'écran, relevé sur les maquettes 30136:8533 (320 px) et
-   30174:11316 (800 px). Le contenu est bordé à 800 px : au-delà, la maquette
-   ne centre pas une colonne large, elle garde la même. */
+   30174:11316 (800 px) : il remplit le cadre (body), plafonné à la largeur
+   max de l'assistant — voir le commentaire du cadre ci-dessus. */
 .qfa-ecran {
   display: flex;
   flex-direction: column;
@@ -1048,7 +1129,7 @@ body > #assistant-carte-canvas {
 
 .qfa-lieu__nom {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 16px;
   font-weight: 700;
   line-height: 1.4;
@@ -1057,7 +1138,7 @@ body > #assistant-carte-canvas {
 /* 10 px dans la maquette : c'est une mention, pas un sous-titre. */
 .qfa-lieu__type {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 10px;
   line-height: 1.4;
 }
@@ -1070,14 +1151,14 @@ body > #assistant-carte-canvas {
 
 .qfa-lieu__section p {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 14px;
   line-height: 1.5;
 }
 
 .qfa-lieu__soustitre {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.4;
@@ -1141,13 +1222,15 @@ turbo-frame {
 
 /* État d'erreur d'un champ (maquette 30144:16020). Le cadre passe au rouge et
    le message s'affiche dessous, relié au champ par `aria-describedby`. */
+/* Erreur de saisie (30144:16015) : cadre et message au rouge erreur du DSFR,
+   message en corps 16, 4 px sous le champ. */
 .qfa-combobox__cadre[data-erreur="true"] {
-  border-color: var(--qfa-user-address);
+  border-color: var(--qfa-erreur);
 }
 
 .qfa-combobox__erreur {
   margin: var(--qfa-espace-1v) 0 0;
-  color: var(--qfa-user-address);
-  font-size: 12px;
+  color: var(--qfa-erreur);
+  font-size: 16px;
   line-height: 1.5;
 }
