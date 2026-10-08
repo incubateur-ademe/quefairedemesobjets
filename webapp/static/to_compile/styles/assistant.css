@@ -42,6 +42,9 @@ html {
    preflight ; le retirer (ADR 0009 Q2) l'a laissée revenir. */
 body {
   margin: 0;
+  /* Le texte sans couleur propre prend celle des titres, jamais le noir pur
+     du navigateur. */
+  color: var(--qfa-texte-titre);
   font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 }
 
@@ -418,7 +421,7 @@ body {
 .qfa-combobox__label {
   display: block;
   margin-bottom: var(--qfa-espace-2v);
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 14px;
   font-weight: 600;
   line-height: normal;
@@ -453,7 +456,7 @@ body {
   flex: none;
   width: 24px;
   height: 24px;
-  background: var(--qfa-texte-titre);
+  background: var(--qfa-accent);
   -webkit-mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain
     no-repeat;
   mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain no-repeat;
@@ -484,17 +487,21 @@ body {
   outline: none;
 }
 
+/* Dans le flux, et non en surimpression : la liste allonge le panneau, donc
+   l'iframe, au lieu de recouvrir ce qui suit. */
 .qfa-combobox__liste {
-  position: absolute;
-  z-index: 20;
-  width: 100%;
   margin: var(--qfa-espace-1v) 0 0;
   padding: 0;
   list-style: none;
   background: #fff;
   border: 1px solid var(--qfa-bordure);
   border-radius: var(--qfa-rayon-sm);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+}
+
+/* La liste ouverte prend la place du message d'erreur : choisir une
+   suggestion le rendra caduc. */
+.qfa-combobox__liste:not([hidden]) ~ .qfa-combobox__erreur {
+  display: none;
 }
 
 /* Suggestion : 45 px de haut dans le Figma (nœud 24395:189). */
@@ -952,7 +959,6 @@ body {
    secondaire par rapport au libellé. */
 .qfa-combobox__detail {
   color: var(--qfa-texte-courant);
-  font-size: 0.85em;
 }
 
 /* Gabarit d'écran, relevé sur les maquettes 30136:8533 (320 px) et
@@ -1099,7 +1105,7 @@ body > #assistant-carte-canvas {
 
 .qfa-lieu__nom {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 16px;
   font-weight: 700;
   line-height: 1.4;
@@ -1108,7 +1114,7 @@ body > #assistant-carte-canvas {
 /* 10 px dans la maquette : c'est une mention, pas un sous-titre. */
 .qfa-lieu__type {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 10px;
   line-height: 1.4;
 }
@@ -1121,14 +1127,14 @@ body > #assistant-carte-canvas {
 
 .qfa-lieu__section p {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 14px;
   line-height: 1.5;
 }
 
 .qfa-lieu__soustitre {
   margin: 0;
-  color: #000;
+  color: var(--qfa-texte-titre);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.4;
