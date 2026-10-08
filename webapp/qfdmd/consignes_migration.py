@@ -69,9 +69,11 @@ ETAT_BY_TITLE_WORD = {
     "deposer": "mauvais_etat",
 }
 # Spec: the gestes of an objet follow its état. "Déposer" is the code `trier`.
+# Prêter and louer stay out of the MVP: the fiches carry no consigne for them,
+# so their lieux would show under "Donner ou revendre" unexplained.
 GESTES_BY_ETAT = {
     "reparable": ["reparer"],
-    "bon_etat": ["donner", "revendre", "preter", "louer"],
+    "bon_etat": ["donner", "revendre"],
     "mauvais_etat": ["trier"],
 }
 BONUS_WORDS = "bonus reparation"

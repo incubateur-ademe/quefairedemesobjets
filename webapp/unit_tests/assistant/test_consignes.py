@@ -281,6 +281,24 @@ class TestConsignesFromTheCms:
             + "&geste=donner_echanger_rapporter&geste=vendre_acheter"
         )
 
+    def test_preter_and_louer_stay_out_of_the_mvp(self):
+        """A grid edited in the CMS may still list them."""
+        from unit_tests.qfdmd.test_consignes_block import consigne, grid, page_with
+
+        page = page_with(
+            grid(
+                consigne(
+                    "Donner",
+                    id="don",
+                    etat="bon_etat",
+                    gestes=["donner", "preter", "louer"],
+                )
+            ),
+            parent=None,
+        )
+
+        assert consignes_for(page)[0]["gestes"] == ["donner_echanger_rapporter"]
+
     def test_badges_follow_the_fields(self, fiche):
         badges = {
             c["code"]: [(b["condition"], b["libelle"]) for b in c["badges"]]
