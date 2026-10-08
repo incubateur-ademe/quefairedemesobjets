@@ -75,6 +75,10 @@ class TestParcours:
         assert arrival == departure
 
 
+# An address as the autocomplete sends it: chosen, hence located.
+AURAY = {"adresse": "Auray", "longitude": "-2.98", "latitude": "47.67"}
+
+
 @pytest.fixture
 def fiche():
     """A live fiche: `ModelChoiceField` checks that it really exists."""
@@ -87,7 +91,7 @@ class TestSearchView:
     def test_complete_input_leads_to_the_fiche(self, client, fiche):
         response = client.get(
             reverse("assistant:recherche"),
-            {"fiche": fiche.slug, "objet": fiche.title, "adresse": "Auray"},
+            {"fiche": fiche.slug, "objet": fiche.title, **AURAY},
         )
 
         assert response.status_code == 302
@@ -113,6 +117,30 @@ class TestSearchView:
         response = client.get(
             reverse("assistant:recherche"),
             {"fiche": fiche.slug, "objet": fiche.title, "longitude": "abc"},
+        )
+
+        assert response.status_code == 302
+
+    def test_an_address_typed_without_a_suggestion_is_refused(self, client, fiche):
+        """Text the BAN did not resolve would be silently ignored by the map."""
+        response = client.get(
+            reverse("assistant:recherche"),
+            {"fiche": fiche.slug, "objet": fiche.title, "adresse": "zzz nulle part"},
+        )
+
+        assert response.status_code == 200
+        assert "Nous ne connaissons pas cette adresse" in response.content.decode()
+
+    def test_a_chosen_address_goes_through(self, client, fiche):
+        response = client.get(
+            reverse("assistant:recherche"),
+            {
+                "fiche": fiche.slug,
+                "objet": fiche.title,
+                "adresse": "Nantes",
+                "longitude": "-1.55",
+                "latitude": "47.21",
+            },
         )
 
         assert response.status_code == 302
@@ -200,7 +228,7 @@ class TestSearchForm:
         term.save()
 
         response = client.get(
-            reverse("assistant:recherche"), {"objet": "Bidule test", "adresse": "Auray"}
+            reverse("assistant:recherche"), {"objet": "Bidule test", **AURAY}
         )
 
         assert response.status_code == 302
@@ -230,7 +258,7 @@ class TestSearchForm:
         """The autocomplete already decided: do not resolve again."""
         response = client.get(
             reverse("assistant:recherche"),
-            {"objet": "peu importe", "fiche": fiche.slug, "adresse": "Auray"},
+            {"objet": "peu importe", "fiche": fiche.slug, **AURAY},
         )
 
         assert response.url.startswith(
