@@ -488,14 +488,34 @@ body {
 }
 
 /* Dans le flux, et non en surimpression : la liste allonge le panneau, donc
-   l'iframe, au lieu de recouvrir ce qui suit. */
+   l'iframe, au lieu de recouvrir ce qui suit.
+
+   Champ et liste ouverte forment un seul bloc (maquette 30156:9213) : la
+   liste prolonge la bordure du cadre sur les côtés et en bas, et le cadre
+   perd sa bordure basse et ses coins bas. */
 .qfa-combobox__liste {
-  margin: var(--qfa-espace-1v) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   background: #fff;
-  border: 1px solid var(--qfa-bordure);
-  border-radius: var(--qfa-rayon-sm);
+  border: 2px solid var(--qfa-accent);
+  border-top: 0;
+  border-radius: 0 0 var(--qfa-rayon-sm) var(--qfa-rayon-sm);
+  overflow: clip;
+}
+
+/* La bordure basse retirée, son épaisseur passe dans le remplissage : le
+   champ garde sa hauteur à l'ouverture de la liste. */
+.qfa-combobox__cadre:has(+ .qfa-combobox__liste:not([hidden])) {
+  padding-bottom: calc(10px + 2px);
+  border-bottom: 0;
+  border-radius: var(--qfa-rayon-sm) var(--qfa-rayon-sm) 0 0;
+}
+
+/* L'anneau de focus, décalé de 2 px, couperait le haut de la liste : tant
+   qu'elle est ouverte, le curseur et la suggestion active montrent le focus. */
+.qfa-combobox__cadre:focus-within:has(+ .qfa-combobox__liste:not([hidden])) {
+  outline: none;
 }
 
 /* La liste ouverte prend la place du message d'erreur : choisir une
@@ -504,13 +524,17 @@ body {
   display: none;
 }
 
-/* Suggestion : 45 px de haut dans le Figma (nœud 24395:189). */
+/* Suggestion (maquette 30156:9213) : 12 px de remplissage vertical, 16 px
+   horizontal, un filet gris au-dessus et au-dessous ; le premier sépare la
+   liste du champ. Un libellé trop long passe à la ligne. */
 .qfa-combobox__option {
-  /* 45 px de haut dans la maquette = 2×12 (remplissage) + 21 (ligne). */
-  padding: var(--qfa-espace-3v);
+  padding: var(--qfa-espace-3v) var(--qfa-espace-4v);
+  border-top: 1px solid var(--qfa-bordure);
+  border-bottom: 1px solid var(--qfa-bordure);
+  color: var(--qfa-texte-titre);
   cursor: pointer;
   font-size: 14px;
-  line-height: 21px;
+  line-height: 1.5;
 }
 
 .qfa-combobox__option[aria-selected="true"],
