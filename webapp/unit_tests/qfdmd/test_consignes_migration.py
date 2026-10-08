@@ -226,7 +226,7 @@ class TestPlanForObjets:
         )
         assert (donner["etat"], donner["gestes"], donner["bonus_reparation"]) == (
             "bon_etat",
-            ["donner", "revendre", "preter", "louer"],
+            ["donner", "revendre"],
             False,
         )
         assert (deposer["etat"], deposer["gestes"]) == ("mauvais_etat", ["trier"])
