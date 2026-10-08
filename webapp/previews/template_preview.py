@@ -5,7 +5,6 @@ from pathlib import Path
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
-from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.template import Context, Template
@@ -16,10 +15,10 @@ from django.utils.safestring import mark_safe
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
-import requests
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
+from assistant.adresses import suggest_adresses
 from assistant.objets import sous_categorie_ids_for
 from core.widgets import (
     SearchAutocompleteInput,
@@ -40,7 +39,6 @@ from qfdmo.models.acteur import (
     LabelQualite,
 )
 from qfdmo.models.action import Action, GroupeAction
-from qfdmo.views.autocomplete import BAN_API_URL, BAN_TIMEOUT_SECONDS
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
@@ -1486,7 +1484,7 @@ class AssistantPreview(LookbookPreview):
             "ui/components/assistant/carte.html",
             {
                 "geste": geste,
-                "objet": objet,
+                "fiche": objet,
                 "longitude": longitude,
                 "latitude": latitude,
                 "adresse_precise": precise,
@@ -1628,47 +1626,18 @@ def _side_by_side(renders):
     )
 
 
-# Longitude, latitude, and whether the address is precise (see `_geocode_ban`).
+# Longitude, latitude, and whether the address is precise.
 PARIS = (2.3488, 48.8534, False)
 
 
 def _coordinates_of(adresse):
-    """Geocodes an address through the BAN, falling back on Paris.
-
-    A successful result is cached: the lookbook re-renders the preview on
-    every parameter change, and nothing justifies asking the BAN again for an
-    address already resolved. A failure is not cached, so a BAN outage does
-    not pin the fallback for a day.
-    """
-    if not adresse:
+    """The first BAN suggestion, through the assistant's own proxy and cache,
+    falling back on Paris."""
+    suggestions = suggest_adresses(adresse)
+    if not suggestions:
         return PARIS
-
-    key = f"lookbook:geocode:v2:{adresse}"
-    coordinates = cache.get(key)
-    if coordinates is None:
-        coordinates = _geocode_ban(adresse)
-        if coordinates:
-            cache.set(key, coordinates, 60 * 60 * 24)
-    return coordinates or PARIS
-
-
-def _geocode_ban(adresse):
-    try:
-        response = requests.get(
-            BAN_API_URL, params={"q": adresse, "limit": 1}, timeout=BAN_TIMEOUT_SECONDS
-        )
-        response.raise_for_status()
-        features = response.json().get("features", [])
-    except (requests.RequestException, ValueError):
-        return None
-
-    if not features:
-        return None
-    longitude, latitude = features[0]["geometry"]["coordinates"]
-    # A municipality has no position worth marking: the address marker is only
-    # shown for a street or a house number.
-    precise = features[0]["properties"].get("type") != "municipality"
-    return (longitude, latitude, precise)
+    first = suggestions[0]
+    return (first["longitude"], first["latitude"], first["precise"])
 
 
 def _sous_categorie_ids(slug):
