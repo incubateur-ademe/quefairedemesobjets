@@ -477,6 +477,253 @@
           }
         ]
       }
+    },
+    "/api/suggestions/cohortes": {
+      "get": {
+        "operationId": "data_revue_api_list_cohortes",
+        "summary": "List Cohortes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filtre",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filtre"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "type_action",
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Type Action",
+              "type": "array"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Statut",
+              "type": "array"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cree_apres",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cree Apres"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cree_avant",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cree Avant"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "tri",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tri"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortePageOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/cohortes/filtres": {
+      "get": {
+        "operationId": "data_revue_api_cohortes_filters",
+        "summary": "Cohortes Filters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterMetaOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/logs": {
+      "get": {
+        "operationId": "data_revue_api_cohorte_logs",
+        "summary": "Cohorte Logs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "niveau",
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Niveau",
+              "type": "array"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogPageOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1039,6 +1286,496 @@
         },
         "required": ["id", "username"],
         "title": "UserOut",
+        "type": "object"
+      },
+      "CohortesQuery": {
+        "properties": {
+          "filtre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filtre"
+          },
+          "type_action": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Type Action",
+            "type": "array"
+          },
+          "statut": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Statut",
+            "type": "array"
+          },
+          "cree_apres": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cree Apres"
+          },
+          "cree_avant": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cree Avant"
+          },
+          "tri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tri"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "default": 50,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "title": "CohortesQuery",
+        "type": "object"
+      },
+      "CohorteOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "identifiant_action": {
+            "title": "Identifiant Action",
+            "type": "string"
+          },
+          "identifiant_execution": {
+            "title": "Identifiant Execution",
+            "type": "string"
+          },
+          "execution_datetime": {
+            "title": "Execution Datetime",
+            "type": "string"
+          },
+          "type_action": {
+            "title": "Type Action",
+            "type": "string"
+          },
+          "type_action_label": {
+            "title": "Type Action Label",
+            "type": "string"
+          },
+          "statut": {
+            "title": "Statut",
+            "type": "string"
+          },
+          "cree_le": {
+            "format": "date-time",
+            "title": "Cree Le",
+            "type": "string"
+          },
+          "metadata": {
+            "title": "Metadata"
+          },
+          "total_groupes": {
+            "title": "Total Groupes",
+            "type": "integer"
+          },
+          "compteurs": {
+            "$ref": "#/components/schemas/CompteursOut"
+          },
+          "logs": {
+            "$ref": "#/components/schemas/LogsCountOut"
+          }
+        },
+        "required": [
+          "id",
+          "identifiant_action",
+          "identifiant_execution",
+          "execution_datetime",
+          "type_action",
+          "type_action_label",
+          "statut",
+          "cree_le",
+          "total_groupes",
+          "compteurs",
+          "logs"
+        ],
+        "title": "CohorteOut",
+        "type": "object"
+      },
+      "CohortePageOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CohorteOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "required": ["items", "total", "page", "page_size"],
+        "title": "CohortePageOut",
+        "type": "object"
+      },
+      "CompteursOut": {
+        "properties": {
+          "AVALIDER": {
+            "title": "Avalider",
+            "type": "integer"
+          },
+          "ATRAITER": {
+            "title": "Atraiter",
+            "type": "integer"
+          },
+          "REJETEE": {
+            "title": "Rejetee",
+            "type": "integer"
+          },
+          "ENCOURS": {
+            "title": "Encours",
+            "type": "integer"
+          },
+          "SUCCES": {
+            "title": "Succes",
+            "type": "integer"
+          },
+          "ERREUR": {
+            "title": "Erreur",
+            "type": "integer"
+          }
+        },
+        "required": ["AVALIDER", "ATRAITER", "REJETEE", "ENCOURS", "SUCCES", "ERREUR"],
+        "title": "CompteursOut",
+        "type": "object"
+      },
+      "LogsCountOut": {
+        "properties": {
+          "ERROR": {
+            "title": "Error",
+            "type": "integer"
+          },
+          "WARNING": {
+            "title": "Warning",
+            "type": "integer"
+          },
+          "INFO": {
+            "title": "Info",
+            "type": "integer"
+          }
+        },
+        "required": ["ERROR", "WARNING", "INFO"],
+        "title": "LogsCountOut",
+        "type": "object"
+      },
+      "ErrorOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "current": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current"
+          }
+        },
+        "required": ["code", "detail"],
+        "title": "ErrorOut",
+        "type": "object"
+      },
+      "ChoiceOut": {
+        "properties": {
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": ["value", "label"],
+        "title": "ChoiceOut",
+        "type": "object"
+      },
+      "FilterFieldOut": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "famille": {
+            "enum": ["cohorte", "groupe", "ligne"],
+            "title": "Famille",
+            "type": "string"
+          },
+          "type": {
+            "enum": ["text", "number", "date", "bool", "choice", "user"],
+            "title": "Type",
+            "type": "string"
+          },
+          "operateurs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Operateurs",
+            "type": "array"
+          },
+          "choix": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChoiceOut"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Choix"
+          }
+        },
+        "required": ["key", "label", "famille", "type", "operateurs"],
+        "title": "FilterFieldOut",
+        "type": "object"
+      },
+      "FilterMetaOut": {
+        "properties": {
+          "champs": {
+            "items": {
+              "$ref": "#/components/schemas/FilterFieldOut"
+            },
+            "title": "Champs",
+            "type": "array"
+          }
+        },
+        "required": ["champs"],
+        "title": "FilterMetaOut",
+        "type": "object"
+      },
+      "LogsQuery": {
+        "properties": {
+          "niveau": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Niveau",
+            "type": "array"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "default": 100,
+            "maximum": 500,
+            "minimum": 1,
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "title": "LogsQuery",
+        "type": "object"
+      },
+      "LogOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "niveau": {
+            "title": "Niveau",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "fonction_de_transformation": {
+            "title": "Fonction De Transformation",
+            "type": "string"
+          },
+          "identifiant_unique": {
+            "title": "Identifiant Unique",
+            "type": "string"
+          },
+          "origine_colonnes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origine Colonnes"
+          },
+          "origine_valeurs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origine Valeurs"
+          },
+          "destination_colonnes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination Colonnes"
+          },
+          "suggestion_groupe_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion Groupe Id"
+          },
+          "cree_le": {
+            "format": "date-time",
+            "title": "Cree Le",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "niveau",
+          "message",
+          "fonction_de_transformation",
+          "identifiant_unique",
+          "origine_colonnes",
+          "origine_valeurs",
+          "destination_colonnes",
+          "suggestion_groupe_id",
+          "cree_le"
+        ],
+        "title": "LogOut",
+        "type": "object"
+      },
+      "LogPageOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LogOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "required": ["items", "total", "page", "page_size"],
+        "title": "LogPageOut",
         "type": "object"
       }
     },

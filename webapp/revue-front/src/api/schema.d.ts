@@ -241,6 +241,57 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/cohortes": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List Cohortes */
+    get: operations["data_revue_api_list_cohortes"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/cohortes/filtres": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Cohortes Filters */
+    get: operations["data_revue_api_cohortes_filters"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/cohortes/{cohorte_id}/logs": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Cohorte Logs */
+    get: operations["data_revue_api_cohorte_logs"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -467,6 +518,203 @@ export interface components {
       id: number
       /** Username */
       username: string
+    }
+    /** CohortesQuery */
+    CohortesQuery: {
+      /** Filtre */
+      filtre?: string | null
+      /**
+       * Type Action
+       * @default []
+       */
+      type_action: string[]
+      /**
+       * Statut
+       * @default []
+       */
+      statut: string[]
+      /** Cree Apres */
+      cree_apres?: string | null
+      /** Cree Avant */
+      cree_avant?: string | null
+      /** Tri */
+      tri?: string | null
+      /**
+       * Page
+       * @default 1
+       */
+      page: number
+      /**
+       * Page Size
+       * @default 50
+       */
+      page_size: number
+    }
+    /** CohorteOut */
+    CohorteOut: {
+      /** Id */
+      id: number
+      /** Identifiant Action */
+      identifiant_action: string
+      /** Identifiant Execution */
+      identifiant_execution: string
+      /** Execution Datetime */
+      execution_datetime: string
+      /** Type Action */
+      type_action: string
+      /** Type Action Label */
+      type_action_label: string
+      /** Statut */
+      statut: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Metadata */
+      metadata?: unknown
+      /** Total Groupes */
+      total_groupes: number
+      compteurs: components["schemas"]["CompteursOut"]
+      logs: components["schemas"]["LogsCountOut"]
+    }
+    /** CohortePageOut */
+    CohortePageOut: {
+      /** Items */
+      items: components["schemas"]["CohorteOut"][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** CompteursOut */
+    CompteursOut: {
+      /** Avalider */
+      AVALIDER: number
+      /** Atraiter */
+      ATRAITER: number
+      /** Rejetee */
+      REJETEE: number
+      /** Encours */
+      ENCOURS: number
+      /** Succes */
+      SUCCES: number
+      /** Erreur */
+      ERREUR: number
+    }
+    /** LogsCountOut */
+    LogsCountOut: {
+      /** Error */
+      ERROR: number
+      /** Warning */
+      WARNING: number
+      /** Info */
+      INFO: number
+    }
+    /** ErrorOut */
+    ErrorOut: {
+      /** Code */
+      code: string
+      /** Detail */
+      detail: string
+      /** Errors */
+      errors?: {
+        [key: string]: string[]
+      } | null
+      /** Current */
+      current?: {
+        [key: string]: unknown
+      } | null
+    }
+    /** ChoiceOut */
+    ChoiceOut: {
+      /** Value */
+      value: string
+      /** Label */
+      label: string
+    }
+    /** FilterFieldOut */
+    FilterFieldOut: {
+      /** Key */
+      key: string
+      /** Label */
+      label: string
+      /**
+       * Famille
+       * @enum {string}
+       */
+      famille: "cohorte" | "groupe" | "ligne"
+      /**
+       * Type
+       * @enum {string}
+       */
+      type: "text" | "number" | "date" | "bool" | "choice" | "user"
+      /** Operateurs */
+      operateurs: string[]
+      /** Choix */
+      choix?: components["schemas"]["ChoiceOut"][] | null
+    }
+    /** FilterMetaOut */
+    FilterMetaOut: {
+      /** Champs */
+      champs: components["schemas"]["FilterFieldOut"][]
+    }
+    /** LogsQuery */
+    LogsQuery: {
+      /**
+       * Niveau
+       * @default []
+       */
+      niveau: string[]
+      /**
+       * Page
+       * @default 1
+       */
+      page: number
+      /**
+       * Page Size
+       * @default 100
+       */
+      page_size: number
+    }
+    /** LogOut */
+    LogOut: {
+      /** Id */
+      id: number
+      /** Niveau */
+      niveau: string
+      /** Message */
+      message: string
+      /** Fonction De Transformation */
+      fonction_de_transformation: string
+      /** Identifiant Unique */
+      identifiant_unique: string
+      /** Origine Colonnes */
+      origine_colonnes: string[] | null
+      /** Origine Valeurs */
+      origine_valeurs: string[] | null
+      /** Destination Colonnes */
+      destination_colonnes: string[] | null
+      /** Suggestion Groupe Id */
+      suggestion_groupe_id: number | null
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+    }
+    /** LogPageOut */
+    LogPageOut: {
+      /** Items */
+      items: components["schemas"]["LogOut"][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
     }
   }
   responses: never
@@ -732,6 +980,90 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["UserOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_list_cohortes: {
+    parameters: {
+      query?: {
+        filtre?: string | null
+        type_action?: string[]
+        statut?: string[]
+        cree_apres?: string | null
+        cree_avant?: string | null
+        tri?: string | null
+        page?: number
+        page_size?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CohortePageOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_cohortes_filters: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FilterMetaOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_cohorte_logs: {
+    parameters: {
+      query?: {
+        niveau?: string[]
+        page?: number
+        page_size?: number
+      }
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["LogPageOut"]
         }
       }
     }
