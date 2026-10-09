@@ -6,6 +6,7 @@ import {
   type CohortesParams,
 } from "../../api/queries"
 import type { Cohorte } from "../../api/types"
+import { JsonEntries } from "../../components/common/JsonValue"
 import { LogsButton } from "../../components/common/LogsButton"
 import { LogsDrawer } from "../../components/common/LogsDrawer"
 import { PageSizeSelect, Pager } from "../../components/common/Pager"
@@ -323,14 +324,7 @@ function CohorteRow({
         <tr className="metarow">
           <td />
           <td colSpan={9}>
-            <dl className="metagrid">
-              {metadata.map(([key, value]) => (
-                <div key={key} className="metagrid__item">
-                  <dt>metadata.{key}</dt>
-                  <dd>{typeof value === "string" ? value : JSON.stringify(value)}</dd>
-                </div>
-              ))}
-            </dl>
+            <JsonEntries entries={metadata} />
           </td>
         </tr>
       )}
