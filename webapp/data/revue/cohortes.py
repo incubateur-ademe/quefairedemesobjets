@@ -189,9 +189,8 @@ def cohortes_filter_metadata() -> list[dict]:
     return registry_metadata(COHORTE_FIELDS, {"metadata": list(metadata_keys)})
 
 
-def logs_page(
-    cohorte: SuggestionCohorte, niveau: list[str], page: int, page_size: int
-) -> dict:
+def logs_queryset(cohorte: SuggestionCohorte, niveau: list[str]) -> QuerySet:
+    """Logs of the cohorte, the most severe first."""
     gravity = Case(
         *(
             When(niveau_de_log=level, then=Value(gravite))
@@ -203,7 +202,11 @@ def logs_page(
     queryset = cohorte.suggestion_logs.annotate(gravite=gravity)
     if niveau:
         queryset = queryset.filter(niveau_de_log__in=niveau)
-    items, total = paginate(
-        queryset.order_by("gravite", "-cree_le", "-id"), page, page_size
-    )
+    return queryset.order_by("gravite", "-cree_le", "-id")
+
+
+def logs_page(
+    cohorte: SuggestionCohorte, niveau: list[str], page: int, page_size: int
+) -> dict:
+    items, total = paginate(logs_queryset(cohorte, niveau), page, page_size)
     return {"items": items, "total": total, "page": page, "page_size": page_size}

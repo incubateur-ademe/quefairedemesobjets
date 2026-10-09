@@ -542,6 +542,37 @@ select {
 
 .metagrid dd {
   margin: 0;
+  word-break: break-word;
+}
+
+.json-table {
+  width: auto;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.json-table th,
+.json-table td {
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.json-table thead th {
+  background: var(--surface-3);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.json-table tbody th {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.json-table .num {
+  text-align: right;
 }
 
 .emptystate {
@@ -578,6 +609,10 @@ select {
 
 .logs-drawer {
   --size: min(960px, 90vw);
+}
+
+.logs-export {
+  margin-bottom: 1em;
 }
 
 /* --- error notifications (only errors are notified) --- */

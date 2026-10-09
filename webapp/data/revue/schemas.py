@@ -115,3 +115,7 @@ class LogsQuery(Schema):
     niveau: list[str] = []
     page: int = Field(1, ge=1)
     page_size: int = Field(100, ge=1, le=500)
+
+
+class LogsExportQuery(Schema):
+    niveau: list[str] = []

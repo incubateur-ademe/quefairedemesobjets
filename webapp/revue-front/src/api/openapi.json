@@ -724,6 +724,51 @@
           }
         ]
       }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/logs/export": {
+      "get": {
+        "operationId": "data_revue_api_export_cohorte_logs",
+        "summary": "Export Cohorte Logs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "niveau",
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Niveau",
+              "type": "array"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logs de la cohorte au format Excel",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+            }
+          }
+        },
+        "description": "Excel export of the logs of a cohorte (same order and level filter).",
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1776,6 +1821,20 @@
         },
         "required": ["items", "total", "page", "page_size"],
         "title": "LogPageOut",
+        "type": "object"
+      },
+      "LogsExportQuery": {
+        "properties": {
+          "niveau": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Niveau",
+            "type": "array"
+          }
+        },
+        "title": "LogsExportQuery",
         "type": "object"
       }
     },

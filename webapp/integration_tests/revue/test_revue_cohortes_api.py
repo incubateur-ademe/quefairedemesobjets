@@ -164,3 +164,36 @@ class TestLogs:
         clustering = SuggestionCohorteFactory(type_action=SuggestionAction.CLUSTERING)
         status, _ = get(client, f"/cohortes/{clustering.id}/logs")
         assert status == 404
+
+
+@pytest.mark.django_db
+class TestLogsExport:
+    def test_xlsx_export(self, client, cohortes):
+        from io import BytesIO
+
+        from openpyxl import load_workbook
+
+        ajout, _ = cohortes
+        response = client.get(
+            f"{API}/cohortes/{ajout.id}/logs/export", {"niveau": ["ERROR", "WARNING"]}
+        )
+
+        assert response.status_code == 200
+        assert response["Content-Type"].startswith(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        assert (
+            f'filename="logs_cohorte_{ajout.id}_dag_ajout.xlsx"'
+            in response["Content-Disposition"]
+        )
+        rows = list(load_workbook(BytesIO(response.content)).active.values)
+        assert rows[0][0] == "Niveau"
+        assert [row[0] for row in rows[1:]] == ["ERROR", "WARNING", "WARNING"]
+
+    def test_export_requires_a_superuser(self, cohortes):
+        from django.test import Client
+
+        ajout, _ = cohortes
+        response = Client().get(f"{API}/cohortes/{ajout.id}/logs/export")
+
+        assert response.status_code == 401

@@ -1,13 +1,20 @@
 import { useState } from "react"
 
 import { useLogs } from "../../api/queries"
+import { useApp } from "../../context"
 import { formatDateTime } from "../../domain/format"
 import { LOG_LEVEL_ORDER, LOG_LEVELS, type LogLevel } from "../../domain/statuts"
-import { WaDrawer, WaSpinner } from "../../wa"
+import { WaButton, WaDrawer, WaIcon, WaSpinner } from "../../wa"
 import { Pager } from "./Pager"
 import { Pill } from "./Pill"
 
 const PAGE_SIZE = 100
+
+/** URL of the Excel export, with the same level filter as the panel. */
+export function logsExportUrl(apiBase: string, cohorteId: number, niveaux: string[]) {
+  const query = new URLSearchParams(niveaux.map((niveau) => ["niveau", niveau]))
+  return `${apiBase}/cohortes/${cohorteId}/logs/export${query.size ? `?${query}` : ""}`
+}
 
 /** Side panel listing the SuggestionLog of a cohorte, by gravity. */
 export function LogsDrawer({
@@ -17,6 +24,7 @@ export function LogsDrawer({
   cohorteId: number | null
   onClose: () => void
 }) {
+  const { bootstrap } = useApp()
   const [niveaux, setNiveaux] = useState<LogLevel[]>([])
   const [page, setPage] = useState(1)
   const logs = useLogs(cohorteId, { niveau: niveaux, page, page_size: PAGE_SIZE })
@@ -51,6 +59,20 @@ export function LogsDrawer({
           </button>
         ))}
         {logs.isFetching && <WaSpinner />}
+        <span className="spacer" />
+        {cohorteId !== null && (
+          <WaButton
+            size="small"
+            appearance="outlined"
+            className="logs-export"
+            // The response is an attachment: the browser downloads it with the
+            // file name given by the server
+            href={logsExportUrl(bootstrap.apiBase, cohorteId, niveaux)}
+          >
+            <WaIcon slot="start" name="file-excel" />
+            Exporter en Excel
+          </WaButton>
+        )}
       </div>
       {logs.error && <p className="error">{logs.error.message}</p>}
       {logs.data && (

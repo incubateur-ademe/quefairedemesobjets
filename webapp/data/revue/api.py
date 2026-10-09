@@ -2,10 +2,10 @@
 
 Handlers stay thin: business rules live in the other modules of data.revue."""
 
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from ninja import Query, Router
 
-from data.revue import cohortes
+from data.revue import cohortes, exports
 from data.revue.auth import SuperuserSessionAuth
 from data.revue.filters import parse_filter
 from data.revue.schemas import (
@@ -14,6 +14,7 @@ from data.revue.schemas import (
     ErrorOut,
     FilterMetaOut,
     LogPageOut,
+    LogsExportQuery,
     LogsQuery,
     UserOut,
 )
@@ -49,3 +50,28 @@ def cohortes_filters(request: HttpRequest):
 def cohorte_logs(request: HttpRequest, cohorte_id: int, query: Query[LogsQuery]):
     cohorte = cohortes.get_source_cohorte(cohorte_id)
     return cohortes.logs_page(cohorte, query.niveau, query.page, query.page_size)
+
+
+@router.get(
+    "/cohortes/{cohorte_id}/logs/export",
+    openapi_extra={
+        "responses": {
+            200: {
+                "description": "Logs de la cohorte au format Excel",
+                "content": {exports.XLSX_CONTENT_TYPE: {}},
+            }
+        }
+    },
+)
+def export_cohorte_logs(
+    request: HttpRequest, cohorte_id: int, query: Query[LogsExportQuery]
+):
+    """Excel export of the logs of a cohorte (same order and level filter)."""
+    cohorte = cohortes.get_source_cohorte(cohorte_id)
+    response = HttpResponse(
+        exports.logs_xlsx(cohorte, query.niveau), content_type=exports.XLSX_CONTENT_TYPE
+    )
+    response["Content-Disposition"] = (
+        f'attachment; filename="{exports.export_filename(cohorte)}"'
+    )
+    return response
