@@ -292,6 +292,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/cohortes/{cohorte_id}/logs/export": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Export Cohorte Logs
+     * @description Excel export of the logs of a cohorte (same order and level filter).
+     */
+    get: operations["data_revue_api_export_cohorte_logs"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -716,6 +736,14 @@ export interface components {
       /** Page Size */
       page_size: number
     }
+    /** LogsExportQuery */
+    LogsExportQuery: {
+      /**
+       * Niveau
+       * @default []
+       */
+      niveau: string[]
+    }
   }
   responses: never
   parameters: never
@@ -1064,6 +1092,30 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["LogPageOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_export_cohorte_logs: {
+    parameters: {
+      query?: {
+        niveau?: string[]
+      }
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Logs de la cohorte au format Excel */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": unknown
         }
       }
     }
