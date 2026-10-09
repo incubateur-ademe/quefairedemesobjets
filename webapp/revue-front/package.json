@@ -1,0 +1,68 @@
+{
+  "name": "@qfdmo/revue-front",
+  "private": true,
+  "type": "module",
+  "description": "Écran de revue des suggestions SOURCE (React), compilé indépendamment de la webapp",
+  "source": "src/main.tsx",
+  "targets": {
+    "default": {
+      "distDir": "../static/compiled/revue",
+      "publicUrl": "./",
+      "sourceMap": false
+    }
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions"
+  ],
+  "scripts": {
+    "build": "parcel build --cache-dir .parcel-cache --no-cache",
+    "watch": "parcel watch --cache-dir .parcel-cache --no-hmr",
+    "test": "jest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format:check": "prettier --check src",
+    "api:schema": "cd .. && uv run python manage.py export_openapi_schema --api core.api.api --indent 2 --output revue-front/src/api/openapi.json",
+    "api:types": "npm run api:schema && npx --yes openapi-typescript@7.13.0 src/api/openapi.json -o src/api/schema.d.ts && prettier --write src/api/openapi.json src/api/schema.d.ts"
+  },
+  "dependencies": {
+    "@awesome.me/webawesome": "^3.14.0",
+    "@tanstack/react-query": "^5.104.1",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.13",
+    "maplibre-gl": "^6.11.2",
+    "openapi-fetch": "^0.17.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remixicon": "^4.9.1"
+  },
+  "devDependencies": {
+    "@parcel/optimizer-data-url": "^2.16.4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "parcel": "^2.16.4",
+    "postcss-nesting": "^14.0.0",
+    "prettier": "^3.9.8",
+    "ts-jest": "^29.4.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "printWidth": 88,
+    "semi": false
+  }
+}

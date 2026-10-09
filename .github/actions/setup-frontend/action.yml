@@ -56,3 +56,8 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       env:
         BASE_URL: ${{ inputs.base-url }}
+
+    - name: Build review screen assets (webapp/revue-front)
+      if: inputs.build == 'true'
+      shell: bash
+      run: npm run build:revue
