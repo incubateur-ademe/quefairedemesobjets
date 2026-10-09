@@ -1,6 +1,6 @@
-import WaCallout from "@awesome.me/webawesome/dist/react/callout/index.js"
-import WaIcon from "@awesome.me/webawesome/dist/react/icon/index.js"
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react"
+
+import { WaCallout, WaIcon } from "../../wa"
 
 /** Only errors are notified: successful actions show directly in the table. */
 type ErrorItem = { id: number; message: string }

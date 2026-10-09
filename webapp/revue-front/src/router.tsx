@@ -114,6 +114,23 @@ export function useRouter(): RouterValue {
   return value
 }
 
+type SearchPatch = Record<string, string | number | undefined | null>
+
+/** Search params of the current page, and a setter merging a patch into them
+ * (undefined / empty values are removed from the URL). */
+export function useSearchParams() {
+  const { search, navigate } = useRouter()
+  const setSearch = useCallback(
+    (patch: SearchPatch, options?: { replace?: boolean }) =>
+      navigate(
+        buildHref("", window.location.pathname, { ...search, ...patch }),
+        options,
+      ),
+    [search, navigate],
+  )
+  return [search, setSearch] as const
+}
+
 /** Internal link: plain <a> (open in new tab works), client navigation on click. */
 export function Link({
   to,

@@ -21,6 +21,8 @@ const config: Config = {
     ],
   },
   moduleNameMapper: {
+    // Web Awesome wrappers (Lit, ESM only) are replaced by plain elements
+    "^(.*/)?wa$": "<rootDir>/src/__mocks__/wa.tsx",
     // Parcel named pipelines (ex: data-url:remixicon/icons/…svg)
     "^data-url:.*$": "<rootDir>/src/__mocks__/dataUrl.ts",
     "\\.css$": "<rootDir>/src/__mocks__/style.ts",
