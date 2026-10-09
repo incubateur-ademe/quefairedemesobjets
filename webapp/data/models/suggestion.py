@@ -5,6 +5,7 @@ from typing import Protocol
 
 from core.models.mixin import TimestampedModel
 from data.models.change import SuggestionChange
+from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -87,6 +88,15 @@ class SuggestionAction(models.TextChoices):
         "ingestion de source de données - modification d'acteur existant",
     )
     SOURCE_SUPPRESSION = "SOURCE_SUPRESSION", "ingestion de source de données"
+
+
+# Stored values of the SOURCE type_action (beware: SOURCE_SUPPRESSION is stored with
+# a typo, never filter SOURCE cohortes with a string prefix)
+SOURCE_TYPE_ACTIONS = [
+    SuggestionAction.SOURCE_AJOUT.value,
+    SuggestionAction.SOURCE_MODIFICATION.value,
+    SuggestionAction.SOURCE_SUPPRESSION.value,
+]
 
 
 class SuggestionCohorteManager(models.Manager):
@@ -498,6 +508,13 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
+        indexes = [
+            # Review screen: groupes of a cohorte, filtered by statut, ordered by id
+            models.Index(
+                fields=["suggestion_cohorte", "statut", "id"],
+                name="data_sg_cohorte_statut_id",
+            ),
+        ]
 
     objects = SuggestionGroupeManager()
 
@@ -546,6 +563,18 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         null=True,
         blank=True,
         verbose_name="Metadata de la cohorte, données statistiques",
+    )
+    # Human decision trace, written by the review screen (data/revue)
+    decision_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="Décision prise par",
+    )
+    decision_le = models.DateTimeField(
+        null=True, blank=True, verbose_name="Date de la décision"
     )
 
     def __str__(self) -> str:
@@ -688,6 +717,18 @@ class SuggestionUnitaire(TimestampedModel, SuggestionActeurRelationsMixin):
     ordre = models.IntegerField(default=1, blank=True)
     raison = models.TextField(blank=True, db_default="", default="")
     parametres = models.JSONField(blank=True, default=dict)
+    # Human decision trace, written by the review screen (data/revue)
+    decision_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="Décision prise par",
+    )
+    decision_le = models.DateTimeField(
+        null=True, blank=True, verbose_name="Date de la décision"
+    )
     suggestion_modele = models.CharField(
         max_length=255, blank=True, db_default="", default="", choices=[]
     )
@@ -708,6 +749,7 @@ class SuggestionLog(TimestampedModel):
         verbose_name = "📝 Suggestion Log"
 
     class SuggestionLogLevel(models.TextChoices):
+        INFO = "INFO", "Info"
         WARNING = "WARNING", "Warning"
         ERROR = "ERROR", "Error"
 
