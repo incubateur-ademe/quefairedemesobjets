@@ -189,6 +189,8 @@ INSTALLED_APPS = [
     "djangoql",
     "django_tasks",
     "django_tasks_db",
+    # Only for the export_openapi_schema management command
+    "ninja",
 ]
 
 

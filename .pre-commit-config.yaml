@@ -48,7 +48,7 @@ repos:
         name: prettier
         entry: npx prettier --write
         language: system
-        files: \.(js|ts|css|md)$
+        files: \.(js|ts|tsx|css|md)$
       # OpenTofu hooks
       - id: tofu_fmt
         name: tofu fmt

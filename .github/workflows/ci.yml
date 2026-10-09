@@ -153,6 +153,58 @@ jobs:
           npm run test
         working-directory: webapp
 
+  revue_frontend:
+    name: ✅ Review Screen Frontend (revue-front)
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Check code formatting
+        run: npm run format:check
+        working-directory: webapp/revue-front
+
+      - name: Lint
+        run: npm run lint
+        working-directory: webapp/revue-front
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: webapp/revue-front
+
+      - name: Run tests
+        run: npm run test
+        working-directory: webapp/revue-front
+
+      - name: Build
+        run: npm run build
+        working-directory: webapp/revue-front
+
+  revue_api_types:
+    name: 📝 Review Screen API Types Up To Date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Django (GeoDjango) is loaded to export the OpenAPI schema
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup backend Python environment
+        uses: ./.github/actions/setup-backend
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Regenerate the OpenAPI schema and the TypeScript types
+        run: npm run api:types
+        working-directory: webapp/revue-front
+
+      - name: Fail if the committed types are outdated
+        run: git diff --exit-code -- webapp/revue-front/src/api
+
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:

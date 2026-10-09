@@ -2,10 +2,13 @@
   "private": true,
   "name": "Que Faire de mes Objets & Déchets",
   "scripts": {
-    "build": "npm --prefix webapp run build"
+    "build": "npm --prefix webapp run build",
+    "build:revue": "npm -w webapp/revue-front run build",
+    "scalingo-postbuild": "npm run build && npm run build:revue"
   },
   "workspaces": [
-    "webapp"
+    "webapp",
+    "webapp/revue-front"
   ],
   "devDependencies": {
     "prettier": "^3.9.8"
