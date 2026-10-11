@@ -115,7 +115,9 @@ function createIframeAttributes(
     id: iframeId || IFRAME_ID,
     frameBorder: "0",
     scrolling: "no",
-    allow: "geolocation; clipboard-write",
+    // `*`, not the default 'src': the assistant may redirect to the V2 host,
+    // and permissions scoped to the src origin don't follow the redirect.
+    allow: "geolocation *; clipboard-write *",
     allowFullscreen: true,
     title: resolveIframeTitle(route, customTitle),
     style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
