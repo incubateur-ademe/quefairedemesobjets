@@ -135,6 +135,16 @@ variable "SCW_SECRET_KEY" {
   type      = string
   sensitive = true
 }
+variable "ML_DEDUPLICATION_SSH_KEY_B64" {
+  description = "Private SSH key (base64-encoded) used to SSH into the on-demand ml-deduplication inference instance. Decoded to a temp file at runtime by the provisioning scripts."
+  type        = string
+  sensitive   = true
+}
+variable "ML_DEDUPLICATION_SSH_PUB_KEY" {
+  description = "Public SSH key string injected into the on-demand ml-deduplication inference instance (via server tag / cloud-init) so the scheduler can SSH in."
+  type        = string
+  sensitive   = false
+}
 variable "SECRET_KEY" {
   type      = string
   sensitive = true

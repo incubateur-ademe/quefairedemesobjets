@@ -141,7 +141,9 @@ def django_model_queryset_to_sql(query: Any) -> str:
     return str(query.query)
 
 
-def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
+def django_model_queryset_to_df(
+    query: Any, fields: list[str], dtype: Any = object
+) -> pd.DataFrame:
     """Converts a Django QuerySet into a dataframe"""
     fn = "django_model_queryset_to_df"
     log.preview(f"{fn}: query", django_model_queryset_to_sql(query))
@@ -163,7 +165,7 @@ def django_model_queryset_to_df(query: Any, fields: list[str]) -> pd.DataFrame:
             logger.info(f"{fn}: {n} entrées récupérées")
     log.preview(f"{fn}: entrées retournées", data)
     # dtype=object => don't try to infer type
-    return pd.DataFrame(data, dtype=object)
+    return pd.DataFrame(data, dtype=dtype)
 
 
 def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:

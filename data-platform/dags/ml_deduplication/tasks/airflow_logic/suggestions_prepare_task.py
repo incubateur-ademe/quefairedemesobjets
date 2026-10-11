@@ -1,0 +1,57 @@
+"""Tâche Airflow de préparation des suggestions (ML-déduplication)"""
+
+import logging
+
+import pandas as pd
+from airflow.providers.standard.operators.python import PythonOperator
+from cluster.tasks.airflow_logic.utils import parent_data_new_deserialize
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.prepare import (
+    cluster_acteurs_suggestions_prepare,
+)
+from ml_deduplication.config.tasks import TASKS
+from ml_deduplication.config.xcoms import XCOMS, xcom_pull, xcom_push
+
+logger = logging.getLogger(__name__)
+
+
+def task_info_get():
+    return f"""
+
+
+    ============================================================
+    Description de la tâche "{TASKS.SUGGESTIONS_PREPARE}"
+    ============================================================
+
+    💡 quoi: affichage de l'état final des suggestions avant
+    écriture en base
+
+    🎯 pourquoi: avoir une vue d'ensemble au niveau airflow:
+     - si on utilise le dry_run avant écriture
+     - si quelque se passe mal au niveau de l'écriture en base
+
+    🏗️ comment: pas de nouvelle données générées ici, on reprends
+    juste les données des tâches précédentes qu'on essaye d'afficher
+    de manière lisible
+    """
+
+
+def ml_deduplication_suggestions_prepare_wrapper(ti) -> None:
+    logger.info(task_info_get())
+
+    df: pd.DataFrame = xcom_pull(ti, XCOMS.DF_PARENTS_CHOOSE_DATA)
+
+    df = parent_data_new_deserialize(df)
+
+    if df.empty:
+        raise ValueError("Pas de clusters récupérés, on ne devrait pas être là")
+
+    working, failing = cluster_acteurs_suggestions_prepare(df)
+    xcom_push(ti, XCOMS.SUGGESTIONS_WORKING, working)
+    xcom_push(ti, XCOMS.SUGGESTIONS_FAILING, failing)
+
+
+def ml_deduplication_suggestions_prepare_task() -> PythonOperator:
+    return PythonOperator(
+        task_id=TASKS.SUGGESTIONS_PREPARE,
+        python_callable=ml_deduplication_suggestions_prepare_wrapper,
+    )
