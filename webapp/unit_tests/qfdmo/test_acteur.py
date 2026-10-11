@@ -205,7 +205,7 @@ class TestActeurGetOrCreateRevisionActeur:
 class TestCreateRevisionActeur:
     def test_new_revision_acteur(self):
         acteur_type = ActeurTypeFactory(code="fake")
-        revision_acteur = RevisionActeur.objects.create(
+        revision_acteur = RevisionActeurFactory.create(
             nom="Test Object 1",
             location=Point(1, 1),
             acteur_type=acteur_type,
@@ -235,7 +235,7 @@ class TestCreateRevisionActeur:
     def test_new_revision_acteur_with_action_principale(self):
         acteur_type = ActeurTypeFactory(code="fake")
         action_principale = ActionFactory(code="action_1")
-        revision_acteur = RevisionActeur.objects.create(
+        revision_acteur = RevisionActeurFactory.create(
             nom="Test Object 1",
             location=Point(1, 1),
             acteur_type=acteur_type,

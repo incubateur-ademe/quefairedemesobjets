@@ -39,7 +39,7 @@ class TestCastEOBooleanOrStringToBoolean:
     @pytest.mark.parametrize(
         "value,expected_value",
         [
-            (None, None),
+            (None, False),
             (False, False),
             (True, True),
             ("oui", True),
@@ -52,8 +52,8 @@ class TestCastEOBooleanOrStringToBoolean:
             ("yes", True),
             ("False", False),
             ("True", True),
-            ("", None),
-            (" ", None),
+            ("", False),
+            (" ", False),
         ],
     )
     def test_cast_eo_boolean_or_string_to_boolean(
