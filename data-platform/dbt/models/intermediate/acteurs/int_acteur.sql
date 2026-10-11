@@ -1,3 +1,17 @@
+WITH carteco AS (
+    -- Acteurs dont la source est Carteco, avec leur parent éventuel
+    SELECT
+        ra.parent_id,
+        COALESCE(ra.identifiant_unique, a.identifiant_unique)
+            AS identifiant_unique
+    FROM {{ ref('base_acteur') }} AS a
+    FULL JOIN {{ ref('base_revisionacteur') }} AS ra
+        ON a.identifiant_unique = ra.identifiant_unique
+    INNER JOIN {{ ref('base_source') }} AS src
+        ON COALESCE(ra.source_id, a.source_id) = src.id
+    WHERE src.code = 'carteco'
+)
+
 SELECT
     CAST(
         {{ target.schema }}.encode_base57(
@@ -32,7 +46,24 @@ SELECT
         AS email,
     COALESCE(ra.location, a.location)
         AS location, -- noqa: RF04
-    {{ coalesce_empty('ra.telephone', 'a.telephone') }}
+    -- Téléphone tel qu'il peut être publié : les numéros mobiles (06/07) et
+    -- ceux des acteurs Carteco (ou dont un enfant vient de Carteco) sont
+    -- masqués ici, une fois pour toutes les marts (carte, opendata, exhaustive)
+    -- et l'API publique.
+    CASE
+        WHEN {{ coalesce_empty('ra.telephone', 'a.telephone') }} ~ '^0[67]'
+            THEN ''
+        WHEN EXISTS (
+            SELECT 1
+            FROM carteco
+            WHERE
+                carteco.identifiant_unique
+                = COALESCE(ra.identifiant_unique, a.identifiant_unique)
+                OR carteco.parent_id
+                = COALESCE(ra.identifiant_unique, a.identifiant_unique)
+        ) THEN ''
+        ELSE {{ coalesce_empty('ra.telephone', 'a.telephone') }}
+    END
         AS telephone,
     {{ coalesce_empty('ra.nom_commercial', 'a.nom_commercial') }}
         AS nom_commercial,
