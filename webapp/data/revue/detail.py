@@ -3,9 +3,9 @@ tab and the identifiers of the Annuaire Entreprises tab."""
 
 from data.models.suggestion import SuggestionGroupe
 from data.revue.annuaire import identifiants
-from data.revue.services import can_create_localisation
 from data.revue.lignes import ACTEUR, serialize_groupe
 from data.revue.policies import PARENT, REVISION, ReviewPolicy
+from data.revue.services import can_create_localisation
 from qfdmo.models.acteur import DisplayedActeur
 
 LATLONG = ("latitude", "longitude")
