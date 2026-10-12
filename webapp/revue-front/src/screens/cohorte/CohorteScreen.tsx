@@ -10,21 +10,21 @@ import {
 } from "../../api/queries"
 import type { Groupe } from "../../api/types"
 import { LogsDrawer } from "../../components/common/LogsDrawer"
-import { PageSizeSelect, Pager } from "../../components/common/Pager"
+import { Pager, PageSizeSelect } from "../../components/common/Pager"
 import { Segmented } from "../../components/common/Segmented"
 import { ShortcutsHelp, type Shortcut } from "../../components/common/ShortcutsHelp"
 import { FilterBuilder } from "../../components/filters/FilterBuilder"
-import { formatNumber } from "../../domain/format"
 import {
   countConditions,
   parseFilterParam,
   serializeFilter,
 } from "../../domain/filterModel"
+import { formatNumber } from "../../domain/format"
 import { scrollRowIntoView } from "../../domain/scroll"
 import { useSearchParams } from "../../router"
 import { WaButton, WaSpinner } from "../../wa"
-import { CohorteHeader, Counters } from "./CohorteHeader"
 import { GroupeModal } from "../groupe-modal/GroupeModal"
+import { CohorteHeader, Counters } from "./CohorteHeader"
 import { cursorItems, groupeCursor, GroupesView, type ModalTab } from "./GroupesView"
 import { PAGE_SIZES, readReviewState, TUPLES_SEPARATOR } from "./searchState"
 import { TuplesBar } from "./TuplesBar"
