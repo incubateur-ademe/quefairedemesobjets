@@ -153,6 +153,19 @@ class TestCacheKeyIgnoresRef:
         third = get(f"/infotri/embed?ref=BBBB&_t={stamp}&x=1", headers=headers)
         assert third.headers.get("X-Cache-Status") == "MISS"
 
+    @pytest.mark.skipif(CACHE_DISABLED, reason="Only valid when NGINX_DISABLE_CACHE=1")
+    @pytest.mark.parametrize("path", ["/", "/dechet", "/dechet/velo/", "/categories/"])
+    def test_ref_is_kept_outside_analytics_only_routes(self, path):
+        # Default: ref stays in the key, the middleware may read it.
+        stamp = time.time()
+        headers = {"Host": BASE_DOMAIN, "Sec-Fetch-Dest": "iframe"}
+
+        get(f"{path}?ref=AAAA&_t={stamp}", headers=headers)
+        other_ref = get(
+            f"{path}?ref=BBBB&_t={stamp}", headers=headers, allow_redirects=False
+        )
+        assert other_ref.headers.get("X-Cache-Status") == "MISS"
+
 
 class TestXCacheStatusHeader:
     @pytest.mark.parametrize(
