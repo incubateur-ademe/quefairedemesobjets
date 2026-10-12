@@ -42,7 +42,12 @@ modèle, jamais échappé à la volée dans le gabarit.
     solutions est une page entière, qui n'en contient aucun — sans cela, Turbo
     affiche « Content missing ».
     {% endcomment %}
-    {% if localise %}
+    {% comment %}
+    Pas de bouton quand la fiche n'a pas de carte sur le site (Véhicule hors
+    d'usage) : aucune solution vers laquelle renvoyer.
+    {% endcomment %}
+    {% if sans_carte %}
+    {% elif localise %}
         {% comment %}
         `url_compte` : le nombre de solutions à proximité arrive après le rendu
         (ADR 0010, compteur différé) et remplace le libellé ; sans solution, le

@@ -90,6 +90,8 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
     gestes repeats `geste` in the query string.
 
     A block is skipped when none of its gestes exists in the database.
+    `sans_carte` is true when the fiche shows no map on the site (no `carte`
+    block, e.g. Véhicule hors d'usage): there is no solution to send to.
     """
     base = parcours.as_params() if parcours else {}
     # The slug spares the solutions screen a label lookup, and the counter
@@ -98,20 +100,21 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
         base = {**base, "fiche": produit_page.slug}
     localise = bool(parcours and parcours.is_located)
 
+    sans_carte = produit_page is not None and not _shows_map(produit_page)
+
     cms = produit_page.consignes if produit_page is not None else []
     if cms:
-        return [
-            block
-            for block in (_from_cms(child, base, localise) for child in cms)
-            if block
-        ]
+        blocks = (_from_cms(child, base, localise) for child in cms)
+    else:
+        known = set(GroupeAction.objects.values_list("code", flat=True))
+        blocks = (_from_static(static, known, base, localise) for static in BLOCKS)
+    return [{**block, "sans_carte": sans_carte} for block in blocks if block]
 
-    known = set(GroupeAction.objects.values_list("code", flat=True))
-    return [
-        block
-        for block in (_from_static(static, known, base, localise) for static in BLOCKS)
-        if block
-    ]
+
+def _shows_map(produit_page) -> bool:
+    # The raw data: a `carte` block is what puts a map on the fiche of the
+    # site, set at import from the sous-catégorie's `afficher_carte`.
+    return any(b["type"] == "carte" for b in produit_page.body.get_prep_value())
 
 
 def _links(gestes, base, localise) -> dict:
