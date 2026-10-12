@@ -960,6 +960,116 @@
         ]
       }
     },
+    "/api/suggestions/cohortes/{cohorte_id}/lignes": {
+      "get": {
+        "operationId": "data_revue_api_list_lignes",
+        "summary": "List Lignes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "filtre",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filtre"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "tuples",
+            "schema": {
+              "default": [],
+              "description": "Tuples de champs, chacun écrit « champ,champ »",
+              "items": {
+                "type": "string"
+              },
+              "title": "Tuples",
+              "type": "array"
+            },
+            "required": false,
+            "description": "Tuples de champs, chacun écrit « champ,champ »"
+          },
+          {
+            "in": "query",
+            "name": "afficher",
+            "schema": {
+              "default": "avalider",
+              "enum": ["avalider", "tout"],
+              "title": "Afficher",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 500,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LignePageOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
     "/api/suggestions/cohortes/{cohorte_id}/stats": {
       "get": {
         "operationId": "data_revue_api_review_stats",
@@ -3231,6 +3341,100 @@
         },
         "required": ["identifiant_unique", "nom", "nb_enfants"],
         "title": "ParentOut",
+        "type": "object"
+      },
+      "LignesQuery": {
+        "properties": {
+          "filtre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filtre"
+          },
+          "tuples": {
+            "default": [],
+            "description": "Tuples de champs, chacun écrit « champ,champ »",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tuples",
+            "type": "array"
+          },
+          "afficher": {
+            "default": "avalider",
+            "enum": ["avalider", "tout"],
+            "title": "Afficher",
+            "type": "string"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "default": 500,
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "title": "LignesQuery",
+        "type": "object"
+      },
+      "LignePageOut": {
+        "description": "The lignes of the page are given by reference: each ligne is found in its\ngroupe (`groupes`), which is what the writes return and update.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LigneRefOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "groupes": {
+            "items": {
+              "$ref": "#/components/schemas/GroupeOut"
+            },
+            "title": "Groupes",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "required": ["items", "groupes", "total", "page", "page_size"],
+        "title": "LignePageOut",
+        "type": "object"
+      },
+      "LigneRefOut": {
+        "properties": {
+          "groupe_id": {
+            "title": "Groupe Id",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": ["groupe_id", "key"],
+        "title": "LigneRefOut",
         "type": "object"
       },
       "StatsQuery": {
