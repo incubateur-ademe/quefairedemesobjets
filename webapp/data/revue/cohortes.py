@@ -137,11 +137,11 @@ def cohortes_page(
     if cree_avant:
         queryset = queryset.filter(cree_le__date__lte=cree_avant)
     items, total = paginate(queryset.order_by(*_order_by(tri)), page, page_size)
-    _attach_counts(items)
+    attach_counts(items)
     return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
-def _attach_counts(cohortes: list[SuggestionCohorte]) -> None:
+def attach_counts(cohortes: list[SuggestionCohorte]) -> None:
     """Groupes per statut and logs per level, with one grouped query each."""
     ids = [cohorte.id for cohorte in cohortes]
     groupes = {}

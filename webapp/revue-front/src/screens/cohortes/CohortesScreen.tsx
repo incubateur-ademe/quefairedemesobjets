@@ -12,6 +12,7 @@ import { LogsDrawer } from "../../components/common/LogsDrawer"
 import { PageSizeSelect, Pager } from "../../components/common/Pager"
 import { CohorteStatutPill } from "../../components/common/Pill"
 import { Segmented } from "../../components/common/Segmented"
+import { ShortcutsHelp, type Shortcut } from "../../components/common/ShortcutsHelp"
 import { StackBar, StatutLegend, totalOf } from "../../components/common/StackBar"
 import { FilterBuilder } from "../../components/filters/FilterBuilder"
 import { daysAgo, formatDateTime, plural } from "../../domain/format"
@@ -30,6 +31,13 @@ const PERIODS = [
   { value: "7", label: "7 jours" },
   { value: "30", label: "30 jours" },
   { value: "", label: "Tout" },
+]
+
+const SHORTCUTS: Shortcut[] = [
+  { keys: ["↑", "↓"], label: "parcourir les cohortes" },
+  { keys: ["⏎"], label: "ouvrir la cohorte" },
+  { keys: ["/"], label: "filtres avancés" },
+  { keys: ["clic"], label: "sur un en-tête de colonne : trier" },
 ]
 
 type Sort = { key: string; descending: boolean }
@@ -230,7 +238,7 @@ export function CohortesScreen() {
         )}
       </div>
       <div className="tfoot">
-        <span>↑/↓ parcourir · ⏎ ouvrir · cliquez un en-tête pour trier</span>
+        <ShortcutsHelp id="shortcuts-cohortes" shortcuts={SHORTCUTS} />
         <span className="spacer" />
         {cohortes.data && (
           <Pager

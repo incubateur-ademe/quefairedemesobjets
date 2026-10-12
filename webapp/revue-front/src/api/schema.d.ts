@@ -312,6 +312,143 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/cohortes/{cohorte_id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Cohorte Detail */
+    get: operations["data_revue_api_cohorte_detail"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/cohortes/{cohorte_id}/revue/filtres": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Review Filters */
+    get: operations["data_revue_api_review_filters"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/cohortes/{cohorte_id}/groupes": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List Groupes */
+    get: operations["data_revue_api_list_groupes"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/cohortes/{cohorte_id}/stats": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Review Stats */
+    get: operations["data_revue_api_review_stats"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/groupes/{groupe_id}/decision": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Groupe Decision */
+    post: operations["data_revue_api_groupe_decision"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/groupes/{groupe_id}/lignes/decision": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Lignes Decision */
+    post: operations["data_revue_api_lignes_decision"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/groupes/{groupe_id}/propositions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Upsert Proposition */
+    put: operations["data_revue_api_upsert_proposition"]
+    post?: never
+    /** Delete Proposition */
+    delete: operations["data_revue_api_delete_proposition"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/groupes/{groupe_id}/report": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Report */
+    post: operations["data_revue_api_report"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -744,6 +881,329 @@ export interface components {
        */
       niveau: string[]
     }
+    /** CohorteDetailOut */
+    CohorteDetailOut: {
+      /** Id */
+      id: number
+      /** Identifiant Action */
+      identifiant_action: string
+      /** Identifiant Execution */
+      identifiant_execution: string
+      /** Execution Datetime */
+      execution_datetime: string
+      /** Type Action */
+      type_action: string
+      /** Type Action Label */
+      type_action_label: string
+      /** Statut */
+      statut: string
+      /**
+       * Cree Le
+       * Format: date-time
+       */
+      cree_le: string
+      /** Metadata */
+      metadata?: unknown
+      /** Total Groupes */
+      total_groupes: number
+      compteurs: components["schemas"]["CompteursOut"]
+      logs: components["schemas"]["LogsCountOut"]
+      policy: components["schemas"]["PolicyOut"]
+    }
+    /** PolicyOut */
+    PolicyOut: {
+      /** Type Action */
+      type_action: string
+      /** Has Lines */
+      has_lines: boolean
+      /** Can Reject Line */
+      can_reject_line: boolean
+      /** Can Reject Group */
+      can_reject_group: boolean
+      /** Editable Models */
+      editable_models: string[]
+      /** Shows Parent */
+      shows_parent: boolean
+      /** Shows Acteur Diff */
+      shows_acteur_diff: boolean
+      /** Badge */
+      badge: string | null
+    }
+    /** GroupesQuery */
+    GroupesQuery: {
+      /** Filtre */
+      filtre?: string | null
+      /**
+       * Tuples
+       * @description Tuples de champs, chacun écrit « champ,champ »
+       * @default []
+       */
+      tuples: string[]
+      /**
+       * Afficher
+       * @default avalider
+       * @enum {string}
+       */
+      afficher: "avalider" | "tout"
+      /**
+       * Page
+       * @default 1
+       */
+      page: number
+      /**
+       * Page Size
+       * @default 100
+       */
+      page_size: number
+    }
+    /** ActeurIdentiteOut */
+    ActeurIdentiteOut: {
+      /** Identifiant Unique */
+      identifiant_unique: string
+      /** Identifiant Externe */
+      identifiant_externe: string
+      /** Nom */
+      nom: string
+      /** Ville */
+      ville: string
+      admin_urls: components["schemas"]["AdminUrlsOut"]
+    }
+    /** AdminUrlsOut */
+    AdminUrlsOut: {
+      /** Importe */
+      importe: string | null
+      /** Affiche */
+      affiche: string | null
+      /** Corrige */
+      corrige: string | null
+      /** Parent */
+      parent: string | null
+    }
+    /** CellOut */
+    CellOut: {
+      /** Actuel */
+      actuel: {
+        [key: string]: string
+      } | null
+      /** Propose */
+      propose: {
+        [key: string]: string
+      } | null
+      /**
+       * Etat
+       * @enum {string}
+       */
+      etat: "valeur" | "vide" | "pas_de_correction"
+    }
+    /** GroupeCapacitesOut */
+    GroupeCapacitesOut: {
+      /** Valider */
+      valider: boolean
+      /** Refuser */
+      refuser: boolean
+      /** Remettre A Valider */
+      remettre_a_valider: boolean
+      /** Reporter Correction */
+      reporter_correction: boolean
+      /** Reporter Parent */
+      reporter_parent: boolean
+    }
+    /** GroupeOut */
+    GroupeOut: {
+      /** Id */
+      id: number
+      /** Statut */
+      statut: string
+      /**
+       * Modifie Le
+       * Format: date-time
+       */
+      modifie_le: string
+      decision_par: components["schemas"]["UserOut"] | null
+      /** Decision Le */
+      decision_le: string | null
+      acteur: components["schemas"]["ActeurIdentiteOut"]
+      /** Is New */
+      is_new: boolean
+      /** Has Correction */
+      has_correction: boolean
+      parent: components["schemas"]["ParentOut"] | null
+      /** Contexte */
+      contexte?: unknown
+      /** Lignes */
+      lignes: components["schemas"]["LigneOut"][]
+      /** Lignes Validees */
+      lignes_validees: number
+      /** Lignes Total */
+      lignes_total: number
+      capacites: components["schemas"]["GroupeCapacitesOut"]
+    }
+    /** GroupePageOut */
+    GroupePageOut: {
+      /** Items */
+      items: components["schemas"]["GroupeOut"][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** LigneCapacitesOut */
+    LigneCapacitesOut: {
+      /** Valider */
+      valider: boolean
+      /** Remettre A Valider */
+      remettre_a_valider: boolean
+      /** Remettre Groupe A Valider */
+      remettre_groupe_a_valider: boolean
+      /** Corriger Correction */
+      corriger_correction: boolean
+      /** Corriger Parent */
+      corriger_parent: boolean
+      /** Reporter Correction */
+      reporter_correction: boolean
+      /** Reporter Parent */
+      reporter_parent: boolean
+      /** Supprimer Correction */
+      supprimer_correction: boolean
+      /** Supprimer Parent */
+      supprimer_parent: boolean
+    }
+    /** LigneOut */
+    LigneOut: {
+      /** Key */
+      key: string
+      /** Champs */
+      champs: string[]
+      /** Statut */
+      statut: string
+      decision_par: components["schemas"]["UserOut"] | null
+      /** Decision Le */
+      decision_le: string | null
+      acteur: components["schemas"]["CellOut"]
+      correction: components["schemas"]["CellOut"]
+      parent: components["schemas"]["CellOut"] | null
+      capacites: components["schemas"]["LigneCapacitesOut"]
+    }
+    /** ParentOut */
+    ParentOut: {
+      /** Identifiant Unique */
+      identifiant_unique: string
+      /** Nom */
+      nom: string
+      /** Nb Enfants */
+      nb_enfants: number
+    }
+    /** StatsQuery */
+    StatsQuery: {
+      /** Filtre */
+      filtre?: string | null
+      /**
+       * Tuples
+       * @description Tuples de champs, chacun écrit « champ,champ »
+       * @default []
+       */
+      tuples: string[]
+      /**
+       * Afficher
+       * @default avalider
+       * @enum {string}
+       */
+      afficher: "avalider" | "tout"
+      /**
+       * Vue
+       * @default groupes
+       * @enum {string}
+       */
+      vue: "groupes" | "lignes"
+    }
+    /** StatsOut */
+    StatsOut: {
+      compteurs: components["schemas"]["CompteursOut"]
+      totaux_vues: components["schemas"]["TotauxVuesOut"]
+      /** Tuples */
+      tuples: components["schemas"]["TupleCountOut"][]
+    }
+    /** TotauxVuesOut */
+    TotauxVuesOut: {
+      /** Groupes */
+      groupes: number
+      /** Lignes */
+      lignes: number
+    }
+    /** TupleCountOut */
+    TupleCountOut: {
+      /** Champs */
+      champs: string[]
+      /** Count */
+      count: number
+    }
+    /** GroupeDecisionIn */
+    GroupeDecisionIn: {
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "validate" | "reject" | "resubmit"
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
+    /** LignesDecisionIn */
+    LignesDecisionIn: {
+      /** Champs */
+      champs: string[][]
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "validate" | "resubmit"
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
+    /** PropositionIn */
+    PropositionIn: {
+      /**
+       * Suggestion Modele
+       * @enum {string}
+       */
+      suggestion_modele: "RevisionActeur" | "ParentRevisionActeur"
+      /** Champs */
+      champs: string[]
+      /** Valeurs */
+      valeurs: {
+        [key: string]: string
+      }
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
+    /** PropositionDeleteQuery */
+    PropositionDeleteQuery: {
+      /**
+       * Suggestion Modele
+       * @enum {string}
+       */
+      suggestion_modele: "RevisionActeur" | "ParentRevisionActeur"
+      /** Champs */
+      champs: string[]
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
+    /** ReportIn */
+    ReportIn: {
+      /**
+       * Cible
+       * @enum {string}
+       */
+      cible: "correction" | "parent"
+      /**
+       * Champs
+       * @description Lignes à reporter ; absent = toutes les lignes reportables
+       */
+      champs?: string[][] | null
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
   }
   responses: never
   parameters: never
@@ -1116,6 +1576,399 @@ export interface operations {
         }
         content: {
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": unknown
+        }
+      }
+    }
+  }
+  data_revue_api_cohorte_detail: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CohorteDetailOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_review_filters: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["FilterMetaOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_list_groupes: {
+    parameters: {
+      query?: {
+        filtre?: string | null
+        /** @description Tuples de champs, chacun écrit « champ,champ » */
+        tuples?: string[]
+        afficher?: "avalider" | "tout"
+        page?: number
+        page_size?: number
+      }
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupePageOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_review_stats: {
+    parameters: {
+      query?: {
+        filtre?: string | null
+        /** @description Tuples de champs, chacun écrit « champ,champ » */
+        tuples?: string[]
+        afficher?: "avalider" | "tout"
+        vue?: "groupes" | "lignes"
+      }
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StatsOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_groupe_decision: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GroupeDecisionIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_lignes_decision: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LignesDecisionIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_upsert_proposition: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PropositionIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_delete_proposition: {
+    parameters: {
+      query: {
+        suggestion_modele: "RevisionActeur" | "ParentRevisionActeur"
+        champs: string[]
+        expected_modifie_le?: string | null
+      }
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_report: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
         }
       }
     }
