@@ -90,6 +90,53 @@ const MODAL_TABS: [ModalTab, string][] = [
   ["annuaire", "Annuaire entreprise"],
 ]
 
+export type Checkboxes = {
+  isChecked: (id: string) => boolean
+  onToggle: (id: string) => void
+  pageChecked: boolean
+  onTogglePage: (checked: boolean) => void
+}
+
+export function RowCheckbox({
+  id,
+  label,
+  checkboxes,
+}: {
+  id: string
+  label: string
+  checkboxes: Checkboxes
+}) {
+  return (
+    <td className="chk" onClick={(event) => event.stopPropagation()}>
+      <input
+        type="checkbox"
+        aria-label={label}
+        checked={checkboxes.isChecked(id)}
+        onChange={() => checkboxes.onToggle(id)}
+      />
+    </td>
+  )
+}
+
+export function PageCheckbox({
+  label,
+  checkboxes,
+}: {
+  label: string
+  checkboxes: Checkboxes
+}) {
+  return (
+    <th className="chk">
+      <input
+        type="checkbox"
+        aria-label={label}
+        checked={checkboxes.pageChecked}
+        onChange={(event) => checkboxes.onTogglePage(event.target.checked)}
+      />
+    </th>
+  )
+}
+
 function GroupeHeaderRow({
   groupe,
   policy,
@@ -97,6 +144,7 @@ function GroupeHeaderRow({
   cursor,
   onCursor,
   onOpen,
+  checkboxes,
 }: {
   groupe: Groupe
   policy: Policy
@@ -104,6 +152,7 @@ function GroupeHeaderRow({
   cursor: string | null
   onCursor: (cursor: string) => void
   onOpen: (groupe: Groupe, tab: ModalTab) => void
+  checkboxes: Checkboxes
 }) {
   const { acteur } = groupe
   const isCursor = cursor === groupeCursor(groupe)
@@ -113,7 +162,11 @@ function GroupeHeaderRow({
       data-cursor={groupeCursor(groupe)}
       onClick={() => onCursor(groupeCursor(groupe))}
     >
-      <td className="gutter" />
+      <RowCheckbox
+        id={String(groupe.id)}
+        label={`Sélectionner le groupe ${groupe.id}`}
+        checkboxes={checkboxes}
+      />
       <td colSpan={2}>
         <div className="gh">
           <span className="mono muted">#{groupe.id}</span>
@@ -359,6 +412,7 @@ export function GroupesView({
   cursor,
   onCursor,
   onOpen,
+  checkboxes,
 }: {
   groupes: Groupe[]
   policy: Policy
@@ -366,6 +420,7 @@ export function GroupesView({
   cursor: string | null
   onCursor: (cursor: string) => void
   onOpen: (groupe: Groupe, tab: ModalTab) => void
+  checkboxes: Checkboxes
 }) {
   if (!groupes.length) {
     return (
@@ -379,7 +434,10 @@ export function GroupesView({
     <table className="tbl cmp stream">
       <thead>
         <tr>
-          <th className="gutter" />
+          <PageCheckbox
+            label="Sélectionner les groupes de cette page"
+            checkboxes={checkboxes}
+          />
           <LigneHead />
         </tr>
       </thead>
@@ -395,6 +453,7 @@ export function GroupesView({
             cursor={cursor}
             onCursor={onCursor}
             onOpen={onOpen}
+            checkboxes={checkboxes}
           />
           {groupe.lignes.map((ligne) => (
             <LigneRow

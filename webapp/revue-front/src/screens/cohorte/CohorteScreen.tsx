@@ -28,6 +28,19 @@ import { GroupeModal } from "../groupe-modal/GroupeModal"
 import { CohorteHeader, Counters } from "./CohorteHeader"
 import { cursorItems, GroupesView, ligneCursor, type ModalTab } from "./GroupesView"
 import { LignesView } from "./LignesView"
+import { MassBar } from "./MassBar"
+import { useMassAction, useMassPreview } from "../../api/masse"
+import {
+  emptySelection,
+  isSelected,
+  pageFullySelected,
+  selectedCount,
+  selectFilter,
+  toggle,
+  togglePage,
+  type ListFilter,
+  type Selection,
+} from "../../state/selection"
 import { PAGE_SIZES, readReviewState, TUPLES_SEPARATOR } from "./searchState"
 import { TuplesBar } from "./TuplesBar"
 
@@ -53,6 +66,7 @@ const SHORTCUTS: Shortcut[] = [
     label:
       "remettre à valider l’élément courant (une ligne d’un groupe refusé rouvre le groupe)",
   },
+  { keys: ["X"], label: "cocher ou décocher l’élément courant (actions de masse)" },
   { keys: ["⏎"], label: "ouvrir le détail du groupe courant" },
   { keys: ["/"], label: "filtres avancés" },
   { keys: ["Échap"], label: "fermer le détail ou les filtres, annuler une correction" },
@@ -104,6 +118,36 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
   const setListSearch = (patch: Record<string, string | undefined>) =>
     setSearch({ ...patch, page: undefined })
 
+  // Selection, reset when the list changes (view, filters, tuples, « afficher »)
+  const listFilter: ListFilter = revueParams
+  const listKey = JSON.stringify({ vue: state.vue, ...revueParams })
+  const [selectionState, setSelectionState] = useState<{
+    list: string
+    selection: Selection
+  }>({ list: listKey, selection: emptySelection() })
+  const selection =
+    selectionState.list === listKey ? selectionState.selection : emptySelection()
+  const setSelection = (update: (current: Selection) => Selection) =>
+    setSelectionState({ list: listKey, selection: update(selection) })
+  const pageIds = useMemo(
+    () =>
+      state.vue === "groupes"
+        ? pageGroupes.map((g) => String(g.id))
+        : (lignes.data?.items ?? []).map((item) => item.key),
+    [state.vue, pageGroupes, lignes.data],
+  )
+  const total = current.data?.total ?? 0
+  const count = selectedCount(selection, total)
+  const preview = useMassPreview(cohorteId, state.vue, selection, listFilter, count > 0)
+  const massAction = useMassAction(cohorteId)
+  const checkboxes = {
+    isChecked: (id: string) => isSelected(selection, id),
+    onToggle: (id: string) => setSelection((current) => toggle(current, id)),
+    pageChecked: pageFullySelected(selection, pageIds),
+    onTogglePage: (checked: boolean) =>
+      setSelection((current) => togglePage(current, pageIds, checked)),
+  }
+
   const cursor = useCursor(
     positions,
     pageGroupes,
@@ -138,6 +182,18 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         cursor.move(key === "arrowdown" ? 1 : -1)
       } else if (key === "a") {
         validateAtCursor(cursor, actions)
+      } else if (key === "x") {
+        // Checks the element under the cursor: the groupe, or the ligne (view Lignes)
+        const groupe = cursor.groupe()
+        const id =
+          state.vue === "groupes"
+            ? groupe
+              ? String(groupe.id)
+              : null
+            : cursor.current?.slice(2)
+        if (id) {
+          checkboxes.onToggle(id)
+        }
       } else if (key === "u") {
         resubmitAtCursor(cursor, actions)
       } else if (key === "r" && state.vue === "groupes") {
@@ -236,6 +292,38 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
           setListSearch({ tuples: tuples.join(TUPLES_SEPARATOR) || undefined })
         }
       />
+      {count > 0 && (
+        <MassBar
+          vue={state.vue}
+          policy={cohorte.data.policy}
+          count={count}
+          total={total}
+          filterMode={selection.mode === "filtre"}
+          canSelectFilter={
+            selection.mode === "page" &&
+            pageFullySelected(selection, pageIds) &&
+            total > selection.ids.size
+          }
+          counts={preview.data}
+          loadingCounts={preview.isFetching}
+          running={massAction.isPending}
+          job={massAction.job}
+          onSelectFilter={() => setSelection(() => selectFilter())}
+          onClear={() => setSelection(() => emptySelection())}
+          onRun={(action) =>
+            massAction
+              .mutateAsync({
+                vue: state.vue,
+                action,
+                selection,
+                list: listFilter,
+                pageGroupeIds: pageGroupes.map((g) => g.id),
+              })
+              .then(() => setSelection(() => emptySelection()))
+              .catch(() => {})
+          }
+        />
+      )}
       {current.error && <p className="error">{current.error.message}</p>}
       <div className="scroll grow">
         {state.vue === "groupes"
@@ -247,6 +335,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
                 cursor={cursor.current}
                 onCursor={cursor.set}
                 onOpen={openModal}
+                checkboxes={checkboxes}
               />
             )
           : lignes.data && (
@@ -256,6 +345,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
                 cursor={cursor.current}
                 onCursor={cursor.set}
                 onOpen={openModal}
+                checkboxes={checkboxes}
               />
             )}
       </div>

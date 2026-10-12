@@ -27,7 +27,7 @@ MAX_IN_VALUES = 100
 
 OPERATORS_BY_TYPE: dict[str, list[str]] = {
     "text": ["eq", "neq", "icontains", "startswith", "in", "is_empty", "is_not_empty"],
-    "number": ["eq", "neq", "gt", "lt", "between", "is_empty", "is_not_empty"],
+    "number": ["eq", "neq", "in", "gt", "lt", "between", "is_empty", "is_not_empty"],
     "date": ["eq", "neq", "gt", "lt", "between", "is_empty", "is_not_empty"],
     "bool": ["eq"],
     "choice": ["eq", "neq", "in"],
@@ -226,6 +226,9 @@ class _Compiler:
         if spec.is_datetime:
             lhs = f"{lhs}__date"
         cast = _parse_date if spec.type == "date" else _parse_number
+        if operator == "in":
+            values = _as_list(value, int | float, spec)
+            return Q(**{f"{lhs}__in": values})
         if operator == "between":
             if not isinstance(value, list) or len(value) != 2:
                 raise filter_error(f"« entre » attend deux valeurs ({spec.label})")
