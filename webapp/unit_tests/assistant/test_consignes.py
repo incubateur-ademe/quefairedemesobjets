@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.urls import reverse
 
@@ -106,10 +108,16 @@ class TestConsignes:
         )
 
 
+def fiche_avec_carte(**kwargs):
+    """A fiche as most live ones: its body holds the map."""
+    body = [{"type": "carte", "id": "carte", "value": {"carte_config": None}}]
+    return ProduitPageFactory(body=json.dumps(body), parent=None, **kwargs)
+
+
 class TestFicheObjet:
     @pytest.fixture
     def fiche(self):
-        return ProduitPageFactory(parent=None)
+        return fiche_avec_carte()
 
     def test_the_fiche_shows_the_three_blocks(self, client, fiche):
         content = client.get(
@@ -130,6 +138,18 @@ class TestFicheObjet:
         assert "assistant-geolocalisation" in without
         assert "assistant-geolocalisation" not in located
         assert "assistant-compteur" in located
+
+    def test_a_fiche_without_map_has_no_button(self, client):
+        """Véhicule hors d'usage: no map on the site, so no solution to show."""
+        fiche = ProduitPageFactory(parent=None)
+        url = reverse("assistant:produit", args=[fiche.slug])
+
+        for params in ({}, {"longitude": "-0.56", "latitude": "47.47"}):
+            content = client.get(url, {"objet": "Véhicule", **params}).content
+            assert b"data-gestes" in content
+            assert reverse("assistant:solutions").encode() + b"?" not in content
+        assert all(c["sans_carte"] for c in consignes_for(fiche))
+        assert not any(c["sans_carte"] for c in consignes_for(fiche_avec_carte()))
 
     def test_the_header_recalls_the_search(self, client, fiche):
         content = client.get(
@@ -191,7 +211,7 @@ class TestLinksLeavingTheFrame:
     """
 
     def test_the_gestes_cta_leaves_the_frame(self, client):
-        fiche = ProduitPageFactory(parent=None)
+        fiche = fiche_avec_carte()
 
         content = client.get(
             reverse("assistant:produit", args=[fiche.slug])
