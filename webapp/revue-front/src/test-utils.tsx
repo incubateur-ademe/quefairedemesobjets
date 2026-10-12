@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render } from "@testing-library/react"
+import { fireEvent, render } from "@testing-library/react"
 import type { ReactNode } from "react"
 
 import type { ApiClient } from "./api/client"
@@ -16,22 +16,45 @@ export const BOOTSTRAP: Bootstrap = {
   user: { id: 1, username: "admin" },
 }
 
-type Handler = (path: string, options?: { params?: Record<string, unknown> }) => unknown
+/** Error answered by the fake API (status and JSON body). */
+export class FakeApiError {
+  constructor(
+    readonly status: number,
+    readonly body: Record<string, unknown>,
+  ) {}
+}
 
-/** Fake openapi-fetch client: `handler` returns the data of each GET. */
+type Handler = (
+  path: string,
+  options: { params?: Record<string, unknown>; body?: unknown } | undefined,
+  method: "GET" | "POST" | "PUT" | "DELETE",
+) => unknown
+
+/** Fake openapi-fetch client: `handler` returns the data of each request, or a
+ * FakeApiError. */
 export function fakeApi(handler: Handler) {
-  const respond = async (
-    path: string,
-    options?: { params?: Record<string, unknown> },
-  ) => ({
-    data: await handler(path, options),
-    response: new (class {
-      ok = true
-      status = 200
-    })(),
-  })
-  return { GET: jest.fn(respond), POST: jest.fn(respond) } as unknown as ApiClient & {
+  const respond =
+    (method: "GET" | "POST" | "PUT" | "DELETE") =>
+    async (
+      path: string,
+      options?: { params?: Record<string, unknown>; body?: unknown },
+    ) => {
+      const result = await handler(path, options, method)
+      if (result instanceof FakeApiError) {
+        return { error: result.body, response: { ok: false, status: result.status } }
+      }
+      return { data: result, response: { ok: true, status: 200 } }
+    }
+  return {
+    GET: jest.fn(respond("GET")),
+    POST: jest.fn(respond("POST")),
+    PUT: jest.fn(respond("PUT")),
+    DELETE: jest.fn(respond("DELETE")),
+  } as unknown as ApiClient & {
     GET: jest.Mock
+    POST: jest.Mock
+    PUT: jest.Mock
+    DELETE: jest.Mock
   }
 }
 
@@ -59,5 +82,6 @@ export function setControlValue(
   eventName: "change" | "input" = "change",
 ) {
   ;(element as HTMLElement & { value: unknown }).value = value
-  element.dispatchEvent(new Event(eventName, { bubbles: true }))
+  // fireEvent wraps the dispatch in act(): state updates are flushed
+  fireEvent(element, new Event(eventName, { bubbles: true }))
 }

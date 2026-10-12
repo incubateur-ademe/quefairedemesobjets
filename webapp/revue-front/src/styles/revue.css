@@ -25,6 +25,8 @@
   --done-soft: #e5e9ef;
   --err: #8a2a7a;
   --err-soft: #f6e1f2;
+  --diff: #fff1b8;
+  --diff-fg: #574100;
   --font-mono: ui-monospace, Menlo, Consolas, monospace;
 }
 
@@ -56,6 +58,8 @@
     --done-soft: #252c38;
     --err: #e28ed3;
     --err-soft: #381e35;
+    --diff: #4a3c0c;
+    --diff-fg: #ffe08c;
   }
 }
 
@@ -633,4 +637,451 @@ select {
   background: none;
   color: inherit;
   cursor: pointer;
+}
+
+/* --- screen 2: review of a cohorte --- */
+.review {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.rhead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.rtitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.rtitle h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.back {
+  color: var(--muted);
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.counters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.counter b {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  max-width: 420px;
+}
+
+.progress .stack {
+  flex: 1;
+  height: 8px;
+}
+
+.progress .pct {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tuplebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.chip .n {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.chip--ghost {
+  border-color: transparent;
+}
+
+/* comparison table: Acteur importé | ▶ | Correction | ⏩ | Parent */
+.hsub {
+  display: block;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+}
+
+.cmp td.c-tgt {
+  background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface));
+}
+
+.cmp td.c-par {
+  background: color-mix(in srgb, var(--err-soft) 35%, var(--surface));
+}
+
+.cmp th.c-rep,
+.cmp td.c-rep {
+  width: 34px;
+  padding-right: 2px;
+  padding-left: 2px;
+  text-align: center;
+}
+
+.gutter {
+  width: 12px;
+}
+
+.champs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.champ {
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.dv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.dv .arrow {
+  color: var(--faint);
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0 8px;
+}
+
+.kv__item {
+  display: contents;
+}
+
+.kv .k {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.val.chg {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--diff);
+  color: var(--diff-fg);
+}
+
+.val.old {
+  color: var(--danger);
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
+.inherit {
+  color: var(--faint);
+  font-size: 11.5px;
+  font-style: italic;
+}
+
+.empty {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.xl {
+  margin-left: 5px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.xl:hover {
+  text-decoration: underline;
+}
+
+.sugcell {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.sugbtns {
+  display: flex;
+  gap: 2px;
+}
+
+.sugbtns button,
+.rep {
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sugbtns button:hover,
+.rep:hover {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.editbtn {
+  opacity: 0.55;
+}
+
+tr:hover .editbtn,
+.editbtn:focus-visible {
+  opacity: 1;
+}
+
+.rep {
+  font-size: 13px;
+}
+
+.rep small {
+  margin-left: 2px;
+  font-size: 10px;
+}
+
+.repoff {
+  color: var(--faint);
+}
+
+.edit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+}
+
+.edit .bad {
+  --wa-form-control-border-color: var(--danger);
+}
+
+.ferr {
+  color: var(--danger);
+  font-size: 11.5px;
+}
+
+.eacts {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.decided {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.lock {
+  color: var(--faint);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.p-accent {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* flow groupe → lignes */
+.stream tbody.gbody tr.ghead td {
+  padding: 6px 8px;
+  border-top: 2px solid var(--line-strong);
+  background: var(--surface-2);
+}
+
+.stream tbody.gbody:first-of-type tr.ghead td {
+  border-top: 0;
+}
+
+.stream tr.ln.st-ATRAITER td {
+  background: var(--ok-soft);
+}
+
+.stream tr.ln.st-REJETEE td,
+.stream tr.ghead.st-REJETEE td {
+  background: var(--danger-soft);
+}
+
+.stream tr.ro td {
+  color: var(--muted);
+}
+
+.gh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.gname {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.gmeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 3px;
+}
+
+.glinks {
+  display: flex;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 11.5px;
+}
+
+.glinks .lk {
+  font-weight: 500;
+}
+
+.gact {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.lineprog {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lineprog .stack {
+  width: 36px;
+  min-width: 36px;
+  height: 5px;
+}
+
+/* cursor: the groupe header is much more marked than its lignes */
+.stream tbody.gfocus tr.ln > td {
+  background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface)) !important;
+}
+
+.stream tbody.gfocus tr.ln > td.gutter {
+  box-shadow: inset 3px 0 0 var(--accent-line);
+}
+
+.stream tr.ghead.cur > td {
+  border-top-color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface)) !important;
+}
+
+.stream tr.ghead.cur > td.gutter {
+  box-shadow: inset 5px 0 0 var(--accent);
+}
+
+.stream tr.ln.cur > td {
+  background: var(--accent-soft) !important;
+}
+
+.stream tr.ln.cur > td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* keyboard shortcuts help */
+.shortcuts-link {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: help;
+}
+
+.shortcuts-tooltip {
+  --max-width: 460px;
+}
+
+.shortcuts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 12px;
+  text-align: left;
+}
+
+.shortcuts__item {
+  display: contents;
+}
+
+.shortcuts dt {
+  display: flex;
+  gap: 3px;
+}
+
+.shortcuts dd {
+  margin: 0;
 }
