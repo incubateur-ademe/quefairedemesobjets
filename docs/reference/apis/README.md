@@ -42,4 +42,5 @@ instance defined in `webapp/core/api.py` and mounted in `webapp/core/urls.py`.
 
 qfdmo.md
 stats.md
+suggestions.md
 ```
