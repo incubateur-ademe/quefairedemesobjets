@@ -16,7 +16,7 @@ from data.revue.detail import serialize_groupe_detail
 from data.revue.errors import RevueApiError
 from data.revue.exports import XLSX_CONTENT_TYPE, export_filename, logs_xlsx
 from data.revue.filters import parse_filter
-from data.revue.lignes import groupes_queryset, serialize_groupes
+from data.revue.lignes import groupes_queryset, ligne_key, serialize_groupes
 from data.revue.pagination import paginate
 from data.revue.policies import get_policy
 from data.revue.revue import (
@@ -38,7 +38,9 @@ from data.revue.schemas import (
     GroupeOut,
     GroupePageOut,
     GroupesQuery,
+    LignePageOut,
     LignesDecisionIn,
+    LignesQuery,
     LogPageOut,
     LogsExportQuery,
     LogsQuery,
@@ -154,6 +156,33 @@ def list_groupes(request: HttpRequest, cohorte_id: int, query: Query[GroupesQuer
     items = list(groupes_queryset().filter(id__in=ids).order_by("id"))
     return {
         "items": serialize_groupes(items, get_policy(cohorte.type_action)),
+        "total": total,
+        "page": query.page,
+        "page_size": query.page_size,
+    }
+
+
+@router.get(
+    "/cohortes/{cohorte_id}/lignes", response={200: LignePageOut, 422: ErrorOut}
+)
+def list_lignes(request: HttpRequest, cohorte_id: int, query: Query[LignesQuery]):
+    cohorte = cohortes.get_source_cohorte(cohorte_id)
+    keys, total = revue.lignes_page(
+        cohorte,
+        parse_filter(query.filtre),
+        revue.parse_tuples(query.tuples),
+        query.afficher,
+        query.page,
+        query.page_size,
+    )
+    groupe_ids = sorted({groupe_id for groupe_id, _ in keys})
+    groupes = list(groupes_queryset().filter(id__in=groupe_ids).order_by("id"))
+    return {
+        "items": [
+            {"groupe_id": groupe_id, "key": ligne_key(groupe_id, champs)}
+            for groupe_id, champs in keys
+        ],
+        "groupes": serialize_groupes(groupes, get_policy(cohorte.type_action)),
         "total": total,
         "page": query.page,
         "page_size": query.page_size,
