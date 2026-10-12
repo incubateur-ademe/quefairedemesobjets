@@ -1,5 +1,5 @@
 import type { GroupeActions } from "../../api/mutations"
-import type { Groupe, Modele, Policy } from "../../api/types"
+import type { Groupe, Ligne, Modele, Policy } from "../../api/types"
 import { StatutPill } from "../../components/common/Pill"
 import { plural } from "../../domain/format"
 import { WaButton } from "../../wa"
@@ -83,25 +83,30 @@ function ReportAll({
   )
 }
 
+export type ModalTab = "suggestions" | "acteur" | "localisation" | "annuaire"
+
+const MODAL_TABS: [ModalTab, string][] = [
+  ["acteur", "Acteur"],
+  ["localisation", "Localisation"],
+  ["annuaire", "Annuaire entreprise"],
+]
+
 function GroupeHeaderRow({
   groupe,
   policy,
   actions,
   cursor,
   onCursor,
+  onOpen,
 }: {
   groupe: Groupe
   policy: Policy
   actions: GroupeActions
   cursor: string | null
   onCursor: (cursor: string) => void
+  onOpen: (groupe: Groupe, tab: ModalTab) => void
 }) {
   const { acteur } = groupe
-  const decide =
-    (action: "validate" | "reject" | "resubmit") => (event: React.MouseEvent) => {
-      event.stopPropagation()
-      actions.decideGroupe(groupe, action).catch(() => {})
-    }
   const isCursor = cursor === groupeCursor(groupe)
   return (
     <tr
@@ -121,6 +126,21 @@ function GroupeHeaderRow({
         <div className="gmeta">
           <span className="mono faint">{acteur.identifiant_unique}</span>
           <span className="muted">{acteur.ville}</span>
+        </div>
+        <div className="gmeta">
+          {MODAL_TABS.map(([tab, label]) => (
+            <WaButton
+              key={tab}
+              size="small"
+              appearance="plain"
+              onClick={(event) => {
+                event.stopPropagation()
+                onOpen(groupe, tab)
+              }}
+            >
+              {label}
+            </WaButton>
+          ))}
         </div>
         <div className="glinks">
           {acteur.admin_urls.importe && (
@@ -209,32 +229,122 @@ function GroupeHeaderRow({
       </td>
       <td>
         <div className="gact">
-          {groupe.capacites.refuser && (
-            <WaButton
-              size="small"
-              variant="danger"
-              appearance="outlined"
-              onClick={decide("reject")}
-            >
-              Refuser le groupe
-            </WaButton>
-          )}
-          {groupe.capacites.valider && (
-            <WaButton size="small" variant="success" onClick={decide("validate")}>
-              Valider le groupe
-            </WaButton>
-          )}
-          {groupe.capacites.remettre_a_valider && (
-            <WaButton size="small" appearance="outlined" onClick={decide("resubmit")}>
-              Remettre à valider
-            </WaButton>
-          )}
-          {PROCESSING.includes(groupe.statut) && (
-            <span className="lock">lecture seule</span>
-          )}
+          <GroupeActionsButtons groupe={groupe} actions={actions} />
         </div>
       </td>
     </tr>
+  )
+}
+
+/** A ligne de suggestion: one row of the comparison table, as in the admin. */
+export function LigneRow({
+  groupe,
+  ligne,
+  actions,
+  cursor,
+  onCursor,
+}: {
+  groupe: Groupe
+  ligne: Ligne
+  actions: GroupeActions
+  cursor?: string | null
+  onCursor?: (cursor: string) => void
+}) {
+  const id = ligneCursor(ligne.key)
+  return (
+    <tr
+      className={`ln st-${ligne.statut}${PROCESSING.includes(ligne.statut) ? " ro" : ""}${cursor === id ? " cur" : ""}`}
+      data-cursor={onCursor ? id : undefined}
+      onClick={() => onCursor?.(id)}
+    >
+      <td className="gutter" />
+      <td>
+        <ChampsCell ligne={ligne} />
+      </td>
+      <td className="c-src">
+        <ActeurCell ligne={ligne} />
+      </td>
+      <td className="c-rep">
+        <ReportButton
+          groupe={groupe}
+          ligne={ligne}
+          modele="RevisionActeur"
+          actions={actions}
+        />
+      </td>
+      <td className="c-tgt">
+        <TargetCell
+          groupe={groupe}
+          ligne={ligne}
+          modele="RevisionActeur"
+          actions={actions}
+        />
+      </td>
+      <td className="c-rep">
+        <ReportButton
+          groupe={groupe}
+          ligne={ligne}
+          modele="ParentRevisionActeur"
+          actions={actions}
+        />
+      </td>
+      <td className="c-tgt c-par">
+        <TargetCell
+          groupe={groupe}
+          ligne={ligne}
+          modele="ParentRevisionActeur"
+          actions={actions}
+        />
+      </td>
+      <td>
+        <StatutCell ligne={ligne} />
+      </td>
+      <td>
+        <LigneActionCell groupe={groupe} ligne={ligne} actions={actions} />
+      </td>
+    </tr>
+  )
+}
+
+/** Decision buttons of a groupe (header row and modal). */
+export function GroupeActionsButtons({
+  groupe,
+  actions,
+}: {
+  groupe: Groupe
+  actions: GroupeActions
+}) {
+  const decide =
+    (action: "validate" | "reject" | "resubmit") => (event: React.MouseEvent) => {
+      event.stopPropagation()
+      actions.decideGroupe(groupe, action).catch(() => {})
+    }
+  return (
+    <>
+      {groupe.capacites.refuser && (
+        <WaButton
+          size="small"
+          variant="danger"
+          appearance="outlined"
+          onClick={decide("reject")}
+        >
+          Refuser le groupe
+        </WaButton>
+      )}
+      {groupe.capacites.valider && (
+        <WaButton size="small" variant="success" onClick={decide("validate")}>
+          Valider le groupe
+        </WaButton>
+      )}
+      {groupe.capacites.remettre_a_valider && (
+        <WaButton size="small" appearance="outlined" onClick={decide("resubmit")}>
+          Remettre à valider
+        </WaButton>
+      )}
+      {PROCESSING.includes(groupe.statut) && (
+        <span className="lock">lecture seule</span>
+      )}
+    </>
   )
 }
 
@@ -246,12 +356,14 @@ export function GroupesView({
   actions,
   cursor,
   onCursor,
+  onOpen,
 }: {
   groupes: Groupe[]
   policy: Policy
   actions: GroupeActions
   cursor: string | null
   onCursor: (cursor: string) => void
+  onOpen: (groupe: Groupe, tab: ModalTab) => void
 }) {
   if (!groupes.length) {
     return (
@@ -280,64 +392,18 @@ export function GroupesView({
             actions={actions}
             cursor={cursor}
             onCursor={onCursor}
+            onOpen={onOpen}
           />
-          {groupe.lignes.map((ligne) => {
-            const id = ligneCursor(ligne.key)
-            return (
-              <tr
-                key={ligne.key}
-                className={`ln st-${ligne.statut}${PROCESSING.includes(ligne.statut) ? " ro" : ""}${cursor === id ? " cur" : ""}`}
-                data-cursor={id}
-                onClick={() => onCursor(id)}
-              >
-                <td className="gutter" />
-                <td>
-                  <ChampsCell ligne={ligne} />
-                </td>
-                <td className="c-src">
-                  <ActeurCell ligne={ligne} />
-                </td>
-                <td className="c-rep">
-                  <ReportButton
-                    groupe={groupe}
-                    ligne={ligne}
-                    modele="RevisionActeur"
-                    actions={actions}
-                  />
-                </td>
-                <td className="c-tgt">
-                  <TargetCell
-                    groupe={groupe}
-                    ligne={ligne}
-                    modele="RevisionActeur"
-                    actions={actions}
-                  />
-                </td>
-                <td className="c-rep">
-                  <ReportButton
-                    groupe={groupe}
-                    ligne={ligne}
-                    modele="ParentRevisionActeur"
-                    actions={actions}
-                  />
-                </td>
-                <td className="c-tgt c-par">
-                  <TargetCell
-                    groupe={groupe}
-                    ligne={ligne}
-                    modele="ParentRevisionActeur"
-                    actions={actions}
-                  />
-                </td>
-                <td>
-                  <StatutCell ligne={ligne} />
-                </td>
-                <td>
-                  <LigneActionCell groupe={groupe} ligne={ligne} actions={actions} />
-                </td>
-              </tr>
-            )
-          })}
+          {groupe.lignes.map((ligne) => (
+            <LigneRow
+              key={ligne.key}
+              groupe={groupe}
+              ligne={ligne}
+              actions={actions}
+              cursor={cursor}
+              onCursor={onCursor}
+            />
+          ))}
         </tbody>
       ))}
     </table>

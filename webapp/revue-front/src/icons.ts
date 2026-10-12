@@ -12,6 +12,7 @@ import externalLink from "data-url:remixicon/icons/System/external-link-line.svg
 import fileExcel from "data-url:remixicon/icons/Document/file-excel-2-line.svg"
 import fileList from "data-url:remixicon/icons/Document/file-list-line.svg"
 import filter from "data-url:remixicon/icons/System/filter-line.svg"
+import mapPin from "data-url:remixicon/icons/Map/map-pin-line.svg"
 import information from "data-url:remixicon/icons/System/information-line.svg"
 
 export const ICONS: Record<string, string> = {
@@ -27,6 +28,7 @@ export const ICONS: Record<string, string> = {
   "file-list": fileList,
   filter,
   information,
+  "map-pin": mapPin,
 }
 
 export type IconName = keyof typeof ICONS

@@ -380,6 +380,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/groupes/{groupe_id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Groupe Detail */
+    get: operations["data_revue_api_groupe_detail"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/suggestions/groupes/{groupe_id}/decision": {
     parameters: {
       query?: never
@@ -443,6 +460,27 @@ export interface paths {
     put?: never
     /** Report */
     post: operations["data_revue_api_report"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/annuaire-entreprises": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Annuaire Entreprises
+     * @description Entreprise and établissement of a SIRET / SIREN, from the public API
+     *     « Recherche d'entreprises » (cached one day).
+     */
+    get: operations["data_revue_api_annuaire_entreprises"]
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -1139,6 +1177,101 @@ export interface components {
       /** Count */
       count: number
     }
+    /** AnnuaireOut */
+    AnnuaireOut: {
+      /** Siret */
+      siret: components["schemas"]["IdentifiantOut"][]
+      /** Siren */
+      siren: components["schemas"]["IdentifiantOut"][]
+    }
+    /** ChampValeurOut */
+    ChampValeurOut: {
+      /** Champ */
+      champ: string
+      /** Valeur */
+      valeur: string
+    }
+    /** GroupeDetailOut */
+    GroupeDetailOut: {
+      /** Id */
+      id: number
+      /** Statut */
+      statut: string
+      /**
+       * Modifie Le
+       * Format: date-time
+       */
+      modifie_le: string
+      decision_par: components["schemas"]["UserOut"] | null
+      /** Decision Le */
+      decision_le: string | null
+      acteur: components["schemas"]["ActeurIdentiteOut"]
+      /** Is New */
+      is_new: boolean
+      /** Has Correction */
+      has_correction: boolean
+      parent: components["schemas"]["ParentOut"] | null
+      /** Contexte */
+      contexte?: unknown
+      /** Lignes */
+      lignes: components["schemas"]["LigneOut"][]
+      /** Lignes Validees */
+      lignes_validees: number
+      /** Lignes Total */
+      lignes_total: number
+      capacites: components["schemas"]["GroupeCapacitesOut"]
+      /** Acteur Affiche */
+      acteur_affiche: components["schemas"]["ChampValeurOut"][]
+      localisation: components["schemas"]["LocalisationOut"]
+      annuaire: components["schemas"]["AnnuaireOut"]
+    }
+    /** IdentifiantOut */
+    IdentifiantOut: {
+      /**
+       * Source
+       * @enum {string}
+       */
+      source: "corrige" | "parent" | "correction" | "acteur"
+      /** Label */
+      label: string
+      /** Valeur */
+      valeur: string
+      /**
+       * Propose
+       * @description Valeur proposée (et non actuelle)
+       */
+      propose: boolean
+    }
+    /** LocalisationOut */
+    LocalisationOut: {
+      /** Points */
+      points: components["schemas"]["PointOut"][]
+      /**
+       * Ligne
+       * @description Clé de la ligne (latitude, longitude) du groupe
+       */
+      ligne?: string | null
+      /**
+       * Creer Correction
+       * @description Pas encore de proposition de localisation sur la correction (SU latitude/longitude sur RevisionActeur) : en ajouter une
+       * @default false
+       */
+      creer_correction: boolean
+    }
+    /** PointOut */
+    PointOut: {
+      /**
+       * Key
+       * @enum {string}
+       */
+      key: "Origin" | "Acteur" | "RevisionActeur" | "ParentRevisionActeur"
+      /** Latitude */
+      latitude: number
+      /** Longitude */
+      longitude: number
+      /** Draggable */
+      draggable: boolean
+    }
     /** GroupeDecisionIn */
     GroupeDecisionIn: {
       /**
@@ -1203,6 +1336,61 @@ export interface components {
       champs?: string[][] | null
       /** Expected Modifie Le */
       expected_modifie_le?: string | null
+    }
+    /** AnnuaireQuery */
+    AnnuaireQuery: {
+      /**
+       * Champ
+       * @enum {string}
+       */
+      champ: "siret" | "siren"
+      /** Valeur */
+      valeur: string
+    }
+    /** AnnuaireEntrepriseOut */
+    AnnuaireEntrepriseOut: {
+      /** Trouve */
+      trouve: boolean
+      entreprise: components["schemas"]["EntrepriseOut"] | null
+      etablissement: components["schemas"]["EtablissementOut"] | null
+    }
+    /** EntrepriseOut */
+    EntrepriseOut: {
+      /** Siren */
+      siren: string
+      /** Nom */
+      nom: string
+      /** Adresse */
+      adresse: string
+      /** Activite Code */
+      activite_code: string
+      /**
+       * Etat
+       * @enum {string}
+       */
+      etat: "actif" | "inactif"
+    }
+    /** EtablissementOut */
+    EtablissementOut: {
+      /** Siret */
+      siret: string
+      /** Nom */
+      nom: string
+      /** Adresse */
+      adresse: string
+      /** Activite Code */
+      activite_code: string
+      /**
+       * Etat
+       * @enum {string}
+       */
+      etat: "actif" | "ferme"
+      /** Est Siege */
+      est_siege: boolean
+      /** Latitude */
+      latitude?: number | null
+      /** Longitude */
+      longitude?: number | null
     }
   }
   responses: never
@@ -1708,6 +1896,37 @@ export interface operations {
       }
     }
   }
+  data_revue_api_groupe_detail: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeDetailOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
   data_revue_api_groupe_decision: {
     parameters: {
       query?: never
@@ -1964,6 +2183,47 @@ export interface operations {
       }
       /** @description Unprocessable Entity */
       422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_annuaire_entreprises: {
+    parameters: {
+      query: {
+        champ: "siret" | "siren"
+        valeur: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AnnuaireEntrepriseOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Bad Gateway */
+      502: {
         headers: {
           [name: string]: unknown
         }

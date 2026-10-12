@@ -5,8 +5,10 @@ import { unwrap } from "./client"
 import type {
   Afficher,
   CohorteDetail,
+  AnnuaireEntreprise,
   CohortePage,
   FilterField,
+  GroupeDetail,
   GroupePage,
   LogPage,
   Stats,
@@ -42,6 +44,7 @@ export const queryKeys = {
     params
       ? (["groupes", cohorteId, params] as const)
       : (["groupes", cohorteId] as const),
+  groupe: (groupeId: number) => ["groupe", groupeId] as const,
   stats: (cohorteId: number, params?: RevueParams & { vue: Vue }) =>
     params ? (["stats", cohorteId, params] as const) : (["stats", cohorteId] as const),
 }
@@ -138,5 +141,41 @@ export function useStats(cohorteId: number, params: RevueParams & { vue: Vue }) 
         }),
       ),
     placeholderData: keepPreviousData,
+  })
+}
+
+/** Detail of a groupe, for the modal (acteur displayed, map, Annuaire). */
+export function useGroupeDetail(groupeId: number | null) {
+  const { api } = useApp()
+  return useQuery({
+    queryKey: queryKeys.groupe(groupeId ?? 0),
+    queryFn: (): Promise<GroupeDetail> =>
+      unwrap(
+        api.GET("/api/suggestions/groupes/{groupe_id}", {
+          params: { path: { groupe_id: groupeId! } },
+        }),
+      ),
+    enabled: groupeId !== null,
+  })
+}
+
+/** Entreprise and établissement of a SIRET / SIREN (Annuaire des entreprises). */
+export function useAnnuaireEntreprise(
+  champ: "siret" | "siren",
+  valeur: string,
+  enabled = true,
+) {
+  const { api } = useApp()
+  return useQuery({
+    queryKey: ["annuaire", champ, valeur] as const,
+    queryFn: (): Promise<AnnuaireEntreprise> =>
+      unwrap(
+        api.GET("/api/suggestions/annuaire-entreprises", {
+          params: { query: { champ, valeur } },
+        }),
+      ),
+    staleTime: 60 * 60_000,
+    retry: false,
+    enabled: enabled && Boolean(valeur),
   })
 }

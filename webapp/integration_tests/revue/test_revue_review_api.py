@@ -488,3 +488,160 @@ class TestCorrections:
         )
 
         assert status == 409
+
+
+@pytest.mark.django_db
+class TestGroupeDetail:
+    def test_detail_of_a_modification(self, client, modification):
+        groupe = modification.suggestion_groupes.filter(
+            parent_revision_acteur__isnull=False,
+            suggestion_unitaires__champs=["latitude", "longitude"],
+        ).first()
+        assert groupe, "the seed has a groupe with a parent and a latitude/longitude"
+        status, body = get(client, f"/groupes/{groupe.id}")
+
+        assert status == 200
+        assert body["id"] == groupe.id
+        assert body["lignes"]
+        points = {point["key"]: point for point in body["localisation"]["points"]}
+        assert set(points) >= {
+            "Origin",
+            "Acteur",
+            "RevisionActeur",
+            "ParentRevisionActeur",
+        }
+        assert points["Origin"]["draggable"] is False
+        assert points["Acteur"]["draggable"] is False
+        draggable = groupe.statut == SuggestionStatut.AVALIDER
+        assert points["RevisionActeur"]["draggable"] is draggable
+        assert body["localisation"]["ligne"] == f"{groupe.id}:latitude,longitude"
+        assert body["annuaire"]["siren"][-1]["valeur"]
+        assert body["acteur_affiche"] == [] or body["acteur_affiche"][0]["champ"] == (
+            "identifiant_unique"
+        )
+
+    def test_detail_of_an_ajout(self, client, seed):
+        groupe = seed[SuggestionAction.SOURCE_AJOUT].suggestion_groupes.first()
+        _, body = get(client, f"/groupes/{groupe.id}")
+
+        assert body["acteur_affiche"] == []
+        assert [point["key"] for point in body["localisation"]["points"]] == ["Acteur"]
+        (siret,) = body["annuaire"]["siret"]
+        assert siret["source"] == "acteur"
+        assert siret["propose"] is True
+        assert len(siret["valeur"]) == 14
+
+    def test_not_found(self, client, seed):
+        status, body = get(client, "/groupes/0")
+        assert status == 404
+        assert body["code"] == "not_found"
+
+
+@pytest.mark.django_db
+class TestCreateLocalisationCorrection:
+    def test_create_a_correction_without_localisation_ligne(self, client, modification):
+        groupe = (
+            modification.suggestion_groupes.filter(
+                statut=SuggestionStatut.AVALIDER, revision_acteur__isnull=True
+            )
+            .exclude(suggestion_unitaires__champs=["latitude", "longitude"])
+            .first()
+        )
+        _, body = get(client, f"/groupes/{groupe.id}")
+        assert body["localisation"]["creer_correction"] is True
+        assert "RevisionActeur" not in [
+            p["key"] for p in body["localisation"]["points"]
+        ]
+
+        status, body = post(
+            client,
+            f"/groupes/{groupe.id}/propositions",
+            {
+                "suggestion_modele": "RevisionActeur",
+                "champs": ["latitude", "longitude"],
+                "valeurs": {"latitude": "48.85", "longitude": "2.35"},
+            },
+            method="put",
+        )
+
+        assert status == 200
+        ligne = next(
+            ligne
+            for ligne in body["lignes"]
+            if ligne["champs"] == ["latitude", "longitude"]
+        )
+        assert ligne["correction"]["propose"] == {
+            "latitude": "48.85",
+            "longitude": "2.35",
+        }
+        assert ligne["acteur"]["propose"] is None
+        _, body = get(client, f"/groupes/{groupe.id}")
+        assert body["localisation"]["creer_correction"] is False
+        correction = next(
+            p for p in body["localisation"]["points"] if p["key"] == "RevisionActeur"
+        )
+        assert correction == {
+            "key": "RevisionActeur",
+            "latitude": 48.85,
+            "longitude": 2.35,
+            "draggable": True,
+        }
+
+    def test_no_creation_once_decided(self, client, modification):
+        groupe = modification.suggestion_groupes.filter(
+            statut=SuggestionStatut.ATRAITER, revision_acteur__isnull=True
+        ).first()
+        _, body = get(client, f"/groupes/{groupe.id}")
+        assert body["localisation"]["creer_correction"] is False
+
+        status, _ = post(
+            client,
+            f"/groupes/{groupe.id}/propositions",
+            {
+                "suggestion_modele": "RevisionActeur",
+                "champs": ["latitude", "longitude"],
+                "valeurs": {"latitude": "48.85", "longitude": "2.35"},
+            },
+            method="put",
+        )
+        assert status in (404, 409)
+
+
+@pytest.mark.django_db
+def test_add_a_localisation_correction_to_an_existing_correction(client, modification):
+    """The acteur has a RevisionActeur, but no proposed localisation on it."""
+    groupe = (
+        modification.suggestion_groupes.filter(
+            statut=SuggestionStatut.AVALIDER, revision_acteur__isnull=False
+        )
+        .exclude(
+            suggestion_unitaires__suggestion_modele="RevisionActeur",
+            suggestion_unitaires__champs=["latitude", "longitude"],
+        )
+        .first()
+    )
+    _, body = get(client, f"/groupes/{groupe.id}")
+    points = {p["key"]: p for p in body["localisation"]["points"]}
+    assert "RevisionActeur" in points  # current localisation of the correction
+    assert body["localisation"]["creer_correction"] is True
+
+    status, _ = post(
+        client,
+        f"/groupes/{groupe.id}/propositions",
+        {
+            "suggestion_modele": "RevisionActeur",
+            "champs": ["latitude", "longitude"],
+            "valeurs": {
+                "latitude": str(points["RevisionActeur"]["latitude"] + 0.001),
+                "longitude": str(points["RevisionActeur"]["longitude"]),
+            },
+        },
+        method="put",
+    )
+
+    assert status == 200
+    assert groupe.suggestion_unitaires.filter(
+        suggestion_modele="RevisionActeur", champs=["latitude", "longitude"]
+    ).exists()
+    _, body = get(client, f"/groupes/{groupe.id}")
+    assert body["localisation"]["creer_correction"] is False
