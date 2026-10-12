@@ -430,8 +430,17 @@ class TestPlanForText:
 
         apply_plan(page, plan_conversion(page))
 
-        assert draft_types(page) == ["consignes", "paragraph", "carte", "break"]
-        grid = page.get_latest_revision_as_object().body[0].value
+        draft = page.get_latest_revision_as_object().body
+        assert draft_types(page) == [
+            "paragraph",
+            "consignes",
+            "paragraph",
+            "carte",
+            "break",
+        ]
+        # Spec: a migrated fiche, without H2, gets one above its consignes.
+        assert draft[0].value.source == "<h2>Découvrez les consignes</h2>"
+        grid = draft[1].value
         assert grid["column_width"] == "12"
         assert draft_consignes(page)[0]["contenu"].source == (
             "Apportez-le en déchèterie."
@@ -509,8 +518,8 @@ class TestApplyPlan:
 
         apply_plan(page, plan_conversion(page))
 
-        assert draft_types(page) == ["consignes", "item_grid"]
-        left = page.get_latest_revision_as_object().body[1].value["items"]
+        assert draft_types(page) == ["paragraph", "consignes", "item_grid"]
+        left = page.get_latest_revision_as_object().body[2].value["items"]
         assert [item.value["title"] for item in left] == ["Les piles boutons"]
 
     def test_lone_cards_get_a_width_from_their_number(self):
@@ -527,7 +536,7 @@ class TestApplyPlan:
 
         apply_plan(page, plan_conversion(page))
 
-        grid = page.get_latest_revision_as_object().body[0].value
+        grid = page.get_latest_revision_as_object().body[1].value
         assert grid["column_width"] == "6"
 
     def test_nothing_usable_writes_no_draft(self):

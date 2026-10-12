@@ -87,6 +87,7 @@ TEXT_CONSIGNE_OBJET = {
     "titre": "Donner, revendre ou déposer",
     "gestes": ["donner", "revendre", "trier"],
 }
+CONSIGNES_HEADING = "Découvrez les consignes"
 BONUS_WORDS = "bonus reparation"
 RAPPORTER_WORDS = ("rapport", "ramen")  # rapporter, rapportez, ramener
 
@@ -293,7 +294,9 @@ def apply_plan(page: ProduitPage, plan: Plan, user=None, publish=False) -> int:
 
     A grid emptied by the move disappears, a grid partly moved keeps its
     other cards; the new grid takes the place of the first card that moved
-    and the width of the grid it came from. Returns the number written.
+    and the width of the grid it came from, under a « Découvrez les
+    consignes » H2 unless the block above is already one. Returns the number
+    written.
     """
     if not plan.consignes:
         return 0
@@ -320,6 +323,8 @@ def apply_plan(page: ProduitPage, plan: Plan, user=None, publish=False) -> int:
     for block in raw:
         remaining = _without_moved(block, moved)
         if remaining is not block and not inserted:
+            if not (body and "<h2" in str(body[-1].get("value") or "")):
+                body.append(_heading())
             body.extend(grids)
             inserted = True
         if remaining is not None:
@@ -446,6 +451,16 @@ def _without_moved(block: dict, moved: set) -> dict | None:
             return None
         return {**block, "value": {**block["value"], "items": kept}}
     return None if (block_id, None) in moved else block
+
+
+def _heading() -> dict:
+    """Spec: a fiche with no H2 above its consignes (the migrated ones) gets
+    one, in a text block before the grid."""
+    return {
+        "type": "paragraph",
+        "id": str(uuid.uuid4()),
+        "value": f"<h2>{CONSIGNES_HEADING}</h2>",
+    }
 
 
 def _chunks(items, size):
