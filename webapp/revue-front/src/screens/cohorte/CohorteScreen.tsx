@@ -20,6 +20,7 @@ import {
   parseFilterParam,
   serializeFilter,
 } from "../../domain/filterModel"
+import { scrollRowIntoView } from "../../domain/scroll"
 import { useSearchParams } from "../../router"
 import { WaButton, WaSpinner } from "../../wa"
 import { CohorteHeader, Counters } from "./CohorteHeader"
@@ -265,9 +266,9 @@ function useCursor(
 
   useEffect(() => {
     if (current) {
-      document
-        .querySelector(`[data-cursor="${current.replace(/"/g, '\\"')}"]`)
-        ?.scrollIntoView({ block: "nearest" })
+      scrollRowIntoView(
+        document.querySelector(`[data-cursor="${current.replace(/"/g, '\\"')}"]`),
+      )
     }
   }, [current])
 

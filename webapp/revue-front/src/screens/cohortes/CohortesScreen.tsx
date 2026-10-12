@@ -21,6 +21,7 @@ import {
   parseFilterParam,
   serializeFilter,
 } from "../../domain/filterModel"
+import { scrollRowIntoView } from "../../domain/scroll"
 import { TYPE_ACTIONS } from "../../domain/statuts"
 import { buildHref, Link, useRouter, useSearchParams } from "../../router"
 import { WaButton, WaSpinner } from "../../wa"
@@ -77,6 +78,9 @@ export function CohortesScreen() {
   const focus = focusState.list === listKey ? focusState.index : 0
   const setFocus = (update: (index: number) => number) =>
     setFocusState({ list: listKey, index: update(focus) })
+  useEffect(() => {
+    scrollRowIntoView(document.querySelector("tr.focus"))
+  }, [focus])
 
   // Any change of the list (filter, sort, page) resets the page or the focus
   const setListSearch = (patch: Record<string, string | undefined>) =>
