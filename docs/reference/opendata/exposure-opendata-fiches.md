@@ -34,19 +34,19 @@ Pour une consigne, les lieux qui la mettent en œuvre sont donc les acteurs dont
 
 ## Table `consignes.csv`
 
-| Colonne               | Type    | Description                                                     | Format ou valeurs                                                     |
-| --------------------- | ------- | --------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `identifiant`         | texte   | Identifiant stable de la consigne, attribué par le CMS.         | UUID.                                                                 |
-| `identifiant_produit` | entier  | Fiche à laquelle la consigne appartient.                        | Clé vers `produits.identifiant`.                                      |
-| `ordre`               | entier  | Position de la consigne dans la fiche.                          | À partir de `1`.                                                      |
-| `titre`               | texte   | Titre de la consigne.                                           | Non vide.                                                             |
-| `contenu`             | texte   | Contenu mis en forme.                                           | HTML : paragraphes, gras, liens, listes.                              |
-| `contenu_texte`       | texte   | Le même contenu en texte brut.                                  | Une ligne par paragraphe, items de liste préfixés par `- `.           |
-| `gestes`              | texte   | Codes d'action décrits par la consigne, pivot vers les acteurs. | Séparés par `\|`. Voir section « Valeurs de référence ».              |
-| `etat`                | texte   | État de l'objet auquel la consigne s'applique.                  | `reparable`, `bon_etat`, `mauvais_etat` ou vide (déchets).            |
-| `lieu_de_depot`       | texte   | Où déposer le déchet.                                           | Code du lieu ou vide (objets). Voir section « Valeurs de référence ». |
-| `bonus_reparation`    | booléen | La fiche est éligible au bonus réparation pour ce geste.        | `true` ou `false`.                                                    |
-| `lien_url`            | texte   | Page du site vers laquelle la consigne renvoie.                 | URL absolue ou vide.                                                  |
+| Colonne               | Type    | Description                                                     | Format ou valeurs                                                                       |
+| --------------------- | ------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `identifiant`         | texte   | Identifiant stable de la consigne, attribué par le CMS.         | UUID.                                                                                   |
+| `identifiant_produit` | entier  | Fiche à laquelle la consigne appartient.                        | Clé vers `produits.identifiant`.                                                        |
+| `ordre`               | entier  | Position de la consigne dans la fiche.                          | À partir de `1`.                                                                        |
+| `titre`               | texte   | Titre de la consigne.                                           | Non vide.                                                                               |
+| `contenu`             | texte   | Contenu mis en forme.                                           | HTML : paragraphes, gras, liens, listes.                                                |
+| `contenu_texte`       | texte   | Le même contenu en texte brut.                                  | Une ligne par paragraphe, items de liste préfixés par `- `.                             |
+| `gestes`              | texte   | Codes d'action décrits par la consigne, pivot vers les acteurs. | Séparés par `\|`. Voir section « Valeurs de référence ».                                |
+| `etat`                | texte   | État de l'objet auquel la consigne s'applique.                  | `reparable`, `bon_etat`, `mauvais_etat` ou vide (déchets, objet sans état).             |
+| `lieu_de_depot`       | texte   | Où déposer le déchet.                                           | Code du lieu ou vide (objets, déchet sans lieu). Voir section « Valeurs de référence ». |
+| `bonus_reparation`    | booléen | La fiche est éligible au bonus réparation pour ce geste.        | `true` ou `false`.                                                                      |
+| `lien_url`            | texte   | Page du site vers laquelle la consigne renvoie.                 | URL absolue ou vide.                                                                    |
 
 ## Valeurs de référence
 
@@ -88,7 +88,7 @@ identifiant,identifiant_produit,ordre,titre,contenu,contenu_texte,gestes,etat,li
 
 ## Migration des fiches existantes
 
-Dans le CMS, l'action de page « Convertir les cartes en grille de consignes » déplace la première rangée de cartes d'une fiche (après l'introduction, avant la carte) dans une grille de consignes, largeur de colonne comprise : titre, contenu et lien ne sont pas réécrits, et les cartes plus bas dans la page ne sont pas touchées. Les champs typés sont déduits des badges selon les règles de migration de la tâche #3284, sans intervention d'un modèle : état et bonus d'après les badges pour un objet (ou d'après le titre « Réparer », « Donner ou revendre », « Déposer » à défaut), lieu de dépôt d'après le premier badge qui nomme un lieu pour un déchet, gestes déduits de l'état ou « déposer » (`trier`), « rapporter » quand la carte dit de rapporter le produit. Une carte dont l'état ne peut pas être déduit reste en place et est signalée à l'éditeur ; il en va de même quand les badges contredisent le type de la fiche (lieu de dépôt sur une fiche objet, état sur une fiche déchet), signe que la case « À usage unique » est à revoir avant de convertir. Le résultat est un **brouillon** que l'éditeur relit avant de publier (`webapp/qfdmd/consignes_migration.py`).
+Dans le CMS, l'action de page « Convertir les cartes en grille de consignes » déplace la première rangée de cartes d'une fiche (après l'introduction, avant la carte) dans une grille de consignes, largeur de colonne comprise : titre, contenu et lien ne sont pas réécrits, et les cartes plus bas dans la page ne sont pas touchées. Les champs typés sont déduits des badges selon les règles de migration de la tâche #3284, sans intervention d'un modèle : état et bonus d'après les badges pour un objet (ou d'après le titre « Réparer », « Donner ou revendre », « Déposer » à défaut), lieu de dépôt d'après le premier badge qui nomme un lieu pour un déchet, gestes déduits de l'état ou « déposer » (`trier`), « rapporter » quand la carte dit de rapporter le produit. Une carte dont l'état ne peut pas être déduit reste en place et est signalée à l'éditeur ; il en va de même quand les badges contredisent le type de la fiche (lieu de dépôt sur une fiche objet, état sur une fiche déchet), signe que la case « À usage unique » est à revoir avant de convertir. Une fiche sans cartes, qui porte sa consigne en texte libre (le paragraphe qui ouvre la fiche, avant tout titre), en reçoit une seule : titre « Déposer » et geste `trier` pour un déchet, titre « Donner, revendre ou déposer » et gestes `donner|revendre|trier` pour un objet, contenu repris tel quel, sans état, lieu de dépôt ni bonus. Le résultat est un **brouillon** que l'éditeur relit avant de publier (`webapp/qfdmd/consignes_migration.py`).
 
 ## Production
 

@@ -390,6 +390,57 @@ class TestPlanForDechets:
         assert "Cheminée" in plan.notes[0]
 
 
+def text_page(**kwargs):
+    """A fiche migrated from the former site: the consigne as plain text,
+    then the map heading (Véhicule hors d'usage, Acétone)."""
+    body = [
+        {"type": "paragraph", "id": "texte", "value": "Apportez-le en déchèterie."},
+        {"type": "paragraph", "id": "titre", "value": "<h2>Où l'apporter ?</h2>"},
+        {"type": "carte", "id": "carte", "value": {"carte_config": None}},
+        {"type": "break", "id": "break", "value": ""},
+    ]
+    return ProduitPageFactory(body=json.dumps(body), live=True, **kwargs)
+
+
+class TestPlanForText:
+    def test_a_dechet_text_becomes_one_deposer_consigne(self):
+        plan = plan_conversion(text_page(usage_unique=True))
+
+        assert [c.value for c in plan.consignes] == [
+            {
+                "titre": "Déposer",
+                "contenu": "Apportez-le en déchèterie.",
+                "lien": None,
+                "gestes": ["trier"],
+                "etat": None,
+                "lieu_de_depot": None,
+                "bonus_reparation": False,
+            }
+        ]
+
+    def test_an_objet_text_takes_every_geste(self):
+        (consigne,) = plan_conversion(text_page(usage_unique=False)).consignes
+
+        assert consigne.value["titre"] == "Donner, revendre ou déposer"
+        assert consigne.value["gestes"] == ["donner", "revendre", "trier"]
+        assert consigne.value["etat"] is None
+
+    def test_the_text_moves_into_a_full_width_grid(self):
+        page = text_page(usage_unique=True)
+
+        apply_plan(page, plan_conversion(page))
+
+        assert draft_types(page) == ["consignes", "paragraph", "carte", "break"]
+        grid = page.get_latest_revision_as_object().body[0].value
+        assert grid["column_width"] == "12"
+        assert draft_consignes(page)[0]["contenu"].source == (
+            "Apportez-le en déchèterie."
+        )
+
+    def test_a_fiche_with_cards_ignores_its_intro_text(self):
+        assert len(plan_conversion(objet_page()).consignes) == 3
+
+
 class TestApplyPlan:
     def test_cards_move_into_a_draft_grid_word_for_word(self):
         target = ProduitPageFactory(parent=None, title="Bonus réparation")
@@ -481,7 +532,7 @@ class TestApplyPlan:
 
     def test_nothing_usable_writes_no_draft(self):
         page = ProduitPageFactory(
-            body=json.dumps([{"type": "paragraph", "id": "p", "value": "<p>x</p>"}])
+            body=json.dumps([{"type": "paragraph", "id": "p", "value": "<h2>x</h2>"}])
         )
         before = page.revisions.count()
 

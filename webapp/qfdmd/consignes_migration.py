@@ -16,6 +16,11 @@ The conversion is deterministic, the rules being those of the spec:
   says to bring the product back; the lieu de dépôt is the first badge that
   names a lieu.
 
+A fiche without cards (most of the fiches migrated from the former site)
+holds its consigne as plain text: the paragraph that opens the body, before
+any heading. It becomes a single consigne, titled and given gestes by the
+spec ("Pour les composants texte uniquement"), with no état, lieu or bonus.
+
 Title, content and link are copied verbatim. A card whose fields cannot be
 resolved stays where it is and is reported to the editor. The row moves
 into the grid in a **draft revision**: nothing is published until an editor
@@ -75,6 +80,12 @@ GESTES_BY_ETAT = {
     "reparable": ["reparer"],
     "bon_etat": ["donner", "revendre"],
     "mauvais_etat": ["trier"],
+}
+# A text consigne, by the fiche's « À usage unique » flag (spec #3284).
+TEXT_CONSIGNE_DECHET = {"titre": "Déposer", "gestes": ["trier"]}
+TEXT_CONSIGNE_OBJET = {
+    "titre": "Donner, revendre ou déposer",
+    "gestes": ["donner", "revendre", "trier"],
 }
 BONUS_WORDS = "bonus reparation"
 RAPPORTER_WORDS = ("rapport", "ramen")  # rapporter, rapportez, ramener
@@ -143,8 +154,14 @@ def first_row_of_cards(page: ProduitPage) -> list[dict]:
 def plan_conversion(page: ProduitPage) -> Plan:
     """Convert the first row, in memory. Nothing is written."""
     plan = Plan()
+    cards = first_row_of_cards(page)
+    if not cards:
+        text = _text_consigne(page)
+        if text:
+            plan.consignes.append(text)
+        return plan
     lieux = {normalise(lieu.libelle): lieu for lieu in LieuDeDepot.objects.all()}
-    for source in first_row_of_cards(page):
+    for source in cards:
         card = source["card"]
         titre = (card.get("title") or "").strip()
         if not titre:
@@ -164,6 +181,31 @@ def plan_conversion(page: ProduitPage) -> Plan:
             )
         )
     return plan
+
+
+def _text_consigne(page: ProduitPage) -> Consigne | None:
+    """The paragraph opening the body, when it is not a heading, as the one
+    consigne of a fiche without cards."""
+    raw = page.body.get_prep_value()
+    if not raw or raw[0]["type"] != "paragraph":
+        return None
+    contenu = raw[0]["value"] or ""
+    if not strip_tags(contenu).strip() or re.match(r"\s*<h[1-6]", contenu):
+        return None
+    rules = TEXT_CONSIGNE_DECHET if page.usage_unique else TEXT_CONSIGNE_OBJET
+    return Consigne(
+        raw[0]["id"],
+        None,
+        {
+            "titre": rules["titre"],
+            "contenu": contenu,
+            "lien": None,
+            "gestes": list(rules["gestes"]),
+            "etat": None,
+            "lieu_de_depot": None,
+            "bonus_reparation": False,
+        },
+    )
 
 
 def _typed_for_objet(
