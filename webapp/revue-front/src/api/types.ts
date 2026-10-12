@@ -21,3 +21,7 @@ export type LigneCapacites = Schemas["LigneCapacitesOut"]
 export type Modele = "RevisionActeur" | "ParentRevisionActeur"
 export type Vue = "groupes" | "lignes"
 export type Afficher = "avalider" | "tout"
+export type GroupeDetail = Schemas["GroupeDetailOut"]
+export type Point = Schemas["PointOut"]
+export type Identifiant = Schemas["IdentifiantOut"]
+export type AnnuaireEntreprise = Schemas["AnnuaireEntrepriseOut"]

@@ -14,3 +14,6 @@ export { default as WaOption } from "@awesome.me/webawesome/dist/react/option/in
 export { default as WaSelect } from "@awesome.me/webawesome/dist/react/select/index.js"
 export { default as WaSpinner } from "@awesome.me/webawesome/dist/react/spinner/index.js"
 export { default as WaTooltip } from "@awesome.me/webawesome/dist/react/tooltip/index.js"
+export { default as WaTab } from "@awesome.me/webawesome/dist/react/tab/index.js"
+export { default as WaTabGroup } from "@awesome.me/webawesome/dist/react/tab-group/index.js"
+export { default as WaTabPanel } from "@awesome.me/webawesome/dist/react/tab-panel/index.js"
