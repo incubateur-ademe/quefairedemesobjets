@@ -86,6 +86,12 @@ class TestOtherTypes:
             tree(cond("type_action", "in", ["SOURCE_AJOUT", "SOURCE_SUPRESSION"]))
         ) == {"Écosystème_DAG", ""}
 
+    def test_number_in(self, cohortes):
+        first_two = list(
+            SuggestionCohorte.objects.order_by("id").values_list("id", flat=True)[:2]
+        )
+        assert len(ids(tree(cond("id", "in", first_two)))) == 2
+
     def test_number_between(self, cohortes):
         first = SuggestionCohorte.objects.order_by("id").first()
         assert ids(tree(cond("id", "between", [first.id, first.id]))) == {

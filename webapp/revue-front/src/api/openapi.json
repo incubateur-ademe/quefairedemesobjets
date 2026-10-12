@@ -1681,6 +1681,193 @@
           }
         ]
       }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/actions/apercu": {
+      "post": {
+        "operationId": "data_revue_api_mass_preview",
+        "summary": "Mass Preview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MassPreviewOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "description": "Number of elements each mass action would really change on the selection.",
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MassSelectionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/actions": {
+      "post": {
+        "operationId": "data_revue_api_mass_action",
+        "summary": "Mass Action",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MassResultOut"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MassJobOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "description": "Runs a mass action. The filter of a « tout le filtre » selection is applied\nagain by the server. Large reports run in the background (202 + job).",
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MassActionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/jobs/{job_id}": {
+      "get": {
+        "operationId": "data_revue_api_job",
+        "summary": "Job",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -4032,6 +4219,234 @@
         },
         "required": ["siret", "nom", "adresse", "activite_code", "etat", "est_siege"],
         "title": "EtablissementOut",
+        "type": "object"
+      },
+      "MassPreviewOut": {
+        "description": "Number of elements (groupes or lignes) each action would really change.",
+        "properties": {
+          "compteurs": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "enum": [
+                "validate",
+                "reject",
+                "resubmit",
+                "report_correction",
+                "report_parent"
+              ]
+            },
+            "title": "Compteurs",
+            "type": "object"
+          }
+        },
+        "required": ["compteurs"],
+        "title": "MassPreviewOut",
+        "type": "object"
+      },
+      "FiltreSelectionIn": {
+        "properties": {
+          "mode": {
+            "const": "filtre",
+            "title": "Mode",
+            "type": "string"
+          },
+          "filtre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filtre"
+          },
+          "tuples": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tuples",
+            "type": "array"
+          },
+          "afficher": {
+            "default": "avalider",
+            "enum": ["avalider", "tout"],
+            "title": "Afficher",
+            "type": "string"
+          },
+          "exclus": {
+            "default": [],
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "maxItems": 5000,
+            "title": "Exclus",
+            "type": "array"
+          }
+        },
+        "required": ["mode"],
+        "title": "FiltreSelectionIn",
+        "type": "object"
+      },
+      "IdsSelectionIn": {
+        "properties": {
+          "mode": {
+            "const": "ids",
+            "title": "Mode",
+            "type": "string"
+          },
+          "ids": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "maxItems": 5000,
+            "title": "Ids",
+            "type": "array"
+          }
+        },
+        "required": ["mode", "ids"],
+        "title": "IdsSelectionIn",
+        "type": "object"
+      },
+      "MassSelectionIn": {
+        "properties": {
+          "vue": {
+            "enum": ["groupes", "lignes"],
+            "title": "Vue",
+            "type": "string"
+          },
+          "selection": {
+            "discriminator": {
+              "mapping": {
+                "filtre": "#/components/schemas/FiltreSelectionIn",
+                "ids": "#/components/schemas/IdsSelectionIn"
+              },
+              "propertyName": "mode"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IdsSelectionIn"
+              },
+              {
+                "$ref": "#/components/schemas/FiltreSelectionIn"
+              }
+            ],
+            "title": "Selection"
+          }
+        },
+        "required": ["vue", "selection"],
+        "title": "MassSelectionIn",
+        "type": "object"
+      },
+      "MassResultOut": {
+        "properties": {
+          "affected": {
+            "title": "Affected",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": ["affected", "skipped"],
+        "title": "MassResultOut",
+        "type": "object"
+      },
+      "MassJobOut": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": ["job_id", "total"],
+        "title": "MassJobOut",
+        "type": "object"
+      },
+      "MassActionIn": {
+        "properties": {
+          "vue": {
+            "enum": ["groupes", "lignes"],
+            "title": "Vue",
+            "type": "string"
+          },
+          "selection": {
+            "discriminator": {
+              "mapping": {
+                "filtre": "#/components/schemas/FiltreSelectionIn",
+                "ids": "#/components/schemas/IdsSelectionIn"
+              },
+              "propertyName": "mode"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IdsSelectionIn"
+              },
+              {
+                "$ref": "#/components/schemas/FiltreSelectionIn"
+              }
+            ],
+            "title": "Selection"
+          },
+          "action": {
+            "enum": [
+              "validate",
+              "reject",
+              "resubmit",
+              "report_correction",
+              "report_parent"
+            ],
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "required": ["vue", "selection", "action"],
+        "title": "MassActionIn",
+        "type": "object"
+      },
+      "JobOut": {
+        "properties": {
+          "status": {
+            "enum": ["pending", "running", "done", "error"],
+            "title": "Status",
+            "type": "string"
+          },
+          "affected": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affected"
+          }
+        },
+        "required": ["status", "affected"],
+        "title": "JobOut",
         "type": "object"
       }
     },

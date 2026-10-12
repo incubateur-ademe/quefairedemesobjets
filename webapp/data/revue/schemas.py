@@ -380,3 +380,56 @@ class LignePageOut(Schema):
 class LignesQuery(RevueQuery):
     page: int = Field(1, ge=1)
     page_size: int = Field(500, ge=1, le=1000)
+
+
+# --- Mass actions ---
+
+
+class IdsSelectionIn(Schema):
+    mode: Literal["ids"]
+    ids: list[int | str] = Field(..., max_length=5000)
+
+
+class FiltreSelectionIn(Schema):
+    mode: Literal["filtre"]
+    filtre: str | None = None
+    tuples: list[str] = []
+    afficher: Literal["avalider", "tout"] = "avalider"
+    exclus: list[int | str] = Field([], max_length=5000)
+
+
+class MassSelectionIn(Schema):
+    vue: Literal["groupes", "lignes"]
+    selection: IdsSelectionIn | FiltreSelectionIn = Field(..., discriminator="mode")
+
+
+class MassActionIn(MassSelectionIn):
+    action: Literal[
+        "validate", "reject", "resubmit", "report_correction", "report_parent"
+    ]
+
+
+MassAction = Literal[
+    "validate", "reject", "resubmit", "report_correction", "report_parent"
+]
+
+
+class MassPreviewOut(Schema):
+    """Number of elements (groupes or lignes) each action would really change."""
+
+    compteurs: dict[MassAction, int]
+
+
+class MassResultOut(Schema):
+    affected: int
+    skipped: int
+
+
+class MassJobOut(Schema):
+    job_id: str
+    total: int
+
+
+class JobOut(Schema):
+    status: Literal["pending", "running", "done", "error"]
+    affected: int | None

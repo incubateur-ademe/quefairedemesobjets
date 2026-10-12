@@ -3,6 +3,7 @@
 Handlers stay thin: business rules live in the other modules of data.revue."""
 
 from data.models.suggestion import SOURCE_TYPE_ACTIONS, SuggestionCohorte
+from data.revue import cohortes, masse, revue
 from data.revue.annuaire import lookup as annuaire_lookup
 from data.revue.auth import SuperuserSessionAuth
 from data.revue.cohortes import (
@@ -39,12 +40,18 @@ from data.revue.schemas import (
     GroupeOut,
     GroupePageOut,
     GroupesQuery,
+    JobOut,
     LignePageOut,
     LignesDecisionIn,
     LignesQuery,
     LogPageOut,
     LogsExportQuery,
     LogsQuery,
+    MassActionIn,
+    MassJobOut,
+    MassPreviewOut,
+    MassResultOut,
+    MassSelectionIn,
     PropositionDeleteQuery,
     PropositionIn,
     ReportIn,
@@ -57,7 +64,7 @@ from data.revue.services import delete_proposition as delete_proposition_service
 from data.revue.services import report as report_service
 from data.revue.services import upsert_proposition as upsert_proposition_service
 from django.http import HttpRequest, HttpResponse
-from ninja import Query, Router
+from ninja import Query, Router, Status
 
 router = Router(auth=SuperuserSessionAuth(), tags=["Revue suggestions"])
 
@@ -272,3 +279,40 @@ def annuaire_entreprises(request: HttpRequest, query: Query[AnnuaireQuery]):
     """Entreprise and établissement of a SIRET / SIREN, from the public API
     « Recherche d'entreprises » (cached one day)."""
     return annuaire_lookup(query.champ, query.valeur)
+
+
+# --- Mass actions ---
+
+
+@router.post(
+    "/cohortes/{cohorte_id}/actions/apercu",
+    response={200: MassPreviewOut, 404: ErrorOut, 422: ErrorOut},
+)
+def mass_preview(request: HttpRequest, cohorte_id: int, payload: MassSelectionIn):
+    """Number of elements each mass action would really change on the selection."""
+    cohorte = cohortes.get_source_cohorte(cohorte_id)
+    selection = masse.resolve(cohorte, payload.dict())
+    return {"compteurs": masse.preview(selection)}
+
+
+@router.post(
+    "/cohortes/{cohorte_id}/actions",
+    response={
+        200: MassResultOut,
+        202: MassJobOut,
+        404: ErrorOut,
+        422: ErrorOut,
+    },
+)
+def mass_action(request: HttpRequest, cohorte_id: int, payload: MassActionIn):
+    """Runs a mass action. The filter of a « tout le filtre » selection is applied
+    again by the server. Large reports run in the background (202 + job)."""
+    cohorte = cohortes.get_source_cohorte(cohorte_id)
+    selection = masse.resolve(cohorte, payload.dict())
+    result = masse.run(selection, payload.action, request.auth)
+    return Status(202 if "job_id" in result else 200, result)
+
+
+@router.get("/jobs/{job_id}", response={200: JobOut, 404: ErrorOut})
+def job(request: HttpRequest, job_id: str):
+    return masse.job_status(job_id)
