@@ -19,12 +19,16 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
     "0:1" 1;
 }
 
-# iframe.js appends ref=<base64 parent URL> to every embed URL. It is only read
-# client-side (analytics controller), never by Django, so drop it from the cache
-# key: otherwise every embedding page is a cache miss.
-map $args $cache_args {
+# iframe.js appends ref=<base64 parent URL> to every embed URL. Mostly read
+# client-side (analytics controller), so drop it from the cache key: otherwise
+# every embedding page is a cache miss.
+# Except on the assistant routes (`/`, `/dechet...`): RequestEnhancementMiddleware
+# redirects ASSISTANT_V2_BETA_TESTERS_HOSTS to the V2 based on ref, and legacy
+# redirects echo it, so one embedder's cached response must not reach another.
+map "$uri?$args" $cache_args {
     default $args;
-    "~^(.*&)?ref=[^&]*(&.*)?$" $1$2;
+    "~^/(?:dechet(?:/[^?]*)?)?\?" $args;
+    "~^[^?]*\?((?:.*&)?)ref=[^&]*(&.*)?$" $1$2;
 }
 
 map $host $is_valid_host {

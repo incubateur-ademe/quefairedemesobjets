@@ -153,6 +153,19 @@ class TestCacheKeyIgnoresRef:
         third = get(f"/infotri/embed?ref=BBBB&_t={stamp}&x=1", headers=headers)
         assert third.headers.get("X-Cache-Status") == "MISS"
 
+    @pytest.mark.skipif(CACHE_DISABLED, reason="Only valid when NGINX_DISABLE_CACHE=1")
+    @pytest.mark.parametrize("path", ["/", "/dechet", "/dechet/velo/"])
+    def test_ref_is_kept_on_assistant_routes(self, path):
+        # The middleware picks the assistant V2 redirect from ref.
+        stamp = time.time()
+        headers = {"Host": BASE_DOMAIN, "Sec-Fetch-Dest": "iframe"}
+
+        get(f"{path}?ref=AAAA&_t={stamp}", headers=headers)
+        other_ref = get(
+            f"{path}?ref=BBBB&_t={stamp}", headers=headers, allow_redirects=False
+        )
+        assert other_ref.headers.get("X-Cache-Status") == "MISS"
+
 
 class TestXCacheStatusHeader:
     @pytest.mark.parametrize(
