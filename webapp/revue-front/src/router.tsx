@@ -13,6 +13,8 @@ import {
   type ReactNode,
 } from "react"
 
+import { toSafeInternalHref } from "./safeHref"
+
 export type Route =
   { name: "cohortes" } | { name: "cohorte"; cohorteId: number } | { name: "notFound" }
 
@@ -125,15 +127,16 @@ export function Link({
   children: ReactNode
 }) {
   const { navigate } = useRouter()
+  const href = toSafeInternalHref(to)
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) {
       return
     }
     event.preventDefault()
-    navigate(to)
+    navigate(href)
   }
   return (
-    <a href={to} className={className} onClick={onClick}>
+    <a href={href} className={className} onClick={onClick}>
       {children}
     </a>
   )
