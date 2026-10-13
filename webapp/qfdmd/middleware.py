@@ -92,8 +92,9 @@ class RequestEnhancementMiddleware:
 
         `iframe.js` carries the host page URL in `ref` (base64): it is the only
         thing that tells one embedder from another, so the switch is decided
-        here rather than in the script. `data-objet` becomes the fiche's slug;
-        a fiche that does not exist in V2 stays on the legacy assistant rather
+        here rather than in the script. `data-objet` is a fiche or a legacy
+        synonyme slug, resolved to its fiche as the legacy assistant does; a
+        fiche that does not exist in V2 stays on the legacy assistant rather
         than 404ing.
         """
         if "ref" not in request.GET:
@@ -106,18 +107,31 @@ class RequestEnhancementMiddleware:
             return None
         if self._referrer_host(request) not in settings.ASSISTANT["V2_HOSTS"]:
             return None
+        url_kwargs = match.kwargs
         if slug := match.kwargs.get("slug"):
-            from qfdmd.models import ProduitPage
-
-            if not ProduitPage.objects.live().filter(slug=slug).exists():
+            if not (fiche_slug := self._fiche_slug(slug)):
                 return None
+            url_kwargs = {**match.kwargs, "slug": fiche_slug}
         return self._build_redirect_url(
             target,
             request.GET,
             [],
             base_url=settings.ASSISTANT["V2_BASE_URL"] or settings.BASE_URL,
-            **match.kwargs,
+            **url_kwargs,
         )
+
+    @staticmethod
+    def _fiche_slug(slug: str) -> str | None:
+        from qfdmd.models import ProduitPage, Synonyme
+
+        fiches = ProduitPage.objects.live()
+        if fiches.filter(slug=slug).exists():
+            return slug
+        synonyme = Synonyme.objects.filter(slug=slug).first()
+        page = synonyme and synonyme.wagtail_page
+        if page and fiches.filter(pk=page.pk).exists():
+            return page.slug
+        return None
 
     @staticmethod
     def _referrer_host(request) -> str | None:

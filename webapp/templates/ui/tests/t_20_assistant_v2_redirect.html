@@ -1,0 +1,30 @@
+{% load dsfr_tags %}
+
+{% dsfr_callout title="Bascule vers l'assistant V2" text="iframe.js reste celui de la V1 : le serveur bascule vers la V2 si l'hôte de la page est dans ASSISTANT_V2_BETA_TESTERS_HOSTS. data-objet peut être un slug de fiche ou de synonyme." icon_class="fr-icon-flask-line" %}
+
+{% if host_is_beta %}
+  <div class="fr-alert fr-alert--success fr-mb-3w">
+    <p><code>{{ host }}</code> est dans <code>ASSISTANT_V2_BETA_TESTERS_HOSTS</code>.</p>
+  </div>
+{% else %}
+  <div class="fr-alert fr-alert--warning fr-mb-3w">
+    <p>
+      <code>{{ host }}</code> n'est pas dans <code>ASSISTANT_V2_BETA_TESTERS_HOSTS</code> : l'iframe restera sur la V1.
+      Ajoutez <code>ASSISTANT_V2_BETA_TESTERS_HOSTS={{ host }}</code> à <code>webapp/.env</code> et relancez le serveur.
+    </p>
+  </div>
+{% endif %}
+
+<p class="fr-mb-3w" data-testid="attendu">
+  Attendu :
+  {% if not objet %}
+    accueil de la V2 (<code>/assistant/</code>)
+  {% elif fiche_slug %}
+    fiche V2 <code>/assistant/objet/{{ fiche_slug }}/</code>{% if fiche_slug != objet %}, via le synonyme <code>{{ objet }}</code>{% endif %},
+    champ objet rempli avec le titre de la fiche
+  {% else %}
+    aucune fiche pour <code>{{ objet }}</code> : reste sur la V1 (<code>/dechet/{{ objet }}/</code>)
+  {% endif %}
+</p>
+
+<script src="{{ base_url }}/iframe.js"{% if objet %} data-objet="{{ objet }}"{% endif %}></script>

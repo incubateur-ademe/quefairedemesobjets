@@ -1,6 +1,7 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
 from pathlib import Path
+from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
@@ -20,7 +21,8 @@ from core.widgets import (
 )
 from infotri.forms import InfotriForm
 from qfdmd.forms import QfSearchForm
-from qfdmd.models import Synonyme
+from qfdmd.middleware import RequestEnhancementMiddleware
+from qfdmd.models import ProduitPage, Synonyme
 from qfdmd.views import get_homepage
 from qfdmo.forms import (
     LegendeForm,
@@ -180,6 +182,65 @@ class PinPointForm(forms.Form):
         required=False,
         queryset=ActeurType.objects.all(),
         initial="",
+    )
+
+
+# Slugs sent by Combak's `data-objet` (lvaoObjectSlug in their bundles).
+COMBAK_SLUGS = [
+    "airfryer",
+    "appareil-photo",
+    "aspirateur",
+    "casque",
+    "cave-a-vin",
+    "congelateur",
+    "console",
+    "ecouteur",
+    "enceinte",
+    "four",
+    "lave-linge",
+    "lave-vaisselle",
+    "machine-cafe",
+    "montre-connectee",
+    "ordinateur-fixe",
+    "ordinateur-portable",
+    "refrigerateur",
+    "robot-cuiseur",
+    "seche-linge",
+    "smartphone",
+    "tablette-numerique",
+    "televiseur",
+    "video-projecteur",
+]
+
+
+def assistant_v2_objet_choices():
+    """Read at each form instantiation: one example per case from the local
+    database, then the slugs of a real embedder."""
+    fiche = ProduitPage.objects.live().values_list("slug", flat=True).first()
+    synonyme = next(
+        (
+            s
+            for s in Synonyme.objects.exclude(
+                slug__in=ProduitPage.objects.values("slug")
+            ).filter(produit__next_wagtail_page__isnull=False)[:20]
+            if s.wagtail_page
+        ),
+        None,
+    )
+    cas = [
+        ("", "Sans objet : accueil"),
+        *([(fiche, f"Slug de fiche ({fiche})")] if fiche else []),
+        *([(synonyme.slug, f"Slug de synonyme ({synonyme.slug})")] if synonyme else []),
+        ("objet-inconnu", "Slug inconnu (objet-inconnu)"),
+    ]
+    return [("Cas", cas), ("Combak", [(slug, slug) for slug in COMBAK_SLUGS])]
+
+
+class AssistantV2RedirectForm(forms.Form):
+    objet = forms.ChoiceField(
+        label="data-objet",
+        choices=assistant_v2_objet_choices,
+        required=False,
     )
 
 
@@ -1423,4 +1484,22 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/t_19_infotri_responsive.html",
             {"base_url": base_url},
+        )
+
+    @register_form_class(AssistantV2RedirectForm)
+    def t_20_assistant_v2_redirect(self, objet="", **kwargs):
+        """Test which assistant `iframe.js` opens for a whitelisted host,
+        depending on `data-objet`"""
+        host = urlparse(base_url).hostname
+        return render_to_string(
+            "ui/tests/t_20_assistant_v2_redirect.html",
+            {
+                "base_url": base_url,
+                "objet": objet,
+                "host": host,
+                "host_is_beta": host in settings.ASSISTANT["V2_HOSTS"],
+                "fiche_slug": (
+                    RequestEnhancementMiddleware._fiche_slug(objet) if objet else ""
+                ),
+            },
         )

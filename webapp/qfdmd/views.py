@@ -671,45 +671,11 @@ class SynonymeDetailView(DetailView):
         return ctx
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        synonyme = self.get_object()
-
-        # First, check if the synonyme has a direct redirection
-        try:
-            synonyme_intermediate_page = synonyme.next_wagtail_page
-            redirect_url = synonyme_intermediate_page.page.url
-            return redirect(redirect_url)
-        except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
-            pass
-
-        # If no direct redirection, check if produit has redirection
-        try:
-            intermediate_page = synonyme.produit.next_wagtail_page
-            synonyme_can_be_redirected = (
-                not hasattr(synonyme, "should_not_redirect_to")
-                or synonyme.should_not_redirect_to.page != intermediate_page.page
-            )
-            if synonyme_can_be_redirected:
-                redirect_url = self._build_redirect_url(
-                    request, intermediate_page.page.url
-                )
-                return redirect(redirect_url)
-        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
-            pass
-
-        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
-        # ont été migré vers des qfdmd.ProduitPage
-        # Finally, check if the produit was automatically migrated to a
-        # ProduitPage by the migrate_produits_legacy command
-        migrated_page = synonyme.produit.legacy_imported_as_produit_page
-        if migrated_page is not None and migrated_page.live:
-            synonyme_can_be_redirected = (
-                not hasattr(synonyme, "should_not_redirect_to")
-                or synonyme.should_not_redirect_to.page.pk != migrated_page.pk
-            )
-            # Guard against a redirect loop when the migrated page lives at
-            # the exact same URL as the legacy synonyme (/dechet/<slug>/)
-            if synonyme_can_be_redirected and migrated_page.url != request.path:
-                return redirect(self._build_redirect_url(request, migrated_page.url))
+        page = self.get_object().wagtail_page
+        # Guard against a redirect loop when the migrated page lives at
+        # the exact same URL as the legacy synonyme (/dechet/<slug>/)
+        if page is not None and page.url != request.path:
+            return redirect(self._build_redirect_url(request, page.url))
 
         return super().get(request, *args, **kwargs)
 
