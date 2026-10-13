@@ -65,6 +65,10 @@ errors under the input. Checkbox rows keep Django's layout.
   align-items: start;
 }
 
+.aligned .flex-container:not(.checkbox-row, .form-multiline) > select {
+  justify-self: start;
+}
+
 .aligned .flex-container:not(.checkbox-row, .form-multiline) > label {
   grid-column: 1;
   grid-row: 1;
@@ -91,13 +95,4 @@ errors under the input. Checkbox rows keep Django's layout.
 /* Map widget: address search on the label row, map below at full width */
 .aligned .flex-container > [data-controller="map-search"] {
   grid-row: 1;
-}
-
-.aligned .flex-container > .dj_map_wrapper {
-  float: none;
-  width: 100%;
-}
-
-.aligned .flex-container .dj_map {
-  width: 100%;
 }
