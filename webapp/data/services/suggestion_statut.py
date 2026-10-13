@@ -65,11 +65,11 @@ def set_lignes_statut(
     identified by its `champs` tuple, all suggestion_modele included).
     The groupe statut is left to the caller."""
     return SuggestionUnitaire.objects.filter(
-        suggestion_groupe=groupe, champs__in=[list(c) for c in champs_list]
+        suggestion_groupe=groupe, champs__in=[list(champs) for champs in champs_list]
     ).update(**_statut_fields(statut, user))
 
 
-def compute_cohorte_statut(groupe_statuts: set[str]) -> str | None:
+def compute_cohorte_statut(groupe_statuts: set[str]) -> SuggestionCohorteStatut | None:
     if not groupe_statuts:
         return None
     if SuggestionStatut.AVALIDER in groupe_statuts:

@@ -1,6 +1,5 @@
 import pytest
 from data.models.suggestion import (
-    SOURCE_TYPE_ACTIONS,
     SuggestionAction,
     SuggestionCohorteStatut,
     SuggestionStatut,
@@ -17,6 +16,7 @@ from unit_tests.data.models.suggestion_factory import (
     SuggestionGroupeFactory,
     SuggestionUnitaireFactory,
 )
+from unit_tests.qfdmo.acteur_factory import ActeurFactory, RevisionActeurFactory
 
 
 @pytest.fixture
@@ -31,24 +31,18 @@ def groupe():
             type_action=SuggestionAction.SOURCE_MODIFICATION
         )
     )
+    acteur = ActeurFactory()
+    revision_acteur = RevisionActeurFactory()
     for modele in ["Acteur", "RevisionActeur"]:
         for champs in [["nom"], ["latitude", "longitude"]]:
             SuggestionUnitaireFactory(
                 suggestion_groupe=groupe,
                 suggestion_modele=modele,
                 champs=champs,
-                revision_acteur_id="rev" if modele == "RevisionActeur" else None,
+                acteur=acteur if modele == "Acteur" else None,
+                revision_acteur=revision_acteur if modele == "RevisionActeur" else None,
             )
     return groupe
-
-
-class TestSourceTypeActions:
-    def test_source_type_actions_are_the_stored_values(self):
-        assert SOURCE_TYPE_ACTIONS == [
-            "SOURCE_AJOUT",
-            "SOURCE_MODIFICATION",
-            "SOURCE_SUPRESSION",
-        ]
 
 
 class TestSetGroupesStatut:
