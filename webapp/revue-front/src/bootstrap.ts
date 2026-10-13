@@ -1,4 +1,6 @@
 /** Context rendered by the Django page (templates/data/revue.html). */
+import { toSafeInternalHref } from "./safeHref"
+
 export type Bootstrap = {
   basepath: string
   apiBase: string
@@ -12,5 +14,6 @@ export function readBootstrap(doc: Document = document): Bootstrap {
   if (!element?.textContent) {
     throw new Error("Missing #revue-bootstrap data")
   }
-  return JSON.parse(element.textContent) as Bootstrap
+  const parsed = JSON.parse(element.textContent) as Bootstrap
+  return { ...parsed, basepath: toSafeInternalHref(parsed.basepath) }
 }
