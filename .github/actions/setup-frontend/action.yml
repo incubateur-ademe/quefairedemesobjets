@@ -32,7 +32,7 @@ runs:
         path: |
           node_modules
           ${{ inputs.working-directory }}/node_modules
-        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+        key: node-modules-${{ runner.os }}-${{ inputs.working-directory }}-${{ hashFiles('package-lock.json') }}
 
     - name: Install npm dependencies
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -56,8 +56,3 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       env:
         BASE_URL: ${{ inputs.base-url }}
-
-    - name: Build review screen assets (webapp/revue-front)
-      if: inputs.build == 'true'
-      shell: bash
-      run: npm run build:revue

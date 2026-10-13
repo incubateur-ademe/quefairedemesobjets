@@ -24,6 +24,14 @@ runs:
         build: ${{ inputs.build-frontend }}
         base-url: ${{ inputs.base-url }}
 
+    - name: Setup review screen frontend
+      if: inputs.build-frontend == 'true'
+      uses: ./.github/actions/setup-frontend
+      with:
+        build: "true"
+        working-directory: webapp/revue-front
+        base-url: ${{ inputs.base-url }}
+
     - name: Setup backend environment
       uses: ./.github/actions/setup-backend
       with:
