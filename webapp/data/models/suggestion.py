@@ -120,7 +120,24 @@ class SuggestionCohorteManager(models.Manager):
         )
 
 
-class SuggestionCohorte(TimestampedModel):
+class SuggestionStatutFieldsMixin:
+    """Shared statut write helpers for the review screen and apply tasks."""
+
+    HUMAN_DECISION_STATUTS = [SuggestionStatut.ATRAITER, SuggestionStatut.REJETEE]
+
+    @classmethod
+    def _statut_fields(cls, statut: str, user=None) -> dict:
+        """Fields to update with the statut: a human decision is traced, putting back
+        to AVALIDER clears the trace, processing statuts keep it untouched."""
+        fields = {"statut": statut, "modifie_le": timezone.now()}
+        if statut in cls.HUMAN_DECISION_STATUTS:
+            fields |= {"decision_par": user, "decision_le": timezone.now()}
+        elif statut == SuggestionStatut.AVALIDER:
+            fields |= {"decision_par": None, "decision_le": None}
+        return fields
+
+
+class SuggestionCohorte(SuggestionStatutFieldsMixin, TimestampedModel):
     """Statut writes of the review screen (data/revue) and of the apply tasks
     live on this model. The Django admin keeps its own statut management: both
     live in parallel.
@@ -134,7 +151,6 @@ class SuggestionCohorte(TimestampedModel):
         verbose_name = "1️⃣ Suggestion Cohorte"
         verbose_name_plural = "1️⃣ Suggestions Cohortes"
 
-    HUMAN_DECISION_STATUTS = [SuggestionStatut.ATRAITER, SuggestionStatut.REJETEE]
     PROCESSING_STATUTS = [
         SuggestionStatut.ENCOURS,
         SuggestionStatut.SUCCES,
@@ -204,17 +220,6 @@ class SuggestionCohorte(TimestampedModel):
     def __str__(self) -> str:
         return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
 
-    @classmethod
-    def _statut_fields(cls, statut: str, user=None) -> dict:
-        """Fields to update with the statut: a human decision is traced, putting back
-        to AVALIDER clears the trace, processing statuts keep it untouched."""
-        fields = {"statut": statut, "modifie_le": timezone.now()}
-        if statut in cls.HUMAN_DECISION_STATUTS:
-            fields |= {"decision_par": user, "decision_le": timezone.now()}
-        elif statut == SuggestionStatut.AVALIDER:
-            fields |= {"decision_par": None, "decision_le": None}
-        return fields
-
     def set_groupes_statut(
         self, groupe_ids: Iterable[int], statut: str, user=None
     ) -> int:
@@ -231,22 +236,6 @@ class SuggestionCohorte(TimestampedModel):
                 suggestion_groupe_id__in=groupe_ids
             ).update(**fields)
             return self.suggestion_groupes.filter(id__in=groupe_ids).update(**fields)
-
-    def set_lignes_statut(
-        self,
-        groupe: "SuggestionGroupe",
-        champs_list: Iterable[list[str]],
-        statut: str,
-        user=None,
-    ) -> int:
-        """Set the statut of the SuggestionUnitaire of the given lignes (a ligne is
-        identified by its `champs` tuple, all suggestion_modele included).
-        The groupe statut is left to the caller."""
-        return SuggestionUnitaire.objects.filter(
-            suggestion_groupe=groupe,
-            suggestion_groupe__suggestion_cohorte=self,
-            champs__in=[list(champs) for champs in champs_list],
-        ).update(**self._statut_fields(statut, user))
 
     @classmethod
     def _compute_cohorte_statut(
@@ -594,7 +583,9 @@ class SuggestionActeurRelationsMixin:
             return None
 
 
-class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
+class SuggestionGroupe(
+    SuggestionStatutFieldsMixin, TimestampedModel, SuggestionActeurRelationsMixin
+):
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
@@ -672,6 +663,20 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         if self.acteur:
             libelle += f" - {self.acteur.identifiant_unique}"
         return libelle
+
+    def set_lignes_statut(
+        self,
+        champs_list: Iterable[list[str]],
+        statut: str,
+        user=None,
+    ) -> int:
+        """Set the statut of the SuggestionUnitaire of the given lignes (a ligne is
+        identified by its `champs` tuple, all suggestion_modele included).
+        The groupe statut is left to the caller."""
+        return SuggestionUnitaire.objects.filter(
+            suggestion_groupe=self,
+            champs__in=[list(champs) for champs in champs_list],
+        ).update(**self._statut_fields(statut, user))
 
     @property
     def displayed_acteur_uuid(self) -> str | None:
