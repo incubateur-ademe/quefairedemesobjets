@@ -15,7 +15,7 @@ export function App({ bootstrap }: { bootstrap: Bootstrap }) {
         defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
       }),
   )
-  const [api] = useState(() => createApiClient(`${bootstrap.adminBase}login/`))
+  const [api] = useState(() => createApiClient())
 
   return (
     <AppContext.Provider value={{ bootstrap, api }}>
