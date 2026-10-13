@@ -84,8 +84,8 @@ class TestSetGroupesStatut:
 class TestSetLignesStatut:
     @pytest.mark.django_db
     def test_only_the_ligne_unitaires_are_updated(self, groupe, user):
-        count = groupe.suggestion_cohorte.set_lignes_statut(
-            groupe, [["latitude", "longitude"]], SuggestionStatut.ATRAITER, user=user
+        count = groupe.set_lignes_statut(
+            [["latitude", "longitude"]], SuggestionStatut.ATRAITER, user=user
         )
 
         assert count == 2
