@@ -82,6 +82,7 @@ test.describe("📋 Fiche Acteur - mode carte", () => {
   test("La fiche acteur est immédiatement masquée après sa fermeture", async ({
     page,
   }) => {
+    await mockApiAdresse(page)
     await navigateTo(page, "/carte")
 
     await searchCarteAndWaitForActeurs(page, "auray")
@@ -99,6 +100,7 @@ test.describe("📋 Fiche Acteur - mode carte", () => {
     "La fiche acteur affiche la distance",
     { tag: ["@regression"] },
     async ({ page }) => {
+      await mockApiAdresse(page)
       await navigateTo(page, "/carte")
 
       await searchCarteAndWaitForActeurs(page, "auray")
