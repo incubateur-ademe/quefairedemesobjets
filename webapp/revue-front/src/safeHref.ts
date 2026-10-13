@@ -22,5 +22,18 @@ export function toSafeInternalHref(value: string): string {
   if (url.origin !== window.location.origin) {
     return "/"
   }
-  return `${url.pathname}${url.search}${url.hash}`
+  // The URL parser leaves `'` in the path and the fragment. Percent-encode the
+  // HTML meta-characters so this string cannot be reinterpreted as markup.
+  return `${url.pathname}${url.search}${url.hash}`.replace(/[<>"']/g, (character) => {
+    switch (character) {
+      case "<":
+        return "%3C"
+      case ">":
+        return "%3E"
+      case '"':
+        return "%22"
+      default:
+        return "%27"
+    }
+  })
 }

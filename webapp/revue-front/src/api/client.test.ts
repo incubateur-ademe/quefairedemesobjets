@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+import createClient from "openapi-fetch"
+
 import { ApiError, createCsrfMiddleware, readCookie, unwrap } from "./client"
 
 describe("readCookie", () => {
@@ -11,19 +13,31 @@ describe("readCookie", () => {
 })
 
 describe("csrfMiddleware", () => {
-  const run = (method: string) => {
-    const middleware = createCsrfMiddleware(() => "a=1; csrftoken=token123")
-    const request = new Request("http://localhost/api/suggestions/me", { method })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (middleware.onRequest as any)({ request }) as Request
+  type Method = "get" | "post" | "put" | "patch" | "delete"
+
+  const run = async (method: Method) => {
+    let sent: Request | undefined
+    const client = createClient<{ "/test": Record<Method, object> }>({
+      baseUrl: "http://localhost",
+      fetch: async (input) => {
+        sent = input as Request
+        return new Response("{}")
+      },
+    })
+    client.use(createCsrfMiddleware(() => "a=1; csrftoken=token123"))
+    await client.request(method, "/test")
+    return sent!
   }
 
-  it.each(["POST", "PUT", "PATCH", "DELETE"])("sets the token on %s", (method) => {
-    expect(run(method).headers.get("X-CSRFToken")).toBe("token123")
-  })
+  it.each<Method>(["post", "put", "patch", "delete"])(
+    "sets the token on %s",
+    async (method) => {
+      expect((await run(method)).headers.get("X-CSRFToken")).toBe("token123")
+    },
+  )
 
-  it("does not set the token on GET", () => {
-    expect(run("GET").headers.get("X-CSRFToken")).toBeNull()
+  it("does not set the token on GET", async () => {
+    expect((await run("get")).headers.get("X-CSRFToken")).toBeNull()
   })
 })
 
