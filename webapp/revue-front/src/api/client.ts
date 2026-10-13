@@ -48,11 +48,10 @@ export function createApiClient(loginUrl: string) {
     onResponse({ response }) {
       if (response.status === 401) {
         // Session expired: back to the admin login, then here
-        window.location.assign(
-          toSafeInternalHref(
-            `${loginUrl}?next=${encodeURIComponent(window.location.pathname)}`,
-          ),
-        )
+        const safeLoginPath = toSafeInternalHref(loginUrl)
+        const loginHref = new URL(safeLoginPath, window.location.origin)
+        loginHref.searchParams.set("next", window.location.pathname)
+        window.location.assign(`${loginHref.pathname}${loginHref.search}${loginHref.hash}`)
       }
       return response
     },
