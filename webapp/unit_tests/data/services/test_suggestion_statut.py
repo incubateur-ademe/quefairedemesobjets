@@ -1,14 +1,9 @@
 import pytest
 from data.models.suggestion import (
     SuggestionAction,
+    SuggestionCohorte,
     SuggestionCohorteStatut,
     SuggestionStatut,
-)
-from data.services.suggestion_statut import (
-    compute_cohorte_statut,
-    recompute_cohorte_statut,
-    set_groupes_statut,
-    set_lignes_statut,
 )
 from django.contrib.auth.models import User
 from unit_tests.data.models.suggestion_factory import (
@@ -48,7 +43,9 @@ def groupe():
 class TestSetGroupesStatut:
     @pytest.mark.django_db
     def test_decision_is_traced_on_groupe_and_unitaires(self, groupe, user):
-        set_groupes_statut([groupe.id], SuggestionStatut.ATRAITER, user=user)
+        groupe.suggestion_cohorte.set_groupes_statut(
+            [groupe.id], SuggestionStatut.ATRAITER, user=user
+        )
 
         groupe.refresh_from_db()
         assert groupe.statut == SuggestionStatut.ATRAITER
@@ -61,8 +58,9 @@ class TestSetGroupesStatut:
 
     @pytest.mark.django_db
     def test_avalider_clears_decision(self, groupe, user):
-        set_groupes_statut([groupe.id], SuggestionStatut.REJETEE, user=user)
-        set_groupes_statut([groupe.id], SuggestionStatut.AVALIDER)
+        cohorte = groupe.suggestion_cohorte
+        cohorte.set_groupes_statut([groupe.id], SuggestionStatut.REJETEE, user=user)
+        cohorte.set_groupes_statut([groupe.id], SuggestionStatut.AVALIDER)
 
         groupe.refresh_from_db()
         assert groupe.statut == SuggestionStatut.AVALIDER
@@ -74,8 +72,9 @@ class TestSetGroupesStatut:
 
     @pytest.mark.django_db
     def test_processing_statut_keeps_decision(self, groupe, user):
-        set_groupes_statut([groupe.id], SuggestionStatut.ATRAITER, user=user)
-        set_groupes_statut([groupe.id], SuggestionStatut.SUCCES)
+        cohorte = groupe.suggestion_cohorte
+        cohorte.set_groupes_statut([groupe.id], SuggestionStatut.ATRAITER, user=user)
+        cohorte.set_groupes_statut([groupe.id], SuggestionStatut.SUCCES)
 
         groupe.refresh_from_db()
         assert groupe.statut == SuggestionStatut.SUCCES
@@ -85,7 +84,7 @@ class TestSetGroupesStatut:
 class TestSetLignesStatut:
     @pytest.mark.django_db
     def test_only_the_ligne_unitaires_are_updated(self, groupe, user):
-        count = set_lignes_statut(
+        count = groupe.suggestion_cohorte.set_lignes_statut(
             groupe, [["latitude", "longitude"]], SuggestionStatut.ATRAITER, user=user
         )
 
@@ -113,7 +112,7 @@ class TestCohorteStatut:
         ],
     )
     def test_compute_cohorte_statut(self, groupe_statuts, expected):
-        assert compute_cohorte_statut(groupe_statuts) == expected
+        assert SuggestionCohorte._compute_cohorte_statut(groupe_statuts) == expected
 
     @pytest.mark.django_db
     def test_recompute_cohorte_statut(self):
@@ -125,7 +124,7 @@ class TestCohorteStatut:
             suggestion_cohorte=cohorte, statut=SuggestionStatut.REJETEE
         )
 
-        recompute_cohorte_statut([cohorte.id])
+        cohorte.recompute_cohorte_statut()
 
         cohorte.refresh_from_db()
         assert cohorte.statut == SuggestionCohorteStatut.SUCCES

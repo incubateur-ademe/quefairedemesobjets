@@ -1,5 +1,6 @@
 import logging
 import re
+from collections.abc import Iterable
 from datetime import datetime
 from typing import Protocol
 
@@ -9,9 +10,11 @@ from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.db import transaction
 from django.db.models import BooleanField, CheckConstraint, Count, ExpressionWrapper, Q
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from more_itertools import first
 from qfdmo.models.acteur import (
     Acteur,
@@ -118,9 +121,30 @@ class SuggestionCohorteManager(models.Manager):
 
 
 class SuggestionCohorte(TimestampedModel):
+    """Statut writes of the review screen (data/revue) and of the apply tasks
+    live on this model. The Django admin keeps its own statut management: both
+    live in parallel.
+
+    A SuggestionGroupe statut is always written together with the statut of its
+    SuggestionUnitaire, so that the « lignes de suggestion » (built from the
+    SuggestionUnitaire) stay consistent with their groupe.
+    """
+
     class Meta:
         verbose_name = "1️⃣ Suggestion Cohorte"
         verbose_name_plural = "1️⃣ Suggestions Cohortes"
+
+    HUMAN_DECISION_STATUTS = [SuggestionStatut.ATRAITER, SuggestionStatut.REJETEE]
+    PROCESSING_STATUTS = [
+        SuggestionStatut.ENCOURS,
+        SuggestionStatut.SUCCES,
+        SuggestionStatut.ERREUR,
+    ]
+    FINISHED_STATUTS = {
+        SuggestionStatut.SUCCES,
+        SuggestionStatut.ERREUR,
+        SuggestionStatut.REJETEE,
+    }
 
     objects: SuggestionCohorteManager = SuggestionCohorteManager()
 
@@ -179,6 +203,72 @@ class SuggestionCohorte(TimestampedModel):
 
     def __str__(self) -> str:
         return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
+
+    @classmethod
+    def _statut_fields(cls, statut: str, user=None) -> dict:
+        """Fields to update with the statut: a human decision is traced, putting back
+        to AVALIDER clears the trace, processing statuts keep it untouched."""
+        fields = {"statut": statut, "modifie_le": timezone.now()}
+        if statut in cls.HUMAN_DECISION_STATUTS:
+            fields |= {"decision_par": user, "decision_le": timezone.now()}
+        elif statut == SuggestionStatut.AVALIDER:
+            fields |= {"decision_par": None, "decision_le": None}
+        return fields
+
+    def set_groupes_statut(
+        self, groupe_ids: Iterable[int], statut: str, user=None
+    ) -> int:
+        """Set the statut of the groupes and of all their SuggestionUnitaire.
+        Returns the number of updated groupes."""
+        groupe_ids = list(
+            self.suggestion_groupes.filter(id__in=list(groupe_ids)).values_list(
+                "id", flat=True
+            )
+        )
+        fields = self._statut_fields(statut, user)
+        with transaction.atomic():
+            SuggestionUnitaire.objects.filter(
+                suggestion_groupe_id__in=groupe_ids
+            ).update(**fields)
+            return self.suggestion_groupes.filter(id__in=groupe_ids).update(**fields)
+
+    def set_lignes_statut(
+        self,
+        groupe: "SuggestionGroupe",
+        champs_list: Iterable[list[str]],
+        statut: str,
+        user=None,
+    ) -> int:
+        """Set the statut of the SuggestionUnitaire of the given lignes (a ligne is
+        identified by its `champs` tuple, all suggestion_modele included).
+        The groupe statut is left to the caller."""
+        return SuggestionUnitaire.objects.filter(
+            suggestion_groupe=groupe,
+            suggestion_groupe__suggestion_cohorte=self,
+            champs__in=[list(champs) for champs in champs_list],
+        ).update(**self._statut_fields(statut, user))
+
+    @classmethod
+    def _compute_cohorte_statut(
+        cls, groupe_statuts: set[str]
+    ) -> SuggestionCohorteStatut | None:
+        if not groupe_statuts:
+            return None
+        if SuggestionStatut.AVALIDER in groupe_statuts:
+            return SuggestionCohorteStatut.AVALIDER
+        if groupe_statuts <= cls.FINISHED_STATUTS:
+            return SuggestionCohorteStatut.SUCCES
+        return SuggestionCohorteStatut.ENCOURS
+
+    def recompute_cohorte_statut(self) -> None:
+        """Recompute the statut of the cohorte from the statut of its groupes.
+        Cohortes without groupe (legacy Suggestion) are left untouched."""
+        statut = self._compute_cohorte_statut(
+            set(self.suggestion_groupes.values_list("statut", flat=True).distinct())
+        )
+        if statut and statut != self.statut:
+            self.statut = statut
+            self.save(update_fields=["statut", "modifie_le"])
 
 
 class Suggestion(TimestampedModel):
