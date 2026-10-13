@@ -76,8 +76,13 @@ class ProduitView(TurboFrameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         # The fiche is the page itself: the links leaving it carry its slug.
+        # Reached without a search (an embed's `data-objet`, a shared link),
+        # the search field shows the fiche's title.
+        parcours = Parcours.from_query(self.request.GET)
         parcours = replace(
-            Parcours.from_query(self.request.GET), fiche=self.object.slug
+            parcours,
+            fiche=self.object.slug,
+            objet=parcours.objet or self.object.title,
         )
         return super().get_context_data(
             parcours=parcours,

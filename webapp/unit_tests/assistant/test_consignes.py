@@ -160,6 +160,14 @@ class TestFicheObjet:
         assert 'value="Chaise"' in content
         assert 'value="Auray"' in content
 
+    def test_without_a_search_the_header_shows_the_fiche(self, client, fiche):
+        """An embed's `data-objet` lands here without a typed label."""
+        content = client.get(
+            reverse("assistant:produit", args=[fiche.slug])
+        ).content.decode()
+
+        assert f'value="{fiche.title}"' in content
+
     def test_the_frame_allows_changing_objet_without_reload(self, client, fiche):
         content = client.get(
             reverse("assistant:produit", args=[fiche.slug])
