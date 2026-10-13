@@ -1,6 +1,5 @@
 import createClient, { type Middleware } from "openapi-fetch"
 
-import { toSafeInternalHref } from "../safeHref"
 import type { paths } from "./schema"
 
 /** Error returned by the API: `{ code, detail, errors?, current? }`. */
@@ -41,17 +40,14 @@ export function createCsrfMiddleware(
   }
 }
 
-export function createApiClient(loginUrl: string) {
+export function createApiClient() {
   const client = createClient<paths>({ credentials: "same-origin" })
   client.use(createCsrfMiddleware())
   client.use({
     onResponse({ response }) {
       if (response.status === 401) {
-        // Session expired: back to the admin login, then here
-        const safeLoginPath = toSafeInternalHref(loginUrl)
-        const loginHref = new URL(safeLoginPath, window.location.origin)
-        loginHref.searchParams.set("next", window.location.pathname)
-        window.location.assign(`${loginHref.pathname}${loginHref.search}${loginHref.hash}`)
+        // Session expired: the Django page redirects to the admin login, then here
+        window.location.reload()
       }
       return response
     },
