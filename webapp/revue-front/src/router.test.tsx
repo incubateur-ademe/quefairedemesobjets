@@ -62,4 +62,15 @@ describe("RouterProvider", () => {
     expect(screen.getByText("cohorte lignes")).toBeInTheDocument()
     expect(window.location.pathname).toBe("/data/revue/cohortes/7")
   })
+
+  it("does not expose an unsafe link target", () => {
+    window.history.replaceState(null, "", "/data/revue/")
+    render(
+      <RouterProvider basepath="/data/revue/">
+        <Link to="javascript:alert(1)">aller</Link>
+      </RouterProvider>,
+    )
+
+    expect(screen.getByRole("link", { name: "aller" })).toHaveAttribute("href", "/")
+  })
 })

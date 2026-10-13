@@ -1,5 +1,6 @@
 import createClient, { type Middleware } from "openapi-fetch"
 
+import { toSafeInternalHref } from "../safeHref"
 import type { paths } from "./schema"
 
 /** Error returned by the API: `{ code, detail, errors?, current? }`. */
@@ -48,7 +49,9 @@ export function createApiClient(loginUrl: string) {
       if (response.status === 401) {
         // Session expired: back to the admin login, then here
         window.location.assign(
-          `${loginUrl}?next=${encodeURIComponent(window.location.pathname)}`,
+          toSafeInternalHref(
+            `${loginUrl}?next=${encodeURIComponent(window.location.pathname)}`,
+          ),
         )
       }
       return response
