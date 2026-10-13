@@ -7,7 +7,8 @@ import pytest
 from django.test import RequestFactory
 
 from qfdmd.middleware import RequestEnhancementMiddleware
-from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+from qfdmd.models import LegacyIntermediateProduitPage
+from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory, SynonymeFactory
 
 BETA = {"V2_HOSTS": ["beta.example.fr"], "V2_BASE_URL": ""}
 
@@ -60,6 +61,22 @@ class TestScriptRedirect:
         page = ProduitPageFactory(parent=None)
         response = client.get(
             f"/dechet/{page.slug}/", {"ref": ref("https://beta.example.fr/")}
+        )
+        assert response.status_code == 302
+        assert response.url.startswith(
+            f"https://qfdmo.fr/assistant/objet/{page.slug}/?"
+        )
+
+    def test_legacy_synonyme_opens_its_fiche(self, client):
+        """Embedders pass synonyme slugs (`montre-connectee`): follow them to
+        their fiche, as the legacy assistant does."""
+        page = ProduitPageFactory(parent=None)
+        synonyme = SynonymeFactory(nom="Montre connectée")
+        LegacyIntermediateProduitPage.objects.create(
+            page=page, produit=synonyme.produit
+        )
+        response = client.get(
+            f"/dechet/{synonyme.slug}/", {"ref": ref("https://beta.example.fr/")}
         )
         assert response.status_code == 302
         assert response.url.startswith(

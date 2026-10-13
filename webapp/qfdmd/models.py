@@ -1650,6 +1650,32 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
         return self.get_absolute_url()
 
     @cached_property
+    def wagtail_page(self) -> Page | None:
+        """The Wagtail page that replaces this synonyme's legacy fiche, if any:
+        its own redirection first, then its produit's, then the page its
+        produit was migrated to."""
+        try:
+            return self.next_wagtail_page.page
+        except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
+
+        excluded = getattr(self, "should_not_redirect_to", None)
+        excluded_page_id = excluded.page_id if excluded else None
+        try:
+            page = self.produit.next_wagtail_page.page
+            if page.pk != excluded_page_id:
+                return page
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
+
+        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+        # ont été migré vers des qfdmd.ProduitPage
+        page = self.produit.legacy_imported_as_produit_page
+        if page is not None and page.live and page.pk != excluded_page_id:
+            return page
+        return None
+
+    @cached_property
     def bon_etat(self) -> str:
         if self.qu_est_ce_que_j_en_fais_bon_etat:
             return self.qu_est_ce_que_j_en_fais_bon_etat
