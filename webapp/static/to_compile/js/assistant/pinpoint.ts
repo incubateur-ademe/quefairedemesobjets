@@ -12,7 +12,8 @@ export type PinpointColors = {
  * The color follows the geste chosen by the user, not a property of the
  * place: the same acteur shows in blue if the user chose "donner" and in brown
  * if they chose "revendre" (#3295). Only the Bonus Réparation is an exception
- * and overrides the geste color.
+ * and overrides the geste color, on the "réparer" map only: elsewhere a
+ * repairer's bonus says nothing about giving or selling.
  */
 export function pinpointElement(
   place: Place,
@@ -31,18 +32,19 @@ export function pinpointElement(
   element.dataset.uuid = place.uuid
   element.dataset.geste = geste
   element.setAttribute("aria-label", place.nom)
+  const hasBonus = place.bonus && geste === "reparer"
   element.style.setProperty(
     "--qfa-pinpoint-color",
-    place.bonus ? colors.bonus : colors.geste,
+    hasBonus ? colors.bonus : colors.geste,
   )
-  if (place.bonus) element.dataset.bonus = "true"
+  if (hasBonus) element.dataset.bonus = "true"
 
   const icon = document.createElement("span")
   icon.className = "qfa-pinpoint__icon"
   element.append(icon)
 
   // The "%" pastille on the pin's right shoulder (30141:9028).
-  if (place.bonus) {
+  if (hasBonus) {
     const pastille = document.createElement("span")
     pastille.className = "qfa-pinpoint__bonus"
     element.append(pastille)
