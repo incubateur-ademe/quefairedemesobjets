@@ -12,7 +12,7 @@ import {
   pinpointElement,
   type PinpointColors,
 } from "../../js/assistant/pinpoint"
-import type { Map as MapLibreMap, Marker, StyleSpecification } from "maplibre-gl"
+import type { Map as MapLibreMap, Marker } from "maplibre-gl"
 
 type Timing = { server: number; total: number; places: number }
 
@@ -69,6 +69,7 @@ export default class extends Controller<HTMLElement> {
     fiche: String,
     lieuUrl: String,
     workerUrl: String,
+    styleUrl: String,
     longitude: Number,
     latitude: Number,
     preciseAddress: Boolean,
@@ -84,6 +85,7 @@ export default class extends Controller<HTMLElement> {
   declare ficheValue: string
   declare lieuUrlValue: string
   declare workerUrlValue: string
+  declare styleUrlValue: string
   declare longitudeValue: number
   declare latitudeValue: number
   declare preciseAddressValue: boolean
@@ -137,8 +139,12 @@ export default class extends Controller<HTMLElement> {
   }
 
   async #createMap(canvas: HTMLElement): Promise<PersistedMap | null> {
-    const [{ Map: MapLibre, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
-      await Promise.all([import("maplibre-gl"), import("carte-facile")])
+    const {
+      Map: MapLibre,
+      Marker,
+      NavigationControl,
+      setWorkerUrl,
+    } = await import("maplibre-gl")
     // Disconnected while the imports were loading (lookbook re-render): a map
     // created now would live on a detached node, and its worker and WebGL
     // context would never be released.
@@ -150,12 +156,10 @@ export default class extends Controller<HTMLElement> {
 
     const map = new MapLibre({
       container: canvas,
-      // `carte-facile` ships its own copy of maplibre-gl (5.x) while V1
-      // requires 6.x: the two `StyleSpecification` declarations diverge on an
-      // optional field, `font-faces`. The object is identical at runtime; only
-      // the declarations disagree, hence this deliberately narrow cast rather
-      // than an `any`.
-      style: mapStyles.desaturated as unknown as StyleSpecification,
+      // The "desaturated" style of `carte-facile`, served as a static file:
+      // importing the package for it cost ~930 KB (the package and its own
+      // copy of maplibre-gl 5), for 9 KB of style. See `carte-style.json`.
+      style: this.styleUrlValue,
       center: [this.longitudeValue, this.latitudeValue],
       zoom: INITIAL_ZOOM,
       attributionControl: { compact: true },
