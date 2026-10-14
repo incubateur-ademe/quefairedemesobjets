@@ -235,3 +235,18 @@ class TestDocumentation:
 
     def test_the_historical_api_still_answers(self, client):
         assert client.get("/api/docs").status_code == 200
+
+
+class TestLieuxGeojson:
+    def test_around_a_point_only_the_places_within_20_km(self, client, reparer):
+        """The map's first display: the nearest places, within 20 km (#3356)."""
+        near = place(reparer, at=Point(2.3488, 48.95, srid=4326))  # ~11 km north
+        place(reparer, at=Point(2.3488, 49.10, srid=4326))  # ~27 km north
+
+        payload = client.get(
+            reverse("api_v1:lieux-geojson"), {**PARIS, "geste": "reparer"}
+        ).json()
+
+        assert [feature["properties"]["uuid"] for feature in payload["features"]] == [
+            near.uuid
+        ]
