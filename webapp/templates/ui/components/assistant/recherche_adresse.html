@@ -17,7 +17,8 @@ champ.
      id="{{ id|default:'recherche-adresse' }}"
      data-controller="assistant-combobox"
      data-assistant-combobox-url-value="{{ url_recherche }}"
-     data-assistant-combobox-min-length-value="3">
+     data-assistant-combobox-min-length-value="3"
+     data-assistant-combobox-require-choice-value="true">
     <label class="qfa-combobox__label" for="{{ id|default:'recherche-adresse' }}-champ">
         {{ label|default:"Où souhaitez-vous trouver des solutions ?" }}
     </label>
