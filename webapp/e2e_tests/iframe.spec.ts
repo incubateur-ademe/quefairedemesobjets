@@ -63,7 +63,7 @@ test.describe("📦 Système d'Intégration Iframe", () => {
       const [allow, src, frameborder, scrolling, allowfullscreen, style, title] =
         attributes
 
-      expect(allow).toBe("geolocation; clipboard-write")
+      expect(allow).toBe("geolocation *; clipboard-write *")
       // The ref parameter is base64-encoded referrer URL, which depends on the environment
       const expectedReferrer = `${baseURL}/lookbook/preview/iframe/formulaire/`
       const expectedRef = Buffer.from(expectedReferrer).toString("base64")

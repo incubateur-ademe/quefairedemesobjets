@@ -115,7 +115,9 @@ function createIframeAttributes(
     id: iframeId || IFRAME_ID,
     frameBorder: "0",
     scrolling: "no",
-    allow: "geolocation; clipboard-write",
+    // A bare feature only allows the src origin: once redirected to another
+    // origin (beta hosts sent to the assistant V2), geolocation was blocked.
+    allow: "geolocation *; clipboard-write *",
     allowFullscreen: true,
     title: resolveIframeTitle(route, customTitle),
     style: `overflow: hidden; max-width: ${maxWidth}; width: 100%; height: ${height};`,
