@@ -45,7 +45,7 @@ export default class extends Controller<HTMLAnchorElement> {
     this.modulesRequested = true
 
     try {
-      await Promise.all([import("maplibre-gl"), import("carte-facile")])
+      await import("maplibre-gl")
     } catch {
       // A failed prefetch must break nothing: the map screen will redo the
       // import itself, and report the error if any.
