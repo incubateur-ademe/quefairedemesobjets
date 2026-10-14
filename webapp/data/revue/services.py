@@ -22,11 +22,6 @@ from data.models.suggestion import (
 from data.revue.errors import RevueApiError
 from data.revue.lignes import ACTEUR, groupes_queryset, serialize_groupe
 from data.revue.policies import PARENT, REVISION, ReviewPolicy, get_policy
-from data.services.suggestion_statut import (
-    recompute_cohorte_statut,
-    set_groupes_statut,
-    set_lignes_statut,
-)
 from data.views import update_suggestion_groupe
 
 AVALIDER = SuggestionStatut.AVALIDER
@@ -73,7 +68,7 @@ def write_groupe(
         lignes = {tuple(ligne["champs"]): ligne for ligne in current["lignes"]}
         write(groupe, policy, {"groupe": current, "lignes": lignes})
         SuggestionGroupe.objects.filter(id=groupe_id).update(modifie_le=timezone.now())
-        recompute_cohorte_statut([groupe.suggestion_cohorte_id])
+        groupe.suggestion_cohorte.recompute_cohorte_statut()
     return serialize_groupe(groupes_queryset().get(id=groupe_id), policy)
 
 
@@ -102,15 +97,15 @@ def decide_groupe(groupe_id, action: str, user, expected_modifie_le) -> dict:
         if action == "validate":
             if not capacites["valider"]:
                 _refuse(groupe, policy, "Ce groupe n'est plus à valider")
-            set_groupes_statut([groupe.id], ATRAITER, user)
+            groupe.suggestion_cohorte.set_groupes_statut([groupe.id], ATRAITER, user)
         elif action == "reject":
             if not capacites["refuser"]:
                 _refuse(groupe, policy, "Ce groupe ne peut plus être refusé")
-            set_groupes_statut([groupe.id], REJETEE, user)
+            groupe.suggestion_cohorte.set_groupes_statut([groupe.id], REJETEE, user)
         elif action == "resubmit":
             if not capacites["remettre_a_valider"]:
                 _refuse(groupe, policy, "Ce groupe ne peut pas être remis à valider")
-            set_groupes_statut([groupe.id], AVALIDER)
+            groupe.suggestion_cohorte.set_groupes_statut([groupe.id], AVALIDER)
 
     return write_groupe(groupe_id, expected_modifie_le, write)
 
@@ -123,18 +118,20 @@ def decide_lignes(
         if action == "validate":
             if not all(ligne["capacites"]["valider"] for ligne in lignes):
                 _refuse(groupe, policy, "Cette ligne n'est plus à valider")
-            set_lignes_statut(groupe, champs_list, ATRAITER, user)
+            groupe.set_lignes_statut(champs_list, ATRAITER, user)
             # The groupe is validated with its last ligne
             if not groupe.suggestion_unitaires.exclude(statut=ATRAITER).exists():
-                set_groupes_statut([groupe.id], ATRAITER, user)
+                groupe.suggestion_cohorte.set_groupes_statut(
+                    [groupe.id], ATRAITER, user
+                )
         elif action == "resubmit":
             if groupe.statut == REJETEE:
                 # Refusal is a decision on the whole groupe: reopen it
-                set_groupes_statut([groupe.id], AVALIDER)
+                groupe.suggestion_cohorte.set_groupes_statut([groupe.id], AVALIDER)
                 return
             if not all(ligne["capacites"]["remettre_a_valider"] for ligne in lignes):
                 _refuse(groupe, policy, "Cette ligne ne peut pas être remise à valider")
-            set_lignes_statut(groupe, champs_list, AVALIDER)
+            groupe.set_lignes_statut(champs_list, AVALIDER)
             if groupe.statut == ATRAITER:
                 SuggestionGroupe.objects.filter(id=groupe.id).update(
                     statut=AVALIDER, decision_par=None, decision_le=None
