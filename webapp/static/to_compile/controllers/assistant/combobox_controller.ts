@@ -36,6 +36,7 @@ export default class extends Controller<HTMLElement> {
   static values = {
     url: String,
     minLength: { type: Number, default: 2 },
+    requireChoice: Boolean,
   }
 
   declare readonly inputTarget: HTMLInputElement
@@ -53,6 +54,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly hiddenTargets: HTMLInputElement[]
   declare urlValue: string
   declare minLengthValue: number
+  /** The address: typed text is worth nothing without a chosen suggestion. */
+  declare requireChoiceValue: boolean
 
   static debounces = [{ name: "search", wait: TYPING_DELAY_MS }]
 
@@ -97,7 +100,7 @@ export default class extends Controller<HTMLElement> {
       if (!response.ok) throw new Error(`response ${response.status}`)
       const { results } = await response.json()
       this.suggestions = results
-      this.#showNoResult(!results.length)
+      this.#showNoResult(!results.length && !isTypingANumber(query))
       if (results.length) this.#render()
       else this.#close()
     } catch (error) {
@@ -107,6 +110,14 @@ export default class extends Controller<HTMLElement> {
   }
 
   navigate(event: KeyboardEvent) {
+    if (event.key === "Enter" && this.#isUnresolved()) {
+      // Submitted as is, the text would carry no position: the map would fall
+      // back on its default view (Paris) instead of saying it is unknown.
+      event.preventDefault()
+      if (this.suggestions.length) this.#choose(Math.max(this.active, 0))
+      else this.#showNoResult(true)
+      return
+    }
     if (!this.suggestions.length) return
 
     const keys: Record<string, () => void> = {
@@ -164,6 +175,16 @@ export default class extends Controller<HTMLElement> {
       const value = suggestion[field.dataset.key ?? ""]
       field.value = value === undefined || value === null ? "" : String(value)
     }
+  }
+
+  #isUnresolved(): boolean {
+    return (
+      this.requireChoiceValue &&
+      this.inputTarget.value.trim() !== "" &&
+      this.hiddenTargets.some(
+        (field) => field.dataset.key !== "precise" && !field.value,
+      )
+    )
   }
 
   #clearHidden() {
@@ -230,6 +251,14 @@ export default class extends Controller<HTMLElement> {
   #announce(message: string) {
     if (this.hasStatusTarget) this.statusTarget.textContent = message
   }
+}
+
+/**
+ * A house number or a postcode being typed ("365"): the BAN knows nothing
+ * yet, and the user is not done. A complete postcode (5 digits) is judged.
+ */
+function isTypingANumber(query: string): boolean {
+  return /^\d[\d\s]{0,3}$/.test(query)
 }
 
 /** Labels come from a third-party API: they are not trusted HTML. */
