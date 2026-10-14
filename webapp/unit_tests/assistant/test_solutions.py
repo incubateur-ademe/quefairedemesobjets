@@ -42,6 +42,16 @@ class TestSolutionsScreen:
         assert 'precise-address-value="false"' in municipality
         assert 'precise-address-value="true"' in address
 
+    def test_an_address_without_position_is_said_unknown(self, client, reparer):
+        """Typed without choosing a suggestion: the map falls back on its
+        default view, the field says why."""
+        content = client.get(
+            reverse("assistant:solutions"), {"geste": "reparer", "adresse": "trucmuche"}
+        ).content.decode()
+
+        assert "Nous ne connaissons pas cette adresse" in content
+        assert 'aria-invalid="true"' in content
+
     def test_without_position_the_map_still_has_a_center(self, client, reparer):
         """Otherwise MapLibre receives NaN and refuses to initialize."""
         content = client.get(
