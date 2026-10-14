@@ -318,9 +318,10 @@ export default class extends Controller<HTMLElement> {
         places: incoming.length,
       }
       this.assistantChronoOutlets.forEach((chrono) => chrono.record(timing))
+      // Framed first: the visible area is the one the user will see.
+      this.#fitOnce(incoming)
       const area = this.#visibleArea()
       state.places = merge(state.places, incoming, area)
-      this.#fitOnce(incoming)
       this.#draw()
       this.#announce(
         state.places.some((place) => isInArea(place, area))
@@ -344,8 +345,10 @@ export default class extends Controller<HTMLElement> {
    */
   #fitOnce(places: Place[]) {
     const state = this.state
-    if (!state?.needsFit || places.length === 0) return
+    if (!state?.needsFit) return
+    // Even with nothing within 20 km: the next requests follow the view.
     state.needsFit = false
+    if (places.length === 0) return
 
     const points: [number, number][] = places.map((place) => [
       place.longitude,
@@ -365,13 +368,22 @@ export default class extends Controller<HTMLElement> {
   }
 
   #placesUrl(): string {
+    const state = this.state!
     const area = this.#visibleArea()
-    const params = new URLSearchParams({
-      bbox: JSON.stringify({
-        southWest: { lng: area.west, lat: area.south },
-        northEast: { lng: area.east, lat: area.north },
-      }),
-    })
+    // First display around an address: the 20 nearest places within 20 km,
+    // whatever the initial zoom shows, then the view is framed on them
+    // (#3356). Afterwards, the places of the visible area.
+    const params = state.needsFit
+      ? new URLSearchParams({
+          longitude: String(state.address[0]),
+          latitude: String(state.address[1]),
+        })
+      : new URLSearchParams({
+          bbox: JSON.stringify({
+            southWest: { lng: area.west, lat: area.south },
+            northEast: { lng: area.east, lat: area.north },
+          }),
+        })
     // One `geste` per code: a block of the fiche may span two gestes.
     for (const code of this.#gestes()) params.append("geste", code)
     if (this.ficheValue) params.set("fiche", this.ficheValue)
