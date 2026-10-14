@@ -5,11 +5,16 @@ existing pages are migrated to that block, a fiche without grid still shows
 the static text below, so the assistant never renders an empty fiche.
 """
 
+import re
 from urllib.parse import urlencode
 
 from django.urls import reverse
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+from wagtail.rich_text import expand_db_html
 
 from qfdmd.blocks import ETAT_CHOICES
+from qfdmd.models import ProduitPage
 from qfdmo.models.action import Action, GroupeAction
 
 # TODO: the counter on the buttons is out of the MVP (ADR 0010, #3295), and its
@@ -180,8 +185,8 @@ def _from_cms(child, base, localise) -> dict | None:
         "code": child.id,
         "gestes": gestes,
         "libelle": value["titre"],
-        # RichText: rendered as HTML by the template, never escaped.
-        "consigne": value["contenu"],
+        # Rendered here, marked safe: the template never escapes it.
+        "consigne": _consigne_html(value["contenu"].source, base),
         "badges": badges,
         **_links(gestes, base, localise),
     }
@@ -200,3 +205,38 @@ def _groupes_of(action_codes) -> list[str]:
         .values_list("code", "groupe_action__code")
     )
     return [groupes[code] for code in action_codes if code in groupes]
+
+
+# A rich text link to a page, as Wagtail stores it: `<a linktype="page" id="3">`.
+PAGE_LINK = re.compile(r"<a\b[^>]*\blinktype=\"page\"[^>]*>")
+PAGE_ID = re.compile(r"\bid=\"(\d+)\"")
+# Anchors Wagtail expanded, still bound to the fiche frame.
+FRAMED_LINK = re.compile(r"<a\b(?![^>]*data-turbo-frame)")
+
+
+def _consigne_html(source, base) -> str:
+    """The consigne's links, made to work from the fiche frame.
+
+    A link to another fiche opens that fiche in the assistant, the address
+    kept; any other link opens in a new tab. Left as is, Turbo would look for
+    the `assistant-fiche` frame in a page of the site and show
+    « Content missing ».
+    """
+    ids = {int(PAGE_ID.search(tag).group(1)) for tag in PAGE_LINK.findall(source)}
+    fiches = ProduitPage.objects.live().in_bulk(ids) if ids else {}
+    location = {k: v for k, v in base.items() if k not in ("fiche", "objet")}
+
+    def to_fiche(match):
+        page = fiches.get(int(PAGE_ID.search(match.group(0)).group(1)))
+        if page is None:
+            return match.group(0)
+        params = urlencode({**location, "fiche": page.slug, "objet": page.title})
+        url = f"{reverse('assistant:produit', args=[page.slug])}?{params}"
+        return f'<a href="{escape(url)}" data-turbo-frame="_top">'
+
+    html = expand_db_html(PAGE_LINK.sub(to_fiche, source))
+    return mark_safe(
+        FRAMED_LINK.sub(
+            '<a target="_blank" rel="noopener" data-turbo-frame="_top"', html
+        )
+    )
