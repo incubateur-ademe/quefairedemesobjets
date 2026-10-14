@@ -10,6 +10,8 @@ Mounted at `/api/v1/` (`core/api.py`, `core/urls.py`).
 
 from time import perf_counter
 
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_control
 from ninja import Field, Query, Router, Schema
@@ -17,7 +19,7 @@ from ninja.decorators import decorate_view
 from pydantic import field_validator
 
 from assistant.adresses import suggest_adresses
-from assistant.compte import count_nearby
+from assistant.compte import RADIUS_KM, count_nearby
 from assistant.objets import suggest_objets
 from qfdmo.lieux_query import LieuxQuery, clean_codes, sous_categorie_ids_for
 from qfdmo.models.acteur import MAX_PLACES_ON_MAP
@@ -75,11 +77,25 @@ class SuggestionsAdresses(Schema):
 @decorate_view(CACHE_FIVE_MINUTES)
 def lieux_geojson(request, response: HttpResponse, query: Query[LieuxQuery]):
     """Au plus 20 lieux (#3356), toutes sources confondues : ce que la carte
-    de l'assistant dessine. Les propriétés se limitent à ce que la punaise
-    affiche ; le détail est sur `/lieux/{identifiant}`.
+    de l'assistant dessine. Autour d'un point, les 20 plus proches à moins de
+    20 km : le premier affichage de la carte, cadré sur eux. Les propriétés se
+    limitent à ce que la punaise affiche ; le détail est sur
+    `/lieux/{identifiant}`.
     """
     start = perf_counter()
-    payload = query.queryset().for_the_map(MAX_PLACES_ON_MAP).as_geojson()
+    acteurs = query.queryset()
+    if query.bbox is None:
+        position = Point(query.longitude, query.latitude, srid=4326)
+        acteurs = acteurs.annotate(distance=Distance("location", position))
+    places = acteurs.for_the_map(MAX_PLACES_ON_MAP)
+    if query.bbox is None:
+        # ponytail: filtered after the LIMIT, a `ST_DWithin` would cost the
+        # KNN scan of the GiST index (see `nearest_to`). 20 rows at most.
+        places = [place for place in places if place.distance.km <= RADIUS_KM]
+    payload = {
+        "type": "FeatureCollection",
+        "features": [place.as_geojson_feature() for place in places],
+    }
     duration_ms = (perf_counter() - start) * 1000
     # Read by the browser (Network tab, PerformanceObserver) and by the map's
     # debug overlay.
