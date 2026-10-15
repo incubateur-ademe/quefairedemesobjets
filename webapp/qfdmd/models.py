@@ -38,6 +38,7 @@ from wagtail.snippets.models import register_snippet
 
 # Update when migrating to v4
 from sites_conformes.content_manager.abstract import SitesFacilesBasePage
+from sites_conformes.content_manager.blocks.badges_tags import badge_level_choices
 from sites_conformes.content_manager.models import ContentPage
 from django.conf import settings
 
@@ -711,6 +712,22 @@ class ProduitPage(
         verbose_name="Corps de texte",
         blank=True,
     )
+
+    @property
+    def consignes(self) -> list:
+        """Every consigne of the page in reading order, across the grids.
+
+        The one place the assistant and the open data export read: a page
+        may hold several grids (#3284), with any content between them. Each
+        item is a bound list child: `.id` is the identifier the open data
+        publishes, `.value` the fields of the consigne.
+        """
+        return [
+            consigne
+            for block in self.body
+            if block.block_type == "consignes"
+            for consigne in block.value["consignes"].bound_blocks
+        ]
 
     @cached_property
     def _partitioned_body(self) -> PartitionedBody:
@@ -1576,6 +1593,35 @@ class Lien(models.Model):
 
     class Meta:
         ordering = ("titre_du_lien",)
+
+
+@register_snippet
+class LieuDeDepot(models.Model):
+    """Where a déchet goes: bac de tri, conteneur à verre, déchèterie…
+
+    Shown as a badge on a consigne of a déchet page, exported as
+    `lieu_de_depot` in the consignes open data (#3284).
+    """
+
+    code = models.SlugField(
+        unique=True,
+        help_text="Identifiant stable, exporté en open data (ex. bac_de_tri)",
+    )
+    libelle = models.CharField(max_length=100)
+    couleur = models.CharField(
+        "Couleur du badge",
+        max_length=40,
+        choices=badge_level_choices,
+        default="grey",
+    )
+
+    class Meta:
+        ordering = ("libelle",)
+        verbose_name = "Lieu de dépôt"
+        verbose_name_plural = "Lieux de dépôt"
+
+    def __str__(self):
+        return self.libelle
 
 
 class ProduitLien(models.Model):
