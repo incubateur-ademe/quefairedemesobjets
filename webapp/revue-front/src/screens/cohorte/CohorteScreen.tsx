@@ -96,11 +96,11 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
   )
 
   const modalGroupeId = search.groupe ? Number(search.groupe) : null
-  const modalTab = (search.onglet as ModalTab) || "suggestions"
+  const modalTab = (search.onglet as ModalTab) || "localisation"
   const openModal = (groupe: Groupe, tab: ModalTab) =>
     setSearch({
       groupe: String(groupe.id),
-      onglet: tab === "suggestions" ? undefined : tab,
+      onglet: tab === "localisation" ? undefined : tab,
     })
 
   useEffect(() => {
@@ -131,7 +131,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
       } else if (key === "enter") {
         const groupe = cursor.groupe()
         if (groupe) {
-          openModal(groupe, "suggestions")
+          openModal(groupe, "localisation")
         }
       } else if (event.key === "/") {
         event.preventDefault()
@@ -261,7 +261,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         actions={actions}
         onTab={(tab) =>
           setSearch(
-            { onglet: tab === "suggestions" ? undefined : tab },
+            { onglet: tab === "localisation" ? undefined : tab },
             { replace: true },
           )
         }

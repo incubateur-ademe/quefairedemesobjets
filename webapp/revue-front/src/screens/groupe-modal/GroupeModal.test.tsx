@@ -159,13 +159,6 @@ describe("GroupeModal", () => {
     )
   })
 
-  it("shows the acteur displayed on the map", async () => {
-    setup("/data/revue/cohortes/7?groupe=1&onglet=acteur")
-
-    expect(await screen.findByText("Ressourcerie")).toBeInTheDocument()
-    expect(within(dialog()).getByText("voir le site ↗")).toBeInTheDocument()
-  })
-
   it("saves the position of a marker as soon as it is released", async () => {
     const api = setup("/data/revue/cohortes/7?groupe=1&onglet=localisation")
     await screen.findByText("Légende")

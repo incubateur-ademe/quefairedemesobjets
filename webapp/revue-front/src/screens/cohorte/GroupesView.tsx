@@ -83,10 +83,9 @@ function ReportAll({
   )
 }
 
-export type ModalTab = "suggestions" | "acteur" | "localisation" | "annuaire"
+export type ModalTab = "localisation" | "annuaire"
 
 const MODAL_TABS: [ModalTab, string][] = [
-  ["acteur", "Acteur"],
   ["localisation", "Localisation"],
   ["annuaire", "Annuaire entreprise"],
 ]
