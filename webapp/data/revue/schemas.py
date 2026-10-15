@@ -208,7 +208,6 @@ class GroupeOut(Schema):
     is_new: bool
     has_correction: bool
     parent: ParentOut | None
-    contexte: Any = None
     lignes: list[LigneOut]
     lignes_validees: int
     lignes_total: int
@@ -293,11 +292,6 @@ class ReportIn(Schema):
 # --- Detail of a groupe (modal) ---
 
 
-class ChampValeurOut(Schema):
-    champ: str
-    valeur: str
-
-
 class PointOut(Schema):
     key: Literal["Origin", "Acteur", "RevisionActeur", "ParentRevisionActeur"]
     latitude: float
@@ -360,6 +354,5 @@ class AnnuaireQuery(Schema):
 
 
 class GroupeDetailOut(GroupeOut):
-    acteur_affiche: list[ChampValeurOut]
     localisation: LocalisationOut
     annuaire: AnnuaireOut

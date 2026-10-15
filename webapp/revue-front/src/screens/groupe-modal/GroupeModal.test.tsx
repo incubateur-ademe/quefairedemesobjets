@@ -15,10 +15,6 @@ const detail = (): GroupeDetail => ({
       }),
     ],
   }),
-  acteur_affiche: [
-    { champ: "nom", valeur: "Ressourcerie" },
-    { champ: "url", valeur: "https://ressourcerie.fr" },
-  ],
   localisation: {
     ligne: "1:latitude,longitude",
     creer_correction: false,

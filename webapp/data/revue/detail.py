@@ -1,9 +1,7 @@
-"""Detail of a groupe (modal of the review screen): the acteur as displayed on the
-map, the points of the localisation tab and the identifiers of the Annuaire
-Entreprises tab."""
+"""Detail of a groupe (modal of the review screen): the points of the localisation
+tab and the identifiers of the Annuaire Entreprises tab."""
 
 from data.models.suggestion import SuggestionGroupe
-from data.models.suggestions.source import SuggestionSourceModel
 from data.revue.annuaire import identifiants
 from data.revue.services import can_create_localisation
 from data.revue.lignes import ACTEUR, serialize_groupe
@@ -11,37 +9,6 @@ from data.revue.policies import PARENT, REVISION, ReviewPolicy
 from qfdmo.models.acteur import DisplayedActeur
 
 LATLONG = ("latitude", "longitude")
-
-DISPLAYED_FIELDS = [
-    "identifiant_unique",
-    "nom",
-    "nom_commercial",
-    "nom_officiel",
-    "acteur_type_code",
-    "source_code",
-    "statut",
-    "siret",
-    "siren",
-    "naf_principal",
-    "adresse",
-    "adresse_complement",
-    "code_postal",
-    "ville",
-    "latitude",
-    "longitude",
-    "url",
-    "email",
-    "telephone",
-    "horaires_osm",
-    "horaires_description",
-    "public_accueilli",
-    "reprise",
-    "uniquement_sur_rdv",
-    "consignes_dacces",
-    "lieu_prestation",
-    "description",
-    "commentaires",
-]
 
 
 def _displayed_acteur(groupe: SuggestionGroupe) -> DisplayedActeur | None:
@@ -53,18 +20,6 @@ def _displayed_acteur(groupe: SuggestionGroupe) -> DisplayedActeur | None:
     if not identifiant:
         return None
     return DisplayedActeur.objects.filter(identifiant_unique=identifiant).first()
-
-
-def _displayed_fields(displayed: DisplayedActeur | None) -> list[dict]:
-    if displayed is None:
-        return []
-    values = SuggestionSourceModel.from_acteur(
-        displayed, fields_to_include=DISPLAYED_FIELDS
-    )
-    return [
-        {"champ": champ, "valeur": getattr(values, champ, None) or ""}
-        for champ in DISPLAYED_FIELDS
-    ]
 
 
 def _point(key: str, lat, lng, draggable: bool = False) -> dict | None:
@@ -142,10 +97,8 @@ def localisation(
 
 def serialize_groupe_detail(groupe: SuggestionGroupe, policy: ReviewPolicy) -> dict:
     serialized = serialize_groupe(groupe, policy)
-    displayed = _displayed_acteur(groupe)
     return {
         **serialized,
-        "acteur_affiche": _displayed_fields(displayed),
         "localisation": localisation(groupe, serialized, policy),
-        "annuaire": identifiants(groupe, displayed),
+        "annuaire": identifiants(groupe, _displayed_acteur(groupe)),
     }

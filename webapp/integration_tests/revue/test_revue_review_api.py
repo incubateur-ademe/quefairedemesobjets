@@ -516,15 +516,11 @@ class TestGroupeDetail:
         assert points["RevisionActeur"]["draggable"] is draggable
         assert body["localisation"]["ligne"] == f"{groupe.id}:latitude,longitude"
         assert body["annuaire"]["siren"][-1]["valeur"]
-        assert body["acteur_affiche"] == [] or body["acteur_affiche"][0]["champ"] == (
-            "identifiant_unique"
-        )
 
     def test_detail_of_an_ajout(self, client, seed):
         groupe = seed[SuggestionAction.SOURCE_AJOUT].suggestion_groupes.first()
         _, body = get(client, f"/groupes/{groupe.id}")
 
-        assert body["acteur_affiche"] == []
         assert [point["key"] for point in body["localisation"]["points"]] == ["Acteur"]
         (siret,) = body["annuaire"]["siret"]
         assert siret["source"] == "acteur"

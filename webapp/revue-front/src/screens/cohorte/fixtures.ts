@@ -63,7 +63,6 @@ export function groupe(id: number, patch: Partial<Groupe> = {}): Groupe {
     is_new: false,
     has_correction: false,
     parent: null,
-    contexte: null,
     lignes,
     lignes_validees: 0,
     lignes_total: lignes.length,
