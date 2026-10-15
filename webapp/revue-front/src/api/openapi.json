@@ -28,7 +28,9 @@
           }
         },
         "description": "List the possible <i>sources</i> for an actor.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/sous-categories": {
@@ -53,7 +55,9 @@
           }
         },
         "description": "List the possible <i>sub-categories of objects</i> for an actor.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/actions": {
@@ -78,7 +82,9 @@
           }
         },
         "description": "List the possible <i>actions</i> on an object / waste.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/actions/groupes": {
@@ -103,7 +109,9 @@
           }
         },
         "description": "List the possible <i>actions</i> on an object / waste.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/acteurs": {
@@ -269,7 +277,9 @@
           }
         },
         "description": "The actors corresponding to a point on the \"Que faire de mes objets et déchets\" map.\n\nTo find actors near a point:\n- provide a latitude / longitude (example: latitude=48.86 and longitude=2.3)\n- provide a radius (optional) in km: results outside this radius will not be\n  returned\n\nIf the latitude or longitude are missing, then all results will be returned sorted\nby name.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/acteurs/types": {
@@ -294,7 +304,9 @@
           }
         },
         "description": "List the possible <i>types</i> of actors.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/acteurs/services": {
@@ -319,7 +331,9 @@
           }
         },
         "description": "Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/acteur": {
@@ -349,7 +363,9 @@
             }
           }
         },
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/autocomplete/configurateur": {
@@ -372,7 +388,9 @@
             "description": "OK"
           }
         },
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/qfdmo/acteurs/columns": {
@@ -397,7 +415,9 @@
           }
         },
         "description": "Actor models columns.\nUsed by the data-platform (Airflow) to build the DAGs parameters.",
-        "tags": ["Que faire de mes objets"]
+        "tags": [
+          "Que faire de mes objets"
+        ]
       }
     },
     "/api/stats": {
@@ -430,7 +450,12 @@
             "schema": {
               "default": "month",
               "description": "Granularité de regroupement des KPI.",
-              "enum": ["day", "week", "month", "year"],
+              "enum": [
+                "day",
+                "week",
+                "month",
+                "year"
+              ],
               "title": "Periodicity",
               "type": "string"
             },
@@ -450,7 +475,9 @@
             }
           }
         },
-        "tags": ["KPI"]
+        "tags": [
+          "KPI"
+        ]
       }
     },
     "/api/suggestions/me": {
@@ -470,7 +497,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -621,7 +650,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -646,7 +677,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -717,7 +750,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -762,7 +797,9 @@
           }
         },
         "description": "Excel export of the logs of a cohorte (same order and level filter).",
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -807,7 +844,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -842,7 +881,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -900,7 +941,10 @@
             "name": "afficher",
             "schema": {
               "default": "avalider",
-              "enum": ["avalider", "tout"],
+              "enum": [
+                "avalider",
+                "tout"
+              ],
               "title": "Afficher",
               "type": "string"
             },
@@ -952,7 +996,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1010,7 +1056,10 @@
             "name": "afficher",
             "schema": {
               "default": "avalider",
-              "enum": ["avalider", "tout"],
+              "enum": [
+                "avalider",
+                "tout"
+              ],
               "title": "Afficher",
               "type": "string"
             },
@@ -1062,7 +1111,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1120,7 +1171,10 @@
             "name": "afficher",
             "schema": {
               "default": "avalider",
-              "enum": ["avalider", "tout"],
+              "enum": [
+                "avalider",
+                "tout"
+              ],
               "title": "Afficher",
               "type": "string"
             },
@@ -1131,7 +1185,10 @@
             "name": "vue",
             "schema": {
               "default": "groupes",
-              "enum": ["groupes", "lignes"],
+              "enum": [
+                "groupes",
+                "lignes"
+              ],
               "title": "Vue",
               "type": "string"
             },
@@ -1160,7 +1217,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1205,7 +1264,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1270,7 +1331,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1345,7 +1408,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1420,7 +1485,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1454,7 +1521,10 @@
             "in": "query",
             "name": "suggestion_modele",
             "schema": {
-              "enum": ["RevisionActeur", "ParentRevisionActeur"],
+              "enum": [
+                "RevisionActeur",
+                "ParentRevisionActeur"
+              ],
               "title": "Suggestion Modele",
               "type": "string"
             },
@@ -1533,7 +1603,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1598,7 +1670,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1625,7 +1699,10 @@
             "in": "query",
             "name": "champ",
             "schema": {
-              "enum": ["siret", "siren"],
+              "enum": [
+                "siret",
+                "siren"
+              ],
               "title": "Champ",
               "type": "string"
             },
@@ -1674,7 +1751,9 @@
           }
         },
         "description": "Entreprise and établissement of a SIRET / SIREN, from the public API\n« Recherche d'entreprises » (cached one day).",
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1730,7 +1809,9 @@
           }
         },
         "description": "Number of elements each mass action would really change on the selection.",
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1806,7 +1887,9 @@
           }
         },
         "description": "Runs a mass action. The filter of a « tout le filtre » selection is applied\nagain by the server. Large reports run in the background (202 + job).",
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1861,7 +1944,9 @@
             }
           }
         },
-        "tags": ["Revue suggestions"],
+        "tags": [
+          "Revue suggestions"
+        ],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -1920,7 +2005,11 @@
             "title": "Url"
           }
         },
-        "required": ["logo", "code", "libelle"],
+        "required": [
+          "logo",
+          "code",
+          "libelle"
+        ],
         "title": "SourceSchema",
         "type": "object"
       },
@@ -1949,7 +2038,10 @@
             "type": "string"
           }
         },
-        "required": ["code", "libelle"],
+        "required": [
+          "code",
+          "libelle"
+        ],
         "title": "SousCategorieObjetSchema",
         "type": "object"
       },
@@ -1996,7 +2088,10 @@
             "title": "Icon"
           }
         },
-        "required": ["couleur", "code"],
+        "required": [
+          "couleur",
+          "code"
+        ],
         "title": "ActionSchema",
         "type": "object"
       },
@@ -2043,7 +2138,10 @@
             "title": "Icon"
           }
         },
-        "required": ["couleur", "code"],
+        "required": [
+          "couleur",
+          "code"
+        ],
         "title": "GroupeActionSchema",
         "type": "object"
       },
@@ -2274,7 +2372,9 @@
             "title": "Libelle"
           }
         },
-        "required": ["code"],
+        "required": [
+          "code"
+        ],
         "title": "ActeurServiceSchema",
         "type": "object"
       },
@@ -2304,7 +2404,9 @@
             "type": "string"
           }
         },
-        "required": ["code"],
+        "required": [
+          "code"
+        ],
         "title": "ActeurTypeSchema",
         "type": "object"
       },
@@ -2322,7 +2424,10 @@
             "type": "integer"
           }
         },
-        "required": ["items", "count"],
+        "required": [
+          "items",
+          "count"
+        ],
         "title": "PagedActeurSchema",
         "type": "object"
       },
@@ -2343,7 +2448,10 @@
             "type": "array"
           }
         },
-        "required": ["with_properties", "db_only"],
+        "required": [
+          "with_properties",
+          "db_only"
+        ],
         "title": "ModelFieldsSchema",
         "type": "object"
       },
@@ -2365,7 +2473,12 @@
           "periodicity": {
             "default": "month",
             "description": "Granularité de regroupement des KPI.",
-            "enum": ["day", "week", "month", "year"],
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
             "title": "Periodicity",
             "type": "string"
           }
@@ -2388,7 +2501,11 @@
             "type": "string"
           }
         },
-        "required": ["value", "date", "iso_date"],
+        "required": [
+          "value",
+          "date",
+          "iso_date"
+        ],
         "title": "Stat",
         "type": "object"
       },
@@ -2413,7 +2530,9 @@
             "type": "array"
           }
         },
-        "required": ["stats"],
+        "required": [
+          "stats"
+        ],
         "title": "StatOutput",
         "type": "object"
       },
@@ -2428,7 +2547,10 @@
             "type": "string"
           }
         },
-        "required": ["id", "username"],
+        "required": [
+          "id",
+          "username"
+        ],
         "title": "UserOut",
         "type": "object"
       },
@@ -2600,7 +2722,12 @@
             "type": "integer"
           }
         },
-        "required": ["items", "total", "page", "page_size"],
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
         "title": "CohortePageOut",
         "type": "object"
       },
@@ -2631,7 +2758,14 @@
             "type": "integer"
           }
         },
-        "required": ["AVALIDER", "ATRAITER", "REJETEE", "ENCOURS", "SUCCES", "ERREUR"],
+        "required": [
+          "AVALIDER",
+          "ATRAITER",
+          "REJETEE",
+          "ENCOURS",
+          "SUCCES",
+          "ERREUR"
+        ],
         "title": "CompteursOut",
         "type": "object"
       },
@@ -2650,7 +2784,11 @@
             "type": "integer"
           }
         },
-        "required": ["ERROR", "WARNING", "INFO"],
+        "required": [
+          "ERROR",
+          "WARNING",
+          "INFO"
+        ],
         "title": "LogsCountOut",
         "type": "object"
       },
@@ -2694,7 +2832,10 @@
             "title": "Current"
           }
         },
-        "required": ["code", "detail"],
+        "required": [
+          "code",
+          "detail"
+        ],
         "title": "ErrorOut",
         "type": "object"
       },
@@ -2709,7 +2850,10 @@
             "type": "string"
           }
         },
-        "required": ["value", "label"],
+        "required": [
+          "value",
+          "label"
+        ],
         "title": "ChoiceOut",
         "type": "object"
       },
@@ -2724,12 +2868,23 @@
             "type": "string"
           },
           "famille": {
-            "enum": ["cohorte", "groupe", "ligne"],
+            "enum": [
+              "cohorte",
+              "groupe",
+              "ligne"
+            ],
             "title": "Famille",
             "type": "string"
           },
           "type": {
-            "enum": ["text", "number", "date", "bool", "choice", "user"],
+            "enum": [
+              "text",
+              "number",
+              "date",
+              "bool",
+              "choice",
+              "user"
+            ],
             "title": "Type",
             "type": "string"
           },
@@ -2755,7 +2910,13 @@
             "title": "Choix"
           }
         },
-        "required": ["key", "label", "famille", "type", "operateurs"],
+        "required": [
+          "key",
+          "label",
+          "famille",
+          "type",
+          "operateurs"
+        ],
         "title": "FilterFieldOut",
         "type": "object"
       },
@@ -2769,7 +2930,9 @@
             "type": "array"
           }
         },
-        "required": ["champs"],
+        "required": [
+          "champs"
+        ],
         "title": "FilterMetaOut",
         "type": "object"
       },
@@ -2918,7 +3081,12 @@
             "type": "integer"
           }
         },
-        "required": ["items", "total", "page", "page_size"],
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
         "title": "LogPageOut",
         "type": "object"
       },
@@ -3087,7 +3255,10 @@
           },
           "afficher": {
             "default": "avalider",
-            "enum": ["avalider", "tout"],
+            "enum": [
+              "avalider",
+              "tout"
+            ],
             "title": "Afficher",
             "type": "string"
           },
@@ -3187,7 +3358,12 @@
             "title": "Parent"
           }
         },
-        "required": ["importe", "affiche", "corrige", "parent"],
+        "required": [
+          "importe",
+          "affiche",
+          "corrige",
+          "parent"
+        ],
         "title": "AdminUrlsOut",
         "type": "object"
       },
@@ -3222,12 +3398,20 @@
             "title": "Propose"
           },
           "etat": {
-            "enum": ["valeur", "vide", "pas_de_correction"],
+            "enum": [
+              "valeur",
+              "vide",
+              "pas_de_correction"
+            ],
             "title": "Etat",
             "type": "string"
           }
         },
-        "required": ["actuel", "propose", "etat"],
+        "required": [
+          "actuel",
+          "propose",
+          "etat"
+        ],
         "title": "CellOut",
         "type": "object"
       },
@@ -3381,7 +3565,12 @@
             "type": "integer"
           }
         },
-        "required": ["items", "total", "page", "page_size"],
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
         "title": "GroupePageOut",
         "type": "object"
       },
@@ -3526,7 +3715,11 @@
             "type": "integer"
           }
         },
-        "required": ["identifiant_unique", "nom", "nb_enfants"],
+        "required": [
+          "identifiant_unique",
+          "nom",
+          "nb_enfants"
+        ],
         "title": "ParentOut",
         "type": "object"
       },
@@ -3554,7 +3747,10 @@
           },
           "afficher": {
             "default": "avalider",
-            "enum": ["avalider", "tout"],
+            "enum": [
+              "avalider",
+              "tout"
+            ],
             "title": "Afficher",
             "type": "string"
           },
@@ -3605,7 +3801,13 @@
             "type": "integer"
           }
         },
-        "required": ["items", "groupes", "total", "page", "page_size"],
+        "required": [
+          "items",
+          "groupes",
+          "total",
+          "page",
+          "page_size"
+        ],
         "title": "LignePageOut",
         "type": "object"
       },
@@ -3620,7 +3822,10 @@
             "type": "string"
           }
         },
-        "required": ["groupe_id", "key"],
+        "required": [
+          "groupe_id",
+          "key"
+        ],
         "title": "LigneRefOut",
         "type": "object"
       },
@@ -3648,13 +3853,19 @@
           },
           "afficher": {
             "default": "avalider",
-            "enum": ["avalider", "tout"],
+            "enum": [
+              "avalider",
+              "tout"
+            ],
             "title": "Afficher",
             "type": "string"
           },
           "vue": {
             "default": "groupes",
-            "enum": ["groupes", "lignes"],
+            "enum": [
+              "groupes",
+              "lignes"
+            ],
             "title": "Vue",
             "type": "string"
           }
@@ -3678,7 +3889,11 @@
             "type": "array"
           }
         },
-        "required": ["compteurs", "totaux_vues", "tuples"],
+        "required": [
+          "compteurs",
+          "totaux_vues",
+          "tuples"
+        ],
         "title": "StatsOut",
         "type": "object"
       },
@@ -3693,7 +3908,10 @@
             "type": "integer"
           }
         },
-        "required": ["groupes", "lignes"],
+        "required": [
+          "groupes",
+          "lignes"
+        ],
         "title": "TotauxVuesOut",
         "type": "object"
       },
@@ -3711,7 +3929,10 @@
             "type": "integer"
           }
         },
-        "required": ["champs", "count"],
+        "required": [
+          "champs",
+          "count"
+        ],
         "title": "TupleCountOut",
         "type": "object"
       },
@@ -3732,7 +3953,10 @@
             "type": "array"
           }
         },
-        "required": ["siret", "siren"],
+        "required": [
+          "siret",
+          "siren"
+        ],
         "title": "AnnuaireOut",
         "type": "object"
       },
@@ -3842,7 +4066,12 @@
       "IdentifiantOut": {
         "properties": {
           "source": {
-            "enum": ["corrige", "parent", "correction", "acteur"],
+            "enum": [
+              "corrige",
+              "parent",
+              "correction",
+              "acteur"
+            ],
             "title": "Source",
             "type": "string"
           },
@@ -3860,7 +4089,12 @@
             "type": "boolean"
           }
         },
-        "required": ["source", "label", "valeur", "propose"],
+        "required": [
+          "source",
+          "label",
+          "valeur",
+          "propose"
+        ],
         "title": "IdentifiantOut",
         "type": "object"
       },
@@ -3892,14 +4126,21 @@
             "type": "boolean"
           }
         },
-        "required": ["points"],
+        "required": [
+          "points"
+        ],
         "title": "LocalisationOut",
         "type": "object"
       },
       "PointOut": {
         "properties": {
           "key": {
-            "enum": ["Origin", "Acteur", "RevisionActeur", "ParentRevisionActeur"],
+            "enum": [
+              "Origin",
+              "Acteur",
+              "RevisionActeur",
+              "ParentRevisionActeur"
+            ],
             "title": "Key",
             "type": "string"
           },
@@ -3916,14 +4157,23 @@
             "type": "boolean"
           }
         },
-        "required": ["key", "latitude", "longitude", "draggable"],
+        "required": [
+          "key",
+          "latitude",
+          "longitude",
+          "draggable"
+        ],
         "title": "PointOut",
         "type": "object"
       },
       "GroupeDecisionIn": {
         "properties": {
           "action": {
-            "enum": ["validate", "reject", "resubmit"],
+            "enum": [
+              "validate",
+              "reject",
+              "resubmit"
+            ],
             "title": "Action",
             "type": "string"
           },
@@ -3940,7 +4190,9 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["action"],
+        "required": [
+          "action"
+        ],
         "title": "GroupeDecisionIn",
         "type": "object"
       },
@@ -3958,7 +4210,10 @@
             "type": "array"
           },
           "action": {
-            "enum": ["validate", "resubmit"],
+            "enum": [
+              "validate",
+              "resubmit"
+            ],
             "title": "Action",
             "type": "string"
           },
@@ -3975,14 +4230,20 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["champs", "action"],
+        "required": [
+          "champs",
+          "action"
+        ],
         "title": "LignesDecisionIn",
         "type": "object"
       },
       "PropositionIn": {
         "properties": {
           "suggestion_modele": {
-            "enum": ["RevisionActeur", "ParentRevisionActeur"],
+            "enum": [
+              "RevisionActeur",
+              "ParentRevisionActeur"
+            ],
             "title": "Suggestion Modele",
             "type": "string"
           },
@@ -4014,14 +4275,21 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["suggestion_modele", "champs", "valeurs"],
+        "required": [
+          "suggestion_modele",
+          "champs",
+          "valeurs"
+        ],
         "title": "PropositionIn",
         "type": "object"
       },
       "PropositionDeleteQuery": {
         "properties": {
           "suggestion_modele": {
-            "enum": ["RevisionActeur", "ParentRevisionActeur"],
+            "enum": [
+              "RevisionActeur",
+              "ParentRevisionActeur"
+            ],
             "title": "Suggestion Modele",
             "type": "string"
           },
@@ -4046,14 +4314,20 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["suggestion_modele", "champs"],
+        "required": [
+          "suggestion_modele",
+          "champs"
+        ],
         "title": "PropositionDeleteQuery",
         "type": "object"
       },
       "ReportIn": {
         "properties": {
           "cible": {
-            "enum": ["correction", "parent"],
+            "enum": [
+              "correction",
+              "parent"
+            ],
             "title": "Cible",
             "type": "string"
           },
@@ -4088,14 +4362,19 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["cible"],
+        "required": [
+          "cible"
+        ],
         "title": "ReportIn",
         "type": "object"
       },
       "AnnuaireQuery": {
         "properties": {
           "champ": {
-            "enum": ["siret", "siren"],
+            "enum": [
+              "siret",
+              "siren"
+            ],
             "title": "Champ",
             "type": "string"
           },
@@ -4104,7 +4383,10 @@
             "type": "string"
           }
         },
-        "required": ["champ", "valeur"],
+        "required": [
+          "champ",
+          "valeur"
+        ],
         "title": "AnnuaireQuery",
         "type": "object"
       },
@@ -4135,7 +4417,11 @@
             ]
           }
         },
-        "required": ["trouve", "entreprise", "etablissement"],
+        "required": [
+          "trouve",
+          "entreprise",
+          "etablissement"
+        ],
         "title": "AnnuaireEntrepriseOut",
         "type": "object"
       },
@@ -4158,12 +4444,21 @@
             "type": "string"
           },
           "etat": {
-            "enum": ["actif", "inactif"],
+            "enum": [
+              "actif",
+              "inactif"
+            ],
             "title": "Etat",
             "type": "string"
           }
         },
-        "required": ["siren", "nom", "adresse", "activite_code", "etat"],
+        "required": [
+          "siren",
+          "nom",
+          "adresse",
+          "activite_code",
+          "etat"
+        ],
         "title": "EntrepriseOut",
         "type": "object"
       },
@@ -4186,7 +4481,10 @@
             "type": "string"
           },
           "etat": {
-            "enum": ["actif", "ferme"],
+            "enum": [
+              "actif",
+              "ferme"
+            ],
             "title": "Etat",
             "type": "string"
           },
@@ -4217,7 +4515,14 @@
             "title": "Longitude"
           }
         },
-        "required": ["siret", "nom", "adresse", "activite_code", "etat", "est_siege"],
+        "required": [
+          "siret",
+          "nom",
+          "adresse",
+          "activite_code",
+          "etat",
+          "est_siege"
+        ],
         "title": "EtablissementOut",
         "type": "object"
       },
@@ -4241,7 +4546,9 @@
             "type": "object"
           }
         },
-        "required": ["compteurs"],
+        "required": [
+          "compteurs"
+        ],
         "title": "MassPreviewOut",
         "type": "object"
       },
@@ -4273,7 +4580,10 @@
           },
           "afficher": {
             "default": "avalider",
-            "enum": ["avalider", "tout"],
+            "enum": [
+              "avalider",
+              "tout"
+            ],
             "title": "Afficher",
             "type": "string"
           },
@@ -4294,7 +4604,9 @@
             "type": "array"
           }
         },
-        "required": ["mode"],
+        "required": [
+          "mode"
+        ],
         "title": "FiltreSelectionIn",
         "type": "object"
       },
@@ -4321,14 +4633,20 @@
             "type": "array"
           }
         },
-        "required": ["mode", "ids"],
+        "required": [
+          "mode",
+          "ids"
+        ],
         "title": "IdsSelectionIn",
         "type": "object"
       },
       "MassSelectionIn": {
         "properties": {
           "vue": {
-            "enum": ["groupes", "lignes"],
+            "enum": [
+              "groupes",
+              "lignes"
+            ],
             "title": "Vue",
             "type": "string"
           },
@@ -4351,7 +4669,10 @@
             "title": "Selection"
           }
         },
-        "required": ["vue", "selection"],
+        "required": [
+          "vue",
+          "selection"
+        ],
         "title": "MassSelectionIn",
         "type": "object"
       },
@@ -4366,7 +4687,10 @@
             "type": "integer"
           }
         },
-        "required": ["affected", "skipped"],
+        "required": [
+          "affected",
+          "skipped"
+        ],
         "title": "MassResultOut",
         "type": "object"
       },
@@ -4381,14 +4705,20 @@
             "type": "integer"
           }
         },
-        "required": ["job_id", "total"],
+        "required": [
+          "job_id",
+          "total"
+        ],
         "title": "MassJobOut",
         "type": "object"
       },
       "MassActionIn": {
         "properties": {
           "vue": {
-            "enum": ["groupes", "lignes"],
+            "enum": [
+              "groupes",
+              "lignes"
+            ],
             "title": "Vue",
             "type": "string"
           },
@@ -4422,14 +4752,23 @@
             "type": "string"
           }
         },
-        "required": ["vue", "selection", "action"],
+        "required": [
+          "vue",
+          "selection",
+          "action"
+        ],
         "title": "MassActionIn",
         "type": "object"
       },
       "JobOut": {
         "properties": {
           "status": {
-            "enum": ["pending", "running", "done", "error"],
+            "enum": [
+              "pending",
+              "running",
+              "done",
+              "error"
+            ],
             "title": "Status",
             "type": "string"
           },
@@ -4445,7 +4784,10 @@
             "title": "Affected"
           }
         },
-        "required": ["status", "affected"],
+        "required": [
+          "status",
+          "affected"
+        ],
         "title": "JobOut",
         "type": "object"
       }

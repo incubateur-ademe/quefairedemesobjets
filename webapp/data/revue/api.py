@@ -3,7 +3,7 @@
 Handlers stay thin: business rules live in the other modules of data.revue."""
 
 from data.models.suggestion import SOURCE_TYPE_ACTIONS, SuggestionCohorte
-from data.revue import cohortes, masse, revue
+from data.revue import cohortes, masse
 from data.revue.annuaire import lookup as annuaire_lookup
 from data.revue.auth import SuperuserSessionAuth
 from data.revue.cohortes import (

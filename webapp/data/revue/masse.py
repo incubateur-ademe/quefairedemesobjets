@@ -38,10 +38,6 @@ from data.revue.revue import (
     filtered_ligne_rows,
     parse_tuples,
 )
-from data.services.suggestion_statut import (
-    recompute_cohorte_statut,
-    set_groupes_statut,
-)
 
 SUGGESTION_TASK_ASYNC_THRESHOLD = 1000
 BATCH = 5000
@@ -218,7 +214,7 @@ def run(selection: Selection, action: str, user) -> dict:
             affected = _decide_groupes(selection, action, user)
         else:
             affected = _decide_lignes(selection, action, user)
-        recompute_cohorte_statut([selection.cohorte.id])
+        selection.cohorte.recompute_cohorte_statut()
     return {"affected": affected, "skipped": max(total - affected, 0)}
 
 
@@ -247,7 +243,9 @@ def _decide_groupes(selection: Selection, action: str, user) -> int:
         .values_list("id", flat=True)
     )
     for batch in _batches(ids):
-        set_groupes_statut(batch, target, user if target != AVALIDER else None)
+        selection.cohorte.set_groupes_statut(
+            batch, target, user if target != AVALIDER else None
+        )
     return len(ids)
 
 
@@ -289,7 +287,7 @@ def _decide_lignes(selection: Selection, action: str, user) -> int:
         .distinct()
     )
     for batch in _batches(refused):
-        set_groupes_statut(batch, AVALIDER)
+        selection.cohorte.set_groupes_statut(batch, AVALIDER)
     validated = lignes.exclude(suggestion_groupe__statut=REJETEE)
     groupe_ids = list(
         validated.values_list("suggestion_groupe_id", flat=True).distinct()
