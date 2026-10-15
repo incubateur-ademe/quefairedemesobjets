@@ -20,6 +20,7 @@ from qfdmd.legacy_migration import (
 from qfdmd.models import Produit, ProduitPage
 from qfdmd.views import (
     finalize_page_migration,
+    generate_consignes,
     import_legacy_synonymes,
     legacy_migrate,
     migrate_single_produit,
@@ -127,6 +128,11 @@ def register_legacy_migrate_url():
             "legacy/finalize-migration/<str:id>/",
             finalize_page_migration,
             name="finalize_page_migration",
+        ),
+        path(
+            "consignes/generer/<str:id>/",
+            generate_consignes,
+            name="generate_consignes",
         ),
     ]
 
@@ -467,6 +473,27 @@ def register_finalize_migration_menu_item():
     return FinalizeMigrationMenuItem(order=49)
 
 
+class GenerateConsignesMenuItem(ActionMenuItem):
+    """Convert the first row of cards into a consignes grid, in a draft
+    revision (#3284)."""
+
+    name = "generate-consignes"
+    label = "Convertir les cartes en grille de consignes"
+    icon_name = "list-ul"
+
+    def get_url(self, context):
+        return reverse("generate_consignes", args=[context["page"].id])
+
+    def is_shown(self, context):
+        page = context.get("page")
+        return bool(page) and page.specific_class is ProduitPage
+
+
+@hooks.register("register_page_action_menu_item")
+def register_generate_consignes_menu_item():
+    return GenerateConsignesMenuItem(order=48)
+
+
 @hooks.register("register_log_actions")
 def register_migration_log_actions(actions):
     @actions.register_action("qfdmd.migrate_produit")
@@ -478,6 +505,11 @@ def register_migration_log_actions(actions):
     class RevertMigrationAction(LogFormatter):
         label = "Annulation migration"
         message = "Migration automatique annulée"
+
+    @actions.register_action("qfdmd.generate_consignes")
+    class GenerateConsignesAction(LogFormatter):
+        label = "Génération des consignes"
+        message = "Consignes générées depuis le contenu, en brouillon"
 
     @actions.register_action("qfdmd.finalize_migration")
     class FinalizeMigrationAction(LogFormatter):
