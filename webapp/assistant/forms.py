@@ -5,7 +5,7 @@ carries a label, the hidden fields carry what the server actually uses, the
 targeted fiche and the coordinates. Validating both together is a form's job,
 not a chain of `if` in the view.
 
-The parameters of the places endpoint are validated by `api.LieuxQuery`.
+The parameters of the places endpoint are validated by `qfdmo.lieux_query.LieuxQuery`.
 """
 
 from django import forms
