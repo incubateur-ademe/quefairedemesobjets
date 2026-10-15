@@ -3025,9 +3025,6 @@
               }
             ]
           },
-          "contexte": {
-            "title": "Contexte"
-          },
           "lignes": {
             "items": {
               "$ref": "#/components/schemas/LigneOut"
@@ -3348,21 +3345,6 @@
         "title": "AnnuaireOut",
         "type": "object"
       },
-      "ChampValeurOut": {
-        "properties": {
-          "champ": {
-            "title": "Champ",
-            "type": "string"
-          },
-          "valeur": {
-            "title": "Valeur",
-            "type": "string"
-          }
-        },
-        "required": ["champ", "valeur"],
-        "title": "ChampValeurOut",
-        "type": "object"
-      },
       "GroupeDetailOut": {
         "properties": {
           "id": {
@@ -3421,9 +3403,6 @@
               }
             ]
           },
-          "contexte": {
-            "title": "Contexte"
-          },
           "lignes": {
             "items": {
               "$ref": "#/components/schemas/LigneOut"
@@ -3441,13 +3420,6 @@
           },
           "capacites": {
             "$ref": "#/components/schemas/GroupeCapacitesOut"
-          },
-          "acteur_affiche": {
-            "items": {
-              "$ref": "#/components/schemas/ChampValeurOut"
-            },
-            "title": "Acteur Affiche",
-            "type": "array"
           },
           "localisation": {
             "$ref": "#/components/schemas/LocalisationOut"
@@ -3470,7 +3442,6 @@
           "lignes_validees",
           "lignes_total",
           "capacites",
-          "acteur_affiche",
           "localisation",
           "annuaire"
         ],

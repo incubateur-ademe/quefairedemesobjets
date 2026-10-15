@@ -1066,8 +1066,6 @@ export interface components {
       /** Has Correction */
       has_correction: boolean
       parent: components["schemas"]["ParentOut"] | null
-      /** Contexte */
-      contexte?: unknown
       /** Lignes */
       lignes: components["schemas"]["LigneOut"][]
       /** Lignes Validees */
@@ -1184,13 +1182,6 @@ export interface components {
       /** Siren */
       siren: components["schemas"]["IdentifiantOut"][]
     }
-    /** ChampValeurOut */
-    ChampValeurOut: {
-      /** Champ */
-      champ: string
-      /** Valeur */
-      valeur: string
-    }
     /** GroupeDetailOut */
     GroupeDetailOut: {
       /** Id */
@@ -1211,8 +1202,6 @@ export interface components {
       /** Has Correction */
       has_correction: boolean
       parent: components["schemas"]["ParentOut"] | null
-      /** Contexte */
-      contexte?: unknown
       /** Lignes */
       lignes: components["schemas"]["LigneOut"][]
       /** Lignes Validees */
@@ -1220,8 +1209,6 @@ export interface components {
       /** Lignes Total */
       lignes_total: number
       capacites: components["schemas"]["GroupeCapacitesOut"]
-      /** Acteur Affiche */
-      acteur_affiche: components["schemas"]["ChampValeurOut"][]
       localisation: components["schemas"]["LocalisationOut"]
       annuaire: components["schemas"]["AnnuaireOut"]
     }

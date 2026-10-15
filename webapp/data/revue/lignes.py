@@ -252,7 +252,6 @@ def serialize_groupe(
         "is_new": policy.badge is not None and context.acteur is None,
         "has_correction": context.revision is not None,
         "parent": parent,
-        "contexte": groupe.contexte,
         "lignes": lignes,
         "lignes_validees": sum(
             ligne["statut"] == SuggestionStatut.ATRAITER for ligne in lignes
