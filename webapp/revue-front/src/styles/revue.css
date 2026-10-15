@@ -1099,29 +1099,16 @@ tr:hover .editbtn,
   --width: min(1280px, 96vw);
 }
 
+.groupe-modal::part(dialog) {
+  min-height: 80vh;
+}
+
 .modal-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-}
-
-.cmpwrap {
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-}
-
-.trace {
-  color: var(--muted);
-  font-size: 11.5px;
-}
-
-details.ctx summary {
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 12px;
 }
 
 .kgrid {

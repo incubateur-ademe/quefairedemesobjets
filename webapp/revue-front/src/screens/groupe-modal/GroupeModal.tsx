@@ -3,10 +3,7 @@ import { useState } from "react"
 import type { GroupeActions } from "../../api/mutations"
 import { useAnnuaireEntreprise, useGroupeDetail } from "../../api/queries"
 import type { GroupeDetail, Identifiant, Modele, Policy } from "../../api/types"
-import { JsonValue } from "../../components/common/JsonValue"
 import { StatutPill } from "../../components/common/Pill"
-import { Value } from "../../components/common/Value"
-import { formatDateTime } from "../../domain/format"
 import {
   WaButton,
   WaDialog,
@@ -16,12 +13,7 @@ import {
   WaTabGroup,
   WaTabPanel,
 } from "../../wa"
-import {
-  GroupeActionsButtons,
-  LigneHead,
-  LigneRow,
-  type ModalTab,
-} from "../cohorte/GroupesView"
+import { GroupeActionsButtons, type ModalTab } from "../cohorte/GroupesView"
 import { AnnuaireTab } from "./AnnuaireTab"
 import {
   LocalisationMap,
@@ -31,14 +23,11 @@ import {
 } from "./LocalisationMap"
 
 const TABS: [ModalTab, string][] = [
-  ["suggestions", "Suggestions"],
-  ["acteur", "Acteur affiché"],
   ["localisation", "Localisation"],
   ["annuaire", "Annuaire entreprise"],
 ]
 
-/** Detail of a groupe: the tabs of the admin (displayed acteur, localisation,
- * Annuaire Entreprises) plus its suggestions, in a modal. */
+/** Detail of a groupe in a modal: its localisation and the Annuaire Entreprises. */
 export function GroupeModal({
   groupeId,
   tab,
@@ -91,12 +80,6 @@ export function GroupeModal({
                 {label}
               </WaTab>
             ))}
-            <WaTabPanel name="suggestions">
-              <SuggestionsTab groupe={groupe} actions={actions} />
-            </WaTabPanel>
-            <WaTabPanel name="acteur">
-              <ActeurTab groupe={groupe} />
-            </WaTabPanel>
             <WaTabPanel name="localisation">
               {tab === "localisation" && (
                 <LocalisationTab groupe={groupe} actions={actions} />
@@ -109,88 +92,6 @@ export function GroupeModal({
         </>
       )}
     </WaDialog>
-  )
-}
-
-function SuggestionsTab({
-  groupe,
-  actions,
-}: {
-  groupe: GroupeDetail
-  actions: GroupeActions
-}) {
-  return (
-    <>
-      <div className="cmpwrap">
-        <table className="tbl cmp stream">
-          <thead>
-            <tr>
-              <th className="gutter" />
-              <LigneHead />
-            </tr>
-          </thead>
-          <tbody>
-            {groupe.lignes.map((ligne) => (
-              <LigneRow
-                key={ligne.key}
-                groupe={groupe}
-                ligne={ligne}
-                actions={actions}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {groupe.decision_par && groupe.decision_le && (
-        <p className="trace">
-          Décision du groupe par {groupe.decision_par.username} le{" "}
-          {formatDateTime(groupe.decision_le)}
-        </p>
-      )}
-      {groupe.contexte !== null && groupe.contexte !== undefined && (
-        <details className="ctx">
-          <summary>Contexte du groupe</summary>
-          <JsonValue value={groupe.contexte} />
-        </details>
-      )}
-    </>
-  )
-}
-
-function ActeurTab({ groupe }: { groupe: GroupeDetail }) {
-  if (!groupe.acteur_affiche.length) {
-    return (
-      <p className="muted">
-        Pas encore d’acteur affiché :{" "}
-        {groupe.is_new ? "il sera créé" : "acteur introuvable"}.
-      </p>
-    )
-  }
-  return (
-    <>
-      {groupe.acteur.admin_urls.affiche && (
-        <p>
-          <a
-            className="lk"
-            href={groupe.acteur.admin_urls.affiche}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Ouvrir l’acteur affiché dans l’admin
-          </a>
-        </p>
-      )}
-      <dl className="kgrid">
-        {groupe.acteur_affiche.map(({ champ, valeur }) => (
-          <div key={champ} className="kgrid__item">
-            <dt>{champ}</dt>
-            <dd>
-              <Value value={valeur} />
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </>
   )
 }
 
