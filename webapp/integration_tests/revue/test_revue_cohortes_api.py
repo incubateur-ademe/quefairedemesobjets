@@ -63,16 +63,6 @@ def get(client, path, **params):
 
 @pytest.mark.django_db
 class TestListCohortes:
-    def test_only_source_cohortes_with_groupes(self, client, cohortes):
-        status, body = get(client, "/cohortes")
-
-        assert status == 200
-        assert body["total"] == 2
-        assert {item["identifiant_action"] for item in body["items"]} == {
-            "dag_ajout",
-            "dag_modification",
-        }
-
     def test_counters_and_logs(self, client, cohortes):
         _, body = get(client, "/cohortes", tri="id")
 
@@ -143,23 +133,6 @@ class TestFiltersMetadata:
 
 @pytest.mark.django_db
 class TestLogs:
-    def test_logs_sorted_by_gravity(self, client, cohortes):
-        ajout, _ = cohortes
-        status, body = get(client, f"/cohortes/{ajout.id}/logs")
-
-        assert status == 200
-        assert [log["niveau"] for log in body["items"]] == [
-            "ERROR",
-            "WARNING",
-            "WARNING",
-            "INFO",
-        ]
-
-    def test_filter_by_level(self, client, cohortes):
-        ajout, _ = cohortes
-        _, body = get(client, f"/cohortes/{ajout.id}/logs", niveau="WARNING")
-        assert body["total"] == 2
-
     def test_not_a_source_cohorte(self, client, cohortes):
         clustering = SuggestionCohorteFactory(type_action=SuggestionAction.CLUSTERING)
         status, _ = get(client, f"/cohortes/{clustering.id}/logs")

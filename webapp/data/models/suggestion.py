@@ -11,7 +11,18 @@ from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.db import transaction
-from django.db.models import BooleanField, CheckConstraint, Count, ExpressionWrapper, Q
+from django.db.models import (
+    BooleanField,
+    Case,
+    CheckConstraint,
+    Count,
+    ExpressionWrapper,
+    IntegerField,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -117,6 +128,21 @@ class SuggestionCohorteManager(models.Manager):
             .filter(suggestions__isnull=False)
             .distinct()
             .order_by("-cree_le")
+        )
+
+    def source_cohortes(self) -> QuerySet["SuggestionCohorte"]:
+        """SOURCE cohortes having at least one groupe."""
+        return (
+            self.get_queryset()
+            .filter(type_action__in=SOURCE_TYPE_ACTIONS)
+            .annotate(
+                total_groupes=Count("suggestion_groupes"),
+                nb_avalider=Count(
+                    "suggestion_groupes",
+                    filter=Q(suggestion_groupes__statut=SuggestionStatut.AVALIDER),
+                ),
+            )
+            .filter(total_groupes__gt=0)
         )
 
 
@@ -258,6 +284,26 @@ class SuggestionCohorte(SuggestionStatutFieldsMixin, TimestampedModel):
         if statut and statut != self.statut:
             self.statut = statut
             self.save(update_fields=["statut", "modifie_le"])
+
+    def logs_queryset(self, niveau: list[str]) -> QuerySet:
+        """Logs of the cohorte, the most severe first."""
+        log_levels = (
+            SuggestionLog.SuggestionLogLevel.ERROR,
+            SuggestionLog.SuggestionLogLevel.WARNING,
+            SuggestionLog.SuggestionLogLevel.INFO,
+        )
+        gravity = Case(
+            *(
+                When(niveau_de_log=level, then=Value(gravite))
+                for gravite, level in enumerate(log_levels)
+            ),
+            default=Value(len(log_levels)),
+            output_field=IntegerField(),
+        )
+        queryset = self.suggestion_logs.annotate(gravite=gravity)
+        if niveau:
+            queryset = queryset.filter(niveau_de_log__in=niveau)
+        return queryset.order_by("gravite", "-cree_le", "-id")
 
 
 class Suggestion(TimestampedModel):
@@ -878,6 +924,13 @@ class SuggestionLog(TimestampedModel):
     origine_valeurs = ArrayField(models.TextField(), null=True)
     destination_colonnes = ArrayField(models.CharField(max_length=255), null=True)
     message = models.TextField(blank=True, db_default="", default="")
+
+
+SUGGESTION_LOG_LEVELS_BY_GRAVITY = (
+    SuggestionLog.SuggestionLogLevel.ERROR,
+    SuggestionLog.SuggestionLogLevel.WARNING,
+    SuggestionLog.SuggestionLogLevel.INFO,
+)
 
 
 class BANCache(models.Model):
