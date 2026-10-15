@@ -1,4 +1,5 @@
 from ninja import NinjaAPI
+from opendata.api import router as opendata_router
 from qfdmo.api import router as qfdmo_router
 from stats.api import router as stats_router
 
@@ -18,3 +19,4 @@ api_v1 = NinjaAPI(
         " les lieux sont ceux du jeu de données ouvert publié sur data.ademe.fr."
     ),
 )
+api_v1.add_router("/", opendata_router, tags=["Open data"])

@@ -182,6 +182,7 @@ INSTALLED_APPS = [
     "qfdmo",
     "infotri",
     "assistant",
+    "opendata",
     "data",
     "adminsortable2",
     "corsheaders",
