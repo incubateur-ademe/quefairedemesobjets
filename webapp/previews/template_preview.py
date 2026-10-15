@@ -20,7 +20,7 @@ from dsfr.forms import DsfrBaseForm
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
 from assistant.adresses import suggest_adresses
-from assistant.objets import sous_categorie_ids_for
+from qfdmo.lieux_query import sous_categorie_ids_for
 from core.widgets import (
     SearchAutocompleteInput,
 )
@@ -1509,6 +1509,7 @@ class TestsPreview(LookbookPreview):
                 ),
             },
         )
+
 
 def geste_choices():
     """Read at each form instantiation, not at import: the table is empty
