@@ -4,8 +4,6 @@ Lives outside the `views` package: the form needs it, and `views/__init__`
 imports the views that import the form. Keeping it there created a cycle.
 """
 
-from django.http import Http404
-
 RESULTS_COUNT = 7
 MIN_LENGTH = 2
 MAX_LENGTH = 100
@@ -58,20 +56,6 @@ def fiche_of(term):
         if page is not None and getattr(page, "slug", None):
             return page
     return None
-
-
-def sous_categorie_ids_for(slug: str) -> list[int]:
-    """Sous-catégories of the fiche, to narrow the places to that objet.
-
-    A fiche without sous-catégorie returns an empty list: the places are then
-    not narrowed, rather than showing none.
-    """
-    from qfdmd.models import ProduitPage
-
-    page = ProduitPage.objects.live().filter(slug=slug).first()
-    if page is None:
-        raise Http404(f"unknown objet: {slug}")
-    return list(page.sous_categorie_objet.values_list("id", flat=True))
 
 
 def suggest_objets(query: str) -> list[dict]:

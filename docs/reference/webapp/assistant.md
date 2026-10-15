@@ -65,7 +65,7 @@ Le contrat complet est dans le chapitre 10 des specs (branche
 
 ### `/api/v1/lieux.geojson`
 
-Paramètres, validés par `api.LieuxQuery` : `geste` (code d'un `GroupeAction`,
+Paramètres, validés par `LieuxQuery` (`qfdmo/lieux_query.py`) : `geste` (code d'un `GroupeAction`,
 obligatoire, répétable), `fiche` (slug d'une fiche, facultatif), et soit `bbox`
 (zone visible, forme Leaflet) soit `longitude` + `latitude`. Une bbox illisible
 renvoie `422` sans repli sur le point.
