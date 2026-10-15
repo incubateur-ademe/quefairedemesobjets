@@ -21,6 +21,7 @@ from data.revue.pagination import paginate
 from data.revue.policies import get_policy
 from data.revue.revue import (
     filtered_groupes,
+    lignes_page,
     parse_tuples,
     review_filter_metadata,
     stats,
@@ -166,11 +167,11 @@ def list_groupes(request: HttpRequest, cohorte_id: int, query: Query[GroupesQuer
     "/cohortes/{cohorte_id}/lignes", response={200: LignePageOut, 422: ErrorOut}
 )
 def list_lignes(request: HttpRequest, cohorte_id: int, query: Query[LignesQuery]):
-    cohorte = cohortes.get_source_cohorte(cohorte_id)
-    keys, total = revue.lignes_page(
+    cohorte = get_source_cohorte(cohorte_id)
+    keys, total = lignes_page(
         cohorte,
         parse_filter(query.filtre),
-        revue.parse_tuples(query.tuples),
+        parse_tuples(query.tuples),
         query.afficher,
         query.page,
         query.page_size,
