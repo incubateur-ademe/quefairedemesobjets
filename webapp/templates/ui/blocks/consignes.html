@@ -1,0 +1,7 @@
+{% load wagtailcore_tags %}
+{% comment %}Grille de consignes (#3284) : la grille d'éléments de Sites conformes, avec des cartes typées.{% endcomment %}
+<div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+  {% for consigne in value.consignes %}
+    <div class="fr-col-12 fr-col-md-{{ value.column_width }}">{% include_block consigne %}</div>
+  {% endfor %}
+</div>
