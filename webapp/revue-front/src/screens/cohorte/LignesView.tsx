@@ -62,7 +62,7 @@ export function LignesView({
                       onClick={(event) => {
                         event.stopPropagation()
                         onCursor(ligneCursor(ligne.key))
-                        onOpen(groupe, "suggestions")
+                        onOpen(groupe, "localisation")
                       }}
                     >
                       {groupe.id}
