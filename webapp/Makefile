@@ -10,7 +10,7 @@ endif
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 BLACK := uv run black
 WEBAPP_DB_PORT ?= 6543
-DB_URL = postgres://webapp:***@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
+DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 PYTEST := uv run pytest
 PYTHON := uv run python
