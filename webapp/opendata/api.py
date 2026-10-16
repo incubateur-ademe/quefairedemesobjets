@@ -2,8 +2,9 @@
 
 The places of the acteurs dataset published on data.ademe.fr (`lieux.py`) and
 the two tables of the fiches (`fiches.py`), as paginated JSON; the fiches also
-as a whole CSV table with `Accept: text/csv`. Mounted at `/api/v1/`
-(`core/api.py`).
+as a whole CSV table with `Accept: text/csv`. Mounted at `/api/v1/` next to the
+assistant's router (`core/api.py`): same parameters as the assistant's screens
+(`qfdmo/lieux_query.py`).
 """
 
 from functools import wraps
@@ -12,7 +13,7 @@ from io import StringIO
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.vary import vary_on_headers
-from ninja import Router, Schema
+from ninja import Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import paginate
 
@@ -25,6 +26,7 @@ from opendata.fiches import (
     write_csv,
 )
 from opendata.lieux import GesteSchema, LieuSchema, for_the_api, open_data
+from qfdmo.lieux_query import LieuxQuery
 from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import GroupeAction
 
@@ -97,6 +99,23 @@ def _csv_openapi(columns) -> dict:
 
 
 router = Router()
+
+
+@router.get(
+    "/lieux",
+    response=list[LieuSchema],
+    url_name="lieux",
+    summary="Lieux proposant un geste, du plus proche au plus lointain",
+)
+@decorate_view(CACHE_FIVE_MINUTES)
+@paginate
+def lieux(request, query: Query[LieuxQuery]):
+    """Les mêmes lieux que l'assistant affiche, restreints aux sources sous
+    licence ouverte : le périmètre du jeu de données publié sur data.ademe.fr.
+
+    Triés par proximité du point donné, ou du centre de la zone `bbox`.
+    """
+    return for_the_api(open_data(query.queryset()))
 
 
 @router.get(
