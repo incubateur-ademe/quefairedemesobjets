@@ -9,6 +9,7 @@ import close from "data-url:remixicon/icons/System/close-line.svg"
 import deleteBin from "data-url:remixicon/icons/System/delete-bin-line.svg"
 import errorWarning from "data-url:remixicon/icons/System/error-warning-line.svg"
 import externalLink from "data-url:remixicon/icons/System/external-link-line.svg"
+import fileExcel from "data-url:remixicon/icons/Document/file-excel-2-line.svg"
 import fileList from "data-url:remixicon/icons/Document/file-list-line.svg"
 import filter from "data-url:remixicon/icons/System/filter-line.svg"
 import information from "data-url:remixicon/icons/System/information-line.svg"
@@ -22,6 +23,7 @@ export const ICONS: Record<string, string> = {
   "delete-bin": deleteBin,
   "error-warning": errorWarning,
   "external-link": externalLink,
+  "file-excel": fileExcel,
   "file-list": fileList,
   filter,
   information,
