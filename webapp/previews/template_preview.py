@@ -7,19 +7,25 @@ from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
+from assistant.adresses import suggest_adresses
+from qfdmo.lieux_query import sous_categorie_ids_for
 from core.widgets import (
     SearchAutocompleteInput,
 )
 from infotri.forms import InfotriForm
+from previews.widgets import AdresseDatalistInput
 from qfdmd.forms import QfSearchForm
 from qfdmd.middleware import RequestEnhancementMiddleware
 from qfdmd.models import ProduitPage, Synonyme
@@ -34,7 +40,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.models.action import Action
+from qfdmo.models.action import Action, GroupeAction
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
@@ -1503,3 +1509,220 @@ class TestsPreview(LookbookPreview):
                 ),
             },
         )
+
+
+def geste_choices():
+    """Read at each form instantiation, not at import: the table is empty
+    during migrations and tests."""
+    groupes = (
+        GroupeAction.objects.filter(afficher=True)
+        .order_by("order")
+        .prefetch_related("actions")
+    )
+    return [(groupe.code, groupe.libelle) for groupe in groupes]
+
+
+class GesteForm(DsfrBaseForm):
+    geste = forms.ChoiceField(label="Geste", choices=geste_choices)
+    objet = forms.CharField(
+        label="Slug d'une fiche produit (facultatif)", required=False
+    )
+    adresse = forms.CharField(
+        label="Adresse ou commune",
+        required=False,
+        initial="Paris",
+        widget=AdresseDatalistInput(
+            attrs={"placeholder": "Paris, Lyon, 12 rue de la Paix…"}
+        ),
+        help_text="Centre de la carte. Les suggestions viennent de la BAN.",
+    )
+
+
+DEFAULT_GESTE_COLOR = "#009081"
+
+
+class AssistantPreview(LookbookPreview):
+    """Assistant V2 components."""
+
+    # Serves assistant.js/css alone: the legacy stack starts its own Stimulus
+    # application and would load the DSFR, which the assistant does not use.
+    assets = "assistant"
+
+    @register_form_class(GesteForm)
+    @component_docs("ui/components/assistant/carte.md")
+    def carte(self, geste="reparer", objet="", adresse="Paris", **kwargs):
+        longitude, latitude, precise = _coordinates_of(adresse)
+        groupe = GroupeAction.objects.filter(code=geste).first()
+        acteurs = (
+            DisplayedActeur.objects.all()
+            .proposing(geste, _sous_categorie_ids(objet))
+            .nearest_to(longitude, latitude)
+            .for_the_map()
+        )
+        return render_to_string(
+            "ui/components/assistant/carte.html",
+            {
+                "gestes": [geste],
+                "fiche": objet,
+                "longitude": longitude,
+                "latitude": latitude,
+                "adresse_precise": precise,
+                "couleur_geste": groupe.couleur if groupe else DEFAULT_GESTE_COLOR,
+                "lieux": acteurs,
+                "debug": True,
+            },
+        )
+
+    @component_docs("ui/components/assistant/recherche_objet.md")
+    def recherche_objet(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_objet.html", {})
+
+    @component_docs("ui/components/assistant/recherche_adresse.md")
+    def recherche_adresse(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_adresse.html", {})
+
+    @component_docs("ui/components/assistant/etiquette_geste.md")
+    def etiquette_geste(self, **kwargs):
+        """Every geste in one preview: direct comparison with the Figma."""
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/etiquette_geste.html",
+                {"geste": groupe.code, "libelle": groupe.libelle_court},
+            )
+            for groupe in GroupeAction.objects.order_by("order")
+        )
+
+    @component_docs("ui/components/assistant/badge.md")
+    def badge(self, **kwargs):
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/badge.html",
+                {"condition": condition, "libelle": libelle},
+            )
+            for condition, libelle in CONDITIONS
+        )
+
+    @component_docs("ui/components/assistant/icone_geste.md")
+    def icone_geste(self, **kwargs):
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/icone_geste.html",
+                {"geste": groupe.code, "titre": groupe.libelle_court},
+            )
+            for groupe in GroupeAction.objects.order_by("order")
+        )
+
+    @component_docs("ui/components/assistant/alerte.md")
+    def alerte(
+        self, message="Cet objet ne se jette pas avec les ordures ménagères.", **kwargs
+    ):
+        return render_to_string(
+            "ui/components/assistant/alerte.html", {"message": message}
+        )
+
+    @component_docs("ui/components/assistant/bloc_geste.md")
+    def bloc_geste(self, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bloc_geste.html", REPARER_BLOCK
+        )
+
+    @component_docs("ui/components/assistant/bloc_gestes.md")
+    def bloc_gestes(self, **kwargs):
+        """The blocks in the order imposed by #3295: repairable, good, worn."""
+        return render_to_string(
+            "ui/components/assistant/bloc_gestes.html",
+            {"blocs": [REPARER_BLOCK, DONNER_BLOCK, TRIER_BLOCK]},
+        )
+
+    @component_docs("ui/components/assistant/bouton_changer_geste.md")
+    def bouton_changer_geste(self, libelle="Réparer", **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bouton_changer_geste.html",
+            {"libelle": libelle, "gestes": ["reparer"], "url": "#"},
+        )
+
+    @component_docs("ui/components/assistant/accordeon.md")
+    def accordeon(self, ouvert=False, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/accordeon.html",
+            {
+                "intitule": "Horaires d'ouverture",
+                "apercu": "Ouvert du lundi au samedi",
+                "contenu": "Lundi au vendredi : 9h-18h. Samedi : 9h-12h.",
+                "ouvert": ouvert,
+            },
+        )
+
+    @component_docs("ui/components/assistant/footer.md")
+    def footer(self, **kwargs):
+        return render_to_string("ui/components/assistant/footer.html", {})
+
+
+CONDITIONS = [
+    ("reparable", "Réparable"),
+    ("bon_etat", "Bon état"),
+    ("mauvais_etat", "Mauvais état"),
+    ("bonus", "Bonus Réparation"),
+]
+
+REPARER_BLOCK = {
+    "gestes": ["reparer"],
+    "libelle": "Réparer",
+    "consigne": (
+        "Vous pensez que votre téléphone mobile peut être réparé ? Pensez au "
+        "Bonus Réparation ! Grâce à la réparation, vous prolongez la durée de "
+        "vie de votre téléphone, tout en économisant de l'argent."
+    ),
+    "badges": [
+        {"condition": "reparable", "libelle": "Réparable"},
+        {"condition": "bonus", "libelle": "Bonus Réparation"},
+    ],
+    "url": "#",
+}
+
+DONNER_BLOCK = {
+    "gestes": ["donner_echanger_rapporter", "vendre_acheter"],
+    "libelle": "Donner ou revendre",
+    "consigne": "Votre objet fonctionne encore ? Donnez-lui une seconde vie.",
+    "badges": [{"condition": "bon_etat", "libelle": "Bon état"}],
+    "url": "#",
+}
+
+TRIER_BLOCK = {
+    "gestes": ["trier"],
+    "libelle": "Déposer",
+    "consigne": "Hors d'usage, votre objet se dépose en point de collecte.",
+    "badges": [{"condition": "mauvais_etat", "libelle": "Mauvais état"}],
+    "url": "#",
+}
+
+
+def _side_by_side(renders):
+    """Lines up several variants to compare them at a glance."""
+    return format_html(
+        '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">{}</div>',
+        mark_safe("".join(renders)),
+    )
+
+
+# Longitude, latitude, and whether the address is precise.
+PARIS = (2.3488, 48.8534, False)
+
+
+def _coordinates_of(adresse):
+    """The first BAN suggestion, through the assistant's own proxy and cache,
+    falling back on Paris."""
+    suggestions = suggest_adresses(adresse)
+    if not suggestions:
+        return PARIS
+    first = suggestions[0]
+    return (first["longitude"], first["latitude"], first["precise"])
+
+
+def _sous_categorie_ids(slug):
+    if not slug:
+        return []
+    try:
+        return sous_categorie_ids_for(slug)
+    except Http404:
+        return []

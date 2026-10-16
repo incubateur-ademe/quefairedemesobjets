@@ -1,0 +1,83 @@
+{% comment %}
+Bloc geste (Figma 24414:395) : badges, titre, consigne, appel à l'action.
+
+C'est l'unité de la fiche objet. L'ordre des blocs (réparable → bon état →
+hors d'usage) est décidé par la vue, pas ici.
+
+`consigne` est du HTML issu du CMS : il est marqué sûr en amont, dans le
+modèle, jamais échappé à la volée dans le gabarit.
+{% endcomment %}
+<article class="qfa-bloc-geste" data-gestes="{{ gestes|join:' ' }}">
+    {% if badges %}
+        <p class="qfa-bloc-geste__badges">
+            {% for badge in badges %}
+                {% include "ui/components/assistant/badge.html" with condition=badge.condition libelle=badge.libelle %}
+            {% endfor %}
+        </p>
+    {% endif %}
+
+    <h3 class="qfa-bloc-geste__titre">
+        {% comment %}
+        One icon per geste the block spans (30174:11578): "Donner ou revendre"
+        shows the donner and vendre icons side by side.
+        {% endcomment %}
+        <span class="qfa-bloc-geste__icones">
+            {% for geste in gestes %}
+                {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+            {% endfor %}
+        </span>
+        {{ libelle }}
+    </h3>
+
+    <div class="qfa-bloc-geste__consigne">{{ consigne }}</div>
+
+    {% comment %}
+    Préchargé au survol : l'écran solutions construit une carte, autant que le
+    document soit déjà là quand le clic arrive (#3431, « que ça semble
+    instantané »).
+    {% endcomment %}
+    {% comment %}
+    `_top` est indispensable : ce lien vit dans le frame `assistant-fiche`, donc
+    Turbo y chercherait par défaut un frame de même nom dans la réponse. L'écran
+    solutions est une page entière, qui n'en contient aucun — sans cela, Turbo
+    affiche « Content missing ».
+    {% endcomment %}
+    {% comment %}
+    Pas de bouton quand la fiche n'a pas de carte sur le site (Véhicule hors
+    d'usage) : aucune solution vers laquelle renvoyer.
+    {% endcomment %}
+    {% if sans_carte %}
+    {% elif localise %}
+        {% comment %}
+        `url_compte` : le nombre de solutions à proximité arrive après le rendu
+        (ADR 0010, compteur différé) et remplace le libellé ; sans solution, le
+        bouton passe en style secondaire mais reste un lien vers la carte.
+        {% endcomment %}
+        <a class="qfa-bouton qfa-bouton--primaire"
+           href="{{ url }}"
+           data-turbo-frame="_top"
+           data-controller="assistant-prefetch assistant-compteur"
+           data-assistant-compteur-url-value="{{ url_compte|default:'' }}"
+           data-action="mouseenter->assistant-prefetch#prefetch
+                        touchstart->assistant-prefetch#prefetch">
+            <span data-assistant-compteur-target="libelle">{{ appel_action|default:"Je découvre les solutions" }}</span>
+            <span class="qfa-bouton__fleche" aria-hidden="true"></span>
+        </a>
+    {% else %}
+        {% comment %}
+        Sans adresse (Figma 30495:2279), pas de compte possible : le clic
+        demande la position du navigateur avant d'ouvrir les solutions.
+        {% endcomment %}
+        <a class="qfa-bouton qfa-bouton--secondaire qfa-bouton--pres-de-moi"
+           href="{{ url }}"
+           data-turbo-frame="_top"
+           data-controller="assistant-prefetch assistant-geolocalisation"
+           data-assistant-geolocalisation-reverse-geocode-url-value="{% url 'qfdmo:reverse_geocode_address' %}"
+           data-action="click->assistant-geolocalisation#locate
+                        mouseenter->assistant-prefetch#prefetch
+                        touchstart->assistant-prefetch#prefetch">
+            <span class="qfa-bouton__localisation" aria-hidden="true"></span>
+            <span data-assistant-geolocalisation-target="libelle">Je découvre les solutions près de moi</span>
+        </a>
+    {% endif %}
+</article>

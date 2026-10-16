@@ -1,0 +1,34 @@
+{% extends base_template %}
+{% load l10n %}
+
+{% block title %}Solutions à proximité{% endblock %}
+
+{% block carte_parking %}{% endblock %}
+
+{% block main %}
+    <div class="qfa-ecran">
+        {% comment %}
+        Bandeau de tête (30141:8705) : retour vers la fiche en rappelant le
+        geste choisi, puis le champ d'adresse qui relance la recherche.
+        {% endcomment %}
+        <div class="qfa-haut-de-page">
+            <div class="qfa-panneau qfa-panneau--solutions">
+                {% include "ui/components/assistant/bouton_changer_geste.html" with url=url_fiche libelle=libelle_geste %}
+
+                <form action="" method="get" data-controller="assistant-submit"
+                      data-action="assistant-combobox:chosen->assistant-submit#submit">
+                    <input type="hidden" name="objet" value="{{ parcours.objet }}">
+                    <input type="hidden" name="fiche" value="{{ parcours.fiche }}">
+                    {% for geste in gestes %}
+                        <input type="hidden" name="geste" value="{{ geste }}">
+                    {% endfor %}
+                    {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise erreur=erreur_adresse %}
+                </form>
+            </div>
+
+            {% include "ui/components/assistant/carte.html" with fiche=parcours.fiche %}
+        </div>
+
+        {% include "ui/components/assistant/footer.html" %}
+    </div>
+{% endblock main %}
