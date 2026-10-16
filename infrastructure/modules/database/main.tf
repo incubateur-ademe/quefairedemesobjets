@@ -50,7 +50,8 @@ resource "scaleway_rdb_privilege" "webapp_metabase_privilege" {
 # ALTER DEFAULT PRIVILEGES grants SELECT on those too.
 
 locals {
-  grant_metabase_default_privileges_script_sha256 = (var.grant_metabase_default_privileges_script_path != null
+  grant_metabase_default_privileges_enabled = var.grant_metabase_default_privileges_script_path != null
+  grant_metabase_default_privileges_script_sha256 = (local.grant_metabase_default_privileges_enabled
     ? filesha256(var.grant_metabase_default_privileges_script_path)
     : null
   )
@@ -58,6 +59,8 @@ locals {
 }
 
 resource "null_resource" "grant_webapp_metabase_default_privileges" {
+  count = local.grant_metabase_default_privileges_enabled ? 1 : 0
+
   depends_on = [
     scaleway_rdb_privilege.webapp_privilege,
     scaleway_rdb_privilege.webapp_metabase_privilege,
@@ -142,6 +145,8 @@ locals {
 }
 
 resource "null_resource" "grant_warehouse_metabase_default_privileges" {
+  count = local.grant_metabase_default_privileges_enabled ? 1 : 0
+
   depends_on = [
     scaleway_rdb_privilege.warehouse_privilege,
     scaleway_rdb_privilege.warehouse_metabase_privilege,
