@@ -1058,6 +1058,51 @@
         ]
       }
     },
+    "/api/suggestions/groupes/{groupe_id}": {
+      "get": {
+        "operationId": "data_revue_api_groupe_detail",
+        "summary": "Groupe Detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeDetailOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
     "/api/suggestions/groupes/{groupe_id}/decision": {
       "post": {
         "operationId": "data_revue_api_groupe_decision",
@@ -1454,6 +1499,72 @@
           },
           "required": true
         },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/annuaire-entreprises": {
+      "get": {
+        "operationId": "data_revue_api_annuaire_entreprises",
+        "summary": "Annuaire Entreprises",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "champ",
+            "schema": {
+              "enum": ["siret", "siren"],
+              "title": "Champ",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "valeur",
+            "schema": {
+              "title": "Valeur",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnuaireEntrepriseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "description": "Entreprise and établissement of a SIRET / SIREN, from the public API\n« Recherche d'entreprises » (cached one day).",
+        "tags": ["Revue suggestions"],
         "security": [
           {
             "SuperuserSessionAuth": []
@@ -2914,9 +3025,6 @@
               }
             ]
           },
-          "contexte": {
-            "title": "Contexte"
-          },
           "lignes": {
             "items": {
               "$ref": "#/components/schemas/LigneOut"
@@ -3216,6 +3324,211 @@
         "title": "TupleCountOut",
         "type": "object"
       },
+      "AnnuaireOut": {
+        "properties": {
+          "siret": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifiantOut"
+            },
+            "title": "Siret",
+            "type": "array"
+          },
+          "siren": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifiantOut"
+            },
+            "title": "Siren",
+            "type": "array"
+          }
+        },
+        "required": ["siret", "siren"],
+        "title": "AnnuaireOut",
+        "type": "object"
+      },
+      "GroupeDetailOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "statut": {
+            "title": "Statut",
+            "type": "string"
+          },
+          "modifie_le": {
+            "format": "date-time",
+            "title": "Modifie Le",
+            "type": "string"
+          },
+          "decision_par": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Le"
+          },
+          "acteur": {
+            "$ref": "#/components/schemas/ActeurIdentiteOut"
+          },
+          "is_new": {
+            "title": "Is New",
+            "type": "boolean"
+          },
+          "has_correction": {
+            "title": "Has Correction",
+            "type": "boolean"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneOut"
+            },
+            "title": "Lignes",
+            "type": "array"
+          },
+          "lignes_validees": {
+            "title": "Lignes Validees",
+            "type": "integer"
+          },
+          "lignes_total": {
+            "title": "Lignes Total",
+            "type": "integer"
+          },
+          "capacites": {
+            "$ref": "#/components/schemas/GroupeCapacitesOut"
+          },
+          "localisation": {
+            "$ref": "#/components/schemas/LocalisationOut"
+          },
+          "annuaire": {
+            "$ref": "#/components/schemas/AnnuaireOut"
+          }
+        },
+        "required": [
+          "id",
+          "statut",
+          "modifie_le",
+          "decision_par",
+          "decision_le",
+          "acteur",
+          "is_new",
+          "has_correction",
+          "parent",
+          "lignes",
+          "lignes_validees",
+          "lignes_total",
+          "capacites",
+          "localisation",
+          "annuaire"
+        ],
+        "title": "GroupeDetailOut",
+        "type": "object"
+      },
+      "IdentifiantOut": {
+        "properties": {
+          "source": {
+            "enum": ["corrige", "parent", "correction", "acteur"],
+            "title": "Source",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "valeur": {
+            "title": "Valeur",
+            "type": "string"
+          },
+          "propose": {
+            "description": "Valeur proposée (et non actuelle)",
+            "title": "Propose",
+            "type": "boolean"
+          }
+        },
+        "required": ["source", "label", "valeur", "propose"],
+        "title": "IdentifiantOut",
+        "type": "object"
+      },
+      "LocalisationOut": {
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/PointOut"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "ligne": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Clé de la ligne (latitude, longitude) du groupe",
+            "title": "Ligne"
+          },
+          "creer_correction": {
+            "default": false,
+            "description": "Pas encore de proposition de localisation sur la correction (SU latitude/longitude sur RevisionActeur) : en ajouter une",
+            "title": "Creer Correction",
+            "type": "boolean"
+          }
+        },
+        "required": ["points"],
+        "title": "LocalisationOut",
+        "type": "object"
+      },
+      "PointOut": {
+        "properties": {
+          "key": {
+            "enum": ["Origin", "Acteur", "RevisionActeur", "ParentRevisionActeur"],
+            "title": "Key",
+            "type": "string"
+          },
+          "latitude": {
+            "title": "Latitude",
+            "type": "number"
+          },
+          "longitude": {
+            "title": "Longitude",
+            "type": "number"
+          },
+          "draggable": {
+            "title": "Draggable",
+            "type": "boolean"
+          }
+        },
+        "required": ["key", "latitude", "longitude", "draggable"],
+        "title": "PointOut",
+        "type": "object"
+      },
       "GroupeDecisionIn": {
         "properties": {
           "action": {
@@ -3386,6 +3699,135 @@
         },
         "required": ["cible"],
         "title": "ReportIn",
+        "type": "object"
+      },
+      "AnnuaireQuery": {
+        "properties": {
+          "champ": {
+            "enum": ["siret", "siren"],
+            "title": "Champ",
+            "type": "string"
+          },
+          "valeur": {
+            "title": "Valeur",
+            "type": "string"
+          }
+        },
+        "required": ["champ", "valeur"],
+        "title": "AnnuaireQuery",
+        "type": "object"
+      },
+      "AnnuaireEntrepriseOut": {
+        "properties": {
+          "trouve": {
+            "title": "Trouve",
+            "type": "boolean"
+          },
+          "entreprise": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntrepriseOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "etablissement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EtablissementOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["trouve", "entreprise", "etablissement"],
+        "title": "AnnuaireEntrepriseOut",
+        "type": "object"
+      },
+      "EntrepriseOut": {
+        "properties": {
+          "siren": {
+            "title": "Siren",
+            "type": "string"
+          },
+          "nom": {
+            "title": "Nom",
+            "type": "string"
+          },
+          "adresse": {
+            "title": "Adresse",
+            "type": "string"
+          },
+          "activite_code": {
+            "title": "Activite Code",
+            "type": "string"
+          },
+          "etat": {
+            "enum": ["actif", "inactif"],
+            "title": "Etat",
+            "type": "string"
+          }
+        },
+        "required": ["siren", "nom", "adresse", "activite_code", "etat"],
+        "title": "EntrepriseOut",
+        "type": "object"
+      },
+      "EtablissementOut": {
+        "properties": {
+          "siret": {
+            "title": "Siret",
+            "type": "string"
+          },
+          "nom": {
+            "title": "Nom",
+            "type": "string"
+          },
+          "adresse": {
+            "title": "Adresse",
+            "type": "string"
+          },
+          "activite_code": {
+            "title": "Activite Code",
+            "type": "string"
+          },
+          "etat": {
+            "enum": ["actif", "ferme"],
+            "title": "Etat",
+            "type": "string"
+          },
+          "est_siege": {
+            "title": "Est Siege",
+            "type": "boolean"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          }
+        },
+        "required": ["siret", "nom", "adresse", "activite_code", "etat", "est_siege"],
+        "title": "EtablissementOut",
         "type": "object"
       }
     },

@@ -208,7 +208,6 @@ class GroupeOut(Schema):
     is_new: bool
     has_correction: bool
     parent: ParentOut | None
-    contexte: Any = None
     lignes: list[LigneOut]
     lignes_validees: int
     lignes_total: int
@@ -288,3 +287,72 @@ class ReportIn(Schema):
         None, description="Lignes à reporter ; absent = toutes les lignes reportables"
     )
     expected_modifie_le: datetime | None = None
+
+
+# --- Detail of a groupe (modal) ---
+
+
+class PointOut(Schema):
+    key: Literal["Origin", "Acteur", "RevisionActeur", "ParentRevisionActeur"]
+    latitude: float
+    longitude: float
+    draggable: bool
+
+
+class LocalisationOut(Schema):
+    points: list[PointOut]
+    ligne: str | None = Field(
+        None, description="Clé de la ligne (latitude, longitude) du groupe"
+    )
+    creer_correction: bool = Field(
+        False,
+        description="Pas encore de proposition de localisation sur la correction "
+        "(SU latitude/longitude sur RevisionActeur) : en ajouter une",
+    )
+
+
+class IdentifiantOut(Schema):
+    source: Literal["corrige", "parent", "correction", "acteur"]
+    label: str
+    valeur: str
+    propose: bool = Field(..., description="Valeur proposée (et non actuelle)")
+
+
+class AnnuaireOut(Schema):
+    siret: list[IdentifiantOut]
+    siren: list[IdentifiantOut]
+
+
+class EntrepriseOut(Schema):
+    siren: str
+    nom: str
+    adresse: str
+    activite_code: str
+    etat: Literal["actif", "inactif"]
+
+
+class EtablissementOut(Schema):
+    siret: str
+    nom: str
+    adresse: str
+    activite_code: str
+    etat: Literal["actif", "ferme"]
+    est_siege: bool
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+class AnnuaireEntrepriseOut(Schema):
+    trouve: bool
+    entreprise: EntrepriseOut | None
+    etablissement: EtablissementOut | None
+
+
+class AnnuaireQuery(Schema):
+    champ: Literal["siret", "siren"]
+    valeur: str
+
+
+class GroupeDetailOut(GroupeOut):
+    localisation: LocalisationOut
+    annuaire: AnnuaireOut
