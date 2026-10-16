@@ -42,6 +42,19 @@ class TestParcours:
 
         assert parcours.as_params() == {"objet": "chaise"}
 
+    def test_a_zero_coordinate_is_a_position(self):
+        """The Greenwich meridian crosses Normandy: 0.0 is not "absent"."""
+        parcours = Parcours(adresse="Villers-sur-Mer", longitude=0.0, latitude=49.32)
+
+        assert Parcours.from_query(parcours.as_params()).is_located
+
+    @pytest.mark.parametrize("value", ["nan", "inf", "-infinity"])
+    def test_a_non_finite_coordinate_counts_as_absent(self, value):
+        """`float("nan")` parses; sent to MapLibre it would break the map."""
+        parcours = Parcours.from_query({"longitude": value, "latitude": "48.8"})
+
+        assert not parcours.is_located
+
     def test_round_trip_through_params(self):
         departure = Parcours(
             fiche="meubles",
@@ -150,6 +163,24 @@ class TestSearchForm:
         assert response.url.startswith(
             reverse("assistant:produit", kwargs={"slug": fiche.slug})
         )
+
+    def test_a_draft_fiche_is_not_a_destination(self, client):
+        """Every other lookup goes through `live()`: a shared label must not
+        route to a page that then 404s."""
+        from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+
+        draft = ProduitPageFactory(parent=None, live=False)
+        term = ProduitPageSearchTerm.objects.get(produit_page=draft)
+        term.searchable_title = "Brouillon test"
+        term.save()
+
+        response = client.get(
+            reverse("assistant:recherche"),
+            {"objet": "Brouillon test", "adresse": "Auray"},
+        )
+
+        assert response.status_code == 200
+        assert "qfa-combobox__erreur" in response.content.decode()
 
     def test_the_explicit_fiche_wins_over_the_label(self, client, fiche):
         """The autocomplete already decided: do not resolve again."""

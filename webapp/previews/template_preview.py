@@ -1562,7 +1562,7 @@ class AssistantPreview(LookbookPreview):
         return render_to_string(
             "ui/components/assistant/carte.html",
             {
-                "geste": geste,
+                "gestes": [geste],
                 "fiche": objet,
                 "longitude": longitude,
                 "latitude": latitude,
@@ -1666,7 +1666,7 @@ CONDITIONS = [
 ]
 
 REPARER_BLOCK = {
-    "geste": "reparer",
+    "gestes": ["reparer"],
     "libelle": "Réparer",
     "consigne": (
         "Vous pensez que votre téléphone mobile peut être réparé ? Pensez au "
@@ -1681,7 +1681,7 @@ REPARER_BLOCK = {
 }
 
 DONNER_BLOCK = {
-    "geste": "donner_echanger_rapporter",
+    "gestes": ["donner_echanger_rapporter", "vendre_acheter"],
     "libelle": "Donner ou revendre",
     "consigne": "Votre objet fonctionne encore ? Donnez-lui une seconde vie.",
     "badges": [{"condition": "bon_etat", "libelle": "Bon état"}],
@@ -1689,7 +1689,7 @@ DONNER_BLOCK = {
 }
 
 TRIER_BLOCK = {
-    "geste": "trier",
+    "gestes": ["trier"],
     "libelle": "Déposer",
     "consigne": "Hors d'usage, votre objet se dépose en point de collecte.",
     "badges": [{"condition": "mauvais_etat", "libelle": "Mauvais état"}],
