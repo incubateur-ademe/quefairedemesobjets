@@ -16,6 +16,7 @@ from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
 
 pytestmark = pytest.mark.django_db
 
+PARIS = {"latitude": "48.8534", "longitude": "2.3488"}
 PARIS_POINT = Point(2.3488, 48.8534, srid=4326)
 
 # The columns of the CSV published on data.ademe.fr that the API serves.
@@ -73,7 +74,20 @@ def get_lieu(client, acteur):
     return client.get(reverse("api_v1:lieu", args=[acteur.uuid]))
 
 
+def get_lieux(client, **params):
+    return client.get(reverse("api_v1:lieux"), {**PARIS, **params})
+
+
 class TestOpenData:
+    def test_only_open_licence_sources_are_served(self, client, reparer):
+        """The perimeter of the dataset on data.ademe.fr."""
+        open_place = place(reparer)
+        place(reparer, licence=DataLicense.NO_LICENSE)
+
+        payload = get_lieux(client, geste="reparer").json()
+
+        assert [item["identifiant"] for item in payload["items"]] == [open_place.uuid]
+
     def test_a_parent_with_one_open_child_is_served(self):
         """`sources` of a parent holds its children's sources: one open is enough."""
         parent = DisplayedActeurFactory(location=PARIS_POINT)
@@ -83,6 +97,36 @@ class TestOpenData:
         )
 
         assert list(open_data(DisplayedActeur.objects.all())) == [parent]
+
+
+class TestLieux:
+    def test_orders_by_proximity_and_paginates(self, client, reparer):
+        for longitude in (2.60, 2.40, 2.35):
+            place(reparer, at=Point(longitude, 48.8534, srid=4326))
+
+        payload = get_lieux(client, geste="reparer", limit=2).json()
+
+        assert payload["count"] == 3
+        assert [item["longitude"] for item in payload["items"]] == [2.35, 2.40]
+
+    def test_answers_in_a_bounded_number_of_queries(
+        self, client, reparer, django_assert_max_num_queries
+    ):
+        """Every relation is prefetched: more places must not mean more queries."""
+        for _ in range(3):
+            place(reparer)
+
+        # count, places, then one query per prefetched relation.
+        with django_assert_max_num_queries(12):
+            get_lieux(client, geste="reparer")
+
+    def test_unknown_fiche_is_a_404(self, client, reparer):
+        assert get_lieux(client, geste="reparer", fiche="inconnu").status_code == 404
+
+    def test_position_is_required(self, client, reparer):
+        assert (
+            client.get(reverse("api_v1:lieux"), {"geste": "reparer"}).status_code == 422
+        )
 
 
 class TestLieu:
