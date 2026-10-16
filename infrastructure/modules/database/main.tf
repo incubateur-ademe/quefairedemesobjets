@@ -74,7 +74,7 @@ resource "null_resource" "grant_webapp_metabase_default_privileges" {
         "postgresql://${var.webapp_db_username}@${scaleway_rdb_instance.webapp.load_balancer.0.ip}:${scaleway_rdb_instance.webapp.load_balancer.0.port}/${scaleway_rdb_database.webapp.name}?sslmode=require" \
         -v owner_user='${var.webapp_db_username}' \
         -v metabase_user='${scaleway_rdb_user.webapp_metabase_user.name}' \
-        -f ${path.module}/sql/grant_metabase_default_privileges.sql
+        -f ${var.grant_metabase_default_privileges_script_path}
     EOT
   }
 
@@ -158,7 +158,7 @@ resource "null_resource" "grant_warehouse_metabase_default_privileges" {
         "postgresql://${var.warehouse_db_username}@${scaleway_rdb_instance.warehouse.load_balancer.0.ip}:${scaleway_rdb_instance.warehouse.load_balancer.0.port}/${scaleway_rdb_database.warehouse_database.name}?sslmode=require" \
         -v owner_user='${var.warehouse_db_username}' \
         -v metabase_user='${scaleway_rdb_user.warehouse_metabase_user.name}' \
-        -f ${path.module}/sql/grant_metabase_default_privileges.sql
+        -f ${var.grant_metabase_default_privileges_script_path}
     EOT
   }
 
