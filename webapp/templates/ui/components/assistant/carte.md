@@ -8,7 +8,7 @@ pendant l'exploration.
 ```django
 {% include "ui/components/assistant/carte.html" with
    geste="reparer"
-   objet="telephone-mobile"
+   fiche="telephone-mobile"
    longitude=2.3488
    latitude=48.8534
    adresse_precise=True
@@ -23,7 +23,7 @@ pendant l'exploration.
 | `longitude`       | ✅     | centre initial                                                       |
 | `latitude`        | ✅     | centre initial                                                       |
 | `couleur_geste`   | ✅     | couleur des pinpoints, issue de `GroupeAction.couleur`               |
-| `objet`           | ⚪️     | slug d'une fiche, restreint les lieux à ses sous-catégories          |
+| `fiche`           | ⚪️     | slug d'une fiche, restreint les lieux à ses sous-catégories          |
 | `adresse_precise` | ⚪️     | affiche la punaise rouge (#3356 §4) ; jamais pour une commune        |
 | `parametres_lieu` | ⚪️     | query string ajoutée au lien de chaque punaise vers `assistant:lieu` |
 | `lieux`           | ⚪️     | liste rendue côté serveur pour la version accessible                 |

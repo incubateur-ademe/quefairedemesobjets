@@ -1,3 +1,4 @@
+from assistant.api import router as assistant_router
 from ninja import NinjaAPI
 from opendata.api import router as opendata_router
 from qfdmo.api import router as qfdmo_router
@@ -19,4 +20,7 @@ api_v1 = NinjaAPI(
         " les lieux sont ceux du jeu de données ouvert publié sur data.ademe.fr."
     ),
 )
+# The assistant first: its `/lieux/compte` would otherwise be read as the
+# identifiant of `/lieux/{identifiant}`.
+api_v1.add_router("/", assistant_router, tags=["Assistant"])
 api_v1.add_router("/", opendata_router, tags=["Open data"])
