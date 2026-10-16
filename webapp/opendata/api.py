@@ -1,13 +1,16 @@
 """Open data API, version 1: what the site publishes for reuse.
 
-The two tables of the fiches (`fiches.py`): paginated JSON by default, the
-whole table as CSV with `Accept: text/csv`. Mounted at `/api/v1/` (`core/api.py`).
+The places of the acteurs dataset published on data.ademe.fr (`lieux.py`) and
+the two tables of the fiches (`fiches.py`), as paginated JSON; the fiches also
+as a whole CSV table with `Accept: text/csv`. Mounted at `/api/v1/`
+(`core/api.py`).
 """
 
 from functools import wraps
 from io import StringIO
 
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from ninja import Router, Schema
@@ -21,8 +24,36 @@ from opendata.fiches import (
     produit_rows,
     write_csv,
 )
+from opendata.lieux import GesteSchema, LieuSchema, for_the_api, open_data
+from qfdmo.models.acteur import DisplayedActeur
+from qfdmo.models.action import GroupeAction
 
 router = Router()
+
+CACHE_FIVE_MINUTES = cache_control(public=True, max_age=300, stale_while_revalidate=60)
+
+
+@router.get(
+    "/lieux/{identifiant}",
+    response=LieuSchema,
+    url_name="lieu",
+    summary="Un lieu",
+)
+@decorate_view(CACHE_FIVE_MINUTES)
+def lieu(request, identifiant: str):
+    """Le lieu portant cet identifiant, s'il est sous licence ouverte."""
+    acteurs = for_the_api(open_data(DisplayedActeur.objects.all()))
+    return get_object_or_404(acteurs, uuid=identifiant)
+
+
+@router.get(
+    "/gestes",
+    response=list[GesteSchema],
+    url_name="gestes",
+    summary="Les gestes, valeurs du paramètre `geste`",
+)
+def gestes(request):
+    return GroupeAction.objects.order_by("order")
 
 
 # Editorial content, published a few times a week at most.
