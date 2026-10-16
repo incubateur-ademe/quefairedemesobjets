@@ -1,6 +1,14 @@
 import type { GroupeActions } from "../../api/mutations"
 import type { Groupe, LignePage } from "../../api/types"
-import { type ModalTab, LigneHead, LigneRow, ligneCursor } from "./GroupesView"
+import {
+  type Checkboxes,
+  type ModalTab,
+  LigneHead,
+  LigneRow,
+  ligneCursor,
+  PageCheckbox,
+  RowCheckbox,
+} from "./GroupesView"
 
 /** View « Lignes » (focus mode): one row per ligne de suggestion, with its groupe
  * and acteur for context. No refusal here: a refusal is a decision on the whole
@@ -11,12 +19,14 @@ export function LignesView({
   cursor,
   onCursor,
   onOpen,
+  checkboxes,
 }: {
   page: LignePage
   actions: GroupeActions
   cursor: string | null
   onCursor: (cursor: string) => void
   onOpen: (groupe: Groupe, tab: ModalTab) => void
+  checkboxes: Checkboxes
 }) {
   const groupes = new Map(page.groupes.map((groupe) => [groupe.id, groupe]))
   if (!page.items.length) {
@@ -32,6 +42,10 @@ export function LignesView({
     <table className="tbl cmp stream lignes">
       <thead>
         <tr>
+          <PageCheckbox
+            label="Sélectionner les lignes de cette page"
+            checkboxes={checkboxes}
+          />
           <th className="num">Groupe</th>
           <th>Acteur</th>
           <LigneHead />
@@ -54,6 +68,11 @@ export function LignesView({
               onCursor={onCursor}
               lead={
                 <>
+                  <RowCheckbox
+                    id={ligne.key}
+                    label={`Sélectionner la ligne ${ligne.champs.join(", ")} du groupe ${groupe.id}`}
+                    checkboxes={checkboxes}
+                  />
                   <td className="num">
                     <button
                       type="button"
