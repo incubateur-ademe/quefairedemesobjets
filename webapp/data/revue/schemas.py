@@ -119,3 +119,172 @@ class LogsQuery(Schema):
 
 class LogsExportQuery(Schema):
     niveau: list[str] = []
+
+
+# --- Review of a cohorte ---
+
+
+class PolicyOut(Schema):
+    type_action: str
+    has_lines: bool
+    can_reject_line: bool
+    can_reject_group: bool
+    editable_models: list[str]
+    shows_parent: bool
+    shows_acteur_diff: bool
+    badge: str | None
+
+
+class CohorteDetailOut(CohorteOut):
+    policy: PolicyOut
+
+
+class CellOut(Schema):
+    actuel: dict[str, str] | None
+    propose: dict[str, str] | None
+    etat: Literal["valeur", "vide", "pas_de_correction"]
+
+
+class LigneCapacitesOut(Schema):
+    valider: bool
+    remettre_a_valider: bool
+    remettre_groupe_a_valider: bool
+    corriger_correction: bool
+    corriger_parent: bool
+    reporter_correction: bool
+    reporter_parent: bool
+    supprimer_correction: bool
+    supprimer_parent: bool
+
+
+class LigneOut(Schema):
+    key: str
+    champs: list[str]
+    statut: str
+    decision_par: UserOut | None
+    decision_le: datetime | None
+    acteur: CellOut
+    correction: CellOut
+    parent: CellOut | None
+    capacites: LigneCapacitesOut
+
+
+class AdminUrlsOut(Schema):
+    importe: str | None
+    affiche: str | None
+    corrige: str | None
+    parent: str | None
+
+
+class ActeurIdentiteOut(Schema):
+    identifiant_unique: str
+    identifiant_externe: str
+    nom: str
+    ville: str
+    admin_urls: AdminUrlsOut
+
+
+class ParentOut(Schema):
+    identifiant_unique: str
+    nom: str
+    nb_enfants: int
+
+
+class GroupeCapacitesOut(Schema):
+    valider: bool
+    refuser: bool
+    remettre_a_valider: bool
+    reporter_correction: bool
+    reporter_parent: bool
+
+
+class GroupeOut(Schema):
+    id: int
+    statut: str
+    modifie_le: datetime
+    decision_par: UserOut | None
+    decision_le: datetime | None
+    acteur: ActeurIdentiteOut
+    is_new: bool
+    has_correction: bool
+    parent: ParentOut | None
+    contexte: Any = None
+    lignes: list[LigneOut]
+    lignes_validees: int
+    lignes_total: int
+    capacites: GroupeCapacitesOut
+
+
+class GroupePageOut(Schema):
+    items: list[GroupeOut]
+    total: int
+    page: int
+    page_size: int
+
+
+class TupleCountOut(Schema):
+    champs: list[str]
+    count: int
+
+
+class TotauxVuesOut(Schema):
+    groupes: int
+    lignes: int
+
+
+class StatsOut(Schema):
+    compteurs: CompteursOut
+    totaux_vues: TotauxVuesOut
+    tuples: list[TupleCountOut]
+
+
+class RevueQuery(Schema):
+    filtre: str | None = None
+    tuples: list[str] = Field(
+        [], description="Tuples de champs, chacun écrit « champ,champ »"
+    )
+    afficher: Literal["avalider", "tout"] = "avalider"
+
+
+class GroupesQuery(RevueQuery):
+    page: int = Field(1, ge=1)
+    page_size: int = Field(100, ge=1, le=200)
+
+
+class StatsQuery(RevueQuery):
+    vue: Literal["groupes", "lignes"] = "groupes"
+
+
+# --- Writes ---
+
+
+class GroupeDecisionIn(Schema):
+    action: Literal["validate", "reject", "resubmit"]
+    expected_modifie_le: datetime | None = None
+
+
+class LignesDecisionIn(Schema):
+    champs: list[list[str]] = Field(..., min_length=1)
+    action: Literal["validate", "resubmit"]
+    expected_modifie_le: datetime | None = None
+
+
+class PropositionIn(Schema):
+    suggestion_modele: Literal["RevisionActeur", "ParentRevisionActeur"]
+    champs: list[str] = Field(..., min_length=1)
+    valeurs: dict[str, str]
+    expected_modifie_le: datetime | None = None
+
+
+class PropositionDeleteQuery(Schema):
+    suggestion_modele: Literal["RevisionActeur", "ParentRevisionActeur"]
+    champs: list[str] = Field(..., min_length=1)
+    expected_modifie_le: datetime | None = None
+
+
+class ReportIn(Schema):
+    cible: Literal["correction", "parent"]
+    champs: list[list[str]] | None = Field(
+        None, description="Lignes à reporter ; absent = toutes les lignes reportables"
+    )
+    expected_modifie_le: datetime | None = None

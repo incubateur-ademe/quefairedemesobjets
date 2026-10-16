@@ -4,6 +4,7 @@ from data.models.suggestion import (
     SuggestionCohorte,
     SuggestionCohorteStatut,
     SuggestionGroupe,
+    SuggestionLog,
     SuggestionStatut,
 )
 from django.contrib.auth.models import User
@@ -167,6 +168,65 @@ class TestSuggestionCohorte:
 
         cohorte.refresh_from_db()
         assert cohorte.statut == SuggestionCohorteStatut.SUCCES
+
+    @pytest.mark.django_db
+    def test_source_cohortes_only_includes_source_types_with_groupes(self):
+        ajout = SuggestionCohorteFactory(
+            identifiant_action="dag_ajout",
+            type_action=SuggestionAction.SOURCE_AJOUT,
+        )
+        SuggestionGroupeFactory(suggestion_cohorte=ajout)
+        modification = SuggestionCohorteFactory(
+            identifiant_action="dag_modification",
+            type_action=SuggestionAction.SOURCE_MODIFICATION,
+        )
+        SuggestionGroupeFactory(suggestion_cohorte=modification)
+        SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                identifiant_action="dag_clustering",
+                type_action=SuggestionAction.CLUSTERING,
+            )
+        )
+        SuggestionCohorteFactory(
+            identifiant_action="dag_vide",
+            type_action=SuggestionAction.SOURCE_AJOUT,
+        )
+
+        cohortes = SuggestionCohorte.objects.source_cohortes()
+
+        assert cohortes.count() == 2
+        assert {cohorte.identifiant_action for cohorte in cohortes} == {
+            "dag_ajout",
+            "dag_modification",
+        }
+
+    @pytest.mark.django_db
+    def test_logs_queryset_sorted_by_gravity(self):
+        cohorte = SuggestionCohorteFactory(type_action=SuggestionAction.SOURCE_AJOUT)
+        for niveau in ["ERROR", "WARNING", "WARNING", "INFO"]:
+            SuggestionLog.objects.create(
+                suggestion_cohorte=cohorte,
+                niveau_de_log=niveau,
+                fonction_de_transformation="f",
+                message=niveau,
+            )
+
+        levels = list(cohorte.logs_queryset([]).values_list("niveau_de_log", flat=True))
+
+        assert levels == ["ERROR", "WARNING", "WARNING", "INFO"]
+
+    @pytest.mark.django_db
+    def test_logs_queryset_filters_by_level(self):
+        cohorte = SuggestionCohorteFactory(type_action=SuggestionAction.SOURCE_AJOUT)
+        for niveau in ["ERROR", "WARNING", "WARNING", "INFO"]:
+            SuggestionLog.objects.create(
+                suggestion_cohorte=cohorte,
+                niveau_de_log=niveau,
+                fonction_de_transformation="f",
+                message=niveau,
+            )
+
+        assert cohorte.logs_queryset(["WARNING"]).count() == 2
 
 
 @pytest.mark.django_db

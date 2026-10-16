@@ -12,7 +12,7 @@ Text comparisons are always case and accent insensitive (unaccent).
 import json
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
@@ -39,6 +39,22 @@ JSON_KEY_PATTERN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9\-]|_(?!_))*$")
 
 
 @dataclass(frozen=True)
+class FilterContext:
+    """Where the filtered rows are, relatively to the fields of the registry.
+
+    - `prefix`: ORM path prepended to the fields paths (ex: "suggestion_groupe__");
+    - `groupe_ref`: reference to the groupe id, for the subqueries of expressions;
+    - `related`: wrappers of the conditions on related rows, by name
+      (ex: "ligne" → Exists(the SuggestionUnitaire of the ligne / of the groupe)).
+      A wrapper receives the condition and the annotations it needs.
+    """
+
+    prefix: str = ""
+    groupe_ref: str = "pk"
+    related: dict[str, Callable[[Q, dict], Q]] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class FieldSpec:
     key: str
     label: str
@@ -46,10 +62,15 @@ class FieldSpec:
     famille: str
     # ORM lookup path, or an expression to annotate (ex: a JSON key)
     path: str | None = None
-    expression: Callable[[], Expression] | None = None
+    expression: Callable[[FilterContext], Expression] | None = None
     choices: tuple[tuple[str, str], ...] = ()
     # datetime fields are compared on their date
     is_datetime: bool = False
+    # The condition applies to related rows: compiled on their model, then
+    # wrapped by `FilterContext.related[related]`
+    related: str | None = None
+    # Fully custom condition: builder(context, spec, operator, value) -> Q
+    builder: Callable[["FilterContext", "FieldSpec", str, Any], Q] | None = None
 
     @property
     def operators(self) -> list[str]:
@@ -71,7 +92,7 @@ class JsonFieldSpec:
             label=f"{self.label} › {key}",
             type="text",
             famille=self.famille,
-            expression=lambda: KT(f"{self.path}__{key}"),
+            expression=lambda context: KT(f"{context.prefix}{self.path}__{key}"),
         )
 
 
@@ -107,9 +128,9 @@ def parse_filter(raw: str | None) -> dict | None:
 
 
 class _Compiler:
-    def __init__(self, registry: FieldRegistry, prefix: str = ""):
+    def __init__(self, registry: FieldRegistry, context: FilterContext):
         self.registry = registry
-        self.prefix = prefix
+        self.context = context
         self.annotations: dict[str, Expression] = {}
         self.nb_conditions = 0
 
@@ -135,12 +156,8 @@ class _Compiler:
             result = (result | q) if (op == "or" and result) else (result & q)
         return result
 
-    def _lhs(self, spec: FieldSpec) -> str:
-        if spec.expression is None:
-            return f"{self.prefix}{spec.path or spec.key}"
-        alias = f"_filtre_{len(self.annotations)}"
-        self.annotations[alias] = spec.expression()
-        return alias
+    def _alias(self) -> str:
+        return f"_filtre_{self.nb_conditions}"
 
     def _condition(self, node: dict) -> Q:
         self.nb_conditions += 1
@@ -152,8 +169,25 @@ class _Compiler:
             raise filter_error(
                 f"Opérateur « {operator} » impossible sur « {spec.label} »"
             )
-        lhs = self._lhs(spec)
         value = node.get("value")
+        if spec.builder:
+            return spec.builder(self.context, spec, operator, value)
+        if spec.related:
+            # Compiled on the related rows (no prefix), then wrapped
+            annotations: dict[str, Expression] = {}
+            lhs = spec.path or spec.key
+            if spec.expression:
+                lhs = self._alias()
+                annotations[lhs] = spec.expression(self.context)
+            q = self._compare(spec, lhs, operator, value)
+            return self.context.related[spec.related](q, annotations)
+        lhs = f"{self.context.prefix}{spec.path or spec.key}"
+        if spec.expression:
+            lhs = self._alias()
+            self.annotations[lhs] = spec.expression(self.context)
+        return self._compare(spec, lhs, operator, value)
+
+    def _compare(self, spec: FieldSpec, lhs: str, operator: str, value: Any) -> Q:
         if operator in ("is_empty", "is_not_empty"):
             empty = Q(**{f"{lhs}__isnull": True})
             if spec.type == "text":
@@ -258,19 +292,25 @@ def _parse_date(value: Any, spec: FieldSpec) -> date:
 
 
 def compile_filter(
-    tree: dict | None, registry: FieldRegistry, prefix: str = ""
+    tree: dict | None, registry: FieldRegistry, context: FilterContext | None = None
 ) -> tuple[dict[str, Expression], Q]:
-    """Compile a filter tree into (annotations to add with `.alias()`, Q).
-    `prefix` is prepended to the ORM paths (ex: "suggestion_groupe__")."""
+    """Compile a filter tree into (annotations to add with `.alias()`, Q)."""
     if not tree:
         return {}, Q()
-    compiler = _Compiler(registry, prefix)
+    compiler = _Compiler(registry, context or FilterContext())
     q = compiler.compile(tree)
     return compiler.annotations, q
 
 
-def apply_filter(queryset, tree: dict | None, registry: FieldRegistry):
-    annotations, q = compile_filter(tree, registry)
+def apply_filter(
+    queryset,
+    tree: dict | None,
+    registry: FieldRegistry | None,
+    context: FilterContext | None = None,
+):
+    if not tree:
+        return queryset
+    annotations, q = compile_filter(tree, registry, context)
     if annotations:
         queryset = queryset.alias(**annotations)
     return queryset.filter(q)
@@ -288,7 +328,9 @@ def registry_metadata(registry: FieldRegistry, json_keys: dict[str, list[str]]):
             "famille": spec.famille,
             "type": spec.type,
             "operateurs": spec.operators,
-            "choix": [{"value": value, "label": label} for value, label in spec.choices]
+            "choix": [
+                {"value": str(value), "label": label} for value, label in spec.choices
+            ]
             or None,
         }
         for spec in fields
