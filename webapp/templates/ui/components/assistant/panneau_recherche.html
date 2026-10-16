@@ -3,10 +3,13 @@ Panneau de saisie vert d'eau (maquette 30139:14317).
 
 Commun à l'accueil et à la fiche : sur la fiche il sert de rappel et permet de
 relancer une recherche, d'où le bouton masqué quand `bouton` est faux.
+
+L'adresse y est facultative, et son libellé le dit ; sur l'écran des solutions,
+qui inclut le champ seul, elle reste nécessaire pour situer la carte.
 {% endcomment %}
 <div class="qfa-panneau">
     {% include "ui/components/assistant/recherche_objet.html" with objet=parcours.objet fiche=parcours.fiche erreur=erreurs.objet.0 %}
-    {% include "ui/components/assistant/recherche_adresse.html" with adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise erreur=erreurs.adresse.0 %}
+    {% include "ui/components/assistant/recherche_adresse.html" with label="Où souhaitez-vous trouver des solutions ? (facultatif)" adresse=parcours.adresse longitude=parcours.longitude latitude=parcours.latitude precise=parcours.precise erreur=erreurs.adresse.0 %}
 
     {% if bouton %}
         <button type="submit" class="qfa-bouton qfa-bouton--primaire qfa-bouton--pleine-largeur">
