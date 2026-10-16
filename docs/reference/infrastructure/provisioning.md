@@ -135,10 +135,10 @@ Pour faire tourner les mots de passe (`webapp_db_password`, `warehouse_db_passwo
 
 #### Object Storage (S3 `fr-par`)
 
-| Bucket                 | Connexion Airflow | Usage                                                                                                                                                            |
-| ---------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qfdmo-interface`      | —                 | Fichiers (images) uploadés depuis l'interface **Django Admin** de la webapp : `logos/`, `labels/`, `pictos/`, `config/groupeaction/icones/`, images Wagtail.     |
-| `lvao-opendata`        | `s3data`          | Export CSV opendata des acteurs (`acteurs.csv` permanent + snapshot horodaté `YYYYMMDDHHMMSS.csv`, ACL `public-read`). Produit par le DAG `export_opendata_dag`. |
-| `lvao-data-source`     | `s3data`          | Fichiers Excel ad-hoc consommés par le DAG `source-s3`.                                                                                                          |
-| `lvao-{env}-airflow`   | `scalewaylogs`    | Remote logs Airflow (`AIRFLOW__LOGGING__REMOTE_LOGGING=true`).                                                                                                   |
-| `lvao-terraform-state` | —                 | Backend OpenTofu/Terragrunt (versionné, chiffré).                                                                                                                |
+| Bucket                 | Connexion Airflow | Usage                                                                                                                                                                                                                          |
+| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `qfdmo-interface`      | —                 | Fichiers (images) uploadés depuis l'interface **Django Admin** de la webapp : `logos/`, `labels/`, `pictos/`, `config/groupeaction/icones/`, images Wagtail.                                                                   |
+| `lvao-opendata`        | `s3data`          | Export CSV opendata des acteurs (`acteurs.csv` permanent + snapshot horodaté `YYYYMMDDHHMMSS.csv`, ACL `public-read`) et des fiches (`fiches/produits.csv`, `fiches/consignes.csv`). Produit par le DAG `export_opendata_dag`. |
+| `lvao-data-source`     | `s3data`          | Fichiers Excel ad-hoc consommés par le DAG `source-s3`.                                                                                                                                                                        |
+| `lvao-{env}-airflow`   | `scalewaylogs`    | Remote logs Airflow (`AIRFLOW__LOGGING__REMOTE_LOGGING=true`).                                                                                                                                                                 |
+| `lvao-terraform-state` | —                 | Backend OpenTofu/Terragrunt (versionné, chiffré).                                                                                                                                                                              |
