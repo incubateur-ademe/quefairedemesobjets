@@ -356,3 +356,27 @@ class AnnuaireQuery(Schema):
 class GroupeDetailOut(GroupeOut):
     localisation: LocalisationOut
     annuaire: AnnuaireOut
+
+
+# --- View « Lignes » ---
+
+
+class LigneRefOut(Schema):
+    groupe_id: int
+    key: str
+
+
+class LignePageOut(Schema):
+    """The lignes of the page are given by reference: each ligne is found in its
+    groupe (`groupes`), which is what the writes return and update."""
+
+    items: list[LigneRefOut]
+    groupes: list[GroupeOut]
+    total: int
+    page: int
+    page_size: int
+
+
+class LignesQuery(RevueQuery):
+    page: int = Field(1, ge=1)
+    page_size: int = Field(500, ge=1, le=1000)

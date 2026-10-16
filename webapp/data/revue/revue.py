@@ -13,6 +13,10 @@ from typing import Literal
 from django.contrib.auth import get_user_model
 from django.db.models import (
     BooleanField,
+    Case,
+    Expression,
+    IntegerField,
+    When,
     CharField,
     Count,
     Exists,
@@ -45,7 +49,7 @@ from data.revue.filters import (
     filter_error,
     registry_metadata,
 )
-from data.revue.lignes import ACTEUR, ordered_champs
+from data.revue.lignes import ACTEUR, ORDERED_FIELDS, ordered_champs
 from data.revue.policies import PARENT, REVISION
 
 Vue = Literal["groupes", "lignes"]
@@ -206,6 +210,78 @@ def _nb_lignes(context: FilterContext):
         .values("n")
     )
     return Coalesce(Subquery(lignes), 0)
+
+
+class ActeurValueMatches(Expression):
+    """Whether the current value of the acteur, for one of the champs of the ligne,
+    matches a text comparison (case and accent insensitive).
+
+    The acteur row is read as JSON (`to_jsonb`), its fields being named like the
+    champs of the suggestions. Only usable on SuggestionUnitaire rows."""
+
+    output_field = BooleanField()
+    conditional = True
+    COMPARISONS = {
+        "eq": "= unaccent(lower(%s))",
+        "icontains": "LIKE '%%' || unaccent(lower(%s)) || '%%'",
+        "startswith": "LIKE unaccent(lower(%s)) || '%%'",
+    }
+
+    def __init__(self, comparison: str, value: str = "", champs=None, acteur=None):
+        super().__init__()
+        self.comparison = comparison
+        self.value = value
+        self.champs = champs if champs is not None else F("champs")
+        self.acteur = (
+            acteur if acteur is not None else F("suggestion_groupe__acteur_id")
+        )
+
+    def get_source_expressions(self):
+        return [self.champs, self.acteur]
+
+    def set_source_expressions(self, expressions):
+        self.champs, self.acteur = expressions
+
+    def as_sql(self, compiler, connection):
+        champs_sql, champs_params = compiler.compile(self.champs)
+        acteur_sql, acteur_params = compiler.compile(self.acteur)
+        current = "unaccent(lower(_acteur_json ->> _champ))"
+        if self.comparison == "is_empty":
+            condition, params = f"coalesce({current}, '') = ''", []
+        else:
+            comparison = self.COMPARISONS[self.comparison]
+            condition = f"{current} {comparison}"
+            params = [_escape_like(self.value) if "LIKE" in comparison else self.value]
+        sql = (
+            "EXISTS (SELECT 1 FROM qfdmo_acteur _acteur"
+            " CROSS JOIN LATERAL to_jsonb(_acteur) AS _acteur_json"
+            f" CROSS JOIN LATERAL unnest({champs_sql}) AS _champ"
+            f" WHERE _acteur.identifiant_unique = {acteur_sql} AND {condition})"
+        )
+        return sql, (*champs_params, *acteur_params, *params)
+
+
+def _escape_like(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _acteur_value_builder(context: FilterContext, spec, operator, value) -> Q:
+    """Current value of the acteur (Acteur importé, before the suggestion)."""
+    if operator in ("is_empty", "is_not_empty"):
+        q = context.related["ligne"](Q(ActeurValueMatches("is_empty")), {})
+        return q if operator == "is_empty" else ~q
+    values = value if operator == "in" else [value]
+    if (
+        not isinstance(values, list)
+        or not values
+        or not all(isinstance(item, str) for item in values)
+    ):
+        raise filter_error(f"Valeur texte attendue pour « {spec.label} »")
+    comparison = "eq" if operator in ("eq", "neq", "in") else operator
+    q = Q(pk__in=[])
+    for item in values:
+        q |= context.related["ligne"](Q(ActeurValueMatches(comparison, item)), {})
+    return ~q if operator == "neq" else q
 
 
 # --- Registry ---
@@ -372,6 +448,13 @@ def review_registry(cohorte: SuggestionCohorte) -> FieldRegistry:
                 )
             ),
             FieldSpec(
+                "ligne.valeur_actuelle",
+                "Valeur actuelle de l'acteur (avant la suggestion)",
+                "text",
+                "ligne",
+                builder=_acteur_value_builder,
+            ),
+            FieldSpec(
                 "ligne.colonne",
                 "Colonne portant une proposition",
                 "choice",
@@ -477,6 +560,8 @@ def filtered_ligne_rows(
 ) -> QuerySet[SuggestionUnitaire]:
     """SuggestionUnitaire rows of the lignes matching the filter: every SU of a
     ligne matches or not, since conditions only depend on (groupe, champs)."""
+    if filtre and registry is None:
+        registry = review_registry(cohorte)
     queryset = apply_filter(
         SuggestionUnitaire.objects.filter(
             suggestion_groupe__suggestion_cohorte=cohorte
@@ -490,6 +575,41 @@ def filtered_ligne_rows(
             ligne_statut_q("lignes", SuggestionStatut.AVALIDER, "suggestion_groupe__")
         )
     return queryset
+
+
+def lignes_page(
+    cohorte: SuggestionCohorte,
+    filtre: dict | None,
+    tuples: list[list[str]],
+    afficher: Afficher | None,
+    page: int,
+    page_size: int,
+) -> tuple[list[tuple[int, list[str]]], int]:
+    """(groupe id, champs) of the lignes of a page, ordered by groupe then as the
+    admin orders the champs, and the total number of lignes."""
+    order = Case(
+        *(
+            When(champs=list(fields), then=Value(i))
+            for i, fields in enumerate(ORDERED_FIELDS)
+        ),
+        default=Value(len(ORDERED_FIELDS)),
+        output_field=IntegerField(),
+    )
+    lignes = (
+        filtered_ligne_rows(cohorte, filtre, tuples, afficher)
+        .order_by()
+        .values("suggestion_groupe_id", "champs")
+        .distinct()
+        .annotate(rang=order)
+        .order_by("suggestion_groupe_id", "rang", "champs")
+    )
+    total = lignes.count()
+    offset = (page - 1) * page_size
+    keys = [
+        (row["suggestion_groupe_id"], row["champs"])
+        for row in lignes[offset : offset + page_size]
+    ]
+    return keys, total
 
 
 def _ligne_key_expression():

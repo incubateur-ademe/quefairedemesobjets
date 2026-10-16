@@ -4,28 +4,30 @@ import { useGroupeActions } from "../../api/mutations"
 import {
   useCohorte,
   useGroupesPage,
+  useLignesPage,
   useReviewFilterFields,
   useStats,
   type RevueParams,
 } from "../../api/queries"
 import type { Groupe } from "../../api/types"
 import { LogsDrawer } from "../../components/common/LogsDrawer"
-import { PageSizeSelect, Pager } from "../../components/common/Pager"
+import { Pager, PageSizeSelect } from "../../components/common/Pager"
 import { Segmented } from "../../components/common/Segmented"
 import { ShortcutsHelp, type Shortcut } from "../../components/common/ShortcutsHelp"
 import { FilterBuilder } from "../../components/filters/FilterBuilder"
-import { formatNumber } from "../../domain/format"
 import {
   countConditions,
   parseFilterParam,
   serializeFilter,
 } from "../../domain/filterModel"
+import { formatNumber } from "../../domain/format"
 import { scrollRowIntoView } from "../../domain/scroll"
 import { useSearchParams } from "../../router"
 import { WaButton, WaSpinner } from "../../wa"
-import { CohorteHeader, Counters } from "./CohorteHeader"
 import { GroupeModal } from "../groupe-modal/GroupeModal"
-import { cursorItems, groupeCursor, GroupesView, type ModalTab } from "./GroupesView"
+import { CohorteHeader, Counters } from "./CohorteHeader"
+import { cursorItems, GroupesView, ligneCursor, type ModalTab } from "./GroupesView"
+import { LignesView } from "./LignesView"
 import { PAGE_SIZES, readReviewState, TUPLES_SEPARATOR } from "./searchState"
 import { TuplesBar } from "./TuplesBar"
 
@@ -35,13 +37,17 @@ const FILTER_HINT =
 const SHORTCUTS: Shortcut[] = [
   {
     keys: ["↑", "↓"],
-    label: "en-tête du groupe → ses lignes → groupe suivant (et page voisine)",
+    label:
+      "élément suivant ou précédent : en-tête du groupe → ses lignes → groupe suivant ; ligne suivante en vue Lignes (et page voisine)",
   },
   {
     keys: ["A"],
     label: "valider l’élément courant (groupe ou ligne), puis passer au suivant",
   },
-  { keys: ["R"], label: "refuser le groupe courant" },
+  {
+    keys: ["R"],
+    label: "refuser le groupe courant (vue Groupes ; en vue Lignes, depuis le détail)",
+  },
   {
     keys: ["U"],
     label:
@@ -75,22 +81,34 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
   const cohorte = useCohorte(cohorteId)
   const fields = useReviewFilterFields(cohorteId)
   const stats = useStats(cohorteId, { ...revueParams, vue: state.vue })
-  const groupes = useGroupesPage(cohorteId, {
-    ...revueParams,
-    page: state.page,
-    page_size: state.pageSize,
-  })
+  const pageParams = { ...revueParams, page: state.page, page_size: state.pageSize }
+  const groupes = useGroupesPage(cohorteId, pageParams, state.vue === "groupes")
+  const lignes = useLignesPage(cohorteId, pageParams, state.vue === "lignes")
+  const current = state.vue === "groupes" ? groupes : lignes
   const actions = useGroupeActions(cohorteId)
-  const items = useMemo(() => groupes.data?.items ?? [], [groupes.data])
+  // Groupes of the page, and cursor positions: groupe headers and their lignes, or
+  // the lignes of the page
+  const pageGroupes = useMemo(
+    () => (state.vue === "groupes" ? groupes.data?.items : lignes.data?.groupes) ?? [],
+    [state.vue, groupes.data, lignes.data],
+  )
+  const positions = useMemo(
+    () =>
+      state.vue === "groupes"
+        ? cursorItems(pageGroupes)
+        : (lignes.data?.items ?? []).map((item) => ligneCursor(item.key)),
+    [state.vue, pageGroupes, lignes.data],
+  )
 
   // A change of the list (view, filters, tuples, « afficher », page) resets the page
   const setListSearch = (patch: Record<string, string | undefined>) =>
     setSearch({ ...patch, page: undefined })
 
   const cursor = useCursor(
-    items,
+    positions,
+    pageGroupes,
     state.page,
-    groupes.data?.total ?? 0,
+    current.data?.total ?? 0,
     state.pageSize,
     (page) => setSearch({ page: String(page) }),
   )
@@ -122,7 +140,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         validateAtCursor(cursor, actions)
       } else if (key === "u") {
         resubmitAtCursor(cursor, actions)
-      } else if (key === "r") {
+      } else if (key === "r" && state.vue === "groupes") {
         const groupe = cursor.groupe()
         if (groupe?.capacites.refuser) {
           actions.decideGroupe(groupe, "reject").catch(() => {})
@@ -197,7 +215,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
             onChange={(size) => setListSearch({ par_page: String(size) })}
           />
           <span className="spacer" />
-          {(groupes.isFetching || stats.isFetching) && <WaSpinner />}
+          {(current.isFetching || stats.isFetching) && <WaSpinner />}
         </div>
       </div>
       {filtersOpen && fields.data && (
@@ -218,40 +236,43 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
           setListSearch({ tuples: tuples.join(TUPLES_SEPARATOR) || undefined })
         }
       />
-      {groupes.error && <p className="error">{groupes.error.message}</p>}
+      {current.error && <p className="error">{current.error.message}</p>}
       <div className="scroll grow">
-        {state.vue === "groupes" ? (
-          groupes.data && (
-            <GroupesView
-              groupes={items}
-              policy={cohorte.data.policy}
-              actions={actions}
-              cursor={cursor.current}
-              onCursor={cursor.set}
-              onOpen={openModal}
-            />
-          )
-        ) : (
-          <div className="emptystate">
-            <b>Vue par lignes</b>
-            Bientôt disponible.
-          </div>
-        )}
+        {state.vue === "groupes"
+          ? groupes.data && (
+              <GroupesView
+                groupes={pageGroupes}
+                policy={cohorte.data.policy}
+                actions={actions}
+                cursor={cursor.current}
+                onCursor={cursor.set}
+                onOpen={openModal}
+              />
+            )
+          : lignes.data && (
+              <LignesView
+                page={lignes.data}
+                actions={actions}
+                cursor={cursor.current}
+                onCursor={cursor.set}
+                onOpen={openModal}
+              />
+            )}
       </div>
       <div className="tfoot">
         <ShortcutsHelp id="shortcuts-revue" shortcuts={SHORTCUTS} />
         <span className="spacer" />
-        {groupes.data && (
+        {current.data && (
           <Pager
-            unit="groupes"
+            unit={state.vue}
             page={state.page}
             pageSize={state.pageSize}
-            total={groupes.data.total}
+            total={current.data.total}
             onPage={(page) => setSearch({ page: String(page) })}
           />
         )}
-        {groupes.data && (
-          <span className="muted">{formatNumber(groupes.data.total)} au total</span>
+        {current.data && (
+          <span className="muted">{formatNumber(current.data.total)} au total</span>
         )}
       </div>
       <GroupeModal
@@ -280,13 +301,13 @@ type Cursor = ReturnType<typeof useCursor>
 /** Single keyboard cursor over the page: groupe headers and lignes. At an end of
  * the page, moves to the neighbour page. */
 function useCursor(
+  positions: string[],
   groupes: Groupe[],
   page: number,
   total: number,
   pageSize: number,
   goToPage: (page: number) => void,
 ) {
-  const positions = useMemo(() => cursorItems(groupes), [groupes])
   const [state, setState] = useState<{
     value: string | null
     atEnd?: "first" | "last"
@@ -321,14 +342,10 @@ function useCursor(
       goToPage(page - 1)
     }
   }
+  /** Groupe of the position: « g:<id> » or « l:<id>:<champs> ». */
   const groupe = () => {
-    const index = current ? positions.indexOf(current) : -1
-    for (let i = index; i >= 0; i--) {
-      if (positions[i].startsWith("g:")) {
-        return groupes.find((g) => groupeCursor(g) === positions[i])
-      }
-    }
-    return undefined
+    const id = current ? Number(current.split(":")[1]) : NaN
+    return groupes.find((g) => g.id === id)
   }
   const nextGroupe = () => {
     const index = current ? positions.indexOf(current) : -1

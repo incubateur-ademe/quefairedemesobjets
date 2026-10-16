@@ -1278,3 +1278,16 @@ tr:hover .editbtn,
   color: var(--danger);
   font-weight: 600;
 }
+
+/* view « Lignes » */
+.tbl .nom {
+  display: block;
+  font-weight: 600;
+}
+
+.lignes button.lk {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+}
