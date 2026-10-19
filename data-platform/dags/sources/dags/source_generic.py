@@ -1,10 +1,8 @@
-import json
-
 from airflow import DAG
-from airflow.sdk.definitions.param import ParamsDict
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import get_mapping_config
+from sources.config.models import SourceConfig
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
 
@@ -156,20 +154,14 @@ with DAG(
     ),
     tags=[
         TAGS.SOURCE,
-        TAGS.ECO_ORGANISME,
         TAGS.GENERIC,
-        TAGS.PNEU,
     ],
     **default_params,
-    params=ParamsDict(
-        {
-            "normalization_rules": json.dumps(default_normalization_rules()),
-            "endpoint": "https://<URL>/data",
-            "metadata_endpoint": "https://<URL>/schema",
-            "validate_address_with_ban": False,
-            "product_mapping": get_mapping_config(),
-            "use_legacy_suggestions": False,
-        }
-    ),
+    params=SourceConfig(
+        normalization_rules=default_normalization_rules(),
+        endpoint="https://<URL>/data",
+        metadata_endpoint="https://<URL>/schema",
+        product_mapping=get_mapping_config(),
+    ).to_airflow_params(),
 ) as dag:
     eo_task_chain(dag)

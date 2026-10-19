@@ -99,6 +99,7 @@ class TestSourceDataNormalize:
             "normalization_rules": NORMALIZATION_RULES,
             "product_mapping": {},
             "endpoint": "http://example.com/api",
+            "save_datasource_in_warehouse_db": False,
         }
         TRANSFORMATION_MAPPING["test_fct_transform_column"] = lambda x, y: "success"
         TRANSFORMATION_MAPPING["test_fct_transform_df"] = lambda x, y: pd.Series(
@@ -156,6 +157,7 @@ class TestSourceDataNormalize:
             "normalization_rules": normalization_rules,
             "product_mapping": {},
             "endpoint": "http://example.com/api",
+            "save_datasource_in_warehouse_db": False,
         }
 
         class ImportSourceValueWarningTest(ImportSourceValueWarning):
@@ -242,6 +244,7 @@ class TestSourceDataNormalize:
             "normalization_rules": normalization_rules,
             "product_mapping": {},
             "endpoint": "http://example.com/api",
+            "save_datasource_in_warehouse_db": False,
         }
         TRANSFORMATION_MAPPING["test_fct_transform_column"] = lambda x, y: "success"
         TRANSFORMATION_MAPPING["test_fct_transform_df"] = lambda x, y: pd.Series(
@@ -266,6 +269,7 @@ class TestSourceDataNormalize:
             "normalization_rules": NORMALIZATION_RULES,
             "product_mapping": {},
             "endpoint": "http://example.com/api",
+            "save_datasource_in_warehouse_db": False,
         }
 
         with pytest.raises(ValueError) as erreur:
@@ -321,6 +325,7 @@ class TestSourceDataNormalize:
                 ],
                 "endpoint": "https://example.com/api",
                 "product_mapping": {"product1": "code1"},
+                "save_datasource_in_warehouse_db": False,
             }
         )
         df, _, _, _ = source_data_normalize(
@@ -362,6 +367,7 @@ class TestDfApplyOCA:
             ],
             "product_mapping": {},
             "endpoint": "https://example.com/api",
+            "save_datasource_in_warehouse_db": False,
         }
 
     @pytest.fixture

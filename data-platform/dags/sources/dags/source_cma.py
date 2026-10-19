@@ -1,11 +1,8 @@
-import json
-
 from airflow import DAG
-from airflow.sdk import Param
-from airflow.sdk.definitions.param import ParamsDict
 from shared.config.airflow import DEFAULT_ARGS
 from shared.config.tags import TAGS
 from sources.config.airflow_params import get_mapping_config
+from sources.config.models import CmaSourceAirflowConfig
 from sources.tasks.airflow_logic.operators import default_params, eo_task_chain
 
 NORMALIZATION_RULES = [
@@ -193,26 +190,11 @@ with DAG(
         TAGS.REPARACTEUR,
     ],
     **default_params,
-    params=ParamsDict(
-        {
-            "normalization_rules": json.dumps(NORMALIZATION_RULES),
-            "endpoint": ("https://apiopendata.artisanat.fr/reparacteur"),
-            "validate_address_with_ban": False,
-            "product_mapping": get_mapping_config(mapping_key="sous_categories_cma"),
-            "use_legacy_suggestions": False,
-            "ignore_rows_with_null_or_empty_fields": Param(
-                ["id"],
-                type="array",
-                items={"type": "string"},
-                description_md=r"""
-            Liste des champs source (avant normalisation) à contrôler après
-            téléchargement. Si l'un d'eux est null ou vide, la ligne est ignorée.
-
-            Pour CMA, on ignore les acteurs sans `id` par défaut car cet identifiant est
-            requis pour construire `identifiant_externe` puis `identifiant_unique`.
-            """,
-            ),
-        }
-    ),
+    params=CmaSourceAirflowConfig(
+        endpoint="https://apiopendata.artisanat.fr/reparacteur",
+        ignore_rows_with_null_or_empty_fields=["id"],
+        normalization_rules=NORMALIZATION_RULES,
+        product_mapping=get_mapping_config(mapping_key="sous_categories_cma"),
+    ).to_airflow_params(),
 ) as dag:
     eo_task_chain(dag)
