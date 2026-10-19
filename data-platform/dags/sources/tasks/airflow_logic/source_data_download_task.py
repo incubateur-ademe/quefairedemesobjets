@@ -5,6 +5,7 @@ from airflow.providers.standard.operators.python import PythonOperator
 from airflow.task.trigger_rule import TriggerRule
 from sources.config.models import SourceConfig
 from sources.config.tasks import TASKS
+from sources.config.xcoms import XCOMS, xcom_push
 from sources.tasks.business_logic.source_data_download import source_data_download
 from utils import logging_utils as log
 
@@ -38,10 +39,16 @@ def source_data_download_wrapper(ti, dag, params):
             "ignore_rows_with_null_fields", ignore_rows_with_null_or_empty_fields
         )
 
-    source_data_download(
+    save_datasource_in_warehouse_db = dag_config.save_datasource_in_warehouse_db
+
+    df = source_data_download(
         endpoint=endpoint,
         s3_connection_id=s3_connection_id,
         metadata_endpoint=metadata_endpoint,
         ignore_rows_with_null_or_empty_fields=ignore_rows_with_null_or_empty_fields,
         dag_id=dag.dag_id,
+        save_datasource_in_warehouse_db=save_datasource_in_warehouse_db,
     )
+
+    if not save_datasource_in_warehouse_db:
+        xcom_push(ti, XCOMS.SOURCE_DOWNLOADED, df)
