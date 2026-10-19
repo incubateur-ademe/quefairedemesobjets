@@ -1,0 +1,13 @@
+{% comment %}
+The map's canvas, a Turbo permanent element: the same node travels from screen
+to screen with its MapLibre instance, tiles and pins. Turbo keeps the node's
+own attributes when it moves it, so this markup is the single source for both
+places it can live: inside the map component (`carte.html`) and parked at the
+end of the body on every other screen (`layout/assistant.html`), where the
+stylesheet hides it.
+{% endcomment %}
+<div id="assistant-carte-canvas"
+     class="qfa-carte__canvas"
+     data-turbo-permanent
+     role="application"
+     aria-label="Carte des lieux proposant ce geste"></div>

@@ -1,0 +1,68 @@
+{% load l10n static %}
+<div
+    class="qfa-carte"
+    data-controller="assistant-carte"
+    data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
+    data-assistant-carte-url-value="{% url 'api_v1:lieux-geojson' %}"
+    data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
+    data-assistant-carte-style-url-value="{% static 'assistant/carte-style.json' %}"
+    {% comment %}
+    One or several GroupeAction codes, comma separated: the controller repeats
+    `geste` in the request for each of them.
+    {% endcomment %}
+    data-assistant-carte-geste-value="{{ gestes|join:',' }}"
+    data-assistant-carte-fiche-value="{{ fiche|default:'' }}"
+    {% comment %}
+    URL pattern of a place's page: the controller replaces `__uuid__` in it.
+    `parametres_lieu` carries the journey (geste, objet, address) so that the
+    place page can lead back to the same solutions.
+    {% endcomment %}
+    data-assistant-carte-lieu-url-value="{% url 'assistant:lieu' uuid='__uuid__' %}{% if parametres_lieu %}?{{ parametres_lieu }}{% endif %}"
+    {% comment %}
+    `unlocalize` is required: the French locale formats decimals with a comma,
+    which Number() reads as NaN.
+    {% endcomment %}
+    data-assistant-carte-longitude-value="{{ longitude|unlocalize }}"
+    data-assistant-carte-latitude-value="{{ latitude|unlocalize }}"
+    data-assistant-carte-precise-address-value="{{ adresse_precise|yesno:'true,false' }}"
+    style="--qfa-geste-color: {{ couleur_geste }}"
+>
+    {% include "ui/components/assistant/carte_canvas.html" %}
+
+    {% if debug %}
+        <div class="qfa-chrono" data-controller="assistant-chrono">
+            <strong data-assistant-chrono-target="value">—</strong>
+            <span data-assistant-chrono-target="detail"></span>
+        </div>
+    {% endif %}
+
+    {% comment %}
+    Status of the map ("aucun lieu", "zoomez"), styled as the alert component
+    (Figma 24420:507) and laid over the map next to the zoom control
+    (30162:9443). Present from the start so screen readers announce changes;
+    hidden while empty.
+    {% endcomment %}
+    <p
+        class="qfa-alerte qfa-carte__message"
+        data-assistant-carte-target="message"
+        role="status"
+        aria-live="polite"
+        hidden
+    >
+        <span class="qfa-alerte__icone" aria-hidden="true"></span>
+        <span data-assistant-carte-target="messageText"></span>
+    </p>
+
+    {% comment %}
+    A MapLibre map is neither keyboard-navigable nor readable by a screen
+    reader. This list is the only accessible path to the results until the
+    list/map toggle exists.
+    {% endcomment %}
+    <ul class="qfa-carte__accessible-list">
+        {% for lieu in lieux %}
+            <li>{{ lieu.nom_commercial|default:lieu.nom }}</li>
+        {% empty %}
+            <li>Aucun lieu à proximité pour ce geste.</li>
+        {% endfor %}
+    </ul>
+</div>

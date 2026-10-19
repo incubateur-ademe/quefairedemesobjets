@@ -1,0 +1,10 @@
+{% comment %}
+Étiquette de geste (Figma 24382:53).
+
+`geste` reprend le code de `GroupeAction`, jamais un libellé : c'est lui qui
+porte la couleur, et un libellé change sans prévenir.
+{% endcomment %}
+<span class="qfa-etiquette" data-geste="{{ geste }}">
+    <span class="qfa-etiquette__icone" aria-hidden="true"></span>
+    {{ libelle }}
+</span>

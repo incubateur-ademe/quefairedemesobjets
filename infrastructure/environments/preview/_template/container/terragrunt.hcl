@@ -47,13 +47,25 @@ locals {
   # Tag set by preview-up.yml: pr-<n>-<shortsha>. Including the SHA forces a
   # container redeploy on every push (the image reference changes).
   image_tag = get_env("IMAGE_TAG")
+  # preview:isoprod label: a preview meant to be used like production
+  # (beta tests), see the database unit for its data.
+  isoprod = get_env("ISOPROD", "false") == "true"
 }
 
 inputs = {
   namespace_id   = dependency.preview_namespace.outputs.namespace_id
   registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:${local.image_tag}"
 
-  extra_tags = ["preview", "preview-pr-${local.pr_number}"]
+  # preview-isoprod marks the container of an isoprod preview.
+  extra_tags = concat(
+    ["preview", "preview-pr-${local.pr_number}"],
+    local.isoprod ? ["preview-isoprod"] : [],
+  )
+
+  # Always on and twice the CPU for an isoprod preview: testers must not
+  # hit a cold start, and the full database is heavier to serve.
+  min_scale = local.isoprod ? 1 : 0
+  cpu_limit = local.isoprod ? 2000 : 1000
 
   # The container is served on its Scaleway-generated domain, unknown before
   # apply: trust the whole generated-domain suffix (Django wildcard syntax).

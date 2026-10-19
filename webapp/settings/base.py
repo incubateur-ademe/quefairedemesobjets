@@ -139,7 +139,7 @@ VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
 BASE_URL = decouple.config(
     "BASE_URL",
-    default="http://quefairedemesdechets.ademe.local",
+    default="https://quefairedemesdechets.ademe.local",
     cast=str,
 )
 BASE_HOST = urlparse(BASE_URL).hostname
@@ -182,6 +182,7 @@ INSTALLED_APPS = [
     "qfdmo",
     "infotri",
     "assistant",
+    "opendata",
     "data",
     "adminsortable2",
     "corsheaders",
@@ -554,7 +555,8 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Also rewrites references to Parcel chunks: see core/storage.py.
+        "BACKEND": "core.storage.ParcelManifestStaticFilesStorage",
     },
 }
 

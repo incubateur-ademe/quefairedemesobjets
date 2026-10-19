@@ -1,0 +1,24 @@
+# Bloc geste
+
+Unité de la fiche objet : badges d'état, titre, consigne, appel à l'action.
+
+## Utilisation
+
+```django
+{% include "ui/components/assistant/bloc_geste.html" with gestes=gestes libelle="Réparer" consigne=consigne badges=badges url=url %}
+```
+
+| Paramètre      | Rôle                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| `gestes`       | codes des `GroupeAction` du bloc, une icône chacun                                           |
+| `consigne`     | contenu CMS, **déjà marqué sûr en amont**                                                    |
+| `badges`       | liste de `{condition, libelle}`                                                              |
+| `appel_action` | libellé du bouton (défaut « Je découvre les solutions »)                                     |
+| `url_compte`   | endpoint du nombre de solutions, chargé après le rendu (vide tant que le compteur est coupé) |
+| `localise`     | vrai quand le parcours porte une position ; faux : le bouton propose la géolocalisation      |
+| `sans_carte`   | vrai quand la fiche n'a pas de carte sur le site : pas de bouton                             |
+
+## L'ordre n'est pas décidé ici
+
+La priorité réparable → bon état → hors d'usage (#3295) est une règle métier :
+elle appartient à la vue. Le bloc rend ce qu'on lui donne, dans l'ordre reçu.
