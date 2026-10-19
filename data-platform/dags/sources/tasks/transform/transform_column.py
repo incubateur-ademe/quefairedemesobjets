@@ -292,6 +292,10 @@ def clean_sous_categorie_codes(
         if not sscat:
             continue
         if sscat not in product_mapping:
+            logger.warning(
+                f"Sous-catégorie absente du mapping : `{sscat}`"
+                f" (valeur source : {sscat_list})"
+            )
             errors.append(f"Impossible d'interpréter la sous-catégorie: {sscat}")
             continue
         sscat = product_mapping[sscat]

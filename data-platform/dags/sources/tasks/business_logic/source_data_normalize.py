@@ -246,8 +246,7 @@ def _remove_undesired_lines(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         if nb_filtered := nb_before - len(df):
             metadata[METADATA_NO_SOUS_CATEGORIE_FILTERED] = str(nb_filtered)
             logger.error(
-                "Acteurs ignorés car sans sous_categorie: "
-                f"{nb_filtered} / {nb_before}"
+                f"Acteurs ignorés car sans sous_categorie: {nb_filtered} / {nb_before}"
             )
             log.preview("Acteurs ignorés (sans sous_categorie)", df_ignored)
 
@@ -276,11 +275,61 @@ def _remove_undesired_lines(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         if nb_filtered := nb_before - len(df):
             metadata[METADATA_NO_LOCATION_FILTERED] = str(nb_filtered)
             logger.error(
-                "Acteurs ignorés car sans localisation: " f"{nb_filtered} / {nb_before}"
+                f"Acteurs ignorés car sans localisation: {nb_filtered} / {nb_before}"
             )
             log.preview("Acteurs ignorés (sans localisation)", df_ignored)
 
     return df, metadata
+
+
+def _log_summary_by_transformation(label: str, df_log: pd.DataFrame) -> None:
+    """Log, for each transformation, the number of logs and the source values
+    that triggered them."""
+    if df_log.empty or "fonction_de_transformation" not in df_log.columns:
+        return
+    for function_name, df_function_log in df_log.groupby("fonction_de_transformation"):
+        logger.warning(
+            f"{label} - {function_name} : {len(df_function_log)} ligne(s) concernée(s)"
+        )
+        log.preview_df_as_markdown(
+            f"{label} - {function_name} : valeurs source",
+            df_function_log["origine_valeurs"]
+            .astype(str)
+            .value_counts()
+            .rename_axis("origine_valeurs")
+            .reset_index(name="occurrences"),
+        )
+
+
+def _log_logs_of_ignored_acteurs(
+    identifiants_ignored: set[str],
+    df_log_error: pd.DataFrame,
+    df_log_warning: pd.DataFrame,
+) -> None:
+    """Log the transformation logs of acteurs removed by the normalization, so
+    that the reason of their removal is visible in Airflow."""
+    for label, df_log in [("Erreurs", df_log_error), ("Warnings", df_log_warning)]:
+        if df_log.empty or "message" not in df_log.columns:
+            continue
+        df_log_ignored = df_log[df_log["identifiant_unique"].isin(identifiants_ignored)]
+        if df_log_ignored.empty:
+            continue
+        logger.error(
+            f"{label} de normalisation sur les acteurs ignorés : "
+            f"{len(df_log_ignored)} log(s) pour "
+            f"{df_log_ignored['identifiant_unique'].nunique()} acteur(s)"
+        )
+        log.preview_df_as_markdown(
+            f"{label} de normalisation sur les acteurs ignorés",
+            df_log_ignored[
+                [
+                    "identifiant_unique",
+                    "fonction_de_transformation",
+                    "origine_valeurs",
+                    "message",
+                ]
+            ],
+        )
 
 
 def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
@@ -381,7 +430,13 @@ def source_data_normalize(
             axis=1,
         )
 
+    _log_summary_by_transformation("Erreurs", df_log_error)
+    _log_summary_by_transformation("Warnings", df_log_warning)
+
     # drop row with not empty log_error
+    identifiants_with_error = set(
+        df.loc[df["log_error"].apply(len) > 0, "identifiant_unique"]
+    )
     df = df[df["log_error"].apply(len) == 0]
 
     # drop logs from df
@@ -407,8 +462,15 @@ def source_data_normalize(
         df = df_normalize_pharmacie(df)
 
     # Filter by content (home, duplicates, subcategory, location)
+    identifiants_before_filtering = set(df["identifiant_unique"])
     df, metadata = _remove_undesired_lines(df)
     log.preview("df after filtering rows by content", df)
+    _log_logs_of_ignored_acteurs(
+        identifiants_with_error
+        | (identifiants_before_filtering - set(df["identifiant_unique"])),
+        df_log_error,
+        df_log_warning,
+    )
 
     log.preview("df après normalisation", df)
     if df.empty:
