@@ -28,6 +28,8 @@ from sources.tasks.transform.transform_df import compute_location, merge_duplica
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
+from utils.db_tmp_tables import column_contains_lists
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -351,10 +353,50 @@ def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFra
     return df
 
 
+def load_acteur_dataframe_at_normalize_start(
+    *,
+    dag_id: str,
+    save_datasource_in_warehouse_db: bool,
+    df_acteur_from_source: pd.DataFrame | None = None,
+) -> pd.DataFrame:
+    """Dataframe au début de `source_data_normalize` (avant patches métier)."""
+    if save_datasource_in_warehouse_db:
+        django_setup_full()
+        from utils.django import (
+            DJANGO_WH_CONNECTION_NAME,
+            django_conn_to_sqlalchemy_engine,
+        )
+
+        view_name = f"{dag_id}_in_use"
+        engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
+        df = pd.read_sql_table(view_name, engine).replace({pd.NA: None})
+    else:
+        if df_acteur_from_source is None:
+            raise ValueError(
+                "df_acteur_from_source est requis lorsque "
+                "save_datasource_in_warehouse_db est False"
+            )
+        df = df_acteur_from_source
+
+    log.preview("df avant normalisation (brut)", df)
+
+    for column in df.columns:
+        if column_contains_lists(df[column]):
+            continue
+        if df[column].dtype == bool:
+            continue
+        if df[column].dtype != str:
+            df[column] = df[column].astype(str)
+
+    log.preview("df avant normalisation", df)
+    return df
+
+
 def source_data_normalize(
-    df_acteur_from_source: pd.DataFrame,
     dag_config: SourceConfig,
     dag_id: str,
+    save_datasource_in_warehouse_db: bool | None = None,
+    df_acteur_from_source: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     """
     Normalization of source data. Passed this step:
@@ -363,8 +405,14 @@ def source_data_normalize(
         but always consistent with the naming and formatting rules
     - Add columns with default values
     """
+    if save_datasource_in_warehouse_db is None:
+        save_datasource_in_warehouse_db = dag_config.save_datasource_in_warehouse_db
 
-    df = df_acteur_from_source
+    df = load_acteur_dataframe_at_normalize_start(
+        dag_id=dag_id,
+        save_datasource_in_warehouse_db=save_datasource_in_warehouse_db,
+        df_acteur_from_source=df_acteur_from_source,
+    )
 
     if dag_id == "pharmacies":
         # Patch for pharmacies because the apostrophe is not well managed in the
@@ -505,8 +553,7 @@ def df_normalize_sinoe(
     )
     if nb_filtered := nb_before - len(df):
         logger.info(
-            "Versions SINOE filtrées (années antérieures): "
-            f"{nb_filtered} / {nb_before}"
+            f"Versions SINOE filtrées (années antérieures): {nb_filtered} / {nb_before}"
         )
     df = df.drop(columns=["annee"]).reset_index(drop=True)
 

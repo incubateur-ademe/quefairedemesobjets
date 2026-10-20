@@ -1,6 +1,8 @@
 import logging
+import re
 import tempfile
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -8,6 +10,8 @@ import pandas as pd
 import requests
 from shared.config.airflow import TMP_FOLDER
 from utils import logging_utils as log
+from utils.db_tmp_tables import infer_postgresql_array_dtypes
+from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
 
@@ -47,42 +51,41 @@ def drop_rows_with_null_or_empty_fields(
     return data
 
 
-def source_data_download(
+def _align_columns_with_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
+    expected_columns = [
+        field["key"] for field in schema if not field.get("x-calculated", False)
+    ]
+
+    missing_columns = set(expected_columns) - set(df.columns)
+    if missing_columns:
+        logger.warning(f"Colonnes manquantes dans le DataFrame : {missing_columns}")
+    for column in missing_columns:
+        df[column] = ""
+
+    extra_columns = set(df.columns) - set(expected_columns)
+    if extra_columns:
+        logger.warning(f"Colonnes supplémentaires dans le DataFrame : {extra_columns}")
+
+    log.preview("metadata retournée par la tâche", schema)
+    return df
+
+
+def _coerce_legacy_download_dtypes(df: pd.DataFrame) -> pd.DataFrame:
+    """Cast non-string/bool/list columns to str (legacy XCom path)."""
+    for column in df.columns:
+        if df[column].dtype not in [str, bool, list]:
+            df[column] = df[column].astype(str)
+    return df
+
+
+def download_source_dataframe(
     endpoint: str,
     s3_connection_id: str | None = None,
     metadata_endpoint: str | None = None,
     ignore_rows_with_null_or_empty_fields: list[str] | None = None,
 ) -> pd.DataFrame:
-    """Téléchargement de la données source sans lui apporter de modification"""
-
-    def _align_columns_with_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
-        # Récupérer toutes les colonnes attendues du schéma
-        expected_columns = [
-            field["key"] for field in schema if not field.get("x-calculated", False)
-        ]
-
-        # Vérifier les colonnes manquantes
-        missing_columns = set(expected_columns) - set(df.columns)
-        if missing_columns:
-            logger.warning(f"Colonnes manquantes dans le DataFrame : {missing_columns}")
-        for column in missing_columns:
-            df[column] = ""
-
-        # Vérifier les colonnes supplémentaires non attendues
-        extra_columns = set(df.columns) - set(expected_columns)
-        if extra_columns:
-            logger.warning(
-                f"Colonnes supplémentaires dans le DataFrame : {extra_columns}"
-            )
-
-        log.preview("metadata retournée par la tâche", schema)
-        return df
-
+    """Fetch source data and build a raw dataframe (no persistence)."""
     logger.info("Téléchargement données de l'API : début...")
-    # TODO: changer de logique, plutôt que de tout charger en mémoire et se
-    # trimballer des dataframes en XCOM, on devrait plutôt streamer les données
-    # directement dans la base de données et déléguer le traitement à la DB
-    # tant que possible
     data = fetch_data_from_endpoint(endpoint, s3_connection_id)
     logger.info("Téléchargement données de l'API : ✅ succès.")
     logger.info(
@@ -93,10 +96,6 @@ def source_data_download(
         data, ignore_rows_with_null_or_empty_fields
     )
     df = pd.DataFrame(data).replace({pd.NA: None, np.nan: None})
-    # create dataframe with only string, boolean or list dtype columns
-    for column in df.columns:
-        if df[column].dtype not in [str, bool, list]:
-            df[column] = df[column].astype(str)
     if df.empty:
         raise ValueError("Aucune donnée reçue de l'API")
     log.preview("df retournée par la tâche", df)
@@ -106,6 +105,72 @@ def source_data_download(
         metadata.raise_for_status()
         schema = metadata.json()
         df = _align_columns_with_schema(df, schema)
+
+    return df
+
+
+def save_source_dataframe_in_warehouse_db(df: pd.DataFrame, dag_id: str) -> None:
+    """Persist downloaded data in the warehouse and point `{dag_id}_in_use` at it."""
+    django_setup_full()
+    from django.db import connections
+    from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine
+
+    table_name = f"{dag_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    view_name = f"{dag_id}_in_use"
+    logger.info("Enregistrement du dataframe en DB nommée %s", table_name)
+    logger.info("Faire pointer une vue vers cette table nommée %s", view_name)
+
+    connection = connections[DJANGO_WH_CONNECTION_NAME]
+    engine = django_conn_to_sqlalchemy_engine(using=DJANGO_WH_CONNECTION_NAME)
+
+    df.to_sql(
+        table_name,
+        engine,
+        if_exists="replace",
+        index=False,
+        method="multi",
+        chunksize=1000,
+        dtype=infer_postgresql_array_dtypes(df),
+    )
+
+    quoted_table_name = f'"{table_name}"'
+    quoted_view_name = f'"{view_name}"'
+    table_name_pattern = re.compile(rf"^{re.escape(dag_id)}_\d{{14}}$")
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"DROP VIEW IF EXISTS {quoted_view_name} CASCADE")
+        cursor.execute(
+            f"CREATE VIEW {quoted_view_name} AS SELECT * FROM {quoted_table_name}"
+        )
+        tbls_all = connection.introspection.table_names()
+        tbls_matched = sorted(
+            (x for x in tbls_all if table_name_pattern.match(x)),
+            reverse=True,
+        )
+        for old_table in tbls_matched[2:]:
+            cursor.execute(f'DROP TABLE IF EXISTS "{old_table}"')
+
+
+def source_data_download(
+    endpoint: str,
+    dag_id: str,
+    s3_connection_id: str | None = None,
+    metadata_endpoint: str | None = None,
+    ignore_rows_with_null_or_empty_fields: list[str] | None = None,
+    save_datasource_in_warehouse_db: bool = True,
+) -> pd.DataFrame:
+    """Téléchargement de la données source sans lui apporter de modification"""
+    df = download_source_dataframe(
+        endpoint=endpoint,
+        s3_connection_id=s3_connection_id,
+        metadata_endpoint=metadata_endpoint,
+        ignore_rows_with_null_or_empty_fields=ignore_rows_with_null_or_empty_fields,
+    )
+
+    if save_datasource_in_warehouse_db:
+        save_source_dataframe_in_warehouse_db(df, dag_id)
+    else:
+        df = _coerce_legacy_download_dtypes(df)
 
     return df
 
