@@ -266,8 +266,9 @@ function useCursor(
 
   useEffect(() => {
     if (current) {
+      const rows = document.querySelectorAll<HTMLElement>("[data-cursor]")
       scrollRowIntoView(
-        document.querySelector(`[data-cursor="${current.replace(/"/g, '\\"')}"]`),
+        Array.from(rows).find((row) => row.dataset.cursor === current) ?? null,
       )
     }
   }, [current])
