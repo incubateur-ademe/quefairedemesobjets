@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import DetailView, TemplateView
 
 from assistant.consignes import block_for, consignes_for
-from assistant.forms import SearchForm
+from assistant.forms import UNKNOWN_ADRESSE_MESSAGE, SearchForm
 from assistant.lieu import gestes_of, offers_bonus, practical_info_of
 from assistant.objets import fiche_for_label
 from assistant.parcours import Parcours
@@ -76,8 +76,13 @@ class ProduitView(TurboFrameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         # The fiche is the page itself: the links leaving it carry its slug.
+        # Reached without a search (an embed's `data-objet`, a shared link),
+        # the search field shows the fiche's title.
+        parcours = Parcours.from_query(self.request.GET)
         parcours = replace(
-            Parcours.from_query(self.request.GET), fiche=self.object.slug
+            parcours,
+            fiche=self.object.slug,
+            objet=parcours.objet or self.object.title,
         )
         return super().get_context_data(
             parcours=parcours,
@@ -129,6 +134,13 @@ class SolutionsView(TurboFrameMixin, TemplateView):
             ),
             longitude=longitude,
             latitude=latitude,
+            # Typed without choosing a suggestion (the field normally prevents
+            # it): no position, the map shows its default view, so say why.
+            erreur_adresse=(
+                UNKNOWN_ADRESSE_MESSAGE
+                if parcours.adresse and not parcours.is_located
+                else ""
+            ),
             # The red marker only shows for a precise address (#3356).
             adresse_precise=parcours.precise and parcours.is_located,
             # Server-rendered for the accessible list: the only path to the

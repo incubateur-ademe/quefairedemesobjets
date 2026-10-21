@@ -1,5 +1,6 @@
 import iframeResize from "@iframe-resizer/parent"
 import { BacklinkKey, generateBackLink } from "../embed/helpers"
+import { scrollIframeIntoView } from "./iframe_scroll"
 import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "./helpers"
 import { getBaseUrlFromEnv } from "./url_utils"
 
@@ -253,6 +254,7 @@ function initializeIframeResizer(
         license: "GPLv3",
         checkOrigin: false,
         log: false,
+        onScroll: () => scrollIframeIntoView(iframe),
         ...options,
         // Override with unique ID to prevent conflicts
         id: iframeId,

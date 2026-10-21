@@ -12,7 +12,7 @@ import {
   pinpointElement,
   type PinpointColors,
 } from "../../js/assistant/pinpoint"
-import type { Map as MapLibreMap, Marker, StyleSpecification } from "maplibre-gl"
+import type { Map as MapLibreMap, Marker } from "maplibre-gl"
 
 type Timing = { server: number; total: number; places: number }
 
@@ -69,6 +69,7 @@ export default class extends Controller<HTMLElement> {
     fiche: String,
     lieuUrl: String,
     workerUrl: String,
+    styleUrl: String,
     longitude: Number,
     latitude: Number,
     preciseAddress: Boolean,
@@ -84,6 +85,7 @@ export default class extends Controller<HTMLElement> {
   declare ficheValue: string
   declare lieuUrlValue: string
   declare workerUrlValue: string
+  declare styleUrlValue: string
   declare longitudeValue: number
   declare latitudeValue: number
   declare preciseAddressValue: boolean
@@ -137,8 +139,12 @@ export default class extends Controller<HTMLElement> {
   }
 
   async #createMap(canvas: HTMLElement): Promise<PersistedMap | null> {
-    const [{ Map: MapLibre, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
-      await Promise.all([import("maplibre-gl"), import("carte-facile")])
+    const {
+      Map: MapLibre,
+      Marker,
+      NavigationControl,
+      setWorkerUrl,
+    } = await import("maplibre-gl")
     // Disconnected while the imports were loading (lookbook re-render): a map
     // created now would live on a detached node, and its worker and WebGL
     // context would never be released.
@@ -150,12 +156,10 @@ export default class extends Controller<HTMLElement> {
 
     const map = new MapLibre({
       container: canvas,
-      // `carte-facile` ships its own copy of maplibre-gl (5.x) while V1
-      // requires 6.x: the two `StyleSpecification` declarations diverge on an
-      // optional field, `font-faces`. The object is identical at runtime; only
-      // the declarations disagree, hence this deliberately narrow cast rather
-      // than an `any`.
-      style: mapStyles.desaturated as unknown as StyleSpecification,
+      // The "desaturated" style of `carte-facile`, served as a static file:
+      // importing the package for it cost ~930 KB (the package and its own
+      // copy of maplibre-gl 5), for 9 KB of style. See `carte-style.json`.
+      style: this.styleUrlValue,
       center: [this.longitudeValue, this.latitudeValue],
       zoom: INITIAL_ZOOM,
       attributionControl: { compact: true },
@@ -318,9 +322,10 @@ export default class extends Controller<HTMLElement> {
         places: incoming.length,
       }
       this.assistantChronoOutlets.forEach((chrono) => chrono.record(timing))
+      // Framed first: the visible area is the one the user will see.
+      this.#fitOnce(incoming)
       const area = this.#visibleArea()
       state.places = merge(state.places, incoming, area)
-      this.#fitOnce(incoming)
       this.#draw()
       this.#announce(
         state.places.some((place) => isInArea(place, area))
@@ -344,8 +349,10 @@ export default class extends Controller<HTMLElement> {
    */
   #fitOnce(places: Place[]) {
     const state = this.state
-    if (!state?.needsFit || places.length === 0) return
+    if (!state?.needsFit) return
+    // Even with nothing within 20 km: the next requests follow the view.
     state.needsFit = false
+    if (places.length === 0) return
 
     const points: [number, number][] = places.map((place) => [
       place.longitude,
@@ -365,13 +372,22 @@ export default class extends Controller<HTMLElement> {
   }
 
   #placesUrl(): string {
+    const state = this.state!
     const area = this.#visibleArea()
-    const params = new URLSearchParams({
-      bbox: JSON.stringify({
-        southWest: { lng: area.west, lat: area.south },
-        northEast: { lng: area.east, lat: area.north },
-      }),
-    })
+    // First display around an address: the 20 nearest places within 20 km,
+    // whatever the initial zoom shows, then the view is framed on them
+    // (#3356). Afterwards, the places of the visible area.
+    const params = state.needsFit
+      ? new URLSearchParams({
+          longitude: String(state.address[0]),
+          latitude: String(state.address[1]),
+        })
+      : new URLSearchParams({
+          bbox: JSON.stringify({
+            southWest: { lng: area.west, lat: area.south },
+            northEast: { lng: area.east, lat: area.north },
+          }),
+        })
     // One `geste` per code: a block of the fiche may span two gestes.
     for (const code of this.#gestes()) params.append("geste", code)
     if (this.ficheValue) params.set("fiche", this.ficheValue)

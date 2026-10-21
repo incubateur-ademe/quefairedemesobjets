@@ -160,6 +160,14 @@ class TestFicheObjet:
         assert 'value="Chaise"' in content
         assert 'value="Auray"' in content
 
+    def test_without_a_search_the_header_shows_the_fiche(self, client, fiche):
+        """An embed's `data-objet` lands here without a typed label."""
+        content = client.get(
+            reverse("assistant:produit", args=[fiche.slug])
+        ).content.decode()
+
+        assert f'value="{fiche.title}"' in content
+
     def test_the_frame_allows_changing_objet_without_reload(self, client, fiche):
         content = client.get(
             reverse("assistant:produit", args=[fiche.slug])
@@ -361,3 +369,35 @@ class TestConsignesFromTheCms:
             "donner_revendre",
             "trier",
         ]
+
+
+class TestConsigneLinks:
+    """The consigne's links live in the fiche frame: left as is, Turbo shows
+    « Content missing »."""
+
+    def consigne_html(self, contenu, parcours=None):
+        from unit_tests.qfdmd.test_consignes_block import consigne, grid, page_with
+
+        fiche = page_with(grid(consigne("Au bac", contenu=contenu, gestes=["trier"])))
+        return str(consignes_for(fiche, parcours)[0]["consigne"])
+
+    def test_a_link_to_a_fiche_opens_it_in_the_assistant(self):
+        cible = ProduitPageFactory(title="Bouteille", slug="bouteille")
+        parcours = Parcours.from_query(
+            {"adresse": "Nantes", "longitude": "-1.55", "latitude": "47.21"}
+        )
+
+        html = self.consigne_html(
+            f'<p><a linktype="page" id="{cible.id}">bouteilles</a></p>', parcours
+        )
+
+        assert reverse("assistant:produit", args=["bouteille"]) in html
+        assert "fiche=bouteille" in html and "objet=Bouteille" in html
+        assert "adresse=Nantes" in html
+        assert 'data-turbo-frame="_top"' in html
+
+    def test_any_other_link_opens_in_a_new_tab(self):
+        html = self.consigne_html('<p><a href="https://example.org">ailleurs</a></p>')
+
+        assert 'target="_blank"' in html
+        assert 'data-turbo-frame="_top"' in html
