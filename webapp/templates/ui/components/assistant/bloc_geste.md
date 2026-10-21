@@ -5,12 +5,12 @@ Unité de la fiche objet : badges d'état, titre, consigne, appel à l'action.
 ## Utilisation
 
 ```django
-{% include "ui/components/assistant/bloc_geste.html" with geste="reparer" libelle="Réparer" consigne=consigne badges=badges url=url %}
+{% include "ui/components/assistant/bloc_geste.html" with gestes=gestes libelle="Réparer" consigne=consigne badges=badges url=url %}
 ```
 
 | Paramètre      | Rôle                                                     |
 | -------------- | -------------------------------------------------------- |
-| `geste`        | code du `GroupeAction`                                   |
+| `gestes`       | codes des `GroupeAction` du bloc, une icône chacun       |
 | `consigne`     | contenu CMS, **déjà marqué sûr en amont**                |
 | `badges`       | liste de `{condition, libelle}`                          |
 | `appel_action` | libellé du bouton (défaut « Je découvre les solutions ») |

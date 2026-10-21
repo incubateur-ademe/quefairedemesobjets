@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
-import { useDebounce, useResize } from "stimulus-use"
 
 import {
+  isInArea,
   merge,
   placesFromGeoJSON,
   type Area,
@@ -25,11 +25,10 @@ function serverDuration(header: string | null): number {
 /** Placeholder replaced by the place uuid in the URL pattern given by the template. */
 const UUID_PLACEHOLDER = "__uuid__"
 
-const SETTLE_DELAY_MS = 1000
 const MIN_ZOOM = 9
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["container", "message"]
+  static targets = ["container", "message", "messageText"]
   static values = {
     url: String,
     geste: String,
@@ -41,12 +40,12 @@ export default class extends Controller<HTMLElement> {
     preciseAddress: Boolean,
   }
   static outlets = ["assistant-chrono"]
-  static debounces = [{ name: "refresh", wait: SETTLE_DELAY_MS }]
 
   declare readonly assistantChronoOutlets: { record(timing: Timing): void }[]
   declare readonly containerTarget: HTMLElement
   declare readonly messageTarget: HTMLElement
   declare readonly hasMessageTarget: boolean
+  declare readonly messageTextTarget: HTMLElement
   declare urlValue: string
   declare gesteValue: string
   declare ficheValue: string
@@ -61,11 +60,9 @@ export default class extends Controller<HTMLElement> {
   private markers = new Map<string, Marker>()
   private places: Place[] = []
   private pendingRequest: AbortController | null = null
+  private lastRequestedUrl = ""
 
   async connect() {
-    useDebounce(this)
-    useResize(this)
-
     const [{ Map, Marker, NavigationControl, setWorkerUrl }, { mapStyles }] =
       await Promise.all([import("maplibre-gl"), import("carte-facile")])
     // Disconnected while the imports were loading (lookbook re-render): a map
@@ -111,6 +108,12 @@ export default class extends Controller<HTMLElement> {
 
     await this.map.once("load")
 
+    // MapLibre opens the compact attribution on load; the mockup shows it
+    // folded (30141:9028). It stays openable by the user.
+    this.containerTarget
+      .querySelector(".maplibregl-ctrl-attrib")
+      ?.classList.remove("maplibregl-compact-show")
+
     // `moveend` is only wired after `load`: the resize and the style setup
     // emit it, which would trigger a second load identical to the first.
     this.map.on("moveend", () => this.refresh())
@@ -128,7 +131,11 @@ export default class extends Controller<HTMLElement> {
   #placeAddressMarker() {
     if (!this.map || !this.preciseAddressValue) return
 
-    new this.MarkerClass({ element: addressElement(this.#colors()), anchor: "center" })
+    new this.MarkerClass({
+      element: addressElement(this.#colors()),
+      anchor: "center",
+      subpixelPositioning: true,
+    })
       .setLngLat([this.longitudeValue, this.latitudeValue])
       .addTo(this.map)
   }
@@ -141,11 +148,10 @@ export default class extends Controller<HTMLElement> {
     this.map = null
   }
 
-  resize() {
-    this.map?.resize()
-  }
-
-  /** Debounced: called on every `moveend`, only acts once the map is still. */
+  /**
+   * Called on every `moveend`. No debounce: MapLibre only emits it once the
+   * gesture is over, and a request still in flight is aborted by the next one.
+   */
   refresh() {
     void this.#load()
   }
@@ -153,20 +159,36 @@ export default class extends Controller<HTMLElement> {
   async #load() {
     if (!this.map) return
 
-    if (this.map.getZoom() < MIN_ZOOM) {
-      this.#hideMarkers()
+    // Below the département zoom, the pins are hidden by CSS but kept in the
+    // DOM and in memory: zooming back in shows them at once, without waiting
+    // for a request, and nothing is rebuilt. Toggling a class rather than
+    // removing markers also keeps the canvas size constant, so MapLibre has
+    // nothing to re-render (#3356).
+    const zoomedOut = this.map.getZoom() < MIN_ZOOM
+    this.element.dataset.zoomedOut = String(zoomedOut)
+    if (zoomedOut) {
       this.#announce(
         "Zoomez sur la carte et faites-la défiler, ou cherchez une nouvelle adresse pour voir apparaître des points.",
       )
       return
     }
 
+    // Whatever memory holds is drawn before asking the server: the map is
+    // never empty while a request is in flight.
+    this.#draw()
+
+    // MapLibre also emits `moveend` on a container resize, even when the view
+    // did not move: the same viewport is never requested twice in a row.
+    const url = this.#placesUrl()
+    if (url === this.lastRequestedUrl) return
+    this.lastRequestedUrl = url
+
     this.pendingRequest?.abort()
     this.pendingRequest = new AbortController()
 
     const start = performance.now()
     try {
-      const response = await fetch(this.#placesUrl(), {
+      const response = await fetch(url, {
         signal: this.pendingRequest.signal,
       })
       if (!response.ok) throw new Error(`response ${response.status}`)
@@ -178,15 +200,18 @@ export default class extends Controller<HTMLElement> {
         places: incoming.length,
       }
       this.assistantChronoOutlets.forEach((chrono) => chrono.record(timing))
-      this.places = merge(this.places, incoming, this.#visibleArea())
+      const area = this.#visibleArea()
+      this.places = merge(this.places, incoming, area)
       this.#draw()
       this.#announce(
-        this.places.length
+        this.places.some((place) => isInArea(place, area))
           ? ""
           : "Aucun lieu trouvé ici. Déplacez la carte pour explorer une autre zone.",
       )
     } catch (error) {
       if ((error as Error).name === "AbortError") return
+      // Let the next move retry the same viewport.
+      this.lastRequestedUrl = ""
       this.#announce(
         "Les lieux n'ont pas pu être chargés. Déplacez la carte pour réessayer.",
       )
@@ -196,12 +221,13 @@ export default class extends Controller<HTMLElement> {
   #placesUrl(): string {
     const area = this.#visibleArea()
     const params = new URLSearchParams({
-      geste: this.gesteValue,
       bbox: JSON.stringify({
         southWest: { lng: area.west, lat: area.south },
         northEast: { lng: area.east, lat: area.north },
       }),
     })
+    // One `geste` per code: a block of the fiche may span two gestes.
+    for (const code of this.#gestes()) params.append("geste", code)
     if (this.ficheValue) params.set("fiche", this.ficheValue)
     return `${this.urlValue}?${params}`
   }
@@ -231,8 +257,15 @@ export default class extends Controller<HTMLElement> {
     for (const place of this.places) {
       if (this.markers.has(place.uuid)) continue
 
-      const element = pinpointElement(place, colors, this.gesteValue, lieuUrl)
-      const marker = new this.MarkerClass({ element, anchor: "bottom" })
+      // The pin shows the icon of the block's first geste.
+      const element = pinpointElement(place, colors, this.#gestes()[0] ?? "", lieuUrl)
+      const marker = new this.MarkerClass({
+        element,
+        anchor: "bottom",
+        // Without it MapLibre rounds marker positions to whole pixels, which
+        // makes the pins jitter during zoom animations.
+        subpixelPositioning: true,
+      })
         .setLngLat([place.longitude, place.latitude])
         .addTo(this.map!)
       this.markers.set(place.uuid, marker)
@@ -249,6 +282,10 @@ export default class extends Controller<HTMLElement> {
     return (uuid) => this.lieuUrlValue.replace(UUID_PLACEHOLDER, uuid)
   }
 
+  #gestes(): string[] {
+    return this.gesteValue.split(",").filter(Boolean)
+  }
+
   #colors(): PinpointColors {
     const style = getComputedStyle(this.element)
     return {
@@ -258,12 +295,9 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  #hideMarkers() {
-    this.markers.forEach((marker) => marker.remove())
-    this.markers.clear()
-  }
-
   #announce(message: string) {
-    if (this.hasMessageTarget) this.messageTarget.textContent = message
+    if (!this.hasMessageTarget) return
+    this.messageTextTarget.textContent = message
+    this.messageTarget.hidden = !message
   }
 }

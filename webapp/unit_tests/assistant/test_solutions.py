@@ -154,3 +154,49 @@ class TestSolutionsScreen:
         assert f"fiche={fiche.slug}" in back
         assert "geste=reparer" in back
         assert "adresse=Auray" in back
+
+    def test_a_block_of_two_gestes_shows_both_icons_and_its_label(
+        self, client, reparer
+    ):
+        """ "Donner ou revendre" (30174:11559) spans two GroupeAction."""
+        GroupeActionFactory(code="donner_echanger_rapporter", libelle_court="Donner")
+        GroupeActionFactory(code="vendre_acheter", libelle_court="Vendre")
+
+        content = client.get(
+            reverse("assistant:solutions"),
+            {"geste": ["donner_echanger_rapporter", "vendre_acheter"]},
+        ).content.decode()
+
+        assert "Donner ou revendre" in content
+        assert 'data-geste="donner_echanger_rapporter"' in content
+        assert 'data-geste="vendre_acheter"' in content
+        assert (
+            'data-assistant-carte-geste-value="donner_echanger_rapporter,vendre_acheter"'
+            in content
+        )
+        assert content.count('name="geste"') == 2
+
+    def test_the_accessible_list_carries_the_nearest_places(self, client, reparer):
+        """The map fetches its own places; the server-rendered list is the
+        only path to the results without it."""
+        from django.contrib.gis.geos import Point
+
+        from unit_tests.qfdmo.acteur_factory import (
+            DisplayedActeurFactory,
+            DisplayedPropositionServiceFactory,
+        )
+        from unit_tests.qfdmo.action_factory import ActionFactory
+
+        action = ActionFactory(code="reparer", groupe_action=reparer)
+        lieu = DisplayedActeurFactory(
+            nom="Atelier test", location=Point(2.36, 48.85, srid=4326)
+        )
+        DisplayedPropositionServiceFactory(acteur=lieu, action=action)
+
+        content = client.get(
+            reverse("assistant:solutions"),
+            {"geste": "reparer", "longitude": "2.36", "latitude": "48.85"},
+        ).content.decode()
+
+        assert "Atelier test" in content
+        assert "Aucun lieu à proximité" not in content
