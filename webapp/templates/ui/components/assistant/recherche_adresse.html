@@ -6,7 +6,12 @@ le fait que la saisie désigne une adresse précise plutôt qu'une commune — c
 qui décide de l'affichage de la punaise rouge (#3356).
 
 Trois caractères minimum : la BAN ne répond pas en deçà.
+
+Les coordonnées sont rendues sans localisation : en français, « -1,55 »
+n'est plus un nombre, et la position serait perdue à chaque réaffichage du
+champ.
 {% endcomment %}
+{% load l10n %}
 {% url 'api_v1:adresses' as url_recherche %}
 <div class="qfa-combobox"
      id="{{ id|default:'recherche-adresse' }}"
@@ -17,7 +22,7 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
         {{ label|default:"Où souhaitez-vous trouver des solutions ?" }}
     </label>
 
-    <span class="qfa-combobox__cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
+    <span class="qfa-combobox__cadre" data-assistant-combobox-target="cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
                id="{{ id|default:'recherche-adresse' }}-champ"
@@ -37,25 +42,39 @@ Trois caractères minimum : la BAN ne répond pas en deçà.
                placeholder="{{ placeholder|default:'ex : une adresse ou commune' }}">
     </span>
 
-    <input type="hidden" name="longitude" value="{{ longitude|default:'' }}"
+    {% comment %}
+    Juste après le cadre : la liste s'ouvre sous le champ, dans le flux, et
+    masque le message d'erreur tant qu'elle est ouverte.
+    {% endcomment %}
+    <ul class="qfa-combobox__liste"
+        id="{{ id|default:'recherche-adresse' }}-liste"
+        role="listbox"
+        data-assistant-combobox-target="list"
+        data-action="mousedown->assistant-combobox#keepFocus
+                     click->assistant-combobox#chooseFromClick"
+        hidden></ul>
+
+    <input type="hidden" name="longitude" value="{{ longitude|default:''|unlocalize }}"
            data-assistant-combobox-target="hidden" data-key="longitude">
-    <input type="hidden" name="latitude" value="{{ latitude|default:'' }}"
+    <input type="hidden" name="latitude" value="{{ latitude|default:''|unlocalize }}"
            data-assistant-combobox-target="hidden" data-key="latitude">
     <input type="hidden" name="precise" value="{{ precise|default:'' }}"
            data-assistant-combobox-target="hidden" data-key="precise">
 
     {% if erreur %}
-        <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-adresse' }}-erreur">
+        <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ id|default:'recherche-adresse' }}-erreur">
             {{ erreur }}
         </p>
     {% endif %}
 
-    <ul class="qfa-combobox__liste"
-        id="{{ id|default:'recherche-adresse' }}-liste"
-        role="listbox"
-        data-assistant-combobox-target="list"
-        data-action="click->assistant-combobox#chooseFromClick"
-        hidden></ul>
+    {% comment %}
+    État « aucun résultat » du composant champ (maquette) : affiché par le
+    contrôleur quand la saisie ne donne aucune suggestion.
+    {% endcomment %}
+    <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-adresse' }}-aucun-resultat"
+       data-assistant-combobox-target="aucunResultat" hidden>
+        Nous ne connaissons pas cette adresse. Choisissez une suggestion dans la liste.
+    </p>
 
     <p class="qfa-sr-only" role="status" aria-live="polite"
        data-assistant-combobox-target="status"></p>
