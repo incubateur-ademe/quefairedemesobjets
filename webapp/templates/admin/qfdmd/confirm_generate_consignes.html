@@ -1,0 +1,43 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load wagtailadmin_tags i18n %}
+
+{% block titletag %}Convertir les cartes en grille de consignes{% endblock %}
+
+{% block content %}
+<div class="nice-padding">
+    <h2>Convertir les cartes de « {{ page.title }} » en grille de consignes</h2>
+
+    <p>
+        La première rangée de cartes de la page (après l'introduction, avant
+        la carte) est déplacée telle quelle dans le composant « Grille de
+        consignes » : titre, contenu et lien ne sont pas réécrits. Les champs
+        typés sont déduits des badges selon les règles de la spécification :
+        état et bonus réparation pour un objet, lieu de dépôt pour un déchet,
+        gestes d'après l'état ou « déposer ». Une carte dont l'état ne peut
+        pas être déduit reste en place et vous est signalée. Les cartes plus
+        bas dans la page ne sont pas touchées.
+    </p>
+
+    <p>
+        Les blocs d'origine sont remplacés par la grille dans un
+        <strong>brouillon</strong>. La page publiée ne change pas tant que
+        vous n'avez pas relu et publié le brouillon.
+    </p>
+
+    {% if already %}
+        <p>
+            <strong>Cette page a déjà une grille de consignes.</strong>
+            Elle sera conservée ; une nouvelle grille sera ajoutée à partir des
+            autres blocs.
+        </p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <a href="{% url 'wagtailadmin_pages:edit' page.id %}" class="button button-secondary">Annuler</a>
+            <button type="submit" class="button">Convertir dans un brouillon</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
