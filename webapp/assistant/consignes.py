@@ -90,46 +90,50 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
     gestes repeats `geste` in the query string.
 
     A block is skipped when none of its gestes exists in the database.
+    `sans_carte` is true when the fiche shows no map on the site (no `carte`
+    block, e.g. Véhicule hors d'usage): there is no solution to send to.
     """
     base = parcours.as_params() if parcours else {}
     # The slug spares the solutions screen a label lookup, and the counter
     # needs it to narrow the places to the objet.
     if produit_page is not None and getattr(produit_page, "slug", None):
         base = {**base, "fiche": produit_page.slug}
-    url_compte = bool(parcours and parcours.is_located)
+    localise = bool(parcours and parcours.is_located)
+
+    sans_carte = produit_page is not None and not _shows_map(produit_page)
 
     cms = produit_page.consignes if produit_page is not None else []
     if cms:
-        return [
-            block
-            for block in (_from_cms(child, base, url_compte) for child in cms)
-            if block
-        ]
-
-    known = set(GroupeAction.objects.values_list("code", flat=True))
-    return [
-        block
-        for block in (
-            _from_static(static, known, base, url_compte) for static in BLOCKS
-        )
-        if block
-    ]
+        blocks = (_from_cms(child, base, localise) for child in cms)
+    else:
+        known = set(GroupeAction.objects.values_list("code", flat=True))
+        blocks = (_from_static(static, known, base, localise) for static in BLOCKS)
+    return [{**block, "sans_carte": sans_carte} for block in blocks if block]
 
 
-def _links(gestes, base, url_compte) -> dict:
+def _shows_map(produit_page) -> bool:
+    # The raw data: a `carte` block is what puts a map on the fiche of the
+    # site, set at import from the sous-catégorie's `afficher_carte`.
+    return any(b["type"] == "carte" for b in produit_page.body.get_prep_value())
+
+
+def _links(gestes, base, localise) -> dict:
     params = urlencode({**base, "geste": gestes}, doseq=True)
     return {
         "url": f"{reverse('assistant:solutions')}?{params}",
+        # Without a position, the button offers geolocation instead. Decided
+        # here, not from `url_compte`: the counter can be off with a position.
+        "localise": localise,
         # Fetched after the page renders, only when there is a position.
         "url_compte": (
             f"{reverse('api_v1:lieux-compte')}?{params}"
-            if COUNTER_ENABLED and url_compte
+            if COUNTER_ENABLED and localise
             else ""
         ),
     }
 
 
-def _from_static(block, known, base, url_compte) -> dict | None:
+def _from_static(block, known, base, localise) -> dict | None:
     gestes = [code for code in block["gestes"] if code in known]
     if not gestes:
         return None
@@ -145,11 +149,11 @@ def _from_static(block, known, base, url_compte) -> dict | None:
         "libelle": block["libelle"],
         "consigne": block["consigne"],
         "badges": badges,
-        **_links(gestes, base, url_compte),
+        **_links(gestes, base, localise),
     }
 
 
-def _from_cms(child, base, url_compte) -> dict | None:
+def _from_cms(child, base, localise) -> dict | None:
     """A consigne of the CMS block, in the shape of the static ones.
 
     The block stores Action codes (the open data vocabulary); the solutions
@@ -179,7 +183,7 @@ def _from_cms(child, base, url_compte) -> dict | None:
         # RichText: rendered as HTML by the template, never escaped.
         "consigne": value["contenu"],
         "badges": badges,
-        **_links(gestes, base, url_compte),
+        **_links(gestes, base, localise),
     }
 
 
