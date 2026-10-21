@@ -396,6 +396,16 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .order_by("distance")
         )
 
+    def for_the_detail(self):
+        """A place and everything its page shows, without cascading queries.
+
+        The `prefetch_related` lives here rather than in the view: it is a
+        property of the data to load, not of the page showing it.
+        """
+        return self.select_related("acteur_type").prefetch_related(
+            "labels", "sources", "proposition_services__action__groupe_action"
+        )
+
 
 class LatLngPropertiesMixin(models.Model):
     location: models.PointField
