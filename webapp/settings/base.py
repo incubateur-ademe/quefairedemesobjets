@@ -555,7 +555,8 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Also rewrites references to Parcel chunks: see core/storage.py.
+        "BACKEND": "core.storage.ParcelManifestStaticFilesStorage",
     },
 }
 

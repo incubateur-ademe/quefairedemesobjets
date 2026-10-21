@@ -304,6 +304,8 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+MAX_PLACES_ON_MAP = 20
+
 OFFERS_CACHE_TTL = 60 * 60 * 12
 
 GEOGRAPHIC_SCAN_THRESHOLD = 1_000
@@ -509,6 +511,12 @@ class DisplayedActeurQuerySet(models.QuerySet):
             .order_by(GeometryDistance("location", center))
         )
 
+    def for_the_map(self, limit: int = MAX_PLACES_ON_MAP):
+        # `location` is nullable and `NULL <-> point` sorts last: with few
+        # candidates, unlocated acteurs would pad the result and break
+        # `as_geojson_feature`.
+        return self.filter(location__isnull=False).with_bonus()[:limit]
+
     def for_the_detail(self):
         """A place and everything its page shows, without cascading queries.
 
@@ -518,6 +526,12 @@ class DisplayedActeurQuerySet(models.QuerySet):
         return self.select_related("acteur_type").prefetch_related(
             "labels", "sources", "proposition_services__action__groupe_action"
         )
+
+    def as_geojson(self) -> dict:
+        return {
+            "type": "FeatureCollection",
+            "features": [acteur.as_geojson_feature() for acteur in self],
+        }
 
 
 class LatLngPropertiesMixin(models.Model):
@@ -1649,6 +1663,21 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+    def as_geojson_feature(self) -> dict:
+        """GeoJSON representation of the place for the map."""
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [self.location.x, self.location.y],
+            },
+            "properties": {
+                "uuid": self.uuid,
+                "nom": self.nom_commercial or self.nom,
+                "bonus": getattr(self, "bonus", False),
+            },
+        }
 
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):
