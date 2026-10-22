@@ -149,6 +149,8 @@ function LocalisationTab({
   return (
     <div className="localisation">
       <LocalisationMap
+        // A new map, framed on its points, for each groupe
+        key={groupe.id}
         points={mapPoints}
         focused={focused}
         onFocus={setFocused}

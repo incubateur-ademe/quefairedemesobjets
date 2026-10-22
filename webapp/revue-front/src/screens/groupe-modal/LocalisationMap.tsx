@@ -89,7 +89,8 @@ function markerElement(key: MarkerKey, draggable: boolean) {
 
 /** Map with a marker per point. Releasing a draggable marker calls `onMove`;
  * clicking a marker calls `onFocus`; the `focused` marker is shown above the
- * others. */
+ * others. The map is framed on the points when the fixed (not draggable) points
+ * change, not when a marker is moved: it stays where the user left it. */
 export function LocalisationMap({
   points,
   focused = null,
@@ -102,13 +103,13 @@ export function LocalisationMap({
   onFocus?: (key: MarkerKey) => void
 }) {
   const container = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<Map | null>(null)
   const markers = useRef<Partial<Record<MarkerKey, HTMLElement>>>({})
   const callbacks = useRef({ onMove, onFocus })
   useEffect(() => {
     callbacks.current = { onMove, onFocus }
   })
 
-  const signature = JSON.stringify(points)
   useEffect(() => {
     if (!container.current) {
       return
@@ -117,13 +118,27 @@ export function LocalisationMap({
     const map = new Map({
       container: container.current,
       style: OSM_STYLE,
-      center: points.length ? [points[0].longitude, points[0].latitude] : [2.2, 46.2],
-      zoom: points.length ? 15 : 5,
+      center: [2.2, 46.2],
+      zoom: 5,
       maxZoom: 18,
       attributionControl: { compact: true },
     })
     map.addControl(new NavigationControl({ showCompass: false }))
+    mapRef.current = map
+    return () => {
+      map.remove()
+      mapRef.current = null
+    }
+  }, [])
+
+  const signature = JSON.stringify(points)
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) {
+      return
+    }
     markers.current = {}
+    const added: Marker[] = []
     for (const point of points) {
       const element = markerElement(point.key, point.draggable)
       element.addEventListener("click", () => callbacks.current.onFocus?.(point.key))
@@ -135,6 +150,7 @@ export function LocalisationMap({
       })
         .setLngLat([point.longitude, point.latitude])
         .addTo(map)
+      added.push(marker)
       if (point.draggable) {
         // Saved as soon as the marker is released, without confirmation
         marker.on("dragend", () => {
@@ -143,14 +159,26 @@ export function LocalisationMap({
         })
       }
     }
-    if (points.length > 1) {
-      const bounds = new LngLatBounds()
-      points.forEach((point) => bounds.extend([point.longitude, point.latitude]))
-      map.fitBounds(bounds, { padding: 60, maxZoom: 17, duration: 0 })
-    }
-    return () => map.remove()
+    return () => added.forEach((marker) => marker.remove())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature])
+
+  // Framing: on the fixed points only, so that moving a marker keeps the view
+  const frame = JSON.stringify(points.filter((point) => !point.draggable))
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !points.length) {
+      return
+    }
+    if (points.length === 1) {
+      map.jumpTo({ center: [points[0].longitude, points[0].latitude], zoom: 15 })
+      return
+    }
+    const bounds = new LngLatBounds()
+    points.forEach((point) => bounds.extend([point.longitude, point.latitude]))
+    map.fitBounds(bounds, { padding: 60, maxZoom: 17, duration: 0 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frame])
 
   // The focused marker goes above the others (markers overlap when the
   // positions are close)
