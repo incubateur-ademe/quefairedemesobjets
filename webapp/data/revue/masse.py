@@ -25,7 +25,6 @@ from data.revue.errors import RevueApiError
 from data.revue.filters import parse_filter
 from data.revue.lignes import (
     ACTEUR,
-    NOT_EDITABLE,
     NOT_REPORTABLE,
     groupes_queryset,
     parse_ligne_key,
@@ -111,7 +110,7 @@ def _all_rows(selection: Selection) -> QuerySet[SuggestionUnitaire]:
 
 def _reportable_acteur_rows(selection: Selection, modele: str):
     """SU Acteur of the lignes that may be reported to `modele`: groupe and ligne
-    to validate, no field forbidden on the target."""
+    to validate, no field not reportable on the target."""
     policy = get_policy(selection.cohorte.type_action)
     if modele not in policy.editable_models:
         return SuggestionUnitaire.objects.none()
@@ -120,7 +119,7 @@ def _reportable_acteur_rows(selection: Selection, modele: str):
         statut=AVALIDER,
         suggestion_groupe__statut=AVALIDER,
     )
-    forbidden = sorted(NOT_REPORTABLE[modele] | NOT_EDITABLE)
+    forbidden = sorted(NOT_REPORTABLE[modele])
     rows = rows.exclude(champs__overlap=forbidden)
     if modele == PARENT:
         rows = rows.filter(suggestion_groupe__parent_revision_acteur__isnull=False)

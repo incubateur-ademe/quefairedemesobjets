@@ -2,7 +2,7 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 
 import { FakeApiError, fakeApi, renderApp, setControlValue } from "../../test-utils"
 import { CohorteScreen } from "./CohorteScreen"
-import { COHORTE, groupe, page, STATS } from "./fixtures"
+import { COHORTE, groupe, ligne, page, STATS } from "./fixtures"
 
 type Answer = (path: string, options: unknown, method: string) => unknown
 
@@ -58,6 +58,34 @@ describe("CohorteScreen", () => {
     await act(async () => resolve(groupe(1, { statut: "ATRAITER" })))
     // The validated groupe stays on screen
     expect(within(headerOf(1)).getByText("Validé")).toBeInTheDocument()
+  })
+
+  it("hides the lignes already validated, if asked", async () => {
+    const api = fakeApi((path) => {
+      if (path.endsWith("/stats")) return STATS
+      if (path.endsWith("/revue/filtres")) return { champs: [] }
+      if (path.endsWith("/groupes"))
+        return page([
+          groupe(1, {
+            lignes: [ligne(1, ["nom"], { statut: "ATRAITER" }), ligne(1, ["url"])],
+          }),
+        ])
+      return COHORTE
+    })
+    renderApp(<CohorteScreen cohorteId={7} />, { api, url: "/data/revue/cohortes/7" })
+    await screen.findByText("Acteur 1")
+    const ligneRow = (key: string) => document.querySelector(`[data-cursor="l:${key}"]`)
+    expect(ligneRow("1:nom")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText("Masquer les lignes déjà validées"))
+
+    await waitFor(() => expect(ligneRow("1:nom")).not.toBeInTheDocument())
+    expect(ligneRow("1:url")).toBeInTheDocument()
+    expect(window.location.search).toBe("?masquer_validees=1")
+    // The keyboard skips the hidden lignes
+    fireEvent.click(headerOf(1))
+    fireEvent.keyDown(window, { key: "ArrowDown" })
+    expect(ligneRow("1:url")).toHaveClass("cur")
   })
 
   it("reloads the groupe and notifies on a conflict", async () => {

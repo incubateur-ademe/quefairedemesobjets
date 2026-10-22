@@ -604,6 +604,13 @@ select {
   font-size: 11.5px;
 }
 
+.hide-validated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
 .pager {
   display: flex;
   align-items: center;

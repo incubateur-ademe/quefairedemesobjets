@@ -106,12 +106,23 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
     () => (state.vue === "groupes" ? groupes.data?.items : lignes.data?.groupes) ?? [],
     [state.vue, groupes.data, lignes.data],
   )
+  // Groupes as shown: without their lignes already validated, if asked
+  const shownGroupes = useMemo(
+    () =>
+      state.vue === "groupes" && state.masquerValidees
+        ? pageGroupes.map((groupe) => ({
+            ...groupe,
+            lignes: groupe.lignes.filter((ligne) => ligne.statut !== "ATRAITER"),
+          }))
+        : pageGroupes,
+    [state.vue, state.masquerValidees, pageGroupes],
+  )
   const positions = useMemo(
     () =>
       state.vue === "groupes"
-        ? cursorItems(pageGroupes)
+        ? cursorItems(shownGroupes)
         : (lignes.data?.items ?? []).map((item) => ligneCursor(item.key)),
-    [state.vue, pageGroupes, lignes.data],
+    [state.vue, shownGroupes, lignes.data],
   )
 
   // A change of the list (view, filters, tuples, « afficher », page) resets the page
@@ -264,6 +275,21 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
             {nbConditions > 0 && <span className="badge">{nbConditions}</span>}{" "}
             <kbd>/</kbd>
           </WaButton>
+          {state.vue === "groupes" && (
+            <label className="hide-validated">
+              <input
+                type="checkbox"
+                checked={state.masquerValidees}
+                onChange={(event) =>
+                  setSearch(
+                    { masquer_validees: event.target.checked ? "1" : undefined },
+                    { replace: true },
+                  )
+                }
+              />
+              Masquer les lignes déjà validées
+            </label>
+          )}
           <PageSizeSelect
             unit={state.vue}
             sizes={PAGE_SIZES[state.vue]}
@@ -329,7 +355,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         {state.vue === "groupes"
           ? groupes.data && (
               <GroupesView
-                groupes={pageGroupes}
+                groupes={shownGroupes}
                 policy={cohorte.data.policy}
                 actions={actions}
                 cursor={cursor.current}

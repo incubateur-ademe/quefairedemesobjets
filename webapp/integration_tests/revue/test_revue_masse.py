@@ -192,6 +192,33 @@ class TestGroupes:
             }
             assert parent == acteur
 
+    def test_report_fields_with_specific_values(self, client, cohorte):
+        """Like in the admin: only the fields not reportable on the target are
+        refused (label_codes is inherited by the parent from its children)."""
+        groupe = cohorte.suggestion_groupes.filter(
+            statut="AVALIDER", parent_revision_acteur__isnull=False
+        ).first()
+        SuggestionUnitaire.objects.create(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["label_codes"],
+            valeurs=["reparacteur"],
+            acteur_id=groupe.acteur_id,
+        )
+
+        status, body = post(
+            client,
+            f"/cohortes/{cohorte.id}/actions/apercu",
+            {
+                "vue": "lignes",
+                "selection": {"mode": "ids", "ids": [f"{groupe.id}:label_codes"]},
+            },
+        )
+
+        assert status == 200
+        assert body["compteurs"]["report_correction"] == 1
+        assert body["compteurs"]["report_parent"] == 0
+
     def test_large_report_runs_as_a_task(self, client, cohorte, monkeypatch):
         monkeypatch.setattr(masse, "SUGGESTION_TASK_ASYNC_THRESHOLD", 1)
 
