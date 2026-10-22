@@ -33,7 +33,10 @@ def cmd_run(cmd: str, dry_run: bool = True, env: dict = {}) -> str | None:
     )
     # Error
     if process.returncode != 0 or process.stderr:
-        raise SystemError(f"💻 commande: erreur 🔴 {process.stderr}")
+        raise SystemError(
+            f"💻 commande: erreur 🔴 returncode={process.returncode} "
+            f"stdout={process.stdout[-2000:]} stderr={process.stderr[-2000:]}"
+        )
 
     # Everything went OK
     logger.info(f"💻 commande: résultat={process.stdout}")
