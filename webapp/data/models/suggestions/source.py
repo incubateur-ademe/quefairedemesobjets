@@ -63,6 +63,9 @@ class SuggestionSourceModel(BaseModel):
     uniquement_sur_rdv: str | None = None
     consignes_dacces: str | None = None
     statut: str | None = None
+    # Only on RevisionActeur, used by the ENRICH_ACTEURS_CLOSED suggestions
+    siret_is_closed: str | None = None
+    parent_reason: str | None = None
     commentaires: str | None = None
     label_codes: str | None = None
     acteur_service_codes: str | None = None
