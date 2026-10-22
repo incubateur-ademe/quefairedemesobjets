@@ -37,7 +37,7 @@ import {
 } from "../../state/selection"
 import { WaButton, WaSpinner } from "../../wa"
 import { GroupeModal } from "../groupe-modal/GroupeModal"
-import { CohorteHeader, Counters } from "./CohorteHeader"
+import { CohorteHeader } from "./CohorteHeader"
 import { cursorItems, GroupesView, ligneCursor, type ModalTab } from "./GroupesView"
 import { LignesView } from "./LignesView"
 import { MassBar } from "./MassBar"
@@ -243,9 +243,10 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
       <div className="rhead">
         <CohorteHeader
           cohorte={cohorte.data}
+          stats={stats.data}
+          vue={state.vue}
           onOpenLogs={() => setSearch({ logs: String(cohorteId) })}
         />
-        {stats.data && <Counters stats={stats.data} vue={state.vue} />}
         <div className="rtitle">
           <Segmented
             label="Vue"

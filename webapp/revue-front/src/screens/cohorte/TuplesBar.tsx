@@ -20,33 +20,38 @@ export function TuplesBar({
     )
   return (
     <div className="tuplebar">
-      <span className="tlabel">Tuples de champs</span>
-      {stats?.tuples.map(({ champs, count }) => {
-        const key = champs.join(",")
-        return (
-          <button
-            key={key}
-            type="button"
-            className="chip"
-            aria-pressed={selected.includes(key)}
-            onClick={() => toggle(key)}
-          >
-            {champs.join(" + ")}
-            <span className="n">{count}</span>
-          </button>
-        )
-      })}
+      <span
+        className="tlabel"
+        title={
+          vue === "groupes"
+            ? "nombre de groupes ayant au moins une ligne sur ce tuple"
+            : "nombre de lignes par tuple"
+        }
+      >
+        Tuples de champs
+      </span>
+      <div className="tuples">
+        {stats?.tuples.map(({ champs, count }) => {
+          const key = champs.join(",")
+          return (
+            <button
+              key={key}
+              type="button"
+              className="chip"
+              aria-pressed={selected.includes(key)}
+              onClick={() => toggle(key)}
+            >
+              {champs.join(" + ")}
+              <span className="n">{count}</span>
+            </button>
+          )
+        })}
+      </div>
       {selected.length > 0 && (
         <button type="button" className="chip chip--ghost" onClick={() => onChange([])}>
           Tous
         </button>
       )}
-      <span className="spacer" />
-      <span className="muted">
-        {vue === "groupes"
-          ? "nombre de groupes ayant au moins une ligne sur ce tuple"
-          : "nombre de lignes par tuple"}
-      </span>
     </div>
   )
 }

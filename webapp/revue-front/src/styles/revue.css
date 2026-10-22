@@ -92,28 +92,6 @@ body {
   min-height: 0;
 }
 
-.app__header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 16px;
-  background: var(--accent);
-}
-
-body[data-environment="production"] .app__header {
-  background: #aa0000;
-}
-
-body[data-environment="staging"] .app__header {
-  background: #30b181;
-}
-
-.app__title {
-  color: var(--accent-fg);
-  font-weight: 700;
-  text-decoration: none;
-}
-
 .screen {
   padding: 8px 16px;
 }
@@ -676,6 +654,18 @@ select {
   font-weight: 600;
 }
 
+/* statut of the cohorte: dot of the tone color, label in title */
+.sdot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.rtitle .sdot {
+  background: currentColor;
+}
+
 .back {
   color: var(--muted);
   font-size: 16px;
@@ -704,35 +694,54 @@ select {
   font-variant-numeric: tabular-nums;
 }
 
-.progress {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 10px;
-  min-width: 220px;
-  max-width: 420px;
-}
-
-.progress .stack {
-  flex: 1;
-  height: 8px;
-}
-
-.progress .pct {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
 .tuplebar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   padding: 7px 16px;
   border-bottom: 1px solid var(--line);
   background: var(--surface);
+}
+
+.tuplebar .tlabel {
+  flex-shrink: 0;
+  cursor: help;
+}
+
+/* tuples on one line, scrolled horizontally when too many */
+.tuples {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+  padding-bottom: 4px;
+  overflow-x: auto;
+}
+
+/* scrollbar below the tuples and always shown (overlay scrollbars hide it) */
+.tuples::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tuples::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tuples::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .tuples {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+}
+
+.tuplebar .chip {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .chip .n {
@@ -966,6 +975,11 @@ tr:hover .editbtn,
   border-top: 0;
 }
 
+.stream tr.ln > td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
 .stream tr.ln.st-ATRAITER td,
 .stream tbody.gbody tr.ghead.st-ATRAITER td {
   background: var(--ok-soft);
@@ -1016,6 +1030,11 @@ tr:hover .editbtn,
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
+}
+
+/* decision buttons at the end of the rows: compact, for denser rows */
+.stream td.c-act wa-button {
+  --wa-form-control-height: 1.8em;
 }
 
 .lineprog {

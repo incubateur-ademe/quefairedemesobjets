@@ -52,7 +52,7 @@ describe("LignesView", () => {
     expect(within(row("2:url")).getByText("Acteur 2")).toBeInTheDocument()
     expect(within(row("2:url")).getByText("acteur_2")).toBeInTheDocument()
     expect(screen.getByText(/lignes 1–3 sur 3/)).toBeInTheDocument()
-    expect(screen.getByText("Lignes du filtre")).toBeInTheDocument()
+    expect(screen.getByTitle(/^Lignes du filtre/)).toBeInTheDocument()
     const query = api.GET.mock.calls.find(([path]) => path.endsWith("/lignes"))![1]
       .params.query
     expect(query).toMatchObject({ page: 1, page_size: 500, afficher: "avalider" })

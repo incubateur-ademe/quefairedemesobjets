@@ -29,7 +29,8 @@ describe("CohorteScreen", () => {
 
     expect(await screen.findByText("dag_ecomaison")).toBeInTheDocument()
     expect(await screen.findByText("Acteur 1")).toBeInTheDocument()
-    expect(screen.getByText("Groupes du filtre")).toBeInTheDocument()
+    expect(screen.getByTitle(/^Groupes du filtre/)).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "Statut : À valider" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /^nom/ })).toBeInTheDocument()
     expect(within(headerOf(1)).getByText("0/2 lignes")).toBeInTheDocument()
   })
