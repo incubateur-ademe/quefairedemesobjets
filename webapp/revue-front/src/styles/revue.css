@@ -807,10 +807,6 @@ select {
   gap: 4px;
 }
 
-.dv .arrow {
-  color: var(--faint);
-}
-
 .kv {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -834,17 +830,16 @@ select {
   word-break: break-word;
 }
 
-.val.chg {
-  padding: 0 3px;
-  border-radius: 3px;
-  background: var(--diff);
-  color: var(--diff-fg);
-}
-
-.val.old {
+/* differences between the current value and the proposition */
+.val del {
   color: var(--danger);
   text-decoration: line-through;
-  opacity: 0.85;
+}
+
+.val ins {
+  color: var(--ok);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .inherit {
