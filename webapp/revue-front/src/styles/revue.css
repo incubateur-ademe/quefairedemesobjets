@@ -935,6 +935,51 @@ tr:hover .editbtn,
   --wa-form-control-border-color: var(--danger);
 }
 
+/* Options wider than the select (Web Awesome syncs the list on its width): long
+   labels (codes, sous-catégories) stay readable */
+wa-select::part(listbox) {
+  width: max-content;
+  min-width: 100%;
+  max-width: min(32rem, 90vw);
+}
+
+/* The current option (keyboard cursor) is neutral, as on hover, not blue: blue
+   reads as selected, while the selection is the check mark */
+wa-select wa-option {
+  --wa-form-control-activated-color: var(--wa-color-neutral-fill-normal);
+  --current-text-color: var(--wa-color-neutral-on-normal);
+}
+
+.edit fieldset.services {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 4px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.edit fieldset.services.bad {
+  border-color: var(--danger);
+}
+
+.services legend {
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.services__row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(12rem, 2fr) auto;
+  gap: 4px;
+  align-items: start;
+}
+
+.services__add {
+  align-self: flex-start;
+}
+
 .ferr {
   color: var(--danger);
   font-size: 11.5px;

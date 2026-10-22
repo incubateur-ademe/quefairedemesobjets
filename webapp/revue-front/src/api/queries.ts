@@ -4,6 +4,7 @@ import { useApp } from "../context"
 import { unwrap } from "./client"
 import type {
   Afficher,
+  ChampChoix,
   CohorteDetail,
   AnnuaireEntreprise,
   CohortePage,
@@ -41,6 +42,7 @@ export const queryKeys = {
   logs: (cohorteId: number, params: LogsParams) => ["logs", cohorteId, params] as const,
   cohorte: (cohorteId: number) => ["cohorte", cohorteId] as const,
   taches: (cohorteId: number) => ["taches", cohorteId] as const,
+  champsChoix: ["champs-choix"] as const,
   reviewFilters: (cohorteId: number) => ["revue-filtres", cohorteId] as const,
   groupes: (cohorteId: number, params?: GroupesParams) =>
     params
@@ -87,6 +89,17 @@ export function useLogs(cohorteId: number | null, params: LogsParams) {
       ),
     enabled: cohorteId !== null,
     placeholderData: keepPreviousData,
+  })
+}
+
+/** Values of the fields edited with a select: they do not change during a session. */
+export function useChampsChoix() {
+  const { api } = useApp()
+  return useQuery({
+    queryKey: queryKeys.champsChoix,
+    queryFn: (): Promise<Record<string, ChampChoix>> =>
+      unwrap(api.GET("/api/suggestions/champs/choix")),
+    staleTime: Infinity,
   })
 }
 

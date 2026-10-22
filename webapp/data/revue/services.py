@@ -19,6 +19,7 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
+from data.revue.choix import normalize_codes
 from data.revue.errors import RevueApiError
 from data.revue.lignes import ACTEUR, groupes_queryset, serialize_groupe
 from data.revue.policies import PARENT, REVISION, ReviewPolicy, get_policy
@@ -200,7 +201,7 @@ def upsert_proposition(
         ok, errors = update_suggestion_groupe(
             groupe,
             modele,
-            valeurs,
+            normalize_codes(valeurs),
             [*state["lignes"], *([LATLONG] if LATLONG not in state["lignes"] else [])],
             identifiant_unique=_target_id(groupe, modele) or "",
         )

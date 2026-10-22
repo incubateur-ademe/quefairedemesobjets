@@ -6,7 +6,6 @@ import { WaButton } from "../../wa"
 import {
   ActeurCell,
   ChampsCell,
-  Decided,
   LigneActionCell,
   ReportButton,
   StatutCell,
@@ -265,8 +264,10 @@ function GroupeHeaderRow({
         )}
       </td>
       <td>
-        <StatutPill statut={groupe.statut} />
-        <Decided par={groupe.decision_par} le={groupe.decision_le} />
+        <StatutPill
+          statut={groupe.statut}
+          decision={{ par: groupe.decision_par, le: groupe.decision_le }}
+        />
         <div className="lineprog">
           <span className="stack">
             <span

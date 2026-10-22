@@ -32,6 +32,7 @@ function setup(url = "/data/revue/cohortes/7?vue=lignes") {
     if (path.endsWith("/stats"))
       return { ...STATS, compteurs: { ...STATS.compteurs, AVALIDER: 3 } }
     if (path.endsWith("/taches")) return []
+    if (path.endsWith("/champs/choix")) return {}
     if (path.endsWith("/revue/filtres")) return { champs: [] }
     if (path.endsWith("/lignes")) return LIGNES
     if (path.endsWith("/groupes")) throw new Error("the groupes page is not loaded")
@@ -105,6 +106,7 @@ describe("LignesView", () => {
       }
       if (path.endsWith("/stats")) return STATS
       if (path.endsWith("/taches")) return []
+      if (path.endsWith("/champs/choix")) return {}
       if (path.endsWith("/revue/filtres")) return { champs: [] }
       if (path.endsWith("/lignes")) return LIGNES
       return COHORTE

@@ -63,7 +63,10 @@ export function GroupeModal({
       {groupe && (
         <>
           <div className="modal-meta">
-            <StatutPill statut={groupe.statut} />
+            <StatutPill
+              statut={groupe.statut}
+              decision={{ par: groupe.decision_par, le: groupe.decision_le }}
+            />
             <span className="mono faint">{groupe.acteur.identifiant_unique}</span>
             {groupe.is_new && policy.badge && (
               <span className="pill p-accent">{policy.badge}</span>

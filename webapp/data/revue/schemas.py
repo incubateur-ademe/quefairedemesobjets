@@ -24,6 +24,13 @@ class ChoiceOut(Schema):
     label: str
 
 
+class ChampChoixOut(Schema):
+    multiple: bool
+    choix: list[ChoiceOut]
+    # proposition_service_codes: action of each row (`choix`: its sous-catégories)
+    actions: list[ChoiceOut] | None = None
+
+
 class FilterFieldOut(Schema):
     key: str
     label: str

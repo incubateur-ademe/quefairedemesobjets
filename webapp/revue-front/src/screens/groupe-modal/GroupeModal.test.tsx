@@ -88,6 +88,7 @@ function setup(url: string, groupeDetail: GroupeDetail = detail()) {
     if (method !== "GET") return groupe(1)
     if (path.endsWith("/stats")) return STATS
     if (path.endsWith("/taches")) return []
+    if (path.endsWith("/champs/choix")) return {}
     if (path.endsWith("/revue/filtres")) return { champs: [] }
     if (path.endsWith("/groupes")) return page([groupe(1), groupe(2)])
     if (path === "/api/suggestions/groupes/{groupe_id}") return groupeDetail

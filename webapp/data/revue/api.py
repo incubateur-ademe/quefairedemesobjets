@@ -6,6 +6,7 @@ from data.models.suggestion import SOURCE_TYPE_ACTIONS, SuggestionCohorte
 from data.revue import cohortes, masse
 from data.revue.annuaire import lookup as annuaire_lookup
 from data.revue.auth import SuperuserSessionAuth
+from data.revue.choix import champs_choix
 from data.revue.cohortes import (
     attach_counts,
     cohortes_filter_metadata,
@@ -30,6 +31,7 @@ from data.revue.revue import (
 from data.revue.schemas import (
     AnnuaireEntrepriseOut,
     AnnuaireQuery,
+    ChampChoixOut,
     CohorteDetailOut,
     CohortePageOut,
     CohortesQuery,
@@ -87,6 +89,12 @@ def list_cohortes(request: HttpRequest, query: Query[CohortesQuery]):
         page=query.page,
         page_size=query.page_size,
     )
+
+
+@router.get("/champs/choix", response=dict[str, ChampChoixOut])
+def champs_choix_view(request: HttpRequest):
+    """Values of the fields edited with a select (choices and codes)."""
+    return champs_choix()
 
 
 @router.get("/cohortes/filtres", response=FilterMetaOut)

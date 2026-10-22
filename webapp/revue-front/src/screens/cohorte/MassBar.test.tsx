@@ -19,6 +19,7 @@ function setup(total = 2) {
     if (method !== "GET") return groupe(1)
     if (path.endsWith("/stats")) return STATS
     if (path.endsWith("/taches")) return []
+    if (path.endsWith("/champs/choix")) return {}
     if (path.endsWith("/revue/filtres")) return { champs: [] }
     if (path.endsWith("/groupes")) {
       const query = (options as { params: { query: { afficher: string } } }).params

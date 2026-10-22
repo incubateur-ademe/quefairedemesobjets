@@ -19,6 +19,7 @@ from data.models.suggestion import (
     SuggestionUnitaire,
 )
 from data.models.suggestions.source import SuggestionSourceModel
+from data.revue.choix import EDITABLE
 from data.revue.policies import PARENT, REVISION, ReviewPolicy
 from qfdmo.models.acteur import RevisionActeur
 
@@ -27,7 +28,9 @@ NOT_REPORTABLE = {
     REVISION: set(SuggestionSourceModel.get_not_reportable_on_revision_fields()),
     PARENT: set(SuggestionSourceModel.get_not_reportable_on_parent_fields()),
 }
-NOT_EDITABLE = set(SuggestionSourceModel.get_not_editable_fields())
+# The codes and services are edited with selects in this screen
+# (data.revue.choix), unlike in the admin
+NOT_EDITABLE = set(SuggestionSourceModel.get_not_editable_fields()) - EDITABLE
 ORDERED_FIELDS = SuggestionSourceModel.get_ordered_fields()
 IDENTITY_FIELDS = ["identifiant_unique", "identifiant_externe", "nom", "ville"]
 

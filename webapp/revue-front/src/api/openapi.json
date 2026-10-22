@@ -629,6 +629,36 @@
         ]
       }
     },
+    "/api/suggestions/champs/choix": {
+      "get": {
+        "operationId": "data_revue_api_champs_choix_view",
+        "summary": "Champs Choix View",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/ChampChoixOut"
+                  },
+                  "title": "Response",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "description": "Values of the fields edited with a select (choices and codes).",
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
     "/api/suggestions/cohortes/filtres": {
       "get": {
         "operationId": "data_revue_api_cohortes_filters",
@@ -2701,6 +2731,38 @@
         },
         "required": ["code", "detail"],
         "title": "ErrorOut",
+        "type": "object"
+      },
+      "ChampChoixOut": {
+        "properties": {
+          "multiple": {
+            "title": "Multiple",
+            "type": "boolean"
+          },
+          "choix": {
+            "items": {
+              "$ref": "#/components/schemas/ChoiceOut"
+            },
+            "title": "Choix",
+            "type": "array"
+          },
+          "actions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChoiceOut"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actions"
+          }
+        },
+        "required": ["multiple", "choix"],
+        "title": "ChampChoixOut",
         "type": "object"
       },
       "ChoiceOut": {

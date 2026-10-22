@@ -258,6 +258,26 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/champs/choix": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Champs Choix View
+     * @description Values of the fields edited with a select (choices and codes).
+     */
+    get: operations["data_revue_api_champs_choix_view"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/suggestions/cohortes/filtres": {
     parameters: {
       query?: never
@@ -900,6 +920,15 @@ export interface components {
       current?: {
         [key: string]: unknown
       } | null
+    }
+    /** ChampChoixOut */
+    ChampChoixOut: {
+      /** Multiple */
+      multiple: boolean
+      /** Choix */
+      choix: components["schemas"]["ChoiceOut"][]
+      /** Actions */
+      actions?: components["schemas"]["ChoiceOut"][] | null
     }
     /** ChoiceOut */
     ChoiceOut: {
@@ -1931,6 +1960,28 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_champs_choix_view: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["ChampChoixOut"]
+          }
         }
       }
     }

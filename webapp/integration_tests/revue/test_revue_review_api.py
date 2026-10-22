@@ -12,6 +12,9 @@ from data.revue.lignes import ligne_statut
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.test import Client
+from qfdmo.models.acteur import LabelQualite
+from unit_tests.qfdmo.action_factory import ActionFactory
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 API = "/api/suggestions"
 
@@ -411,6 +414,107 @@ class TestDecisions:
 
 @pytest.mark.django_db
 class TestCorrections:
+    def put_label_codes(self, client, groupe, value):
+        SuggestionUnitaire.objects.get_or_create(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["label_codes"],
+            defaults={"valeurs": ['["label_a"]'], "acteur_id": groupe.acteur_id},
+        )
+        return post(
+            client,
+            f"/groupes/{groupe.id}/propositions",
+            {
+                "suggestion_modele": "RevisionActeur",
+                "champs": ["label_codes"],
+                "valeurs": {"label_codes": value},
+            },
+            method="put",
+        )
+
+    def test_codes_are_saved_sorted(self, client, groupe):
+        LabelQualite.objects.create(code="label_a", libelle="Label A")
+        LabelQualite.objects.create(code="label_b", libelle="Label B")
+
+        status, _ = self.put_label_codes(client, groupe, '["label_b", "label_a"]')
+
+        assert status == 200
+        assert groupe.suggestion_unitaires.get(
+            suggestion_modele="RevisionActeur", champs=["label_codes"]
+        ).valeurs == ['["label_a", "label_b"]']
+
+    def put_services(self, client, groupe, services):
+        SuggestionUnitaire.objects.get_or_create(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["proposition_service_codes"],
+            defaults={"valeurs": ["[]"], "acteur_id": groupe.acteur_id},
+        )
+        return post(
+            client,
+            f"/groupes/{groupe.id}/propositions",
+            {
+                "suggestion_modele": "RevisionActeur",
+                "champs": ["proposition_service_codes"],
+                "valeurs": {"proposition_service_codes": json.dumps(services)},
+            },
+            method="put",
+        )
+
+    def test_services_are_saved_sorted(self, client, groupe):
+        ActionFactory(code="reparer")
+        ActionFactory(code="donner")
+        for code in ("velo", "chaise"):
+            SousCategorieObjetFactory(code=code)
+
+        status, _ = self.put_services(
+            client,
+            groupe,
+            [
+                {"action": "reparer", "sous_categories": ["velo", "chaise"]},
+                {"action": "donner", "sous_categories": ["velo"]},
+            ],
+        )
+
+        assert status == 200
+        [valeur] = groupe.suggestion_unitaires.get(
+            suggestion_modele="RevisionActeur", champs=["proposition_service_codes"]
+        ).valeurs
+        assert json.loads(valeur) == [
+            {"action": "donner", "sous_categories": ["velo"]},
+            {"action": "reparer", "sous_categories": ["chaise", "velo"]},
+        ]
+
+    def test_invalid_services_are_refused_on_the_field(self, client, groupe):
+        ActionFactory(code="reparer")
+        SousCategorieObjetFactory(code="velo")
+
+        status, error = self.put_services(
+            client,
+            groupe,
+            [
+                {"action": "reparer", "sous_categories": ["velo", "inconnue"]},
+                {"action": "reparer", "sous_categories": []},
+                {"action": "", "sous_categories": ["velo"]},
+            ],
+        )
+
+        assert status == 422
+        assert error["errors"] == {
+            "proposition_service_codes": [
+                "Une action est obligatoire sur chaque ligne",
+                "Action en double : reparer",
+                "Au moins une sous-catégorie par action",
+                "Sous-catégorie inconnue : inconnue",
+            ]
+        }
+
+    def test_unknown_code_is_refused_on_the_field(self, client, groupe):
+        status, error = self.put_label_codes(client, groupe, '["inconnu"]')
+
+        assert status == 422
+        assert error["errors"] == {"label_codes": ["Code inconnu : inconnu"]}
+
     def test_correct_then_delete(self, client, groupe):
         champs = list(champs_of(groupe)[0])
         source = groupe.suggestion_unitaires.get(
@@ -482,7 +586,8 @@ class TestCorrections:
 
     def test_report_fields_with_specific_values(self, client, groupe):
         """Like in the admin: a field that cannot be typed may be reported, except
-        on the parent for the fields inherited from the children."""
+        on the parent for the fields inherited from the children. Unlike in the
+        admin, the codes are editable (with a select)."""
         for champ, valeur in (("label_codes", "reparacteur"), ("source_code", "src")):
             SuggestionUnitaire.objects.create(
                 suggestion_groupe=groupe,
@@ -503,8 +608,9 @@ class TestCorrections:
         for champs in (("label_codes",), ("source_code",)):
             ligne = lignes[champs]
             assert ligne["correction"]["propose"] == ligne["acteur"]["propose"]
-            assert ligne["capacites"]["corriger_correction"] is False
             assert ligne["capacites"]["supprimer_correction"] is True
+        assert lignes[("label_codes",)]["capacites"]["corriger_correction"] is True
+        assert lignes[("source_code",)]["capacites"]["corriger_correction"] is False
         assert lignes[("label_codes",)]["capacites"]["reporter_parent"] is False
         assert lignes[("source_code",)]["capacites"]["reporter_parent"] is True
 
@@ -787,3 +893,21 @@ class TestValeurActuelleFilter:
             modification,
             filtre=filtre(cond("ligne.valeur_actuelle", "icontains", "%")),
         )
+
+
+@pytest.mark.django_db
+def test_choices_of_the_fields(client):
+    LabelQualite.objects.create(code="label_a", libelle="Label A")
+
+    _, choix = get(client, "/champs/choix")
+
+    assert choix["label_codes"]["multiple"] is True
+    assert {"value": "label_a", "label": "Label A (label_a)"} in choix["label_codes"][
+        "choix"
+    ]
+    assert choix["acteur_type_code"]["multiple"] is False
+    assert {"value": "INACTIF", "label": "inactif"} in choix["statut"]["choix"]
+    assert "nom" not in choix
+    services = choix["proposition_service_codes"]
+    assert services["multiple"] is True
+    assert services["actions"] is not None
