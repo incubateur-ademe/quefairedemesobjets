@@ -600,6 +600,11 @@ select {
   --size: min(960px, 90vw);
 }
 
+.taches-active {
+  margin-left: 0.3em;
+  font-weight: 600;
+}
+
 .logs-export {
   margin-bottom: 1em;
 }

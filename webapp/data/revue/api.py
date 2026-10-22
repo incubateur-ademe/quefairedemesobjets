@@ -40,7 +40,6 @@ from data.revue.schemas import (
     GroupeOut,
     GroupePageOut,
     GroupesQuery,
-    JobOut,
     LignePageOut,
     LignesDecisionIn,
     LignesQuery,
@@ -57,12 +56,14 @@ from data.revue.schemas import (
     ReportIn,
     StatsOut,
     StatsQuery,
+    TacheOut,
     UserOut,
 )
 from data.revue.services import decide_groupe, decide_lignes
 from data.revue.services import delete_proposition as delete_proposition_service
 from data.revue.services import report as report_service
 from data.revue.services import upsert_proposition as upsert_proposition_service
+from data.revue.taches import cohorte_taches
 from django.http import HttpRequest, HttpResponse
 from ninja import Query, Router, Status
 
@@ -306,13 +307,16 @@ def mass_preview(request: HttpRequest, cohorte_id: int, payload: MassSelectionIn
 )
 def mass_action(request: HttpRequest, cohorte_id: int, payload: MassActionIn):
     """Runs a mass action. The filter of a « tout le filtre » selection is applied
-    again by the server. Large reports run in the background (202 + job)."""
+    again by the server. Large reports run in the background (202), see /taches."""
     cohorte = cohortes.get_source_cohorte(cohorte_id)
     selection = masse.resolve(cohorte, payload.dict())
     result = masse.run(selection, payload.action, request.auth)
     return Status(202 if "job_id" in result else 200, result)
 
 
-@router.get("/jobs/{job_id}", response={200: JobOut, 404: ErrorOut})
-def job(request: HttpRequest, job_id: str):
-    return masse.job_status(job_id)
+@router.get(
+    "/cohortes/{cohorte_id}/taches", response={200: list[TacheOut], 404: ErrorOut}
+)
+def taches(request: HttpRequest, cohorte_id: int):
+    """Background tasks launched on the cohorte (large reports), most recent first."""
+    return cohorte_taches(cohortes.get_source_cohorte(cohorte_id))

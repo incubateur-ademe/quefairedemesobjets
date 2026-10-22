@@ -1805,7 +1805,7 @@
             }
           }
         },
-        "description": "Runs a mass action. The filter of a « tout le filtre » selection is applied\nagain by the server. Large reports run in the background (202 + job).",
+        "description": "Runs a mass action. The filter of a « tout le filtre » selection is applied\nagain by the server. Large reports run in the background (202), see /taches.",
         "tags": ["Revue suggestions"],
         "requestBody": {
           "content": {
@@ -1824,17 +1824,17 @@
         ]
       }
     },
-    "/api/suggestions/jobs/{job_id}": {
+    "/api/suggestions/cohortes/{cohorte_id}/taches": {
       "get": {
-        "operationId": "data_revue_api_job",
-        "summary": "Job",
+        "operationId": "data_revue_api_taches",
+        "summary": "Taches",
         "parameters": [
           {
             "in": "path",
-            "name": "job_id",
+            "name": "cohorte_id",
             "schema": {
-              "title": "Job Id",
-              "type": "string"
+              "title": "Cohorte Id",
+              "type": "integer"
             },
             "required": true
           }
@@ -1845,7 +1845,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JobOut"
+                  "items": {
+                    "$ref": "#/components/schemas/TacheOut"
+                  },
+                  "title": "Response",
+                  "type": "array"
                 }
               }
             }
@@ -1861,6 +1865,7 @@
             }
           }
         },
+        "description": "Background tasks launched on the cohorte (large reports), most recent first.",
         "tags": ["Revue suggestions"],
         "security": [
           {
@@ -4426,12 +4431,25 @@
         "title": "MassActionIn",
         "type": "object"
       },
-      "JobOut": {
+      "TacheOut": {
         "properties": {
-          "status": {
-            "enum": ["pending", "running", "done", "error"],
-            "title": "Status",
+          "id": {
+            "title": "Id",
             "type": "string"
+          },
+          "statut": {
+            "enum": ["pending", "running", "done", "error"],
+            "title": "Statut",
+            "type": "string"
+          },
+          "action": {
+            "enum": ["report_correction", "report_parent"],
+            "title": "Action",
+            "type": "string"
+          },
+          "groupes": {
+            "title": "Groupes",
+            "type": "integer"
           },
           "affected": {
             "anyOf": [
@@ -4443,10 +4461,58 @@
               }
             ],
             "title": "Affected"
+          },
+          "par": {
+            "title": "Par",
+            "type": "string"
+          },
+          "lancee_le": {
+            "format": "date-time",
+            "title": "Lancee Le",
+            "type": "string"
+          },
+          "debut": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debut"
+          },
+          "fin": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fin"
+          },
+          "erreur": {
+            "title": "Erreur",
+            "type": "string"
           }
         },
-        "required": ["status", "affected"],
-        "title": "JobOut",
+        "required": [
+          "id",
+          "statut",
+          "action",
+          "groupes",
+          "affected",
+          "par",
+          "lancee_le",
+          "debut",
+          "fin",
+          "erreur"
+        ],
+        "title": "TacheOut",
         "type": "object"
       }
     },

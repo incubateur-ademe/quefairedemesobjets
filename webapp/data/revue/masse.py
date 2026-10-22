@@ -5,7 +5,8 @@
 
 Decisions are bulk SQL updates (fast at any size). Reports copy suggestions
 groupe by groupe: synchronous up to SUGGESTION_TASK_ASYNC_THRESHOLD groupes,
-otherwise run by a django-tasks task followed by the client.
+otherwise run by a django-tasks task, followed in the « Tâches » panel
+(data.revue.taches).
 """
 
 from dataclasses import dataclass
@@ -207,7 +208,7 @@ def run(selection: Selection, action: str, user) -> dict:
         raise RevueApiError(422, "invalid", "Refus impossible pour ce type")
     total = preview(selection)[action]
     if action in REPORT_TARGETS:
-        return _report(selection, REPORT_TARGETS[action], total)
+        return _report(selection, REPORT_TARGETS[action], total, user)
     with transaction.atomic():
         if selection.vue == "groupes":
             affected = _decide_groupes(selection, action, user)
@@ -349,40 +350,34 @@ def report_plan(cohorte_id: int, modele: str, plan: dict) -> dict:
 
 
 @task()
-def report_task(cohorte_id: int, modele: str, plan: dict) -> dict:
+def report_task(cohorte_id: int, modele: str, plan: dict, par: str = "") -> dict:
+    """The cohorte comes first: the « Tâches » panel finds the tasks of a cohorte by
+    this argument (data.revue.taches). `par` is only kept for the panel."""
     # JSON keys are strings
     return report_plan(cohorte_id, modele, {int(k): v for k, v in plan.items()})
 
 
-def _report(selection: Selection, modele: str, total: int) -> dict:
+TASK_STATUTS = {
+    TaskResultStatus.READY: "pending",
+    TaskResultStatus.RUNNING: "running",
+    TaskResultStatus.SUCCESSFUL: "done",
+    TaskResultStatus.FAILED: "error",
+}
+
+
+def _report(selection: Selection, modele: str, total: int, user) -> dict:
     plan = _report_plan(selection, modele)
     if len(plan) <= SUGGESTION_TASK_ASYNC_THRESHOLD:
         result = report_plan(selection.cohorte.id, modele, plan)
         return {"affected": result["affected"], "skipped": total - result["affected"]}
     task_result = report_task.enqueue(
-        selection.cohorte.id, modele, {str(k): v for k, v in plan.items()}
+        selection.cohorte.id,
+        modele,
+        {str(k): v for k, v in plan.items()},
+        par=user.get_username() if user else "",
     )
     if task_result.status == TaskResultStatus.SUCCESSFUL:
         # Immediate backend (tests, local): already done
         affected = task_result.return_value["affected"]
         return {"affected": affected, "skipped": total - affected}
     return {"job_id": str(task_result.id), "total": total}
-
-
-def job_status(job_id: str) -> dict:
-    try:
-        result = report_task.get_result(job_id)
-    except Exception as e:  # ResultDoesNotExist, or a backend without results
-        raise RevueApiError(404, "not_found", "Tâche introuvable") from e
-    status = {
-        TaskResultStatus.READY: "pending",
-        TaskResultStatus.RUNNING: "running",
-        TaskResultStatus.SUCCESSFUL: "done",
-        TaskResultStatus.FAILED: "error",
-    }.get(result.status, "pending")
-    affected = (
-        result.return_value["affected"]
-        if result.status == TaskResultStatus.SUCCESSFUL
-        else None
-    )
-    return {"status": status, "affected": affected}

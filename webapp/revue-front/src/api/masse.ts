@@ -1,12 +1,14 @@
-/** Mass actions: preview of the counts, run, follow-up of background jobs, then
- * refresh of the groupes shown on the page (decided elements stay on screen). */
+/** Mass actions: preview of the counts, run, then refresh of the groupes shown on
+ * the page (decided elements stay on screen). Large reports run as background
+ * tasks, followed in the « Tâches » panel: the page is refreshed when one ends. */
 import {
   keepPreviousData,
+  type QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useRef } from "react"
 
 import { useNotifyError } from "../components/common/ErrorToaster"
 import { useApp } from "../context"
@@ -14,7 +16,7 @@ import { toApiSelection, type ListFilter, type Selection } from "../state/select
 import { ApiError, unwrap, type ApiClient } from "./client"
 import { patchGroupeInCaches } from "./mutations"
 import { queryKeys } from "./queries"
-import type { Groupe, GroupePage, Vue } from "./types"
+import type { Groupe, GroupePage, Tache, Vue } from "./types"
 
 export type MassAction =
   "validate" | "reject" | "resubmit" | "report_correction" | "report_parent"
@@ -74,15 +76,33 @@ async function fetchGroupes(api: ApiClient, cohorteId: number, ids: number[]) {
   return groupes
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+/** Reloads the groupes of the page and patches them in place. */
+async function refreshGroupes(
+  api: ApiClient,
+  queryClient: QueryClient,
+  cohorteId: number,
+  ids: number[],
+) {
+  const groupes = await fetchGroupes(api, cohorteId, ids)
+  groupes.forEach((groupe) =>
+    patchGroupeInCaches(queryClient, cohorteId, groupe.id, () => groupe),
+  )
+}
+
+/** Counters and previews changed by a mass action or a background task. */
+function invalidateCounts(queryClient: QueryClient, cohorteId: number) {
+  queryClient.invalidateQueries({ queryKey: queryKeys.stats(cohorteId) })
+  queryClient.invalidateQueries({ queryKey: queryKeys.cohorte(cohorteId) })
+  queryClient.invalidateQueries({ queryKey: ["apercu", cohorteId] })
+  queryClient.invalidateQueries({ queryKey: ["cohortes"] })
+}
 
 export function useMassAction(cohorteId: number) {
   const { api } = useApp()
   const queryClient = useQueryClient()
   const notifyError = useNotifyError()
-  const [job, setJob] = useState<{ total: number } | null>(null)
 
-  const mutation = useMutation({
+  return useMutation({
     mutationFn: async ({
       vue,
       action,
@@ -106,46 +126,66 @@ export function useMassAction(cohorteId: number) {
       if (!response.ok) {
         throw new ApiError(response.status, (error ?? {}) as ApiError["body"])
       }
-      if (response.status === 202 && data && "job_id" in data) {
-        setJob({ total: data.total })
-        try {
-          await waitForJob(api, data.job_id)
-        } finally {
-          setJob(null)
-        }
+      if (response.status === 202) {
+        // Background task: followed by useTaches, which refreshes the page
+        queryClient.invalidateQueries({ queryKey: queryKeys.taches(cohorteId) })
+        return data
       }
-      // The groupes of the page are reloaded and patched in place: the decided
-      // elements stay on screen until the list changes
-      const groupes = await fetchGroupes(api, cohorteId, pageGroupeIds)
-      groupes.forEach((groupe) =>
-        patchGroupeInCaches(queryClient, cohorteId, groupe.id, () => groupe),
-      )
+      // The decided elements stay on screen until the list changes
+      await refreshGroupes(api, queryClient, cohorteId, pageGroupeIds)
       return data
     },
     onError: (error) => notifyError(`Action de masse : ${error.message}`),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats(cohorteId) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.cohorte(cohorteId) })
-      queryClient.invalidateQueries({ queryKey: ["apercu", cohorteId] })
-      queryClient.invalidateQueries({ queryKey: ["cohortes"] })
-    },
+    onSettled: () => invalidateCounts(queryClient, cohorteId),
   })
-  return { ...mutation, job }
 }
 
-async function waitForJob(api: ApiClient, jobId: string) {
-  for (;;) {
-    await sleep(1000)
-    const status = await unwrap(
-      api.GET("/api/suggestions/jobs/{job_id}", {
-        params: { path: { job_id: jobId } },
-      }),
+const POLL_MS = 2000
+
+export const isActive = (tache: Tache) =>
+  tache.statut === "pending" || tache.statut === "running"
+
+/** Background tasks of the cohorte, polled while one is pending or running. When
+ * one ends, the groupes of the page (`pageGroupeIds`) and the counters are
+ * reloaded; a failure is notified. */
+export function useTaches(cohorteId: number, pageGroupeIds: number[]) {
+  const { api } = useApp()
+  const queryClient = useQueryClient()
+  const notifyError = useNotifyError()
+  const query = useQuery({
+    queryKey: queryKeys.taches(cohorteId),
+    queryFn: (): Promise<Tache[]> =>
+      unwrap(
+        api.GET("/api/suggestions/cohortes/{cohorte_id}/taches", {
+          params: { path: { cohorte_id: cohorteId } },
+        }),
+      ),
+    refetchInterval: (query) => (query.state.data?.some(isActive) ? POLL_MS : false),
+  })
+
+  const page = useRef(pageGroupeIds)
+  useEffect(() => {
+    page.current = pageGroupeIds
+  })
+  const active = useRef<Set<string> | null>(null)
+  useEffect(() => {
+    if (!query.data) {
+      return
+    }
+    const ended = query.data.filter(
+      (tache) => active.current?.has(tache.id) && !isActive(tache),
     )
-    if (status.status === "done") {
-      return status
+    active.current = new Set(query.data.filter(isActive).map((tache) => tache.id))
+    if (!ended.length) {
+      return
     }
-    if (status.status === "error") {
-      throw new Error("le report en tâche de fond a échoué")
+    if (ended.some((tache) => tache.statut === "error")) {
+      notifyError("Le report en tâche de fond a échoué : voir le panneau Tâches")
     }
-  }
+    invalidateCounts(queryClient, cohorteId)
+    refreshGroupes(api, queryClient, cohorteId, page.current).catch((error) =>
+      notifyError(error.message),
+    )
+  }, [query.data, api, queryClient, cohorteId, notifyError])
+  return query
 }

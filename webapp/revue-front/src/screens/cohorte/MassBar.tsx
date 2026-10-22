@@ -50,7 +50,6 @@ export function MassBar({
   counts,
   loadingCounts,
   running,
-  job,
   onSelectFilter,
   onClear,
   onRun,
@@ -64,7 +63,6 @@ export function MassBar({
   counts: MassCounts | undefined
   loadingCounts: boolean
   running: boolean
-  job: { total: number } | null
   onSelectFilter: () => void
   onClear: () => void
   onRun: (action: MassAction) => void
@@ -112,9 +110,6 @@ export function MassBar({
       </button>
       <span className="spacer" />
       {(loadingCounts || running) && <WaSpinner />}
-      {job && (
-        <span className="muted">Report en cours ({plural(job.total, "élément")})…</span>
-      )}
       {actions.map((action) => {
         const n = counts?.[action] ?? 0
         return (

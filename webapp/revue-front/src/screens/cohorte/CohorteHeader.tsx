@@ -1,9 +1,10 @@
-import type { CohorteDetail, Stats, Vue } from "../../api/types"
+import type { CohorteDetail, Stats, Tache, Vue } from "../../api/types"
 import { LogsButton } from "../../components/common/LogsButton"
 import { CohorteStatutDot } from "../../components/common/Pill"
 import { formatNumber } from "../../domain/format"
 import { STATUT_ORDER, STATUTS } from "../../domain/statuts"
 import { buildHref, Link, useRouter } from "../../router"
+import { TachesButton } from "./Taches"
 
 const ALWAYS_SHOWN = ["AVALIDER", "ATRAITER", "REJETEE"]
 
@@ -12,12 +13,16 @@ export function CohorteHeader({
   cohorte,
   stats,
   vue,
+  taches,
   onOpenLogs,
+  onOpenTaches,
 }: {
   cohorte: CohorteDetail
   stats: Stats | undefined
   vue: Vue
+  taches: Tache[] | undefined
   onOpenLogs: () => void
+  onOpenTaches: () => void
 }) {
   const { basepath } = useRouter()
   return (
@@ -31,6 +36,7 @@ export function CohorteHeader({
       <span className="muted">{cohorte.execution_datetime}</span>
       {stats && <Counters stats={stats} vue={vue} />}
       <span className="spacer" />
+      {taches && <TachesButton taches={taches} onOpen={onOpenTaches} />}
       <LogsButton cohorteId={cohorte.id} logs={cohorte.logs} onOpen={onOpenLogs} />
     </div>
   )

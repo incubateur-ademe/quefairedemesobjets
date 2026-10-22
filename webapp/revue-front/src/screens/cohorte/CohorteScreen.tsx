@@ -42,6 +42,7 @@ import { cursorItems, GroupesView, ligneCursor, type ModalTab } from "./GroupesV
 import { LignesView } from "./LignesView"
 import { MassBar } from "./MassBar"
 import { PAGE_SIZES, readReviewState, TUPLES_SEPARATOR } from "./searchState"
+import { TachesDrawer } from "./Taches"
 import { TuplesBar } from "./TuplesBar"
 
 const FILTER_HINT =
@@ -151,6 +152,10 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
   const count = selectedCount(selection, total)
   const preview = useMassPreview(cohorteId, state.vue, selection, listFilter, count > 0)
   const massAction = useMassAction(cohorteId)
+  const taches = useTaches(
+    cohorteId,
+    pageGroupes.map((g) => g.id),
+  )
   const checkboxes = {
     isChecked: (id: string) => isSelected(selection, id),
     onToggle: (id: string) => setSelection((current) => toggle(current, id)),
@@ -245,7 +250,12 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
           cohorte={cohorte.data}
           stats={stats.data}
           vue={state.vue}
+          taches={taches.data}
           onOpenLogs={() => setSearch({ logs: String(cohorteId) })}
+          onOpenTaches={() => {
+            setSearch({ taches: "1" })
+            taches.refetch()
+          }}
         />
         <div className="rtitle">
           <Segmented
@@ -334,7 +344,6 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
           counts={preview.data}
           loadingCounts={preview.isFetching}
           running={massAction.isPending}
-          job={massAction.job}
           onSelectFilter={() => setSelection(() => selectFilter())}
           onClear={() => setSelection(() => emptySelection())}
           onRun={(action) =>
@@ -408,6 +417,12 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
       <LogsDrawer
         cohorteId={search.logs ? cohorteId : null}
         onClose={() => setSearch({ logs: undefined })}
+      />
+      <TachesDrawer
+        cohorteId={cohorteId}
+        taches={taches.data}
+        open={Boolean(search.taches)}
+        onClose={() => setSearch({ taches: undefined })}
       />
     </main>
   )
