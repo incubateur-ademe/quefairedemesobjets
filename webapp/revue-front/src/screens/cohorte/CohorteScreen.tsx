@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { useMassAction, useMassPreview } from "../../api/masse"
 import { useGroupeActions } from "../../api/mutations"
 import {
   useCohorte,
@@ -21,15 +22,8 @@ import {
   serializeFilter,
 } from "../../domain/filterModel"
 import { formatNumber } from "../../domain/format"
-import { scrollRowIntoView } from "../../domain/scroll"
+import { scrollRowIntoView, scrollRowToTop } from "../../domain/scroll"
 import { useSearchParams } from "../../router"
-import { WaButton, WaSpinner } from "../../wa"
-import { GroupeModal } from "../groupe-modal/GroupeModal"
-import { CohorteHeader, Counters } from "./CohorteHeader"
-import { cursorItems, GroupesView, ligneCursor, type ModalTab } from "./GroupesView"
-import { LignesView } from "./LignesView"
-import { MassBar } from "./MassBar"
-import { useMassAction, useMassPreview } from "../../api/masse"
 import {
   emptySelection,
   isSelected,
@@ -41,6 +35,12 @@ import {
   type ListFilter,
   type Selection,
 } from "../../state/selection"
+import { WaButton, WaSpinner } from "../../wa"
+import { GroupeModal } from "../groupe-modal/GroupeModal"
+import { CohorteHeader, Counters } from "./CohorteHeader"
+import { cursorItems, GroupesView, ligneCursor, type ModalTab } from "./GroupesView"
+import { LignesView } from "./LignesView"
+import { MassBar } from "./MassBar"
 import { PAGE_SIZES, readReviewState, TUPLES_SEPARATOR } from "./searchState"
 import { TuplesBar } from "./TuplesBar"
 
@@ -200,7 +200,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         const groupe = cursor.groupe()
         if (groupe?.capacites.refuser) {
           actions.decideGroupe(groupe, "reject").catch(() => {})
-          cursor.nextGroupe()
+          cursor.nextGroupe(true)
         }
       } else if (key === "enter") {
         const groupe = cursor.groupe()
@@ -389,7 +389,8 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
 type Cursor = ReturnType<typeof useCursor>
 
 /** Single keyboard cursor over the page: groupe headers and lignes. At an end of
- * the page, moves to the neighbour page. */
+ * the page, moves to the neighbour page. After a decision (`toTop`), the next
+ * position is smoothly scrolled to the top of the table. */
 function useCursor(
   positions: string[],
   groupes: Groupe[],
@@ -401,6 +402,7 @@ function useCursor(
   const [state, setState] = useState<{
     value: string | null
     atEnd?: "first" | "last"
+    toTop?: boolean
   }>({
     value: null,
   })
@@ -413,23 +415,27 @@ function useCursor(
   useEffect(() => {
     if (current) {
       const rows = document.querySelectorAll<HTMLElement>("[data-cursor]")
-      scrollRowIntoView(
-        Array.from(rows).find((row) => row.dataset.cursor === current) ?? null,
-      )
+      const row = Array.from(rows).find((row) => row.dataset.cursor === current) ?? null
+      if (state.toTop) {
+        scrollRowToTop(row)
+      } else {
+        scrollRowIntoView(row)
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scrolls on moves only
   }, [current])
 
-  const set = (value: string) => setState({ value })
-  const move = (delta: 1 | -1) => {
+  const set = (value: string, toTop = false) => setState({ value, toTop })
+  const move = (delta: 1 | -1, toTop = false) => {
     const index = current ? positions.indexOf(current) : -1
     const next = index + delta
     if (next >= 0 && next < positions.length) {
-      set(positions[next])
+      set(positions[next], toTop)
     } else if (delta > 0 && page * pageSize < total) {
-      setState({ value: null, atEnd: "first" })
+      setState({ value: null, atEnd: "first", toTop })
       goToPage(page + 1)
     } else if (delta < 0 && page > 1) {
-      setState({ value: null, atEnd: "last" })
+      setState({ value: null, atEnd: "last", toTop })
       goToPage(page - 1)
     }
   }
@@ -438,15 +444,15 @@ function useCursor(
     const id = current ? Number(current.split(":")[1]) : NaN
     return groupes.find((g) => g.id === id)
   }
-  const nextGroupe = () => {
+  const nextGroupe = (toTop = false) => {
     const index = current ? positions.indexOf(current) : -1
     const next = positions.findIndex(
       (position, i) => i > index && position.startsWith("g:"),
     )
     if (next >= 0) {
-      set(positions[next])
+      set(positions[next], toTop)
     } else {
-      move(1)
+      move(1, toTop)
     }
   }
   return { current, set, move, groupe, nextGroupe }
@@ -464,7 +470,7 @@ function validateAtCursor(
   if (cursor.current.startsWith("g:")) {
     if (groupe.capacites.valider) {
       actions.decideGroupe(groupe, "validate").catch(() => {})
-      cursor.nextGroupe()
+      cursor.nextGroupe(true)
     }
     return
   }
@@ -472,7 +478,7 @@ function validateAtCursor(
   const ligne = groupe.lignes.find((l) => l.key === key)
   if (ligne?.capacites.valider) {
     actions.decideLignes(groupe, [key], "validate").catch(() => {})
-    cursor.move(1)
+    cursor.move(1, true)
   }
 }
 

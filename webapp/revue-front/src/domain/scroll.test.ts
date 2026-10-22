@@ -1,4 +1,4 @@
-import { scrollRowIntoView } from "./scroll"
+import { scrollRowIntoView, scrollRowToTop } from "./scroll"
 
 function layout(rowTop: number, rowHeight: number) {
   document.body.innerHTML = `<div class="scroll"><table><thead><tr><th>h</th></tr></thead>
@@ -30,5 +30,20 @@ describe("scrollRowIntoView", () => {
     const container = layout(200, 30)
     scrollRowIntoView(document.querySelector("#row"))
     expect(container.scrollTop).toBe(1000)
+  })
+})
+
+describe("scrollRowToTop", () => {
+  it("places a row below the sticky header", () => {
+    const container = layout(300, 30)
+    const scrollTo = jest.spyOn(container, "scrollTo")
+    scrollRowToTop(document.querySelector("#row"))
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1000 + 160, behavior: "smooth" })
+  })
+
+  it("places a row hidden under the sticky header", () => {
+    const container = layout(110, 30)
+    scrollRowToTop(document.querySelector("#row"))
+    expect(container.scrollTop).toBe(1000 - 30)
   })
 })

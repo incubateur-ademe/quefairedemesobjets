@@ -958,12 +958,13 @@ tr:hover .editbtn,
   border-top: 0;
 }
 
-.stream tr.ln.st-ATRAITER td {
+.stream tr.ln.st-ATRAITER td,
+.stream tbody.gbody tr.ghead.st-ATRAITER td {
   background: var(--ok-soft);
 }
 
 .stream tr.ln.st-REJETEE td,
-.stream tr.ghead.st-REJETEE td {
+.stream tbody.gbody tr.ghead.st-REJETEE td {
   background: var(--danger-soft);
 }
 
@@ -1025,30 +1026,81 @@ tr:hover .editbtn,
   height: 5px;
 }
 
-/* cursor: the groupe header is much more marked than its lignes */
+/* cursor on a groupe: its header is much more marked than its lignes; cursor on
+ * a ligne: the reverse. Validated or rejected: green or red instead of blue. */
 .stream tbody.gfocus tr.ln > td {
   background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface)) !important;
 }
 
-.stream tbody.gfocus tr.ln > td.gutter {
-  box-shadow: inset 3px 0 0 var(--accent-line);
+.stream tbody.gfocus.st-ATRAITER tr.ln > td {
+  background: color-mix(in srgb, var(--ok-soft) 60%, var(--surface)) !important;
+}
+
+.stream tbody.gfocus.st-REJETEE tr.ln > td {
+  background: color-mix(in srgb, var(--danger-soft) 60%, var(--surface)) !important;
 }
 
 .stream tr.ghead.cur > td {
-  border-top-color: var(--accent) !important;
   background: color-mix(in srgb, var(--accent) 22%, var(--surface)) !important;
-}
-
-.stream tr.ghead.cur > td.gutter {
-  box-shadow: inset 5px 0 0 var(--accent);
 }
 
 .stream tr.ln.cur > td {
   background: var(--accent-soft) !important;
 }
 
-.stream tr.ln.cur > td:first-child {
-  box-shadow: inset 3px 0 0 var(--accent);
+.stream tr.ln.cur.st-ATRAITER > td,
+.stream tr.ghead.cur.st-ATRAITER > td {
+  background: color-mix(in srgb, var(--ok) 15%, var(--ok-soft)) !important;
+}
+
+.stream tr.ln.cur.st-REJETEE > td,
+.stream tr.ghead.cur.st-REJETEE > td {
+  background: color-mix(in srgb, var(--danger) 15%, var(--danger-soft)) !important;
+}
+
+/* frame of the cursor: around the ligne, or around the groupe and its lignes */
+.stream tr.ln.cur,
+.stream tbody.gfocus {
+  --frame: var(--accent);
+}
+
+.stream tr.ln.cur.st-ATRAITER,
+.stream tbody.gfocus.st-ATRAITER {
+  --frame: var(--ok);
+}
+
+.stream tr.ln.cur.st-REJETEE,
+.stream tbody.gfocus.st-REJETEE {
+  --frame: var(--danger);
+}
+
+.stream tr.ln.cur > td,
+.stream tbody.gfocus > tr > td {
+  box-shadow:
+    inset var(--frame-left, 0px) 0 0 var(--frame),
+    inset calc(-1 * var(--frame-right, 0px)) 0 0 var(--frame),
+    inset 0 var(--frame-top, 0px) 0 var(--frame),
+    inset 0 calc(-1 * var(--frame-bottom, 0px)) 0 var(--frame);
+}
+
+.stream tr.ln.cur > td,
+.stream tbody.gfocus > tr:first-child > td {
+  --frame-top: 2px;
+}
+
+.stream tr.ln.cur > td,
+.stream tbody.gfocus > tr:last-child > td {
+  --frame-bottom: 2px;
+}
+
+.stream tr.ln.cur > td:first-child,
+.stream tbody.gfocus > tr > td:first-child {
+  --frame-left: 2px;
+}
+
+.stream tr.ln.cur > td:last-child,
+.stream tbody.gfocus > tr > td:last-child {
+  --frame-right: 2px;
 }
 
 /* keyboard shortcuts help */

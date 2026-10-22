@@ -444,7 +444,7 @@ export function GroupesView({
       {groupes.map((groupe) => (
         <tbody
           key={groupe.id}
-          className={`gbody${cursor === groupeCursor(groupe) ? " gfocus" : ""}`}
+          className={`gbody st-${groupe.statut}${cursor === groupeCursor(groupe) ? " gfocus" : ""}`}
         >
           <GroupeHeaderRow
             groupe={groupe}
