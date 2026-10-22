@@ -755,6 +755,7 @@ select {
 }
 
 .cmp td.c-tgt {
+  min-width: 18rem;
   background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface));
 }
 
