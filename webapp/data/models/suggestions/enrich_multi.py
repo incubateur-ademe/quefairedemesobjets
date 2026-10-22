@@ -28,6 +28,23 @@ from qfdmo.models.acteur import Acteur, RevisionActeur
 
 logger = logging.getLogger(__name__)
 
+# SuggestionCohorte.type_action handled by SuggestionGroupeTypeEnrichMulti
+ENRICH_MULTI_TYPE_ACTIONS = [
+    SuggestionAction.CRAWL_URLS,
+    SuggestionAction.ENRICH_ACTEURS_SIRET,
+    SuggestionAction.ENRICH_ACTEURS_SIREN,
+    SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
+    SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+    SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
+    SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+    SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO,
+]
+
+
+def _as_str(value) -> str:
+    """Acteur values may be non-string (e.g. booleans) or None"""
+    return "" if value is None else str(value)
+
 
 def _format_siret_label(siret: str) -> str:
     if not siret:
@@ -190,7 +207,7 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                             FieldInCell(
                                 field_name=champ,
                                 display_html=display_diff_values(
-                                    (
+                                    _as_str(
                                         getattr(parent_revision_acteur, champ)
                                         if parent_revision_acteur
                                         else ""
@@ -220,7 +237,10 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                     )
                 )
             else:
-                identifiant_unique = suggestion_unitaire.revision_acteur_id
+                identifiant_unique = (
+                    suggestion_unitaire.revision_acteur_id
+                    or suggestion_unitaire.acteur_id
+                )
                 revision_acteur = (
                     RevisionActeur.objects.filter(
                         identifiant_unique=identifiant_unique
@@ -245,7 +265,9 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                         fields=[
                             FieldInCell(
                                 field_name=champ,
-                                display_html=getattr(acteur, champ),
+                                # Some fields only exist on RevisionActeur
+                                # (e.g. parent_reason)
+                                display_html=_as_str(getattr(acteur, champ, None)),
                             )
                             for champ in suggestion_unitaire.champs
                         ],
@@ -258,10 +280,13 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                             FieldInCell(
                                 field_name=champ,
                                 display_html=display_diff_values(
-                                    (
-                                        getattr(revision_acteur, champ)
-                                        if revision_acteur
-                                        else getattr(acteur, champ)
+                                    _as_str(
+                                        getattr(acteur, champ)
+                                        if suggestion_unitaire.suggestion_modele
+                                        == "Acteur"
+                                        # Diff with the value which will be
+                                        # overwritten in the RevisionActeur
+                                        else getattr(revision_acteur, champ, None)
                                     ),
                                     valeur,
                                 ),
@@ -310,15 +335,16 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
                         ),
                     )
                 )
-                links.append(
-                    LinkInCell(
-                        label="Correction",
-                        url=reverse(
-                            "qfdmo:getorcreate_revisionacteur",
-                            args=[identifiant_unique],
-                        ),
+                if suggestion_unitaire.suggestion_modele != "Acteur":
+                    links.append(
+                        LinkInCell(
+                            label="Correction",
+                            url=reverse(
+                                "qfdmo:getorcreate_revisionacteur",
+                                args=[identifiant_unique],
+                            ),
+                        )
                     )
-                )
             label_cell = CellHtmlContent(
                 column_key="label",
                 html_content=row_label,
@@ -333,7 +359,26 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
 
         # Acteur suggestions
         for acteur_suggestion_unitaire in suggestion_groupe.suggestion_unitaires.all():
-            if acteur_suggestion_unitaire.suggestion_modele == "RevisionActeur":
+            if acteur_suggestion_unitaire.suggestion_modele == "Acteur":
+                # Direct update of the Acteur, without creating a revision
+                # (e.g. RGPD anonymization, code postal normalization)
+                identifiant_unique = acteur_suggestion_unitaire.acteur_id
+                if not identifiant_unique:
+                    raise ValueError(
+                        "No identifiant_unique found for acteur_suggestion_unitaire"
+                        f" {acteur_suggestion_unitaire}"
+                    )
+                acteur_data = {
+                    champ: valeur
+                    for champ, valeur in zip(
+                        acteur_suggestion_unitaire.champs,
+                        acteur_suggestion_unitaire.valeurs,
+                    )
+                }
+                acteur = self._apply_one(Acteur, identifiant_unique, acteur_data)
+                self._set_acteur_linked_objects(acteur, acteur_data)
+
+            elif acteur_suggestion_unitaire.suggestion_modele == "RevisionActeur":
                 identifiant_unique = (
                     acteur_suggestion_unitaire.revision_acteur_id
                     or acteur_suggestion_unitaire.acteur_id

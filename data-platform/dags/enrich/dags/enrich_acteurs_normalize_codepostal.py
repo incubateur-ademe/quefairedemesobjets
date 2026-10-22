@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.sdk import Param
 from airflow.sdk.bases.operator import chain
 from enrich.tasks.airflow_logic.db_read_acteur_cp_task import db_read_acteur_cp_task
 from enrich.tasks.airflow_logic.db_write_cp_suggestions_task import (
@@ -20,6 +21,16 @@ with DAG(
     tags=[TAGS.ENRICH, TAGS.ACTEURS, TAGS.CP],
     schedule=None,
     start_date=START_DATES.DEFAULT,
+    params={
+        "use_legacy_suggestions": Param(
+            False,
+            type="boolean",
+            description_md="""**🔄 Utilisation des suggestions legacy**:
+            si coché, les suggestions seront basées sur les suggestions legacy
+            sinon, les suggestions seront basées sur les groupes de suggestions
+            """,
+        ),
+    },
 ) as dag:
     db_read_acteur_cp = db_read_acteur_cp_task(dag)
     acteur_cp_normalize = normalize_acteur_cp_task(dag)

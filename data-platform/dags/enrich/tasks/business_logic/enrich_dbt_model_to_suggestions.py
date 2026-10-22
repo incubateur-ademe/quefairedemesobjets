@@ -214,22 +214,13 @@ COHORTS_TO_PREPARE_CHANGES = {
 }
 
 
-def enrich_dbt_model_to_suggestions(
-    df: pd.DataFrame,
-    cohort: str,
-    identifiant_action: str,
-    dry_run: bool = True,
-) -> bool:
+def cohort_to_suggestion_action(cohort: str) -> str:
+    """Returns the SuggestionAction (SuggestionCohorte.type_action) of a cohort"""
     from utils.django import django_setup_full
 
     django_setup_full()
 
-    from data.models.suggestion import (
-        Suggestion,
-        SuggestionAction,
-        SuggestionCohorte,
-        SuggestionStatut,
-    )
+    from data.models.suggestion import SuggestionAction
 
     # TODO: once all suggestions have been migrated to pydantic, we no
     # longer need SuggestionCohorte.type_action and any of the following
@@ -250,6 +241,24 @@ def enrich_dbt_model_to_suggestions(
             SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO
         ),
     }
+    return COHORTS_TO_SUGGESTION_ACTION[cohort]
+
+
+def enrich_dbt_model_to_suggestions(
+    df: pd.DataFrame,
+    cohort: str,
+    identifiant_action: str,
+    dry_run: bool = True,
+) -> bool:
+    from utils.django import django_setup_full
+
+    django_setup_full()
+
+    from data.models.suggestion import (
+        Suggestion,
+        SuggestionCohorte,
+        SuggestionStatut,
+    )
 
     # Validation
     if df is None or df.empty:
@@ -301,7 +310,7 @@ def enrich_dbt_model_to_suggestions(
         identifiant_action=identifiant_action,
         identifiant_execution=f"{cohort}",
         statut=SuggestionStatut.AVALIDER,
-        type_action=COHORTS_TO_SUGGESTION_ACTION[cohort],
+        type_action=cohort_to_suggestion_action(cohort),
         metadata={"🔢 Nombre de suggestions": len(suggestions)},
     )
     db_cohort.save()

@@ -589,7 +589,14 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         )
 
     def apply(self):
-        from data.models.suggestions.enrich_multi import SuggestionGroupeTypeEnrichMulti
+        from data.models.suggestions.enrich_acteur import (
+            ENRICH_ACTEUR_TYPE_ACTIONS,
+            SuggestionGroupeTypeEnrichActeur,
+        )
+        from data.models.suggestions.enrich_multi import (
+            ENRICH_MULTI_TYPE_ACTIONS,
+            SuggestionGroupeTypeEnrichMulti,
+        )
         from data.models.suggestions.source import SuggestionGroupeTypeSource
 
         type_action = self.suggestion_cohorte.type_action
@@ -599,12 +606,9 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
             SuggestionAction.SOURCE_SUPPRESSION,
         ]:
             SuggestionGroupeTypeSource.from_suggestion_groupe(self).apply()
-        elif type_action in [
-            SuggestionAction.CRAWL_URLS,
-            SuggestionAction.ENRICH_ACTEURS_SIRET,
-            SuggestionAction.ENRICH_ACTEURS_SIREN,
-            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
-        ]:
+        elif type_action in ENRICH_ACTEUR_TYPE_ACTIONS:
+            SuggestionGroupeTypeEnrichActeur.from_suggestion_groupe(self).apply()
+        elif type_action in ENRICH_MULTI_TYPE_ACTIONS:
             SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
 
     def suggestions_can_be_applied_to_parent(self) -> bool:
