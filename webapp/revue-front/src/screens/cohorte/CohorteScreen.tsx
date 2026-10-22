@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { useMassAction, useMassPreview } from "../../api/masse"
+import { useMassAction, useMassPreview, useTaches } from "../../api/masse"
 import { useGroupeActions } from "../../api/mutations"
 import {
   useCohorte,
