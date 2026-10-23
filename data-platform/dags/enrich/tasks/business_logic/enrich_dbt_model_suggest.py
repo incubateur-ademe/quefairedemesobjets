@@ -16,7 +16,7 @@ def enrich_dbt_model_suggest(
     filters: list[dict],
     cohort: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
     use_legacy_suggestions: bool = False,
 ) -> bool:
     """Reads a DBT model and generates suggestions for it"""

@@ -248,17 +248,13 @@ def enrich_dbt_model_to_suggestions(
     df: pd.DataFrame,
     cohort: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
 ) -> bool:
     from utils.django import django_setup_full
 
     django_setup_full()
 
-    from data.models.suggestion import (
-        Suggestion,
-        SuggestionCohorte,
-        SuggestionStatut,
-    )
+    from data.models.suggestion import Suggestion, SuggestionCohorte, SuggestionStatut
 
     # Validation
     if df is None or df.empty:
