@@ -25,11 +25,16 @@ from data.models.suggestion import (
 )
 from data.models.suggestions.abstract import SuggestionGroupeType
 from django.contrib.admin.utils import quote
-from django.core.exceptions import FieldDoesNotExist, ValidationError
+from django.core.exceptions import (
+    FieldDoesNotExist,
+    ObjectDoesNotExist,
+    ValidationError,
+)
 from django.db import models as django_models
 from django.urls import reverse
 from django.utils.html import escape, format_html
 from qfdmo.models.acteur import Acteur, DisplayedActeur, RevisionActeur
+from qfdmo.models.utils import CodeAsNaturalKeyModel, django_model_from_wire
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +69,8 @@ MAP_COLORS = {
 
 COORDINATES_FIELDS = ["latitude", "longitude"]
 
+EMPTY_VALUE = "∅ vide"
+
 
 def _as_str(value) -> str:
     return "" if value is None else str(value)
@@ -81,6 +88,10 @@ def _cast_parent_valeur(champ: str, valeur: str):
     if valeur == "":
         return None if field.null or field.is_relation else ""
     if isinstance(field, django_models.ForeignKey):
+        # Serialized by the DAG with django_model_to_wire: code if the related
+        # model has one (e.g. acteur_type), else pk; resolved by data_reconstruct
+        if issubclass(field.related_model, CodeAsNaturalKeyModel):
+            return valeur
         return field.target_field.to_python(valeur)
     if field.is_relation:
         # e.g. perimetre_adomiciles, serialized as JSON by the DAG
@@ -283,6 +294,23 @@ class SuggestionGroupeTypeCluster(SuggestionGroupeType):
             ],
         )
 
+    def _parent_changed_fields_html(
+        self, change_model_name: str, sus: list[SuggestionUnitaire]
+    ) -> str:
+        """Fields modified on the parent, detailed in the parent table"""
+        if change_model_name not in PARENT_CHANGES:
+            return ""
+        parent_revision_acteur = self.revision_acteurs_by_id.get(self.parent_id or "")
+        champs = [
+            champ
+            for su in sus
+            for champ, valeur in zip(su.champs, su.valeurs)
+            if valeur != _as_str(getattr(parent_revision_acteur, champ, None))
+        ]
+        if not champs:
+            return ""
+        return format_html("<br/>✏️ <small>Modifié(s) : {}</small>", ", ".join(champs))
+
     def to_comparison_table(self, errors: dict | None = None) -> ComparisonTable:
         """1 row per acteur of the cluster: parent, children, parents to delete"""
         exact_fields = self.contexte.get("cluster_fields_exact", [])
@@ -330,10 +358,11 @@ class SuggestionGroupeTypeCluster(SuggestionGroupeType):
                 CellHtmlContent(
                     column_key="role",
                     html_content=format_html(
-                        "{}<br/><small>{}. {}</small>",
+                        "{}<br/><small>{}. {}</small>{}",
                         ROLES[change_model_name],
                         sus[0].ordre,
                         raison,
+                        self._parent_changed_fields_html(change_model_name, sus),
                     ),
                 ),
                 CellHtmlContent(
@@ -404,7 +433,14 @@ class SuggestionGroupeTypeCluster(SuggestionGroupeType):
                             CellHtmlContent(
                                 column_key="current",
                                 html_content=(
-                                    escape(", ".join(currents))
+                                    # Explicit empty value (e.g. NULL boolean),
+                                    # otherwise the change looks like nothing
+                                    escape(
+                                        ", ".join(
+                                            current or EMPTY_VALUE
+                                            for current in currents
+                                        )
+                                    )
                                     if parent_revision_acteur
                                     else "🚫"
                                 ),
@@ -439,30 +475,115 @@ class SuggestionGroupeTypeCluster(SuggestionGroupeType):
                 )
         return ComparisonTable(columns=columns, rows=rows)
 
+    def _coordinates(self, identifiant_unique: str) -> tuple[float, float] | None:
+        latitude = self._value(identifiant_unique, "latitude")
+        longitude = self._value(identifiant_unique, "longitude")
+        if latitude in [None, ""] or longitude in [None, ""]:
+            return None
+        return float(latitude), float(longitude)
+
+    def _parent_coordinates(self) -> tuple[float, float] | None:
+        """Suggested parent location, else current parent location"""
+        suggested = self._parent_suggested_data()
+        if suggested.get("latitude") and suggested.get("longitude"):
+            return float(suggested["latitude"]), float(suggested["longitude"])
+        parent_revision_acteur = self.revision_acteurs_by_id.get(self.parent_id or "")
+        if parent_revision_acteur and parent_revision_acteur.location:
+            return parent_revision_acteur.latitude, parent_revision_acteur.longitude
+        return None
+
     def map_points(self) -> list[dict]:
         points = []
         for change_model_name, identifiant_unique, _ in self._changes():
-            latitude = self._value(identifiant_unique, "latitude")
-            longitude = self._value(identifiant_unique, "longitude")
-            if latitude in [None, ""] or longitude in [None, ""]:
+            if change_model_name in PARENT_CHANGES:
+                continue
+            coordinates = self._coordinates(identifiant_unique)
+            if coordinates is None:
                 continue
             points.append(
                 {
                     "key": f"cluster-{identifiant_unique}",
-                    "latitude": float(latitude),
-                    "longitude": float(longitude),
+                    "latitude": coordinates[0],
+                    "longitude": coordinates[1],
                     "color": MAP_COLORS[change_model_name],
                     "draggable": False,
-                    "text": "P" if change_model_name in PARENT_CHANGES else "",
+                    "text": "",
                 }
             )
+
+        # Parent to create or keep: draggable to edit its suggested location,
+        # placed at the center of the cluster if it has no location yet
+        parent_coordinates = self._parent_coordinates()
+        if parent_coordinates is None and points:
+            parent_coordinates = (
+                sum(point["latitude"] for point in points) / len(points),
+                sum(point["longitude"] for point in points) / len(points),
+            )
+        if parent_coordinates is None:
+            return points
+
+        parent_revision_acteur = self.revision_acteurs_by_id.get(self.parent_id or "")
+        if (
+            parent_revision_acteur
+            and parent_revision_acteur.location
+            and (parent_revision_acteur.latitude, parent_revision_acteur.longitude)
+            != parent_coordinates
+        ):
+            points.append(
+                {
+                    "key": "cluster-parent-current",
+                    "latitude": parent_revision_acteur.latitude,
+                    "longitude": parent_revision_acteur.longitude,
+                    "color": "blue",
+                    "draggable": False,
+                    "text": "",
+                }
+            )
+        points.append(
+            {
+                # Used as suggestion_modele by the suggestion-map-update controller
+                "key": "ParentRevisionActeur",
+                "latitude": parent_coordinates[0],
+                "longitude": parent_coordinates[1],
+                "color": MAP_COLORS[CREATE_AS_PARENT],
+                "draggable": True,
+                "text": "P",
+            }
+        )
         return points
+
+    def _parent_coordinates_suggestion_unitaire(self) -> SuggestionUnitaire | None:
+        """Parent latitude/longitude SuggestionUnitaire, created if the parent
+        data has no location (e.g. location not enriched by the DAG)"""
+        parent_sus = [
+            su
+            for su in self.suggestion_unitaires
+            if su.parametres.get("change_model_name") in PARENT_CHANGES
+        ]
+        if not parent_sus:
+            return None
+        su = SuggestionUnitaire.objects.create(
+            suggestion_groupe=self.suggestion_groupe,
+            statut=parent_sus[0].statut,
+            parent_revision_acteur_id=self.parent_id,
+            suggestion_modele=parent_sus[0].suggestion_modele,
+            ordre=parent_sus[0].ordre,
+            raison=parent_sus[0].raison,
+            parametres=parent_sus[0].parametres,
+            champs=COORDINATES_FIELDS,
+            valeurs=["", ""],
+        )
+        self.suggestion_unitaires.append(su)
+        return su
 
     def update_suggestion_unitaire(
         self, suggestion_modele: str, identifiant_unique: str, fields_values: dict
     ) -> dict | None:
         """Update the valeurs of the edited SuggestionUnitaire, returns the
         errors if any"""
+        if suggestion_modele == "ParentRevisionActeur" and not identifiant_unique:
+            # Parent marker dragged on the map
+            identifiant_unique = self.parent_id or ""
         for champ, valeur in fields_values.items():
             valeur = _as_str(valeur).strip()
             su = next(
@@ -475,6 +596,13 @@ class SuggestionGroupeTypeCluster(SuggestionGroupeType):
                 ),
                 None,
             )
+            if (
+                su is None
+                and suggestion_modele == "ParentRevisionActeur"
+                and identifiant_unique == self.parent_id
+                and champ in COORDINATES_FIELDS
+            ):
+                su = self._parent_coordinates_suggestion_unitaire()
             if su is None:
                 return {champ: f"Pas de suggestion {champ} pour {identifiant_unique}"}
 
@@ -488,8 +616,23 @@ class SuggestionGroupeTypeCluster(SuggestionGroupeType):
                     return {champ: f"Parent {valeur} inexistant"}
             else:
                 try:
-                    _cast_parent_valeur(champ, valeur)
-                except (ValueError, TypeError, ValidationError) as e:
+                    casted = _cast_parent_valeur(champ, valeur)
+                    field = (
+                        None
+                        if champ in COORDINATES_FIELDS
+                        else RevisionActeur._meta.get_field(champ)
+                    )
+                    if isinstance(field, django_models.ForeignKey) and casted:
+                        django_model_from_wire(field.related_model, casted)
+                except ObjectDoesNotExist:
+                    return {champ: f"{valeur} inexistant pour {champ}"}
+                except (
+                    ValueError,
+                    TypeError,
+                    ValidationError,
+                    FieldDoesNotExist,
+                    json.JSONDecodeError,
+                ) as e:
                     return {champ: f"Valeur invalide pour {champ}: {e}"}
 
             valeurs = list(su.valeurs)

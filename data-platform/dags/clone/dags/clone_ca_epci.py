@@ -19,7 +19,6 @@ with DAG(
         "Clone le jeu de données 'epci' de Contours Administratifs dans notre DB"
     ),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.CONTOURS_ADMINISTRATIFS,
         TAGS.EPCI,

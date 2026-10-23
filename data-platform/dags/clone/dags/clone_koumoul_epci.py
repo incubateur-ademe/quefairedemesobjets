@@ -21,7 +21,6 @@ with DAG(
     start_date=START_DATES.DEFAULT,
     description=("Clone le jeu de données 'epci' de Koumoul dans notre DB"),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.KOUMOUL,
         TAGS.EPCI,

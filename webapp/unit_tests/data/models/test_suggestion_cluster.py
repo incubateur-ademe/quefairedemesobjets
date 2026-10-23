@@ -9,7 +9,11 @@ from unit_tests.data.models.suggestion_factory import (
     SuggestionGroupeFactory,
     SuggestionUnitaireFactory,
 )
-from unit_tests.qfdmo.acteur_factory import ActeurFactory, RevisionActeurFactory
+from unit_tests.qfdmo.acteur_factory import (
+    ActeurFactory,
+    ActeurTypeFactory,
+    RevisionActeurFactory,
+)
 
 
 def _parent_id_su(suggestion_groupe, identifiant_unique, change_model_name, valeur):
@@ -150,3 +154,78 @@ class TestSuggestionGroupeTypeCluster:
         assert response.status_code == 200
         su = suggestion_groupe.suggestion_unitaires.get(revision_acteur_id="CHILD")
         assert su.valeurs == [""]
+
+    def test_map_parent_pin_draggable(self, suggestion_groupe):
+        sg_type = SuggestionGroupeTypeCluster.from_suggestion_groupe(suggestion_groupe)
+        parent_points = [point for point in sg_type.map_points() if point["draggable"]]
+
+        assert len(parent_points) == 1
+        assert parent_points[0]["key"] == "ParentRevisionActeur"
+
+    def test_drag_parent_pin(self, admin_client, suggestion_groupe):
+        url = reverse("data:suggestion_groupe", args=[suggestion_groupe.id])
+
+        # Same payload as the suggestion-map-update controller
+        response = admin_client.post(
+            url,
+            {
+                "suggestion_modele": "ParentRevisionActeur",
+                "identifiant_unique": "",
+                "fields_values": '{"latitude": 48.1, "longitude": -0.7}',
+                "fields_groups": '[["latitude", "longitude"]]',
+                "tab": "localisation",
+            },
+        )
+        assert response.status_code == 200
+        su = suggestion_groupe.suggestion_unitaires.get(
+            champs=["latitude", "longitude"]
+        )
+        assert su.valeurs == ["48.1", "-0.7"]
+        assert su.parametres == {"change_model_name": "acteur_keep_as_parent"}
+
+        suggestion_groupe.apply()
+
+        parent = RevisionActeur.objects.get(pk="P1")
+        assert (parent.latitude, parent.longitude) == (48.1, -0.7)
+
+    def test_parent_changes_visible(self, suggestion_groupe):
+        context = get_context_from_suggestion_groupe(suggestion_groupe)
+
+        parent_row = context["comparison_table"].rows[0]
+        role = next(cell for cell in parent_row.cells if cell.column_key == "role")
+        assert "Modifié(s) : nom" in role.html_content
+
+    def test_apply_parent_foreign_key_as_code(self, suggestion_groupe):
+        # The DAG serializes foreign keys with their code (django_model_to_wire)
+        ActeurTypeFactory(code="commerce")
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="ParentRevisionActeur",
+            parent_revision_acteur_id="P1",
+            ordre=1,
+            parametres={"change_model_name": "acteur_keep_as_parent"},
+            champs=["acteur_type"],
+            valeurs=["commerce"],
+        )
+
+        suggestion_groupe.apply()
+
+        assert RevisionActeur.objects.get(pk="P1").acteur_type.code == "commerce"
+
+    def test_update_parent_foreign_key_unknown_code(self, suggestion_groupe):
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="ParentRevisionActeur",
+            parent_revision_acteur_id="P1",
+            ordre=1,
+            parametres={"change_model_name": "acteur_keep_as_parent"},
+            champs=["acteur_type"],
+            valeurs=["commerce"],
+        )
+        sg_type = SuggestionGroupeTypeCluster.from_suggestion_groupe(suggestion_groupe)
+
+        errors = sg_type.update_suggestion_unitaire(
+            "ParentRevisionActeur", "P1", {"acteur_type": "inconnu"}
+        )
+
+        assert errors == {"acteur_type": "inconnu inexistant pour acteur_type"}

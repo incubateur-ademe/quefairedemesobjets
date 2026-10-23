@@ -28,9 +28,6 @@ logger = logging.getLogger(__name__)
 MODELE_REVISION_ACTEUR = "RevisionActeur"
 MODELE_PARENT_REVISION_ACTEUR = "ParentRevisionActeur"
 
-# Grouped fields, the same way as the source suggestions
-GROUPED_FIELDS = [("latitude", "longitude")]
-
 
 def _json_ready(value):
     """Make a dataframe value storable in a JSONField"""
@@ -60,6 +57,8 @@ def _valeur_to_str(value) -> str:
 def _unitaires_parent(change: dict) -> list[dict]:
     """1 unitaire per field of the parent data (latitude/longitude grouped), or
     1 unitaire without field if there is no data, so the change exists"""
+    from data.models.suggestions.constants import GROUPED_FIELDS
+
     data = change["model_params"].get("data") or {}
     champs_groupes = [
         champs for champs in GROUPED_FIELDS if all(champ in data for champ in champs)
