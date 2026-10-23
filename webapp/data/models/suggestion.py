@@ -589,6 +589,10 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         )
 
     def apply(self):
+        from data.models.suggestions.cluster import (
+            CLUSTER_TYPE_ACTIONS,
+            SuggestionGroupeTypeCluster,
+        )
         from data.models.suggestions.enrich_acteur import (
             ENRICH_ACTEUR_TYPE_ACTIONS,
             SuggestionGroupeTypeEnrichActeur,
@@ -610,6 +614,8 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
             SuggestionGroupeTypeEnrichActeur.from_suggestion_groupe(self).apply()
         elif type_action in ENRICH_MULTI_TYPE_ACTIONS:
             SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
+        elif type_action in CLUSTER_TYPE_ACTIONS:
+            SuggestionGroupeTypeCluster.from_suggestion_groupe(self).apply()
 
     def suggestions_can_be_applied_to_parent(self) -> bool:
         return (

@@ -1,0 +1,49 @@
+{# Footer of a CLUSTERING SuggestionGroupe, see SuggestionGroupeTypeCluster #}
+{% load admin_data_tags %}
+
+{% if cluster.parent_comparison_table.rows %}
+    <h4 class="qf-mt-3w">Données du parent</h4>
+    {% include "data/_partials/comparison_table.html" with table=cluster.parent_comparison_table %}
+{% endif %}
+
+{% if cluster.localisation %}
+    <h4 class="qf-mt-3w">Carte du cluster</h4>
+    <div class="qf-flex qf-gap-2 qf-flex-row">
+        <div class="qf-w-1/2 qf-aspect-video qf-relative"
+             data-controller="map"
+             data-map-initial-zoom-value="3"
+             data-map-theme-value="osm">
+            <div data-map-target="mapContainer" class="qf-inset-0 qf-h-full qf-relative qf-z-0">
+                {% for point in cluster.localisation.points %}
+                    {% generic_location_pinpoint_tag point.key point.latitude point.longitude point.color point.draggable point.text %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="qf-w-1/2 qf-flex qf-flex-col qf-gap-2w">
+            <h3>Légende</h3>
+            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w qf-mt-3w">
+                {% generic_location_pinpoint_tag "legend-cluster-parent" 0 0 "blue" False "P" %}
+                <span class="qf-mb-3w">Parent créé ou conservé</span>
+            </div>
+            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w">
+                {% generic_location_pinpoint_tag "legend-cluster-point" 0 0 "green" %}
+                <span class="qf-mb-3w">Acteur à rattacher au parent</span>
+            </div>
+            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w">
+                {% generic_location_pinpoint_tag "legend-cluster-child" 0 0 "grey" %}
+                <span class="qf-mb-3w">Acteur déjà enfant du parent</span>
+            </div>
+            <div class="qf-flex qf-flex-row qf-items-center qf-gap-1w">
+                {% generic_location_pinpoint_tag "legend-cluster-delete" 0 0 "red" %}
+                <span class="qf-mb-3w">Parent à supprimer</span>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if cluster.contexte.fuzzy_details %}
+    <details class="qf-mt-3w">
+        <summary>Détails fuzzy (contexte de clustering)</summary>
+        {% include "data/_partials/value_details.html" with value=cluster.contexte.fuzzy_details %}
+    </details>
+{% endif %}

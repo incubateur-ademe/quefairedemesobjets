@@ -68,6 +68,12 @@ exclus_string = "  \n".join([", ".join(chunck) for chunck in fields_enrich_exclu
 
 DAG_ID = "cluster_acteur_suggestions"
 PARAMS = {
+    "use_legacy_suggestions": Param(
+        False,
+        type="boolean",
+        description_md="""🔄 Si coché, les suggestions seront écrites au format legacy
+            (Suggestion), sinon au format groupes (SuggestionGroupe)""",
+    ),
     "dry_run": Param(
         False,
         type="boolean",
