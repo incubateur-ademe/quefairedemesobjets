@@ -27,20 +27,20 @@ export function LigneHead() {
   return (
     <>
       <th>Champ(s)</th>
-      <th>
+      <th className="c-cmp">
         Acteur importé
         <span className="hsub">suggestion de la source, non corrigeable</span>
       </th>
       <th className="c-rep" title="Reporter vers la correction">
         ▶
       </th>
-      <th>
+      <th className="c-cmp">
         Correction<span className="hsub">RevisionActeur · corrigeable</span>
       </th>
       <th className="c-rep" title="Reporter vers le parent">
         ⏩
       </th>
-      <th>
+      <th className="c-cmp">
         Parent<span className="hsub">ParentRevisionActeur · corrigeable</span>
       </th>
       <th>Statut</th>
@@ -183,7 +183,7 @@ function GroupeHeaderRow({
             <WaButton
               key={tab}
               size="small"
-              appearance="plain"
+              appearance="outlined"
               onClick={(event) => {
                 event.stopPropagation()
                 onOpen(groupe, tab)
@@ -362,8 +362,8 @@ export function LigneRow({
   )
 }
 
-/** Decision buttons of a groupe (header row and modal). */
-export function GroupeActionsButtons({
+/** Decision buttons of a groupe header row. */
+function GroupeActionsButtons({
   groupe,
   actions,
 }: {

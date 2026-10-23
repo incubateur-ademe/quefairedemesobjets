@@ -13,7 +13,7 @@ import {
   WaTabGroup,
   WaTabPanel,
 } from "../../wa"
-import { GroupeActionsButtons, type ModalTab } from "../cohorte/GroupesView"
+import type { ModalTab } from "../cohorte/GroupesView"
 import { AnnuaireTab } from "./AnnuaireTab"
 import {
   LocalisationMap,
@@ -71,8 +71,6 @@ export function GroupeModal({
             {groupe.is_new && policy.badge && (
               <span className="pill p-accent">{policy.badge}</span>
             )}
-            <span className="spacer" />
-            <GroupeActionsButtons groupe={groupe} actions={actions} />
           </div>
           <WaTabGroup
             active={tab}

@@ -175,9 +175,7 @@ class TestReviewFilters:
         assert champs["ligne.statut"]["famille"] == "ligne"
         assert champs["groupe.statut"]["famille"] == "groupe"
         assert "contexte.source_code" in champs
-        assert {"value": "latitude,longitude", "label": "latitude + longitude"} in (
-            champs["ligne.champs"]["choix"]
-        )
+        assert "ligne.champs" not in champs
 
     def test_ligne_statut_in_groupes_view_means_at_least_one_ligne(
         self, client, modification
@@ -585,9 +583,10 @@ class TestCorrections:
         ).count() == len(body["lignes"])
 
     def test_report_fields_with_specific_values(self, client, groupe):
-        """Like in the admin: a field that cannot be typed may be reported, except
-        on the parent for the fields inherited from the children. Unlike in the
-        admin, the codes are editable (with a select)."""
+        """A field that cannot be typed may be reported, except on the parent for
+        the fields inherited from the children. The codes are editable in revue
+        (with a select); source_code is not reportable (see
+        SuggestionSourceModel.get_not_reportable_on_*)."""
         for champ, valeur in (("label_codes", "reparacteur"), ("source_code", "src")):
             SuggestionUnitaire.objects.create(
                 suggestion_groupe=groupe,
@@ -605,14 +604,15 @@ class TestCorrections:
 
         assert status == 200
         lignes = {tuple(ligne["champs"]): ligne for ligne in body["lignes"]}
-        for champs in (("label_codes",), ("source_code",)):
-            ligne = lignes[champs]
-            assert ligne["correction"]["propose"] == ligne["acteur"]["propose"]
-            assert ligne["capacites"]["supprimer_correction"] is True
-        assert lignes[("label_codes",)]["capacites"]["corriger_correction"] is True
-        assert lignes[("source_code",)]["capacites"]["corriger_correction"] is False
-        assert lignes[("label_codes",)]["capacites"]["reporter_parent"] is False
-        assert lignes[("source_code",)]["capacites"]["reporter_parent"] is True
+        label, source = lignes[("label_codes",)], lignes[("source_code",)]
+        assert label["correction"]["propose"] == label["acteur"]["propose"]
+        assert label["capacites"]["supprimer_correction"] is True
+        assert label["capacites"]["corriger_correction"] is True
+        assert label["capacites"]["reporter_parent"] is False
+        assert source["correction"]["propose"] is None
+        assert source["capacites"]["corriger_correction"] is False
+        assert source["capacites"]["reporter_correction"] is False
+        assert source["capacites"]["reporter_parent"] is False
 
     def test_nothing_to_correct_once_validated(self, client, groupe):
         post(client, f"/groupes/{groupe.id}/decision", {"action": "validate"})

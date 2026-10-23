@@ -768,8 +768,19 @@ select {
   font-weight: 400;
 }
 
+/* the 3 comparison columns share the width equally, the others shrink to fit */
+.cmp th.c-cmp {
+  width: 33.33%;
+  white-space: normal;
+}
+
+.cmp td.c-src,
 .cmp td.c-tgt {
   min-width: 18rem;
+  overflow-wrap: anywhere;
+}
+
+.cmp td.c-tgt {
   background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface));
 }
 
@@ -872,16 +883,19 @@ select {
   text-decoration: underline;
 }
 
+/* buttons overlay the value so the 3 comparison columns keep the same text width */
 .sugcell {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 6px;
+  position: relative;
 }
 
 .sugbtns {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   gap: 2px;
+  border-radius: 5px;
+  background: var(--surface);
 }
 
 .sugbtns button,
@@ -1027,12 +1041,12 @@ wa-select wa-option {
 
 .stream tr.ln.st-ATRAITER td,
 .stream tbody.gbody tr.ghead.st-ATRAITER td {
-  background: var(--ok-soft);
+  background: color-mix(in srgb, var(--ok-soft) 35%, var(--surface));
 }
 
 .stream tr.ln.st-REJETEE td,
 .stream tbody.gbody tr.ghead.st-REJETEE td {
-  background: var(--danger-soft);
+  background: color-mix(in srgb, var(--danger-soft) 35%, var(--surface));
 }
 
 .stream tr.ro td {
@@ -1077,8 +1091,9 @@ wa-select wa-option {
   gap: 4px;
 }
 
-/* decision buttons at the end of the rows: compact, for denser rows */
-.stream td.c-act wa-button {
+/* decision and modal buttons of the rows: compact, for denser rows */
+.stream td.c-act wa-button,
+.stream .gmeta wa-button {
   --wa-form-control-height: 1.8em;
 }
 

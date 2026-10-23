@@ -65,7 +65,7 @@ function annuaireAnswer(options: unknown) {
       nom: "RESSOURCERIE SA",
       adresse: "1 RUE DE LA PAIX 75001 PARIS",
       activite_code: "47.79Z",
-      etat: "inactif",
+      etat: champ === "siren" ? "actif" : "inactif",
     },
     etablissement:
       champ === "siret"
@@ -133,8 +133,9 @@ describe("GroupeModal", () => {
       expect(within(modal).getAllByText("RESSOURCERIE SA")).toHaveLength(2),
     )
     expect(within(modal).getByText("BOUTIQUE")).toBeInTheDocument()
-    expect(within(modal).getByText("fermé")).toHaveClass("ae-ferme")
-    expect(within(modal).getAllByText("inactif")[0]).toHaveClass("ae-ferme")
+    expect(within(modal).getByText("fermé")).toHaveClass("p-danger")
+    expect(within(modal).getAllByText("inactif")[0]).toHaveClass("p-danger")
+    expect(within(modal).getAllByText("actif")[0]).toHaveClass("p-ok")
     expect(
       within(modal).getAllByText(/Commerce de détail de biens d'occasion en magasin/),
     ).not.toHaveLength(0)
