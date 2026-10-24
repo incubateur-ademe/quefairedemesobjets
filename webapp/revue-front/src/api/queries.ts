@@ -10,6 +10,7 @@ import type {
   FilterField,
   GroupeDetail,
   GroupePage,
+  LignePage,
   LogPage,
   Stats,
   Vue,
@@ -44,6 +45,10 @@ export const queryKeys = {
     params
       ? (["groupes", cohorteId, params] as const)
       : (["groupes", cohorteId] as const),
+  lignes: (cohorteId: number, params?: GroupesParams) =>
+    params
+      ? (["lignes", cohorteId, params] as const)
+      : (["lignes", cohorteId] as const),
   groupe: (groupeId: number) => ["groupe", groupeId] as const,
   stats: (cohorteId: number, params?: RevueParams & { vue: Vue }) =>
     params ? (["stats", cohorteId, params] as const) : (["stats", cohorteId] as const),
@@ -115,7 +120,11 @@ export function useReviewFilterFields(cohorteId: number) {
 
 /** Page of groupes. Never refetched after a decision: the cache is patched in
  * place so that decided groupes stay on screen until the list changes. */
-export function useGroupesPage(cohorteId: number, params: GroupesParams) {
+export function useGroupesPage(
+  cohorteId: number,
+  params: GroupesParams,
+  enabled = true,
+) {
   const { api } = useApp()
   return useQuery({
     queryKey: queryKeys.groupes(cohorteId, params),
@@ -127,6 +136,7 @@ export function useGroupesPage(cohorteId: number, params: GroupesParams) {
       ),
     staleTime: Infinity,
     placeholderData: keepPreviousData,
+    enabled,
   })
 }
 
@@ -177,5 +187,27 @@ export function useAnnuaireEntreprise(
     staleTime: 60 * 60_000,
     retry: false,
     enabled: enabled && Boolean(valeur),
+  })
+}
+
+/** Page of lignes: references to lignes, found in their groupes. Never refetched
+ * after a decision, like the pages of groupes. */
+export function useLignesPage(
+  cohorteId: number,
+  params: GroupesParams,
+  enabled = true,
+) {
+  const { api } = useApp()
+  return useQuery({
+    queryKey: queryKeys.lignes(cohorteId, params),
+    queryFn: (): Promise<LignePage> =>
+      unwrap(
+        api.GET("/api/suggestions/cohortes/{cohorte_id}/lignes", {
+          params: { path: { cohorte_id: cohorteId }, query: params },
+        }),
+      ),
+    staleTime: Infinity,
+    placeholderData: keepPreviousData,
+    enabled,
   })
 }

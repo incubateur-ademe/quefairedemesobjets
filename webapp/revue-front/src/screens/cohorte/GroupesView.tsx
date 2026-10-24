@@ -242,12 +242,15 @@ export function LigneRow({
   actions,
   cursor,
   onCursor,
+  lead,
 }: {
   groupe: Groupe
   ligne: Ligne
   actions: GroupeActions
   cursor?: string | null
   onCursor?: (cursor: string) => void
+  /** Cells before the comparison columns (view « Lignes »), else a gutter */
+  lead?: React.ReactNode
 }) {
   const id = ligneCursor(ligne.key)
   return (
@@ -256,7 +259,7 @@ export function LigneRow({
       data-cursor={onCursor ? id : undefined}
       onClick={() => onCursor?.(id)}
     >
-      <td className="gutter" />
+      {lead ?? <td className="gutter" />}
       <td>
         <ChampsCell ligne={ligne} />
       </td>

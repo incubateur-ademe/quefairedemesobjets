@@ -363,6 +363,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/cohortes/{cohorte_id}/lignes": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List Lignes */
+    get: operations["data_revue_api_list_lignes"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/suggestions/cohortes/{cohorte_id}/stats": {
     parameters: {
       query?: never
@@ -1131,6 +1148,57 @@ export interface components {
       /** Nb Enfants */
       nb_enfants: number
     }
+    /** LignesQuery */
+    LignesQuery: {
+      /** Filtre */
+      filtre?: string | null
+      /**
+       * Tuples
+       * @description Tuples de champs, chacun écrit « champ,champ »
+       * @default []
+       */
+      tuples: string[]
+      /**
+       * Afficher
+       * @default avalider
+       * @enum {string}
+       */
+      afficher: "avalider" | "tout"
+      /**
+       * Page
+       * @default 1
+       */
+      page: number
+      /**
+       * Page Size
+       * @default 500
+       */
+      page_size: number
+    }
+    /**
+     * LignePageOut
+     * @description The lignes of the page are given by reference: each ligne is found in its
+     *     groupe (`groupes`), which is what the writes return and update.
+     */
+    LignePageOut: {
+      /** Items */
+      items: components["schemas"]["LigneRefOut"][]
+      /** Groupes */
+      groupes: components["schemas"]["GroupeOut"][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** LigneRefOut */
+    LigneRefOut: {
+      /** Groupe Id */
+      groupe_id: number
+      /** Key */
+      key: string
+    }
     /** StatsQuery */
     StatsQuery: {
       /** Filtre */
@@ -1833,6 +1901,44 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["GroupePageOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_list_lignes: {
+    parameters: {
+      query?: {
+        filtre?: string | null
+        /** @description Tuples de champs, chacun écrit « champ,champ » */
+        tuples?: string[]
+        afficher?: "avalider" | "tout"
+        page?: number
+        page_size?: number
+      }
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["LignePageOut"]
         }
       }
       /** @description Unprocessable Entity */
