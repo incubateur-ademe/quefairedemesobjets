@@ -40,6 +40,7 @@ def cohorte_taches(cohorte: SuggestionCohorte) -> list[dict]:
             "exception_class_path",
             modele=F("args_kwargs__args__1"),
             par=F("args_kwargs__kwargs__par"),
+            restaurer=F("args_kwargs__kwargs__restaurer"),
             affected=F("return_value__affected"),
         )[:LIMIT]
     )
@@ -47,7 +48,9 @@ def cohorte_taches(cohorte: SuggestionCohorte) -> list[dict]:
         {
             "id": str(row["id"]),
             "statut": TASK_STATUTS.get(row["status"], "pending"),
-            "action": ACTIONS[row["modele"]],
+            "action": (
+                "restore_correction" if row["restaurer"] else ACTIONS[row["modele"]]
+            ),
             "groupes": row["groupes"],
             "affected": row["affected"],
             "par": row["par"] or "",

@@ -12,7 +12,7 @@ from data.revue.lignes import ligne_statut
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.test import Client
-from qfdmo.models.acteur import LabelQualite
+from qfdmo.models.acteur import Acteur, LabelQualite
 from unit_tests.qfdmo.action_factory import ActionFactory
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
@@ -257,6 +257,34 @@ class TestReviewFilters:
             client,
             modification,
             filtre=filtre(cond("ligne.valeur_source", "icontains", "EXAMPLE.FR")),
+        )
+
+    def test_value_equal_to_empty(self, client, modification):
+        """A value proposed empty (field left empty) is found by « = "" »."""
+        groupe = modification.suggestion_groupes.order_by("id").first()
+        SuggestionUnitaire.objects.create(
+            suggestion_groupe=groupe,
+            suggestion_modele="RevisionActeur",
+            champs=["telephone"],
+            valeurs=[""],
+            acteur_id=groupe.acteur_id,
+            revision_acteur_id=groupe.revision_acteur_id,
+        )
+        with_empty = set(
+            SuggestionUnitaire.objects.filter(
+                suggestion_groupe__suggestion_cohorte=modification,
+                suggestion_modele="RevisionActeur",
+                valeurs=[""],
+            ).values_list("suggestion_groupe_id", flat=True)
+        )
+
+        assert (
+            groupe_ids(
+                client,
+                modification,
+                filtre=filtre(cond("ligne.valeur_correction", "eq", "")),
+            )
+            == with_empty
         )
 
     def test_tuples(self, client, modification):
@@ -613,6 +641,37 @@ class TestCorrections:
         assert source["capacites"]["corriger_correction"] is False
         assert source["capacites"]["reporter_correction"] is False
         assert source["capacites"]["reporter_parent"] is False
+
+    def test_restore_the_value_of_the_acteur(self, client, groupe):
+        """The correction cancels the suggestion of the source with the current
+        value of the acteur, « __empty__ » when it is empty."""
+        Acteur.objects.filter(identifiant_unique=groupe.acteur_id).update(
+            nom_commercial="Boutique", adresse_complement=""
+        )
+        for champ in ("nom_commercial", "adresse_complement"):
+            groupe.suggestion_unitaires.filter(champs=[champ]).delete()
+            SuggestionUnitaire.objects.create(
+                suggestion_groupe=groupe,
+                suggestion_modele="Acteur",
+                champs=[champ],
+                valeurs=["suggéré"],
+                acteur_id=groupe.acteur_id,
+            )
+
+        for champ in ("nom_commercial", "adresse_complement"):
+            status, body = post(
+                client, f"/groupes/{groupe.id}/restaurer", {"champs": [[champ]]}
+            )
+            assert status == 200
+
+        lignes = {tuple(ligne["champs"]): ligne for ligne in body["lignes"]}
+        assert lignes[("nom_commercial",)]["correction"]["propose"] == {
+            "nom_commercial": "Boutique"
+        }
+        assert lignes[("adresse_complement",)]["correction"]["propose"] == {
+            "adresse_complement": "__empty__"
+        }
+        assert lignes[("nom_commercial",)]["capacites"]["restaurer_correction"]
 
     def test_nothing_to_correct_once_validated(self, client, groupe):
         post(client, f"/groupes/{groupe.id}/decision", {"action": "validate"})

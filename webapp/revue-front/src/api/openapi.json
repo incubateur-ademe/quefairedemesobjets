@@ -1646,6 +1646,82 @@
         ]
       }
     },
+    "/api/suggestions/groupes/{groupe_id}/restaurer": {
+      "post": {
+        "operationId": "data_revue_api_restaurer",
+        "summary": "Restaurer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "description": "Correction with the current value of the acteur, cancelling the suggestion\nof the source.",
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestaurerIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
     "/api/suggestions/annuaire-entreprises": {
       "get": {
         "operationId": "data_revue_api_annuaire_entreprises",
@@ -3482,6 +3558,10 @@
             "title": "Reporter Parent",
             "type": "boolean"
           },
+          "restaurer_correction": {
+            "title": "Restaurer Correction",
+            "type": "boolean"
+          },
           "supprimer_correction": {
             "title": "Supprimer Correction",
             "type": "boolean"
@@ -3499,6 +3579,7 @@
           "corriger_parent",
           "reporter_correction",
           "reporter_parent",
+          "restaurer_correction",
           "supprimer_correction",
           "supprimer_parent"
         ],
@@ -4159,6 +4240,42 @@
         "title": "ReportIn",
         "type": "object"
       },
+      "RestaurerIn": {
+        "properties": {
+          "champs": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Lignes à corriger ; absent = toutes les lignes possibles",
+            "title": "Champs"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "title": "RestaurerIn",
+        "type": "object"
+      },
       "AnnuaireQuery": {
         "properties": {
           "champ": {
@@ -4301,7 +4418,8 @@
                 "reject",
                 "resubmit",
                 "report_correction",
-                "report_parent"
+                "report_parent",
+                "restore_correction"
               ]
             },
             "title": "Compteurs",
@@ -4483,7 +4601,8 @@
               "reject",
               "resubmit",
               "report_correction",
-              "report_parent"
+              "report_parent",
+              "restore_correction"
             ],
             "title": "Action",
             "type": "string"
@@ -4505,7 +4624,7 @@
             "type": "string"
           },
           "action": {
-            "enum": ["report_correction", "report_parent"],
+            "enum": ["report_correction", "report_parent", "restore_correction"],
             "title": "Action",
             "type": "string"
           },

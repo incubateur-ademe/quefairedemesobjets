@@ -9,6 +9,7 @@ const COUNTS = {
   reject: 2,
   resubmit: 0,
   report_correction: 1,
+  restore_correction: 1,
   report_parent: 0,
 }
 

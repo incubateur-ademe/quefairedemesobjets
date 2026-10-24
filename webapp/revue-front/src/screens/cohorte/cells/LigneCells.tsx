@@ -78,6 +78,35 @@ export function ReportButton({
   )
 }
 
+/** Correction with the current value of the acteur: cancels the suggestion. */
+export function RestaurerButton({
+  groupe,
+  ligne,
+  actions,
+}: {
+  groupe: Groupe
+  ligne: Ligne
+  actions: GroupeActions
+}) {
+  if (!ligne.capacites.restaurer_correction) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      className="rep"
+      title="Corriger avec la valeur initiale"
+      aria-label={`Corriger ${ligne.champs.join(", ")} avec la valeur initiale`}
+      onClick={(event) => {
+        event.stopPropagation()
+        actions.restaurer(groupe, [ligne.key]).catch(() => {})
+      }}
+    >
+      ↩︎
+    </button>
+  )
+}
+
 /** Correction (RevisionActeur) or Parent (ParentRevisionActeur): current value
  * and proposition, editable (✎) and removable (✕). */
 export function TargetCell({

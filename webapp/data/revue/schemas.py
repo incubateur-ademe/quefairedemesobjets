@@ -160,6 +160,7 @@ class LigneCapacitesOut(Schema):
     corriger_parent: bool
     reporter_correction: bool
     reporter_parent: bool
+    restaurer_correction: bool
     supprimer_correction: bool
     supprimer_parent: bool
 
@@ -296,6 +297,13 @@ class ReportIn(Schema):
     expected_modifie_le: datetime | None = None
 
 
+class RestaurerIn(Schema):
+    champs: list[list[str]] | None = Field(
+        None, description="Lignes à corriger ; absent = toutes les lignes possibles"
+    )
+    expected_modifie_le: datetime | None = None
+
+
 # --- Detail of a groupe (modal) ---
 
 
@@ -410,15 +418,18 @@ class MassSelectionIn(Schema):
     selection: IdsSelectionIn | FiltreSelectionIn = Field(..., discriminator="mode")
 
 
-class MassActionIn(MassSelectionIn):
-    action: Literal[
-        "validate", "reject", "resubmit", "report_correction", "report_parent"
-    ]
-
-
 MassAction = Literal[
-    "validate", "reject", "resubmit", "report_correction", "report_parent"
+    "validate",
+    "reject",
+    "resubmit",
+    "report_correction",
+    "report_parent",
+    "restore_correction",
 ]
+
+
+class MassActionIn(MassSelectionIn):
+    action: MassAction
 
 
 class MassPreviewOut(Schema):
@@ -440,7 +451,7 @@ class MassJobOut(Schema):
 class TacheOut(Schema):
     id: str
     statut: Literal["pending", "running", "done", "error"]
-    action: Literal["report_correction", "report_parent"]
+    action: Literal["report_correction", "report_parent", "restore_correction"]
     groupes: int
     affected: int | None
     par: str

@@ -4,9 +4,9 @@
   as the list, re-applied by the server), except the `exclus`.
 
 Decisions are bulk SQL updates (fast at any size). Reports copy suggestions
-groupe by groupe: synchronous up to SUGGESTION_TASK_ASYNC_THRESHOLD groupes,
-otherwise run by a django-tasks task, followed in the « Tâches » panel
-(data.revue.taches).
+(or restore the value of the acteur) groupe by groupe: synchronous up to
+SUGGESTION_TASK_ASYNC_THRESHOLD groupes, otherwise run by a django-tasks task,
+followed in the « Tâches » panel (data.revue.taches).
 """
 
 from dataclasses import dataclass
@@ -38,6 +38,7 @@ from data.revue.revue import (
     filtered_ligne_rows,
     parse_tuples,
 )
+from qfdmo.models.acteur import Acteur
 
 SUGGESTION_TASK_ASYNC_THRESHOLD = 1000
 BATCH = 5000
@@ -47,8 +48,16 @@ ATRAITER = SuggestionStatut.ATRAITER
 REJETEE = SuggestionStatut.REJETEE
 REOPENABLE = [ATRAITER, REJETEE]
 
-ACTIONS = ["validate", "reject", "resubmit", "report_correction", "report_parent"]
+ACTIONS = [
+    "validate",
+    "reject",
+    "resubmit",
+    "report_correction",
+    "report_parent",
+    "restore_correction",
+]
 REPORT_TARGETS = {"report_correction": REVISION, "report_parent": PARENT}
+RESTORE = "restore_correction"
 
 
 @dataclass
@@ -127,6 +136,21 @@ def _reportable_acteur_rows(selection: Selection, modele: str):
     return rows
 
 
+def _restorable_acteur_rows(selection: Selection):
+    """SU Acteur of the lignes whose correction may take the value of the acteur:
+    reportable to the correction, and the acteur exists (not an AJOUT)."""
+    acteur = Acteur.objects.filter(
+        identifiant_unique=OuterRef("suggestion_groupe__acteur_id")
+    )
+    return _reportable_acteur_rows(selection, REVISION).filter(Exists(acteur))
+
+
+def _plan_rows(selection: Selection, action: str):
+    if action == RESTORE:
+        return _restorable_acteur_rows(selection)
+    return _reportable_acteur_rows(selection, REPORT_TARGETS[action])
+
+
 def _count_lignes(rows: QuerySet[SuggestionUnitaire]) -> int:
     return rows.order_by().values("suggestion_groupe_id", "champs").distinct().count()
 
@@ -145,9 +169,9 @@ def preview(selection: Selection) -> dict[str, int]:
             ),
             "resubmit": _groupes_to_resubmit(groupes).count(),
         }
-        for action, modele in REPORT_TARGETS.items():
+        for action in [*REPORT_TARGETS, RESTORE]:
             counts[action] = (
-                _reportable_acteur_rows(selection, modele)
+                _plan_rows(selection, action)
                 .values("suggestion_groupe_id")
                 .distinct()
                 .count()
@@ -160,8 +184,8 @@ def preview(selection: Selection) -> dict[str, int]:
         "reject": 0,
         "resubmit": _count_lignes(_lignes_to_resubmit(rows)),
         **{
-            action: _count_lignes(_reportable_acteur_rows(selection, modele))
-            for action, modele in REPORT_TARGETS.items()
+            action: _count_lignes(_plan_rows(selection, action))
+            for action in [*REPORT_TARGETS, RESTORE]
         },
     }
 
@@ -207,8 +231,8 @@ def run(selection: Selection, action: str, user) -> dict:
     if action == "reject" and not policy.can_reject_group:
         raise RevueApiError(422, "invalid", "Refus impossible pour ce type")
     total = preview(selection)[action]
-    if action in REPORT_TARGETS:
-        return _report(selection, REPORT_TARGETS[action], total, user)
+    if action in REPORT_TARGETS or action == RESTORE:
+        return _report(selection, action, total, user)
     with transaction.atomic():
         if selection.vue == "groupes":
             affected = _decide_groupes(selection, action, user)
@@ -305,11 +329,11 @@ def _decide_lignes(selection: Selection, action: str, user) -> int:
 # --- Reports ---
 
 
-def _report_plan(selection: Selection, modele: str) -> dict[int, list[list[str]]]:
-    """Lignes to report, by groupe."""
+def _report_plan(selection: Selection, action: str) -> dict[int, list[list[str]]]:
+    """Lignes to report (or to restore), by groupe."""
     plan: dict[int, list[list[str]]] = {}
     for groupe_id, champs in (
-        _reportable_acteur_rows(selection, modele)
+        _plan_rows(selection, action)
         .order_by("suggestion_groupe_id")
         .values_list("suggestion_groupe_id", "champs")
     ):
@@ -317,10 +341,13 @@ def _report_plan(selection: Selection, modele: str) -> dict[int, list[list[str]]
     return plan
 
 
-def report_plan(cohorte_id: int, modele: str, plan: dict) -> dict:
+def report_plan(
+    cohorte_id: int, modele: str, plan: dict, restaurer: bool = False
+) -> dict:
     """Copies the suggestion of the source to the target of each ligne of the
-    plan, groupe by groupe (each groupe in its own transaction)."""
-    from data.revue.services import report_lignes
+    plan, or restores the value of the acteur in the correction (`restaurer`),
+    groupe by groupe (each groupe in its own transaction)."""
+    from data.revue.services import report_lignes, restaurer_lignes
 
     cohorte = SuggestionCohorte.objects.get(id=cohorte_id)
     policy = get_policy(cohorte.type_action)
@@ -341,7 +368,12 @@ def report_plan(cohorte_id: int, modele: str, plan: dict) -> dict:
                 for ligne in serialize_groupe(groupe, policy)["lignes"]
                 if tuple(ligne["champs"]) in wanted
             ]
-            if report_lignes(groupe, modele, lignes):
+            written = (
+                restaurer_lignes(groupe, lignes)
+                if restaurer
+                else report_lignes(groupe, modele, lignes)
+            )
+            if written:
                 affected += 1
                 SuggestionGroupe.objects.filter(id=groupe_id).update(
                     modifie_le=timezone.now()
@@ -350,11 +382,15 @@ def report_plan(cohorte_id: int, modele: str, plan: dict) -> dict:
 
 
 @task()
-def report_task(cohorte_id: int, modele: str, plan: dict, par: str = "") -> dict:
+def report_task(
+    cohorte_id: int, modele: str, plan: dict, par: str = "", restaurer: bool = False
+) -> dict:
     """The cohorte comes first: the « Tâches » panel finds the tasks of a cohorte by
     this argument (data.revue.taches). `par` is only kept for the panel."""
     # JSON keys are strings
-    return report_plan(cohorte_id, modele, {int(k): v for k, v in plan.items()})
+    return report_plan(
+        cohorte_id, modele, {int(k): v for k, v in plan.items()}, restaurer
+    )
 
 
 TASK_STATUTS = {
@@ -365,16 +401,19 @@ TASK_STATUTS = {
 }
 
 
-def _report(selection: Selection, modele: str, total: int, user) -> dict:
-    plan = _report_plan(selection, modele)
+def _report(selection: Selection, action: str, total: int, user) -> dict:
+    restaurer = action == RESTORE
+    modele = REVISION if restaurer else REPORT_TARGETS[action]
+    plan = _report_plan(selection, action)
     if len(plan) <= SUGGESTION_TASK_ASYNC_THRESHOLD:
-        result = report_plan(selection.cohorte.id, modele, plan)
+        result = report_plan(selection.cohorte.id, modele, plan, restaurer)
         return {"affected": result["affected"], "skipped": total - result["affected"]}
     task_result = report_task.enqueue(
         selection.cohorte.id,
         modele,
         {str(k): v for k, v in plan.items()},
         par=user.get_username() if user else "",
+        restaurer=restaurer,
     )
     if task_result.status == TaskResultStatus.SUCCESSFUL:
         # Immediate backend (tests, local): already done

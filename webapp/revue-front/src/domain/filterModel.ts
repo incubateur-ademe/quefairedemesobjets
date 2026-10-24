@@ -136,6 +136,8 @@ function parseScalar(raw: unknown, field: FilterField): unknown {
   }
 }
 
+const EMPTY_TEXT_OPERATORS = new Set<Operator>(["eq", "neq"])
+
 /** Raw value → API value, or undefined when the condition is incomplete. */
 export function toApiValue(
   raw: unknown,
@@ -163,7 +165,16 @@ export function toApiValue(
       .filter((item) => item !== undefined)
     return values.length ? values : undefined
   }
-  return parseScalar(raw, field)
+  const value = parseScalar(raw, field)
+  // A text equal (or not) to nothing: the empty value, e.g. a field left empty
+  if (
+    value === undefined &&
+    field.type === "text" &&
+    EMPTY_TEXT_OPERATORS.has(operator)
+  ) {
+    return ""
+  }
+  return value
 }
 
 export function toDraftFilter(

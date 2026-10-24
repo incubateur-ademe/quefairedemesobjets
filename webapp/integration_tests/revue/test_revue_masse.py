@@ -12,6 +12,7 @@ from data.revue.lignes import ligne_statut
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django_tasks_db.models import DBTaskResult
+from qfdmo.models.acteur import Acteur
 
 API = "/api/suggestions"
 
@@ -220,6 +221,55 @@ class TestGroupes:
         assert body["compteurs"]["report_correction"] == 1
         assert body["compteurs"]["report_parent"] == 0
 
+    def test_restore_the_value_of_the_acteur(self, client, cohorte):
+        """The correction of each selected ligne takes the value of the acteur
+        (« __empty__ » when empty), cancelling the suggestion of the source."""
+        groupe = cohorte.suggestion_groupes.filter(
+            statut="AVALIDER", acteur__isnull=False
+        ).first()
+        Acteur.objects.filter(identifiant_unique=groupe.acteur_id).update(
+            nom_commercial="Boutique", adresse_complement=""
+        )
+        for champ in ("nom_commercial", "adresse_complement"):
+            groupe.suggestion_unitaires.filter(champs=[champ]).delete()
+            SuggestionUnitaire.objects.create(
+                suggestion_groupe=groupe,
+                suggestion_modele="Acteur",
+                champs=[champ],
+                valeurs=["suggéré"],
+                acteur_id=groupe.acteur_id,
+            )
+        selection = {
+            "mode": "ids",
+            "ids": [f"{groupe.id}:nom_commercial", f"{groupe.id}:adresse_complement"],
+        }
+
+        _, apercu = post(
+            client,
+            f"/cohortes/{cohorte.id}/actions/apercu",
+            {"vue": "lignes", "selection": selection},
+        )
+        status, body = post(
+            client,
+            f"/cohortes/{cohorte.id}/actions",
+            {"vue": "lignes", "action": "restore_correction", "selection": selection},
+        )
+
+        assert apercu["compteurs"]["restore_correction"] == 2
+        assert status == 200
+        assert body["affected"] == 1
+        correction = {
+            su.champs[0]: su.valeurs
+            for su in groupe.suggestion_unitaires.filter(
+                suggestion_modele="RevisionActeur",
+                champs__overlap=["nom_commercial", "adresse_complement"],
+            )
+        }
+        assert correction == {
+            "nom_commercial": ["Boutique"],
+            "adresse_complement": ["__empty__"],
+        }
+
     def test_large_report_runs_as_a_task(self, client, cohorte, monkeypatch):
         monkeypatch.setattr(masse, "SUGGESTION_TASK_ASYNC_THRESHOLD", 1)
 
@@ -284,6 +334,13 @@ class TestTaches:
         assert tache["statut"] == "done"
         assert tache["action"] == "report_parent"
         assert tache["affected"] == 3
+
+    def test_restore_task(self, client, cohorte, queued):
+        self.report(client, cohorte, "restore_correction")
+
+        [tache] = client.get(f"{API}/cohortes/{cohorte.id}/taches").json()
+
+        assert tache["action"] == "restore_correction"
 
     def test_tasks_of_other_cohortes_are_not_listed(self, client, cohorte, queued):
         self.report(client, cohorte)

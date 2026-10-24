@@ -8,6 +8,7 @@ import {
   ChampsCell,
   LigneActionCell,
   ReportButton,
+  RestaurerButton,
   StatutCell,
   TargetCell,
 } from "./cells/LigneCells"
@@ -50,6 +51,30 @@ export function LigneHead() {
 }
 
 const PROCESSING = ["ENCOURS", "SUCCES", "ERREUR"]
+
+/** Correction with the value of the acteur on every restorable ligne. */
+function RestaurerAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActions }) {
+  const count = groupe.lignes.filter(
+    (ligne) => ligne.capacites.restaurer_correction,
+  ).length
+  if (!count) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      className="rep all"
+      title={`Corriger ${plural(count, "ligne")} avec la valeur initiale`}
+      onClick={(event) => {
+        event.stopPropagation()
+        actions.restaurer(groupe).catch(() => {})
+      }}
+    >
+      ↩︎
+      <small>tout</small>
+    </button>
+  )
+}
 
 function ReportAll({
   groupe,
@@ -217,7 +242,10 @@ function GroupeHeaderRow({
         </div>
       </td>
       <td className="c-rep">
-        <ReportAll groupe={groupe} modele="RevisionActeur" actions={actions} />
+        <div className="reps reps--col">
+          <ReportAll groupe={groupe} modele="RevisionActeur" actions={actions} />
+          <RestaurerAll groupe={groupe} actions={actions} />
+        </div>
       </td>
       <td>
         {acteur.admin_urls.corrige ? (
@@ -321,12 +349,15 @@ export function LigneRow({
         <ActeurCell ligne={ligne} />
       </td>
       <td className="c-rep">
-        <ReportButton
-          groupe={groupe}
-          ligne={ligne}
-          modele="RevisionActeur"
-          actions={actions}
-        />
+        <div className="reps">
+          <RestaurerButton groupe={groupe} ligne={ligne} actions={actions} />
+          <ReportButton
+            groupe={groupe}
+            ligne={ligne}
+            modele="RevisionActeur"
+            actions={actions}
+          />
+        </div>
       </td>
       <td className="c-tgt">
         <TargetCell

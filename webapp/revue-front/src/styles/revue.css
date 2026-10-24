@@ -934,6 +934,18 @@ tr:hover .editbtn,
   font-size: 10px;
 }
 
+/* report buttons of a cell: side by side (ligne), stacked (groupe) */
+.reps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.reps--col {
+  flex-direction: column;
+}
+
 .repoff {
   color: var(--faint);
 }

@@ -19,7 +19,12 @@ import { queryKeys } from "./queries"
 import type { Groupe, GroupePage, Tache, Vue } from "./types"
 
 export type MassAction =
-  "validate" | "reject" | "resubmit" | "report_correction" | "report_parent"
+  | "validate"
+  | "reject"
+  | "resubmit"
+  | "report_correction"
+  | "report_parent"
+  | "restore_correction"
 
 export type MassCounts = Record<MassAction, number>
 

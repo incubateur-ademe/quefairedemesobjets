@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from core.models.constants import EMPTY_ACTEUR_FIELD
 from data.models.suggestion import (
     SuggestionGroupe,
     SuggestionStatut,
@@ -21,7 +22,7 @@ from data.models.suggestion import (
 )
 from data.revue.choix import normalize_codes
 from data.revue.errors import RevueApiError
-from data.revue.lignes import ACTEUR, groupes_queryset, serialize_groupe
+from data.revue.lignes import ACTEUR, field_values, groupes_queryset, serialize_groupe
 from data.revue.policies import PARENT, REVISION, ReviewPolicy, get_policy
 from data.views import update_suggestion_groupe
 
@@ -280,5 +281,53 @@ def report(
         )
         if not report_lignes(groupe, modele, lignes):
             _refuse(groupe, policy, "Aucune ligne reportable")
+
+    return write_groupe(groupe_id, expected_modifie_le, write)
+
+
+def restaurer_lignes(groupe: SuggestionGroupe, lignes: list[dict]) -> int:
+    """Correction with the current value of the acteur for each restorable ligne:
+    cancels the suggestion of the source. An empty value is written « __empty__ »
+    to empty the correction. Does not validate the lignes."""
+    lignes = [ligne for ligne in lignes if ligne["capacites"]["restaurer_correction"]]
+    if not lignes:
+        return 0
+    values = field_values(
+        groupe.get_acteur_or_none(),
+        sorted({champ for ligne in lignes for champ in ligne["champs"]}),
+    )
+    sus = {
+        (su.suggestion_modele, tuple(su.champs)): su
+        for su in groupe.suggestion_unitaires.all()
+    }
+    for ligne in lignes:
+        champs = tuple(ligne["champs"])
+        target = sus.get((REVISION, champs))
+        if target is None:
+            source = sus[(ACTEUR, champs)]
+            target = SuggestionUnitaire(
+                suggestion_groupe=groupe,
+                suggestion_modele=REVISION,
+                champs=list(champs),
+                ordre=source.ordre,
+                statut=source.statut,
+                revision_acteur_id=_target_id(groupe, REVISION),
+            )
+        target.valeurs = [values[champ] or EMPTY_ACTEUR_FIELD for champ in champs]
+        target.save()
+    return len(lignes)
+
+
+def restaurer(
+    groupe_id, champs_list: list[list[str]] | None, expected_modifie_le
+) -> dict:
+    def write(groupe, policy, state):
+        lignes = (
+            list(state["lignes"].values())
+            if champs_list is None
+            else _lignes(state, champs_list, groupe, policy)
+        )
+        if not restaurer_lignes(groupe, lignes):
+            _refuse(groupe, policy, "Aucune ligne à corriger avec la valeur initiale")
 
     return write_groupe(groupe_id, expected_modifie_le, write)

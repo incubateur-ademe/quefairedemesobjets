@@ -503,6 +503,27 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/groupes/{groupe_id}/restaurer": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Restaurer
+     * @description Correction with the current value of the acteur, cancelling the suggestion
+     *     of the source.
+     */
+    post: operations["data_revue_api_restaurer"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/api/suggestions/annuaire-entreprises": {
     parameters: {
       query?: never
@@ -1208,6 +1229,8 @@ export interface components {
       reporter_correction: boolean
       /** Reporter Parent */
       reporter_parent: boolean
+      /** Restaurer Correction */
+      restaurer_correction: boolean
       /** Supprimer Correction */
       supprimer_correction: boolean
       /** Supprimer Parent */
@@ -1482,6 +1505,16 @@ export interface components {
       /** Expected Modifie Le */
       expected_modifie_le?: string | null
     }
+    /** RestaurerIn */
+    RestaurerIn: {
+      /**
+       * Champs
+       * @description Lignes à corriger ; absent = toutes les lignes possibles
+       */
+      champs?: string[][] | null
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
     /** AnnuaireQuery */
     AnnuaireQuery: {
       /**
@@ -1624,7 +1657,13 @@ export interface components {
        * Action
        * @enum {string}
        */
-      action: "validate" | "reject" | "resubmit" | "report_correction" | "report_parent"
+      action:
+        | "validate"
+        | "reject"
+        | "resubmit"
+        | "report_correction"
+        | "report_parent"
+        | "restore_correction"
     }
     /** TacheOut */
     TacheOut: {
@@ -1639,7 +1678,7 @@ export interface components {
        * Action
        * @enum {string}
        */
-      action: "report_correction" | "report_parent"
+      action: "report_correction" | "report_parent" | "restore_correction"
       /** Groupes */
       groupes: number
       /** Affected */
@@ -2477,6 +2516,59 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ReportIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_restaurer: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RestaurerIn"]
       }
     }
     responses: {

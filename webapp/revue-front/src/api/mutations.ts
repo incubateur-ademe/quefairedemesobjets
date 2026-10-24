@@ -64,6 +64,9 @@ const NO_GROUPE_ACTION = {
   reporter_parent: false,
 }
 
+/** Value emptying a field of the acteur (EMPTY_ACTEUR_FIELD in Django) */
+const EMPTY_VALUE = "__empty__"
+
 const NO_LIGNE_ACTION: Ligne["capacites"] = {
   valider: false,
   remettre_a_valider: false,
@@ -72,6 +75,7 @@ const NO_LIGNE_ACTION: Ligne["capacites"] = {
   corriger_parent: false,
   reporter_correction: false,
   reporter_parent: false,
+  restaurer_correction: false,
   supprimer_correction: false,
   supprimer_parent: false,
 }
@@ -124,6 +128,33 @@ export function withReport(
     .reduce(
       (current, ligne) =>
         withProposition(current, ligne.key, modele, ligne.acteur.propose),
+      groupe,
+    )
+}
+
+/** Optimistic correction with the current value of the acteur (« __empty__ »
+ * when empty) on the restorable lignes whose value is known. */
+export function withRestauration(groupe: Groupe, ligneKeys?: string[]): Groupe {
+  return groupe.lignes
+    .filter(
+      (ligne) =>
+        ligne.capacites.restaurer_correction &&
+        ligne.acteur.actuel &&
+        (!ligneKeys || ligneKeys.includes(ligne.key)),
+    )
+    .reduce(
+      (current, ligne) =>
+        withProposition(
+          current,
+          ligne.key,
+          "RevisionActeur",
+          Object.fromEntries(
+            Object.entries(ligne.acteur.actuel ?? {}).map(([champ, valeur]) => [
+              champ,
+              valeur || EMPTY_VALUE,
+            ]),
+          ),
+        ),
       groupe,
     )
 }
@@ -322,6 +353,21 @@ export function useGroupeActions(cohorteId: number) {
               params: path(groupe),
               body: {
                 cible: modele === "RevisionActeur" ? "correction" : "parent",
+                champs: keys ? champsOf(groupe, keys) : null,
+                ...expected(modifieLe),
+              },
+            }),
+          ),
+      }),
+    restaurer: (groupe: Groupe, keys?: string[]) =>
+      write.mutateAsync({
+        groupe,
+        optimistic: (g) => withRestauration(g, keys),
+        request: (modifieLe) =>
+          unwrap(
+            api.POST("/api/suggestions/groupes/{groupe_id}/restaurer", {
+              params: path(groupe),
+              body: {
                 champs: keys ? champsOf(groupe, keys) : null,
                 ...expected(modifieLe),
               },
