@@ -2,21 +2,12 @@
 
 from datetime import date
 
-from django.db.models import (
-    Case,
-    Count,
-    Func,
-    IntegerField,
-    Q,
-    QuerySet,
-    TextField,
-    Value,
-    When,
-)
+from django.db.models import Count, Func, TextField
 from django.shortcuts import get_object_or_404
 
 from data.models.suggestion import (
     SOURCE_TYPE_ACTIONS,
+    SUGGESTION_LOG_LEVELS_BY_GRAVITY,
     SuggestionAction,
     SuggestionCohorte,
     SuggestionCohorteStatut,
@@ -78,27 +69,6 @@ SORTS = {
 }
 DEFAULT_SORT = "-cree_le"
 
-LOG_LEVELS = [
-    SuggestionLog.SuggestionLogLevel.ERROR,
-    SuggestionLog.SuggestionLogLevel.WARNING,
-    SuggestionLog.SuggestionLogLevel.INFO,
-]
-
-
-def source_cohortes() -> QuerySet[SuggestionCohorte]:
-    """SOURCE cohortes having at least one groupe."""
-    return (
-        SuggestionCohorte.objects.filter(type_action__in=SOURCE_TYPE_ACTIONS)
-        .annotate(
-            total_groupes=Count("suggestion_groupes"),
-            nb_avalider=Count(
-                "suggestion_groupes",
-                filter=Q(suggestion_groupes__statut=SuggestionStatut.AVALIDER),
-            ),
-        )
-        .filter(total_groupes__gt=0)
-    )
-
 
 def get_source_cohorte(cohorte_id: int) -> SuggestionCohorte:
     return get_object_or_404(
@@ -127,7 +97,9 @@ def cohortes_page(
     page: int,
     page_size: int,
 ) -> dict:
-    queryset = apply_filter(source_cohortes(), filtre, COHORTE_FIELDS)
+    queryset = apply_filter(
+        SuggestionCohorte.objects.source_cohortes(), filtre, COHORTE_FIELDS
+    )
     if type_action:
         queryset = queryset.filter(type_action__in=type_action)
     if statut:
@@ -137,11 +109,11 @@ def cohortes_page(
     if cree_avant:
         queryset = queryset.filter(cree_le__date__lte=cree_avant)
     items, total = paginate(queryset.order_by(*_order_by(tri)), page, page_size)
-    _attach_counts(items)
+    attach_counts(items)
     return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
-def _attach_counts(cohortes: list[SuggestionCohorte]) -> None:
+def attach_counts(cohortes: list[SuggestionCohorte]) -> None:
     """Groupes per statut and logs per level, with one grouped query each."""
     ids = [cohorte.id for cohorte in cohortes]
     groupes = {}
@@ -166,7 +138,8 @@ def _attach_counts(cohortes: list[SuggestionCohorte]) -> None:
             for statut in SuggestionStatut.values
         }
         cohorte.logs = {
-            level: logs.get(cohorte.id, {}).get(level, 0) for level in LOG_LEVELS
+            level: logs.get(cohorte.id, {}).get(level, 0)
+            for level in SUGGESTION_LOG_LEVELS_BY_GRAVITY
         }
 
 
@@ -189,24 +162,8 @@ def cohortes_filter_metadata() -> list[dict]:
     return registry_metadata(COHORTE_FIELDS, {"metadata": list(metadata_keys)})
 
 
-def logs_queryset(cohorte: SuggestionCohorte, niveau: list[str]) -> QuerySet:
-    """Logs of the cohorte, the most severe first."""
-    gravity = Case(
-        *(
-            When(niveau_de_log=level, then=Value(gravite))
-            for gravite, level in enumerate(LOG_LEVELS)
-        ),
-        default=Value(len(LOG_LEVELS)),
-        output_field=IntegerField(),
-    )
-    queryset = cohorte.suggestion_logs.annotate(gravite=gravity)
-    if niveau:
-        queryset = queryset.filter(niveau_de_log__in=niveau)
-    return queryset.order_by("gravite", "-cree_le", "-id")
-
-
 def logs_page(
     cohorte: SuggestionCohorte, niveau: list[str], page: int, page_size: int
 ) -> dict:
-    items, total = paginate(logs_queryset(cohorte, niveau), page, page_size)
+    items, total = paginate(cohorte.logs_queryset(niveau), page, page_size)
     return {"items": items, "total": total, "page": page, "page_size": page_size}

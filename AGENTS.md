@@ -82,7 +82,7 @@ For each kind of task below, refer to the specific documentation
 - Linter: Ruff (configuration in `webapp/pyproject.toml` and `data-platform/pyproject.toml`)
 - Formatting: Black (line-length: 88)
 - Type hints: Use type hints when relevant
-- Imports: Organized according to Django conventions (stdlib, third-party, local)
+- Imports: Organized according to Django conventions (stdlib, third-party, local). Import the symbols you use directly (`from package.module import func`), not the module for qualified access (`import module` then `module.func`).
 - Tests: pytest with pytest-django
 
 ## 🔍 Codebase Search

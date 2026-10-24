@@ -769,6 +769,697 @@
           }
         ]
       }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}": {
+      "get": {
+        "operationId": "data_revue_api_cohorte_detail",
+        "summary": "Cohorte Detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohorteDetailOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/revue/filtres": {
+      "get": {
+        "operationId": "data_revue_api_review_filters",
+        "summary": "Review Filters",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterMetaOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/groupes": {
+      "get": {
+        "operationId": "data_revue_api_list_groupes",
+        "summary": "List Groupes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "filtre",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filtre"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "tuples",
+            "schema": {
+              "default": [],
+              "description": "Tuples de champs, chacun écrit « champ,champ »",
+              "items": {
+                "type": "string"
+              },
+              "title": "Tuples",
+              "type": "array"
+            },
+            "required": false,
+            "description": "Tuples de champs, chacun écrit « champ,champ »"
+          },
+          {
+            "in": "query",
+            "name": "afficher",
+            "schema": {
+              "default": "avalider",
+              "enum": ["avalider", "tout"],
+              "title": "Afficher",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 100,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupePageOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/cohortes/{cohorte_id}/stats": {
+      "get": {
+        "operationId": "data_revue_api_review_stats",
+        "summary": "Review Stats",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cohorte_id",
+            "schema": {
+              "title": "Cohorte Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "filtre",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filtre"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "tuples",
+            "schema": {
+              "default": [],
+              "description": "Tuples de champs, chacun écrit « champ,champ »",
+              "items": {
+                "type": "string"
+              },
+              "title": "Tuples",
+              "type": "array"
+            },
+            "required": false,
+            "description": "Tuples de champs, chacun écrit « champ,champ »"
+          },
+          {
+            "in": "query",
+            "name": "afficher",
+            "schema": {
+              "default": "avalider",
+              "enum": ["avalider", "tout"],
+              "title": "Afficher",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "vue",
+            "schema": {
+              "default": "groupes",
+              "enum": ["groupes", "lignes"],
+              "title": "Vue",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/groupes/{groupe_id}/decision": {
+      "post": {
+        "operationId": "data_revue_api_groupe_decision",
+        "summary": "Groupe Decision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupeDecisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/groupes/{groupe_id}/lignes/decision": {
+      "post": {
+        "operationId": "data_revue_api_lignes_decision",
+        "summary": "Lignes Decision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LignesDecisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/groupes/{groupe_id}/propositions": {
+      "put": {
+        "operationId": "data_revue_api_upsert_proposition",
+        "summary": "Upsert Proposition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropositionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "data_revue_api_delete_proposition",
+        "summary": "Delete Proposition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "suggestion_modele",
+            "schema": {
+              "enum": ["RevisionActeur", "ParentRevisionActeur"],
+              "title": "Suggestion Modele",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "champs",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Champs",
+              "type": "array"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "expected_modifie_le",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Expected Modifie Le"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/groupes/{groupe_id}/report": {
+      "post": {
+        "operationId": "data_revue_api_report",
+        "summary": "Report",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1835,6 +2526,866 @@
           }
         },
         "title": "LogsExportQuery",
+        "type": "object"
+      },
+      "CohorteDetailOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "identifiant_action": {
+            "title": "Identifiant Action",
+            "type": "string"
+          },
+          "identifiant_execution": {
+            "title": "Identifiant Execution",
+            "type": "string"
+          },
+          "execution_datetime": {
+            "title": "Execution Datetime",
+            "type": "string"
+          },
+          "type_action": {
+            "title": "Type Action",
+            "type": "string"
+          },
+          "type_action_label": {
+            "title": "Type Action Label",
+            "type": "string"
+          },
+          "statut": {
+            "title": "Statut",
+            "type": "string"
+          },
+          "cree_le": {
+            "format": "date-time",
+            "title": "Cree Le",
+            "type": "string"
+          },
+          "metadata": {
+            "title": "Metadata"
+          },
+          "total_groupes": {
+            "title": "Total Groupes",
+            "type": "integer"
+          },
+          "compteurs": {
+            "$ref": "#/components/schemas/CompteursOut"
+          },
+          "logs": {
+            "$ref": "#/components/schemas/LogsCountOut"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/PolicyOut"
+          }
+        },
+        "required": [
+          "id",
+          "identifiant_action",
+          "identifiant_execution",
+          "execution_datetime",
+          "type_action",
+          "type_action_label",
+          "statut",
+          "cree_le",
+          "total_groupes",
+          "compteurs",
+          "logs",
+          "policy"
+        ],
+        "title": "CohorteDetailOut",
+        "type": "object"
+      },
+      "PolicyOut": {
+        "properties": {
+          "type_action": {
+            "title": "Type Action",
+            "type": "string"
+          },
+          "has_lines": {
+            "title": "Has Lines",
+            "type": "boolean"
+          },
+          "can_reject_line": {
+            "title": "Can Reject Line",
+            "type": "boolean"
+          },
+          "can_reject_group": {
+            "title": "Can Reject Group",
+            "type": "boolean"
+          },
+          "editable_models": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Editable Models",
+            "type": "array"
+          },
+          "shows_parent": {
+            "title": "Shows Parent",
+            "type": "boolean"
+          },
+          "shows_acteur_diff": {
+            "title": "Shows Acteur Diff",
+            "type": "boolean"
+          },
+          "badge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Badge"
+          }
+        },
+        "required": [
+          "type_action",
+          "has_lines",
+          "can_reject_line",
+          "can_reject_group",
+          "editable_models",
+          "shows_parent",
+          "shows_acteur_diff",
+          "badge"
+        ],
+        "title": "PolicyOut",
+        "type": "object"
+      },
+      "GroupesQuery": {
+        "properties": {
+          "filtre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filtre"
+          },
+          "tuples": {
+            "default": [],
+            "description": "Tuples de champs, chacun écrit « champ,champ »",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tuples",
+            "type": "array"
+          },
+          "afficher": {
+            "default": "avalider",
+            "enum": ["avalider", "tout"],
+            "title": "Afficher",
+            "type": "string"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "default": 100,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "title": "GroupesQuery",
+        "type": "object"
+      },
+      "ActeurIdentiteOut": {
+        "properties": {
+          "identifiant_unique": {
+            "title": "Identifiant Unique",
+            "type": "string"
+          },
+          "identifiant_externe": {
+            "title": "Identifiant Externe",
+            "type": "string"
+          },
+          "nom": {
+            "title": "Nom",
+            "type": "string"
+          },
+          "ville": {
+            "title": "Ville",
+            "type": "string"
+          },
+          "admin_urls": {
+            "$ref": "#/components/schemas/AdminUrlsOut"
+          }
+        },
+        "required": [
+          "identifiant_unique",
+          "identifiant_externe",
+          "nom",
+          "ville",
+          "admin_urls"
+        ],
+        "title": "ActeurIdentiteOut",
+        "type": "object"
+      },
+      "AdminUrlsOut": {
+        "properties": {
+          "importe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importe"
+          },
+          "affiche": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affiche"
+          },
+          "corrige": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corrige"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent"
+          }
+        },
+        "required": ["importe", "affiche", "corrige", "parent"],
+        "title": "AdminUrlsOut",
+        "type": "object"
+      },
+      "CellOut": {
+        "properties": {
+          "actuel": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actuel"
+          },
+          "propose": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Propose"
+          },
+          "etat": {
+            "enum": ["valeur", "vide", "pas_de_correction"],
+            "title": "Etat",
+            "type": "string"
+          }
+        },
+        "required": ["actuel", "propose", "etat"],
+        "title": "CellOut",
+        "type": "object"
+      },
+      "GroupeCapacitesOut": {
+        "properties": {
+          "valider": {
+            "title": "Valider",
+            "type": "boolean"
+          },
+          "refuser": {
+            "title": "Refuser",
+            "type": "boolean"
+          },
+          "remettre_a_valider": {
+            "title": "Remettre A Valider",
+            "type": "boolean"
+          },
+          "reporter_correction": {
+            "title": "Reporter Correction",
+            "type": "boolean"
+          },
+          "reporter_parent": {
+            "title": "Reporter Parent",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valider",
+          "refuser",
+          "remettre_a_valider",
+          "reporter_correction",
+          "reporter_parent"
+        ],
+        "title": "GroupeCapacitesOut",
+        "type": "object"
+      },
+      "GroupeOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "statut": {
+            "title": "Statut",
+            "type": "string"
+          },
+          "modifie_le": {
+            "format": "date-time",
+            "title": "Modifie Le",
+            "type": "string"
+          },
+          "decision_par": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Le"
+          },
+          "acteur": {
+            "$ref": "#/components/schemas/ActeurIdentiteOut"
+          },
+          "is_new": {
+            "title": "Is New",
+            "type": "boolean"
+          },
+          "has_correction": {
+            "title": "Has Correction",
+            "type": "boolean"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contexte": {
+            "title": "Contexte"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneOut"
+            },
+            "title": "Lignes",
+            "type": "array"
+          },
+          "lignes_validees": {
+            "title": "Lignes Validees",
+            "type": "integer"
+          },
+          "lignes_total": {
+            "title": "Lignes Total",
+            "type": "integer"
+          },
+          "capacites": {
+            "$ref": "#/components/schemas/GroupeCapacitesOut"
+          }
+        },
+        "required": [
+          "id",
+          "statut",
+          "modifie_le",
+          "decision_par",
+          "decision_le",
+          "acteur",
+          "is_new",
+          "has_correction",
+          "parent",
+          "lignes",
+          "lignes_validees",
+          "lignes_total",
+          "capacites"
+        ],
+        "title": "GroupeOut",
+        "type": "object"
+      },
+      "GroupePageOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GroupeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "required": ["items", "total", "page", "page_size"],
+        "title": "GroupePageOut",
+        "type": "object"
+      },
+      "LigneCapacitesOut": {
+        "properties": {
+          "valider": {
+            "title": "Valider",
+            "type": "boolean"
+          },
+          "remettre_a_valider": {
+            "title": "Remettre A Valider",
+            "type": "boolean"
+          },
+          "remettre_groupe_a_valider": {
+            "title": "Remettre Groupe A Valider",
+            "type": "boolean"
+          },
+          "corriger_correction": {
+            "title": "Corriger Correction",
+            "type": "boolean"
+          },
+          "corriger_parent": {
+            "title": "Corriger Parent",
+            "type": "boolean"
+          },
+          "reporter_correction": {
+            "title": "Reporter Correction",
+            "type": "boolean"
+          },
+          "reporter_parent": {
+            "title": "Reporter Parent",
+            "type": "boolean"
+          },
+          "supprimer_correction": {
+            "title": "Supprimer Correction",
+            "type": "boolean"
+          },
+          "supprimer_parent": {
+            "title": "Supprimer Parent",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valider",
+          "remettre_a_valider",
+          "remettre_groupe_a_valider",
+          "corriger_correction",
+          "corriger_parent",
+          "reporter_correction",
+          "reporter_parent",
+          "supprimer_correction",
+          "supprimer_parent"
+        ],
+        "title": "LigneCapacitesOut",
+        "type": "object"
+      },
+      "LigneOut": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "champs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Champs",
+            "type": "array"
+          },
+          "statut": {
+            "title": "Statut",
+            "type": "string"
+          },
+          "decision_par": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Le"
+          },
+          "acteur": {
+            "$ref": "#/components/schemas/CellOut"
+          },
+          "correction": {
+            "$ref": "#/components/schemas/CellOut"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CellOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "capacites": {
+            "$ref": "#/components/schemas/LigneCapacitesOut"
+          }
+        },
+        "required": [
+          "key",
+          "champs",
+          "statut",
+          "decision_par",
+          "decision_le",
+          "acteur",
+          "correction",
+          "parent",
+          "capacites"
+        ],
+        "title": "LigneOut",
+        "type": "object"
+      },
+      "ParentOut": {
+        "properties": {
+          "identifiant_unique": {
+            "title": "Identifiant Unique",
+            "type": "string"
+          },
+          "nom": {
+            "title": "Nom",
+            "type": "string"
+          },
+          "nb_enfants": {
+            "title": "Nb Enfants",
+            "type": "integer"
+          }
+        },
+        "required": ["identifiant_unique", "nom", "nb_enfants"],
+        "title": "ParentOut",
+        "type": "object"
+      },
+      "StatsQuery": {
+        "properties": {
+          "filtre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filtre"
+          },
+          "tuples": {
+            "default": [],
+            "description": "Tuples de champs, chacun écrit « champ,champ »",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tuples",
+            "type": "array"
+          },
+          "afficher": {
+            "default": "avalider",
+            "enum": ["avalider", "tout"],
+            "title": "Afficher",
+            "type": "string"
+          },
+          "vue": {
+            "default": "groupes",
+            "enum": ["groupes", "lignes"],
+            "title": "Vue",
+            "type": "string"
+          }
+        },
+        "title": "StatsQuery",
+        "type": "object"
+      },
+      "StatsOut": {
+        "properties": {
+          "compteurs": {
+            "$ref": "#/components/schemas/CompteursOut"
+          },
+          "totaux_vues": {
+            "$ref": "#/components/schemas/TotauxVuesOut"
+          },
+          "tuples": {
+            "items": {
+              "$ref": "#/components/schemas/TupleCountOut"
+            },
+            "title": "Tuples",
+            "type": "array"
+          }
+        },
+        "required": ["compteurs", "totaux_vues", "tuples"],
+        "title": "StatsOut",
+        "type": "object"
+      },
+      "TotauxVuesOut": {
+        "properties": {
+          "groupes": {
+            "title": "Groupes",
+            "type": "integer"
+          },
+          "lignes": {
+            "title": "Lignes",
+            "type": "integer"
+          }
+        },
+        "required": ["groupes", "lignes"],
+        "title": "TotauxVuesOut",
+        "type": "object"
+      },
+      "TupleCountOut": {
+        "properties": {
+          "champs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Champs",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": ["champs", "count"],
+        "title": "TupleCountOut",
+        "type": "object"
+      },
+      "GroupeDecisionIn": {
+        "properties": {
+          "action": {
+            "enum": ["validate", "reject", "resubmit"],
+            "title": "Action",
+            "type": "string"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "required": ["action"],
+        "title": "GroupeDecisionIn",
+        "type": "object"
+      },
+      "LignesDecisionIn": {
+        "properties": {
+          "champs": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "minItems": 1,
+            "title": "Champs",
+            "type": "array"
+          },
+          "action": {
+            "enum": ["validate", "resubmit"],
+            "title": "Action",
+            "type": "string"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "required": ["champs", "action"],
+        "title": "LignesDecisionIn",
+        "type": "object"
+      },
+      "PropositionIn": {
+        "properties": {
+          "suggestion_modele": {
+            "enum": ["RevisionActeur", "ParentRevisionActeur"],
+            "title": "Suggestion Modele",
+            "type": "string"
+          },
+          "champs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Champs",
+            "type": "array"
+          },
+          "valeurs": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Valeurs",
+            "type": "object"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "required": ["suggestion_modele", "champs", "valeurs"],
+        "title": "PropositionIn",
+        "type": "object"
+      },
+      "PropositionDeleteQuery": {
+        "properties": {
+          "suggestion_modele": {
+            "enum": ["RevisionActeur", "ParentRevisionActeur"],
+            "title": "Suggestion Modele",
+            "type": "string"
+          },
+          "champs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Champs",
+            "type": "array"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "required": ["suggestion_modele", "champs"],
+        "title": "PropositionDeleteQuery",
+        "type": "object"
+      },
+      "ReportIn": {
+        "properties": {
+          "cible": {
+            "enum": ["correction", "parent"],
+            "title": "Cible",
+            "type": "string"
+          },
+          "champs": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Lignes à reporter ; absent = toutes les lignes reportables",
+            "title": "Champs"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "required": ["cible"],
+        "title": "ReportIn",
         "type": "object"
       }
     },

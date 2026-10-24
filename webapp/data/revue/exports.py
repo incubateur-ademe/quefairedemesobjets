@@ -9,7 +9,6 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from openpyxl.utils import get_column_letter
 
 from data.models.suggestion import SuggestionCohorte
-from data.revue.cohortes import logs_queryset
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 # Excel refuses longer cells
@@ -50,7 +49,7 @@ def logs_xlsx(cohorte: SuggestionCohorte, niveau: list[str]) -> bytes:
         sheet.column_dimensions[get_column_letter(index)].width = width
     sheet.freeze_panes = "A2"
     sheet.append([title for title, _ in LOG_COLUMNS])
-    for log in logs_queryset(cohorte, niveau).iterator(chunk_size=2000):
+    for log in cohorte.logs_queryset(niveau).iterator(chunk_size=2000):
         sheet.append(
             [
                 _cell(log.niveau_de_log),
