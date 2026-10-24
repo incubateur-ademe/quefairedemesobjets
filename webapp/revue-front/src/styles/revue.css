@@ -1291,3 +1291,40 @@ tr:hover .editbtn,
   cursor: pointer;
   font: inherit;
 }
+
+/* selection and mass actions */
+.tbl td.chk,
+.tbl th.chk {
+  width: 28px;
+  padding-right: 0;
+}
+
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.massbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  font-size: 12.5px;
+}
+
+.massbar b {
+  font-variant-numeric: tabular-nums;
+}
+
+.massbar button.lk {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+}

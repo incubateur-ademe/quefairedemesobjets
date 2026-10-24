@@ -260,8 +260,15 @@ def serialize_groupe(
         "capacites": {
             "valider": actionable,
             "refuser": actionable and policy.can_reject_group,
+            # A decided groupe, or a groupe to validate having validated lignes
             "remettre_a_valider": groupe.statut
-            in (SuggestionStatut.ATRAITER, SuggestionStatut.REJETEE),
+            in (SuggestionStatut.ATRAITER, SuggestionStatut.REJETEE)
+            or (
+                actionable
+                and any(
+                    ligne["statut"] == SuggestionStatut.ATRAITER for ligne in lignes
+                )
+            ),
             "reporter_correction": any(
                 ligne["capacites"]["reporter_correction"] for ligne in lignes
             ),

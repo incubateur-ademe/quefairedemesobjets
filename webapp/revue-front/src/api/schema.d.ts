@@ -504,6 +504,64 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/suggestions/cohortes/{cohorte_id}/actions/apercu": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Mass Preview
+     * @description Number of elements each mass action would really change on the selection.
+     */
+    post: operations["data_revue_api_mass_preview"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/cohortes/{cohorte_id}/actions": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Mass Action
+     * @description Runs a mass action. The filter of a « tout le filtre » selection is applied
+     *     again by the server. Large reports run in the background (202 + job).
+     */
+    post: operations["data_revue_api_mass_action"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/jobs/{job_id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Job */
+    get: operations["data_revue_api_job"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -1447,6 +1505,105 @@ export interface components {
       /** Longitude */
       longitude?: number | null
     }
+    /**
+     * MassPreviewOut
+     * @description Number of elements (groupes or lignes) each action would really change.
+     */
+    MassPreviewOut: {
+      /** Compteurs */
+      compteurs: {
+        [key: string]: number
+      }
+    }
+    /** FiltreSelectionIn */
+    FiltreSelectionIn: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      mode: "filtre"
+      /** Filtre */
+      filtre?: string | null
+      /**
+       * Tuples
+       * @default []
+       */
+      tuples: string[]
+      /**
+       * Afficher
+       * @default avalider
+       * @enum {string}
+       */
+      afficher: "avalider" | "tout"
+      /**
+       * Exclus
+       * @default []
+       */
+      exclus: (number | string)[]
+    }
+    /** IdsSelectionIn */
+    IdsSelectionIn: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      mode: "ids"
+      /** Ids */
+      ids: (number | string)[]
+    }
+    /** MassSelectionIn */
+    MassSelectionIn: {
+      /**
+       * Vue
+       * @enum {string}
+       */
+      vue: "groupes" | "lignes"
+      /** Selection */
+      selection:
+        | components["schemas"]["IdsSelectionIn"]
+        | components["schemas"]["FiltreSelectionIn"]
+    }
+    /** MassResultOut */
+    MassResultOut: {
+      /** Affected */
+      affected: number
+      /** Skipped */
+      skipped: number
+    }
+    /** MassJobOut */
+    MassJobOut: {
+      /** Job Id */
+      job_id: string
+      /** Total */
+      total: number
+    }
+    /** MassActionIn */
+    MassActionIn: {
+      /**
+       * Vue
+       * @enum {string}
+       */
+      vue: "groupes" | "lignes"
+      /** Selection */
+      selection:
+        | components["schemas"]["IdsSelectionIn"]
+        | components["schemas"]["FiltreSelectionIn"]
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "validate" | "reject" | "resubmit" | "report_correction" | "report_parent"
+    }
+    /** JobOut */
+    JobOut: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "pending" | "running" | "done" | "error"
+      /** Affected */
+      affected: number | null
+    }
   }
   responses: never
   parameters: never
@@ -2317,6 +2474,134 @@ export interface operations {
       }
       /** @description Bad Gateway */
       502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_mass_preview: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MassSelectionIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MassPreviewOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_mass_action: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        cohorte_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MassActionIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MassResultOut"]
+        }
+      }
+      /** @description Accepted */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MassJobOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_job: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        job_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["JobOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
         headers: {
           [name: string]: unknown
         }
