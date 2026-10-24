@@ -430,6 +430,14 @@ class MassJobOut(Schema):
     total: int
 
 
-class JobOut(Schema):
-    status: Literal["pending", "running", "done", "error"]
+class TacheOut(Schema):
+    id: str
+    statut: Literal["pending", "running", "done", "error"]
+    action: Literal["report_correction", "report_parent"]
+    groupes: int
     affected: int | None
+    par: str
+    lancee_le: datetime
+    debut: datetime | None
+    fin: datetime | None
+    erreur: str

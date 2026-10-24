@@ -145,14 +145,18 @@ def _serialize_ligne(
     actionable = groupe.statut == SuggestionStatut.AVALIDER
     ligne_open = actionable and statut == SuggestionStatut.AVALIDER
 
-    def editable(modele: str) -> bool:
+    def reportable(modele: str) -> bool:
+        """The suggestion of the source may be copied to `modele`, like in the
+        admin: only the fields not reportable on `modele` are refused."""
         if modele not in policy.editable_models or not ligne_open:
             return False
         if modele == PARENT and not groupe.parent_revision_acteur_id:
             return False
-        return not any(
-            champ in NOT_REPORTABLE[modele] or champ in NOT_EDITABLE for champ in champs
-        )
+        return not any(champ in NOT_REPORTABLE[modele] for champ in champs)
+
+    def editable(modele: str) -> bool:
+        """A value may also be typed: not for the fields with specific values."""
+        return reportable(modele) and not any(champ in NOT_EDITABLE for champ in champs)
 
     has_parent = bool(groupe.parent_revision_acteur_id) and policy.shows_parent
     return {
@@ -183,10 +187,15 @@ def _serialize_ligne(
             "remettre_groupe_a_valider": groupe.statut == SuggestionStatut.REJETEE,
             "corriger_correction": editable(REVISION),
             "corriger_parent": has_parent and editable(PARENT),
-            "reporter_correction": editable(REVISION) and ACTEUR in by_modele,
-            "reporter_parent": has_parent and editable(PARENT) and ACTEUR in by_modele,
-            "supprimer_correction": editable(REVISION) and REVISION in by_modele,
-            "supprimer_parent": has_parent and editable(PARENT) and PARENT in by_modele,
+            "reporter_correction": reportable(REVISION) and ACTEUR in by_modele,
+            "reporter_parent": has_parent
+            and reportable(PARENT)
+            and ACTEUR in by_modele,
+            # A reported value may be removed, even when it cannot be typed
+            "supprimer_correction": reportable(REVISION) and REVISION in by_modele,
+            "supprimer_parent": has_parent
+            and reportable(PARENT)
+            and PARENT in by_modele,
         },
     }
 

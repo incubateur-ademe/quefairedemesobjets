@@ -279,7 +279,7 @@ function GroupeHeaderRow({
           {groupe.lignes_validees}/{groupe.lignes_total} lignes
         </div>
       </td>
-      <td>
+      <td className="c-act">
         <div className="gact">
           <GroupeActionsButtons groupe={groupe} actions={actions} />
         </div>
@@ -354,7 +354,7 @@ export function LigneRow({
       <td>
         <StatutCell ligne={ligne} />
       </td>
-      <td>
+      <td className="c-act">
         <LigneActionCell groupe={groupe} ligne={ligne} actions={actions} />
       </td>
     </tr>
@@ -444,7 +444,7 @@ export function GroupesView({
       {groupes.map((groupe) => (
         <tbody
           key={groupe.id}
-          className={`gbody${cursor === groupeCursor(groupe) ? " gfocus" : ""}`}
+          className={`gbody st-${groupe.statut}${cursor === groupeCursor(groupe) ? " gfocus" : ""}`}
         >
           <GroupeHeaderRow
             groupe={groupe}

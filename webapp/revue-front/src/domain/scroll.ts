@@ -18,3 +18,19 @@ export function scrollRowIntoView(row: Element | null) {
     container.scrollTop += Math.min(rowBox.bottom - box.bottom, rowBox.top - top)
   }
 }
+
+/** Smoothly scrolls the scrollable container of a table row to place the row at
+ * the top, just below the sticky header of the table. */
+export function scrollRowToTop(row: Element | null) {
+  const container = row?.closest(".scroll")
+  if (!row || !container) {
+    return
+  }
+  const header = row.closest("table")?.querySelector("thead")
+  const headerHeight = header?.getBoundingClientRect().height ?? 0
+  const top = container.getBoundingClientRect().top + headerHeight
+  container.scrollTo({
+    top: container.scrollTop + row.getBoundingClientRect().top - top,
+    behavior: "smooth",
+  })
+}

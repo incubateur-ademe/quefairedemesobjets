@@ -20,3 +20,17 @@ export function CohorteStatutPill({ statut }: { statut: string }) {
   const meta = COHORTE_STATUTS[statut]
   return meta ? <Pill tone={meta.tone}>{meta.label}</Pill> : <span>{statut}</span>
 }
+
+/** Statut of a cohorte as a colored dot, its label in title. */
+export function CohorteStatutDot({ statut }: { statut: string }) {
+  const meta = COHORTE_STATUTS[statut]
+  const label = meta?.label ?? statut
+  return (
+    <span
+      className={`sdot p-${meta?.tone ?? "done"}`}
+      role="img"
+      aria-label={`Statut : ${label}`}
+      title={label}
+    />
+  )
+}

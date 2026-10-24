@@ -480,6 +480,34 @@ class TestCorrections:
             parent_revision_acteur_id=groupe.parent_revision_acteur_id,
         ).count() == len(body["lignes"])
 
+    def test_report_fields_with_specific_values(self, client, groupe):
+        """Like in the admin: a field that cannot be typed may be reported, except
+        on the parent for the fields inherited from the children."""
+        for champ, valeur in (("label_codes", "reparacteur"), ("source_code", "src")):
+            SuggestionUnitaire.objects.create(
+                suggestion_groupe=groupe,
+                suggestion_modele="Acteur",
+                champs=[champ],
+                valeurs=[valeur],
+                acteur_id=groupe.acteur_id,
+            )
+
+        status, body = post(
+            client,
+            f"/groupes/{groupe.id}/report",
+            {"cible": "correction", "champs": [["label_codes"], ["source_code"]]},
+        )
+
+        assert status == 200
+        lignes = {tuple(ligne["champs"]): ligne for ligne in body["lignes"]}
+        for champs in (("label_codes",), ("source_code",)):
+            ligne = lignes[champs]
+            assert ligne["correction"]["propose"] == ligne["acteur"]["propose"]
+            assert ligne["capacites"]["corriger_correction"] is False
+            assert ligne["capacites"]["supprimer_correction"] is True
+        assert lignes[("label_codes",)]["capacites"]["reporter_parent"] is False
+        assert lignes[("source_code",)]["capacites"]["reporter_parent"] is True
+
     def test_nothing_to_correct_once_validated(self, client, groupe):
         post(client, f"/groupes/{groupe.id}/decision", {"action": "validate"})
 

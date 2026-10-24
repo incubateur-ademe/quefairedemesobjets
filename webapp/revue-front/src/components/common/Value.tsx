@@ -1,4 +1,28 @@
+import {
+  DIFF_DELETE,
+  DIFF_EQUAL,
+  DIFF_INSERT,
+  diff_match_patch as DiffMatchPatch,
+} from "diff-match-patch"
+
 import { externalLink } from "../../domain/externalLinks"
+
+const dmp = new DiffMatchPatch()
+
+/** Differences between two values, like `diff_display` of the admin. */
+export function diffSegments(
+  actuel: string,
+  propose: string,
+): ["equal" | "removed" | "added", string][] {
+  const diffs = dmp.diff_main(actuel, propose)
+  dmp.diff_cleanupSemantic(diffs)
+  const kinds = {
+    [DIFF_EQUAL]: "equal",
+    [DIFF_DELETE]: "removed",
+    [DIFF_INSERT]: "added",
+  } as const
+  return diffs.map(([op, text]) => [kinds[op as keyof typeof kinds], text])
+}
 
 export function ExternalLink({ value }: { value: unknown }) {
   const link = externalLink(value)
@@ -34,8 +58,8 @@ export function Value({
   )
 }
 
-/** Current value and proposition: old value struck out, new value highlighted,
- * like `display_diff_values` of the admin. */
+/** Current value and proposition: removed parts struck out, added parts
+ * highlighted, like `display_diff_values` of the admin. */
 export function DiffValue({
   actuel,
   propose,
@@ -56,14 +80,27 @@ export function DiffValue({
       <Value value={actuel} />
     )
   }
-  if (actuel === null || actuel === undefined || actuel === "" || actuel === propose) {
-    return <Value value={propose} className={actuel === propose ? "" : "chg"} />
+  if (actuel === propose || (!actuel && propose === "")) {
+    return <Value value={propose} />
   }
   return (
     <>
-      <Value value={actuel} className="old" />
-      <span className="arrow">→</span>
-      <Value value={propose} className="chg" />
+      <span className="val">
+        {diffSegments(actuel ?? "", propose).map(([kind, text], index) =>
+          kind === "removed" ? (
+            <del key={index}>{text}</del>
+          ) : kind === "added" ? (
+            <ins key={index}>{text}</ins>
+          ) : (
+            text
+          ),
+        )}
+      </span>
+      {propose === "" ? (
+        <span className="empty"> vide</span>
+      ) : (
+        <ExternalLink value={propose} />
+      )}
     </>
   )
 }

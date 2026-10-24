@@ -40,6 +40,7 @@ export const queryKeys = {
   cohortesFilters: ["cohortes-filtres"] as const,
   logs: (cohorteId: number, params: LogsParams) => ["logs", cohorteId, params] as const,
   cohorte: (cohorteId: number) => ["cohorte", cohorteId] as const,
+  taches: (cohorteId: number) => ["taches", cohorteId] as const,
   reviewFilters: (cohorteId: number) => ["revue-filtres", cohorteId] as const,
   groupes: (cohorteId: number, params?: GroupesParams) =>
     params

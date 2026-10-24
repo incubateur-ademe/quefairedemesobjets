@@ -536,7 +536,7 @@ export interface paths {
     /**
      * Mass Action
      * @description Runs a mass action. The filter of a « tout le filtre » selection is applied
-     *     again by the server. Large reports run in the background (202 + job).
+     *     again by the server. Large reports run in the background (202), see /taches.
      */
     post: operations["data_revue_api_mass_action"]
     delete?: never
@@ -545,15 +545,18 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/suggestions/jobs/{job_id}": {
+  "/api/suggestions/cohortes/{cohorte_id}/taches": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** Job */
-    get: operations["data_revue_api_job"]
+    /**
+     * Taches
+     * @description Background tasks launched on the cohorte (large reports), most recent first.
+     */
+    get: operations["data_revue_api_taches"]
     put?: never
     post?: never
     delete?: never
@@ -1594,15 +1597,37 @@ export interface components {
        */
       action: "validate" | "reject" | "resubmit" | "report_correction" | "report_parent"
     }
-    /** JobOut */
-    JobOut: {
+    /** TacheOut */
+    TacheOut: {
+      /** Id */
+      id: string
       /**
-       * Status
+       * Statut
        * @enum {string}
        */
-      status: "pending" | "running" | "done" | "error"
+      statut: "pending" | "running" | "done" | "error"
+      /**
+       * Action
+       * @enum {string}
+       */
+      action: "report_correction" | "report_parent"
+      /** Groupes */
+      groupes: number
       /** Affected */
       affected: number | null
+      /** Par */
+      par: string
+      /**
+       * Lancee Le
+       * Format: date-time
+       */
+      lancee_le: string
+      /** Debut */
+      debut: string | null
+      /** Fin */
+      fin: string | null
+      /** Erreur */
+      erreur: string
     }
   }
   responses: never
@@ -2580,12 +2605,12 @@ export interface operations {
       }
     }
   }
-  data_revue_api_job: {
+  data_revue_api_taches: {
     parameters: {
       query?: never
       header?: never
       path: {
-        job_id: string
+        cohorte_id: number
       }
       cookie?: never
     }
@@ -2597,7 +2622,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["JobOut"]
+          "application/json": components["schemas"]["TacheOut"][]
         }
       }
       /** @description Not Found */

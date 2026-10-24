@@ -14,6 +14,8 @@ export type ReviewState = {
   tuples: string[]
   page: number
   pageSize: number
+  /** View « Groupes »: hides the lignes already validated */
+  masquerValidees: boolean
 }
 
 /** Tuples are written « champ,champ » and separated by « | » in the URL. */
@@ -29,5 +31,6 @@ export function readReviewState(search: Record<string, string>): ReviewState {
     tuples: search.tuples ? search.tuples.split(TUPLES_SEPARATOR).filter(Boolean) : [],
     page: Number(search.page) || 1,
     pageSize: PAGE_SIZES[vue].includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE[vue],
+    masquerValidees: search.masquer_validees === "1",
   }
 }

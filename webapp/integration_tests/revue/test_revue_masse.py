@@ -11,6 +11,7 @@ from data.revue import masse
 from data.revue.lignes import ligne_statut
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django_tasks_db.models import DBTaskResult
 
 API = "/api/suggestions"
 
@@ -192,6 +193,33 @@ class TestGroupes:
             }
             assert parent == acteur
 
+    def test_report_fields_with_specific_values(self, client, cohorte):
+        """Like in the admin: only the fields not reportable on the target are
+        refused (label_codes is inherited by the parent from its children)."""
+        groupe = cohorte.suggestion_groupes.filter(
+            statut="AVALIDER", parent_revision_acteur__isnull=False
+        ).first()
+        SuggestionUnitaire.objects.create(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=["label_codes"],
+            valeurs=["reparacteur"],
+            acteur_id=groupe.acteur_id,
+        )
+
+        status, body = post(
+            client,
+            f"/cohortes/{cohorte.id}/actions/apercu",
+            {
+                "vue": "lignes",
+                "selection": {"mode": "ids", "ids": [f"{groupe.id}:label_codes"]},
+            },
+        )
+
+        assert status == 200
+        assert body["compteurs"]["report_correction"] == 1
+        assert body["compteurs"]["report_parent"] == 0
+
     def test_large_report_runs_as_a_task(self, client, cohorte, monkeypatch):
         monkeypatch.setattr(masse, "SUGGESTION_TASK_ASYNC_THRESHOLD", 1)
 
@@ -209,9 +237,61 @@ class TestGroupes:
         assert status == 200
         assert body["affected"] > 1
 
-    def test_unknown_job(self, client, cohorte):
-        response = client.get(f"{API}/jobs/00000000-0000-0000-0000-000000000000")
-        assert response.status_code == 404
+
+@pytest.mark.django_db
+class TestTaches:
+    @pytest.fixture
+    def queued(self, settings, monkeypatch):
+        # Enqueued in the database, never run (no worker in tests)
+        settings.TASKS = {
+            "default": {
+                "BACKEND": "django_tasks_db.DatabaseBackend",
+                "ENQUEUE_ON_COMMIT": False,
+            }
+        }
+        monkeypatch.setattr(masse, "SUGGESTION_TASK_ASYNC_THRESHOLD", 1)
+
+    def report(self, client, cohorte, action="report_correction"):
+        return post(
+            client,
+            f"/cohortes/{cohorte.id}/actions",
+            {"vue": "groupes", "action": action, "selection": filtre_selection()},
+        )
+
+    def test_tasks_of_the_cohorte(self, client, cohorte, queued):
+        status, job = self.report(client, cohorte)
+        assert status == 202
+
+        response = client.get(f"{API}/cohortes/{cohorte.id}/taches")
+
+        assert response.status_code == 200
+        [tache] = response.json()
+        assert tache["id"] == job["job_id"]
+        assert tache["statut"] == "pending"
+        assert tache["action"] == "report_correction"
+        assert tache["groupes"] > 1
+        assert tache["par"] == "admin"
+        assert tache["affected"] is None
+
+    def test_finished_task(self, client, cohorte, queued):
+        _, job = self.report(client, cohorte, "report_parent")
+        DBTaskResult.objects.filter(id=job["job_id"]).update(
+            status="SUCCESSFUL", return_value={"affected": 3}
+        )
+
+        [tache] = client.get(f"{API}/cohortes/{cohorte.id}/taches").json()
+
+        assert tache["statut"] == "done"
+        assert tache["action"] == "report_parent"
+        assert tache["affected"] == 3
+
+    def test_tasks_of_other_cohortes_are_not_listed(self, client, cohorte, queued):
+        self.report(client, cohorte)
+        other = SuggestionCohorte.objects.exclude(id=cohorte.id).first()
+
+        response = client.get(f"{API}/cohortes/{other.id}/taches")
+
+        assert response.json() == []
 
 
 @pytest.mark.django_db

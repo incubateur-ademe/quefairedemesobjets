@@ -31,6 +31,7 @@ function setup(url = "/data/revue/cohortes/7?vue=lignes") {
     }
     if (path.endsWith("/stats"))
       return { ...STATS, compteurs: { ...STATS.compteurs, AVALIDER: 3 } }
+    if (path.endsWith("/taches")) return []
     if (path.endsWith("/revue/filtres")) return { champs: [] }
     if (path.endsWith("/lignes")) return LIGNES
     if (path.endsWith("/groupes")) throw new Error("the groupes page is not loaded")
@@ -52,7 +53,7 @@ describe("LignesView", () => {
     expect(within(row("2:url")).getByText("Acteur 2")).toBeInTheDocument()
     expect(within(row("2:url")).getByText("acteur_2")).toBeInTheDocument()
     expect(screen.getByText(/lignes 1–3 sur 3/)).toBeInTheDocument()
-    expect(screen.getByText("Lignes du filtre")).toBeInTheDocument()
+    expect(screen.getByTitle(/^Lignes du filtre/)).toBeInTheDocument()
     const query = api.GET.mock.calls.find(([path]) => path.endsWith("/lignes"))![1]
       .params.query
     expect(query).toMatchObject({ page: 1, page_size: 500, afficher: "avalider" })
@@ -103,6 +104,7 @@ describe("LignesView", () => {
         return { ...groupe(1), modifie_le: `2026-10-09T10:00:0${answered}.000Z` }
       }
       if (path.endsWith("/stats")) return STATS
+      if (path.endsWith("/taches")) return []
       if (path.endsWith("/revue/filtres")) return { champs: [] }
       if (path.endsWith("/lignes")) return LIGNES
       return COHORTE

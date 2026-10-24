@@ -19,6 +19,10 @@ export class Marker {
     map.container.appendChild(this.options.element)
     return this
   }
+  remove() {
+    this.options.element.remove()
+    return this
+  }
   on(event: string, handler: Handler) {
     ;(this.handlers[event] ??= []).push(handler)
     return this
@@ -39,6 +43,9 @@ export class Map {
     return this
   }
   fitBounds() {
+    return this
+  }
+  jumpTo() {
     return this
   }
   remove() {
