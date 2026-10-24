@@ -52,7 +52,7 @@ def enrich_lien_succession_to_suggestion_groupes(
     cohort: str,
     suggest_action: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
 ) -> bool:
     """Write 1 SuggestionGroupe per acteur and 1 SuggestionUnitaire per changed
     field (SIREN and/or SIRET)."""
@@ -156,7 +156,7 @@ def enrich_lien_succession_suggest(
     cohort: str,
     suggest_action: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
 ) -> bool:
     """Reads a DBT model and generates one suggestion per corrected acteur."""
     df = enrich_dbt_model_read(dbt_model_name)

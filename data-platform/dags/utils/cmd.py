@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def cmd_run(cmd: str, dry_run: bool = True, env: dict = {}) -> str | None:
+def cmd_run(cmd: str, dry_run: bool = False, env: dict = {}) -> str | None:
     """Runs a system command with optional dry-run mode,
     Useful to run low-level tasks (e.g. streaming a remove CSV
     into DB via psql) while keeping the logic in Python."""

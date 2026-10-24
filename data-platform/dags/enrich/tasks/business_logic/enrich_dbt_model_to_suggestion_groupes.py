@@ -214,7 +214,7 @@ def enrich_dbt_model_to_suggestion_groupes(
     df: pd.DataFrame,
     cohort: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
 ) -> bool:
     from utils.django import django_setup_full
 

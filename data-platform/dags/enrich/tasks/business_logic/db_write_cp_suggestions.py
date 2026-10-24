@@ -13,7 +13,7 @@ def db_write_cp_suggestions(
     df_acteur_cp: pd.DataFrame,
     df_revision_acteur_cp: pd.DataFrame,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
     use_legacy_suggestions: bool = False,
 ) -> None:
     """Write cp suggestions to db"""
