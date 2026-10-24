@@ -1,0 +1,1054 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Que faire de mes objets et déchets",
+    "version": "0.0.2",
+    "description": ""
+  },
+  "paths": {
+    "/api/qfdmo/sources": {
+      "get": {
+        "operationId": "qfdmo_api_sources",
+        "summary": "Liste des sources",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SourceSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "List the possible <i>sources</i> for an actor.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/sous-categories": {
+      "get": {
+        "operationId": "qfdmo_api_sous_categories",
+        "summary": "Liste des catégories d'objets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SousCategorieObjetSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "List the possible <i>sub-categories of objects</i> for an actor.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/actions": {
+      "get": {
+        "operationId": "qfdmo_api_actions",
+        "summary": "Liste des actions possibles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActionSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "List the possible <i>actions</i> on an object / waste.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/actions/groupes": {
+      "get": {
+        "operationId": "qfdmo_api_groupe_actions",
+        "summary": "Liste des groupes d'actions possibles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupeActionSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "List the possible <i>actions</i> on an object / waste.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/acteurs": {
+      "get": {
+        "operationId": "qfdmo_api_acteurs",
+        "summary": "Liste des acteurs actifs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "types",
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "q": "acteur_type__in",
+              "title": "Types"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "services",
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "q": "acteur_services__in",
+              "title": "Services"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "actions",
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "q": "proposition_services__action_id__in",
+              "title": "Actions"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sous_categories",
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "q": "proposition_services__sous_categories__id__in",
+              "title": "Sous Categories"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "latitude",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Latitude"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "longitude",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Longitude"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "rayon",
+            "schema": {
+              "default": 2,
+              "title": "Rayon",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedActeurSchema"
+                }
+              }
+            }
+          }
+        },
+        "description": "The actors corresponding to a point on the \"Que faire de mes objets et déchets\" map.\n\nTo find actors near a point:\n- provide a latitude / longitude (example: latitude=48.86 and longitude=2.3)\n- provide a radius (optional) in km: results outside this radius will not be\n  returned\n\nIf the latitude or longitude are missing, then all results will be returned sorted\nby name.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/acteurs/types": {
+      "get": {
+        "operationId": "qfdmo_api_acteurs_types",
+        "summary": "Liste des actions possibles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActeurTypeSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "List the possible <i>types</i> of actors.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/acteurs/services": {
+      "get": {
+        "operationId": "qfdmo_api_services",
+        "summary": "Liste des services proposés par les acteurs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActeurServiceSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "description": "Liste l'ensemble des <i>services</i> qui peuvent être proposés par un acteur.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/acteur": {
+      "get": {
+        "operationId": "qfdmo_api_acteur",
+        "summary": "Retrouver un acteur actif",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "identifiant_unique",
+            "schema": {
+              "title": "Identifiant Unique",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActeurSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/autocomplete/configurateur": {
+      "get": {
+        "operationId": "qfdmo_api_autocomplete_epcis",
+        "summary": "Autocomplete Epcis",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "title": "Query",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/qfdmo/acteurs/columns": {
+      "get": {
+        "operationId": "qfdmo_api_acteurs_columns",
+        "summary": "Champs des modèles acteurs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/ModelFieldsSchema"
+                  },
+                  "title": "Response",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "description": "Actor models columns.\nUsed by the data-platform (Airflow) to build the DAGs parameters.",
+        "tags": ["Que faire de mes objets"]
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "operationId": "stats_api_stats_endpoint",
+        "summary": "Statistiques publiques",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Nombre d'itérations de la période souhaitée (ex: 30 jours).",
+              "title": "Since"
+            },
+            "required": false,
+            "description": "Nombre d'itérations de la période souhaitée (ex: 30 jours)."
+          },
+          {
+            "in": "query",
+            "name": "periodicity",
+            "schema": {
+              "default": "month",
+              "description": "Granularité de regroupement des KPI.",
+              "enum": ["day", "week", "month", "year"],
+              "title": "Periodicity",
+              "type": "string"
+            },
+            "required": false,
+            "description": "Granularité de regroupement des KPI."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatOutput"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["KPI"]
+      }
+    },
+    "/api/suggestions/me": {
+      "get": {
+        "operationId": "data_revue_api_me",
+        "summary": "Me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Revue suggestions"],
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SourceSchema": {
+        "properties": {
+          "logo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "description": "Ce champ est utilisé lors de l'import de données, il ne doit pas être mis à jour sous peine de casser l'import de données",
+            "maxLength": 255,
+            "title": "Code",
+            "type": "string"
+          },
+          "libelle": {
+            "maxLength": 255,
+            "title": "Libelle",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": ["logo", "code", "libelle"],
+        "title": "SourceSchema",
+        "type": "object"
+      },
+      "SousCategorieObjetSchema": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "description": "Ce champ est utilisé lors de l'import de données, il ne doit pas être mis à jour sous peine de casser l'import de données",
+            "maxLength": 255,
+            "title": "Code",
+            "type": "string"
+          },
+          "libelle": {
+            "maxLength": 255,
+            "title": "Libelle",
+            "type": "string"
+          }
+        },
+        "required": ["code", "libelle"],
+        "title": "SousCategorieObjetSchema",
+        "type": "object"
+      },
+      "ActionSchema": {
+        "properties": {
+          "couleur": {
+            "title": "Couleur",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "description": "Ce champ est utilisé lors de l'import de données, il ne doit pas être mis à jour sous peine de casser l'import de données",
+            "maxLength": 255,
+            "title": "Code",
+            "type": "string"
+          },
+          "libelle": {
+            "default": "",
+            "maxLength": 255,
+            "title": "Libelle",
+            "type": "string"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",
+            "title": "Icon"
+          }
+        },
+        "required": ["couleur", "code"],
+        "title": "ActionSchema",
+        "type": "object"
+      },
+      "GroupeActionSchema": {
+        "properties": {
+          "couleur": {
+            "title": "Couleur",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "description": "Ce champ est utilisé lors de l'import de données, il ne doit pas être mis à jour sous peine de casser l'import de données",
+            "maxLength": 255,
+            "title": "Code",
+            "type": "string"
+          },
+          "libelle": {
+            "default": "",
+            "maxLength": 255,
+            "title": "Libelle",
+            "type": "string"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Icône du badge à choisir dans le <a href='https://www.systeme-de-design.gouv.fr/elements-d-interface/fondamentaux-techniques/icones' rel='noopener' target='_blank'>DSFR</a>",
+            "title": "Icon"
+          }
+        },
+        "required": ["couleur", "code"],
+        "title": "GroupeActionSchema",
+        "type": "object"
+      },
+      "ActeurFilterSchema": {
+        "properties": {
+          "types": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "q": "acteur_type__in",
+            "title": "Types"
+          },
+          "services": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "q": "acteur_services__in",
+            "title": "Services"
+          },
+          "actions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "q": "proposition_services__action_id__in",
+            "title": "Actions"
+          },
+          "sous_categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "q": "proposition_services__sous_categories__id__in",
+            "title": "Sous Categories"
+          }
+        },
+        "title": "ActeurFilterSchema",
+        "type": "object"
+      },
+      "Input": {
+        "properties": {
+          "limit": {
+            "default": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          }
+        },
+        "title": "Input",
+        "type": "object"
+      },
+      "ActeurSchema": {
+        "properties": {
+          "latitude": {
+            "title": "Latitude",
+            "type": "number"
+          },
+          "longitude": {
+            "title": "Longitude",
+            "type": "number"
+          },
+          "services": {
+            "description": "Les services proposés pour un acteur",
+            "items": {
+              "$ref": "#/components/schemas/ActeurServiceSchema"
+            },
+            "title": "Services",
+            "type": "array"
+          },
+          "actions": {
+            "description": "Les actions proposés pour un acteur",
+            "items": {
+              "$ref": "#/components/schemas/ActionSchema"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ActeurTypeSchema",
+            "description": "Le type d'acteur"
+          },
+          "distance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance"
+          },
+          "nom": {
+            "description": "Le nom d'affichage de l'acteur",
+            "title": "Nom",
+            "type": "string"
+          },
+          "adresse": {
+            "description": "l'adresse complète de l'acteur",
+            "title": "Adresse",
+            "type": "string"
+          },
+          "sources": {
+            "description": "La paternité de l'acteur",
+            "items": {
+              "type": "string"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "nom_commercial": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "",
+            "title": "Nom Commercial"
+          },
+          "identifiant_unique": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identifiant Unique"
+          },
+          "siret": {
+            "anyOf": [
+              {
+                "maxLength": 14,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "",
+            "title": "Siret"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "services",
+          "actions",
+          "type",
+          "nom",
+          "adresse",
+          "sources"
+        ],
+        "title": "ActeurSchema",
+        "type": "object"
+      },
+      "ActeurServiceSchema": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "description": "Ce champ est utilisé lors de l'import de données, il ne doit pas être mis à jour sous peine de casser l'import de données",
+            "maxLength": 255,
+            "title": "Code",
+            "type": "string"
+          },
+          "libelle": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          }
+        },
+        "required": ["code"],
+        "title": "ActeurServiceSchema",
+        "type": "object"
+      },
+      "ActeurTypeSchema": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "code": {
+            "description": "Ce champ est utilisé lors de l'import de données, il ne doit pas être mis à jour sous peine de casser l'import de données",
+            "maxLength": 255,
+            "title": "Code",
+            "type": "string"
+          },
+          "libelle": {
+            "default": "?",
+            "maxLength": 255,
+            "title": "Libelle",
+            "type": "string"
+          }
+        },
+        "required": ["code"],
+        "title": "ActeurTypeSchema",
+        "type": "object"
+      },
+      "PagedActeurSchema": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ActeurSchema"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": ["items", "count"],
+        "title": "PagedActeurSchema",
+        "type": "object"
+      },
+      "ModelFieldsSchema": {
+        "properties": {
+          "with_properties": {
+            "items": {
+              "type": "string"
+            },
+            "title": "With Properties",
+            "type": "array"
+          },
+          "db_only": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Db Only",
+            "type": "array"
+          }
+        },
+        "required": ["with_properties", "db_only"],
+        "title": "ModelFieldsSchema",
+        "type": "object"
+      },
+      "StatInput": {
+        "properties": {
+          "since": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nombre d'itérations de la période souhaitée (ex: 30 jours).",
+            "title": "Since"
+          },
+          "periodicity": {
+            "default": "month",
+            "description": "Granularité de regroupement des KPI.",
+            "enum": ["day", "week", "month", "year"],
+            "title": "Periodicity",
+            "type": "string"
+          }
+        },
+        "title": "StatInput",
+        "type": "object"
+      },
+      "Stat": {
+        "properties": {
+          "value": {
+            "title": "Value",
+            "type": "number"
+          },
+          "date": {
+            "title": "Date",
+            "type": "integer"
+          },
+          "iso_date": {
+            "title": "Iso Date",
+            "type": "string"
+          }
+        },
+        "required": ["value", "date", "iso_date"],
+        "title": "Stat",
+        "type": "object"
+      },
+      "StatOutput": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "stats": {
+            "items": {
+              "$ref": "#/components/schemas/Stat"
+            },
+            "title": "Stats",
+            "type": "array"
+          }
+        },
+        "required": ["stats"],
+        "title": "StatOutput",
+        "type": "object"
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": ["id", "username"],
+        "title": "UserOut",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "SuperuserSessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
+      }
+    }
+  },
+  "servers": []
+}
