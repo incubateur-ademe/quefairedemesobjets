@@ -6,9 +6,9 @@ import { WaButton } from "../../wa"
 import {
   ActeurCell,
   ChampsCell,
-  Decided,
   LigneActionCell,
   ReportButton,
+  RestaurerButton,
   StatutCell,
   TargetCell,
 } from "./cells/LigneCells"
@@ -28,20 +28,20 @@ export function LigneHead() {
   return (
     <>
       <th>Champ(s)</th>
-      <th>
+      <th className="c-cmp">
         Acteur importé
         <span className="hsub">suggestion de la source, non corrigeable</span>
       </th>
       <th className="c-rep" title="Reporter vers la correction">
         ▶
       </th>
-      <th>
+      <th className="c-cmp">
         Correction<span className="hsub">RevisionActeur · corrigeable</span>
       </th>
       <th className="c-rep" title="Reporter vers le parent">
         ⏩
       </th>
-      <th>
+      <th className="c-cmp">
         Parent<span className="hsub">ParentRevisionActeur · corrigeable</span>
       </th>
       <th>Statut</th>
@@ -51,6 +51,30 @@ export function LigneHead() {
 }
 
 const PROCESSING = ["ENCOURS", "SUCCES", "ERREUR"]
+
+/** Correction with the value of the acteur on every restorable ligne. */
+function RestaurerAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActions }) {
+  const count = groupe.lignes.filter(
+    (ligne) => ligne.capacites.restaurer_correction,
+  ).length
+  if (!count) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      className="rep all"
+      title={`Corriger ${plural(count, "ligne")} avec la valeur initiale`}
+      onClick={(event) => {
+        event.stopPropagation()
+        actions.restaurer(groupe).catch(() => {})
+      }}
+    >
+      ↩︎
+      <small>tout</small>
+    </button>
+  )
+}
 
 function ReportAll({
   groupe,
@@ -184,7 +208,7 @@ function GroupeHeaderRow({
             <WaButton
               key={tab}
               size="small"
-              appearance="plain"
+              appearance="outlined"
               onClick={(event) => {
                 event.stopPropagation()
                 onOpen(groupe, tab)
@@ -218,7 +242,10 @@ function GroupeHeaderRow({
         </div>
       </td>
       <td className="c-rep">
-        <ReportAll groupe={groupe} modele="RevisionActeur" actions={actions} />
+        <div className="reps reps--col">
+          <ReportAll groupe={groupe} modele="RevisionActeur" actions={actions} />
+          <RestaurerAll groupe={groupe} actions={actions} />
+        </div>
       </td>
       <td>
         {acteur.admin_urls.corrige ? (
@@ -265,8 +292,10 @@ function GroupeHeaderRow({
         )}
       </td>
       <td>
-        <StatutPill statut={groupe.statut} />
-        <Decided par={groupe.decision_par} le={groupe.decision_le} />
+        <StatutPill
+          statut={groupe.statut}
+          decision={{ par: groupe.decision_par, le: groupe.decision_le }}
+        />
         <div className="lineprog">
           <span className="stack">
             <span
@@ -320,12 +349,15 @@ export function LigneRow({
         <ActeurCell ligne={ligne} />
       </td>
       <td className="c-rep">
-        <ReportButton
-          groupe={groupe}
-          ligne={ligne}
-          modele="RevisionActeur"
-          actions={actions}
-        />
+        <div className="reps">
+          <RestaurerButton groupe={groupe} ligne={ligne} actions={actions} />
+          <ReportButton
+            groupe={groupe}
+            ligne={ligne}
+            modele="RevisionActeur"
+            actions={actions}
+          />
+        </div>
       </td>
       <td className="c-tgt">
         <TargetCell
@@ -361,8 +393,8 @@ export function LigneRow({
   )
 }
 
-/** Decision buttons of a groupe (header row and modal). */
-export function GroupeActionsButtons({
+/** Decision buttons of a groupe header row. */
+function GroupeActionsButtons({
   groupe,
   actions,
 }: {

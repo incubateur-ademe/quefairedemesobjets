@@ -10,7 +10,6 @@ Lignes are rows of SuggestionUnitaire grouped by (groupe, champs).
 
 from typing import Literal
 
-from django.contrib.auth import get_user_model
 from django.db.models import (
     BooleanField,
     Case,
@@ -156,16 +155,6 @@ def _colonne_builder(context: FilterContext, spec, operator, value) -> Q:
     return ~q if operator == "neq" else q
 
 
-def _champs_builder(context: FilterContext, spec, operator, value) -> Q:
-    """Tuple de champs, written « champ,champ »."""
-    values = value if operator == "in" else [value]
-    if not isinstance(values, list) or not all(isinstance(v, str) for v in values):
-        raise filter_error(f"Tuple de champs attendu pour « {spec.label} »")
-    q = Q(champs__in=[item.split(",") for item in values])
-    wrapped = context.related["ligne"](q, {})
-    return ~wrapped if operator == "neq" else wrapped
-
-
 # --- Expressions ---
 
 
@@ -288,7 +277,6 @@ def _acteur_value_builder(context: FilterContext, spec, operator, value) -> Q:
 
 
 def review_registry(cohorte: SuggestionCohorte) -> FieldRegistry:
-    groupes = cohorte.suggestion_groupes.all()
     tuples = ordered_champs(
         tuple(champs)
         for champs in SuggestionUnitaire.objects.filter(
@@ -297,30 +285,9 @@ def review_registry(cohorte: SuggestionCohorte) -> FieldRegistry:
         .values_list("champs", flat=True)
         .distinct()
     )
-    user_ids = set(
-        groupes.exclude(decision_par=None).values_list("decision_par", flat=True)
-    )
-    user_ids |= set(
-        SuggestionUnitaire.objects.filter(suggestion_groupe__suggestion_cohorte=cohorte)
-        .exclude(decision_par=None)
-        .values_list("decision_par", flat=True)
-        .distinct()
-    )
-    users = tuple(
-        (user.id, user.get_username())
-        for user in get_user_model()
-        .objects.filter(id__in=user_ids)
-        .order_by("username")
-    )
-    tuple_choices = tuple((",".join(t), " + ".join(t)) for t in tuples)
     champ_choices = tuple(
         (champ, champ) for champ in sorted({champ for t in tuples for champ in t})
     )
-
-    def on_ligne(key, label, type_, path=None, **kwargs):
-        return FieldSpec(
-            key, label, type_, "ligne", path=path, related="ligne", **kwargs
-        )
 
     return FieldRegistry(
         fields=(
@@ -355,22 +322,6 @@ def review_registry(cohorte: SuggestionCohorte) -> FieldRegistry:
                 "groupe",
                 expression=_nb_lignes,
             ),
-            FieldSpec(
-                "groupe.decision_par",
-                "Groupe décidé par",
-                "user",
-                "groupe",
-                path="decision_par_id",
-                choices=users,
-            ),
-            FieldSpec(
-                "groupe.decision_le",
-                "Groupe décidé le",
-                "date",
-                "groupe",
-                path="decision_le",
-                is_datetime=True,
-            ),
             *(
                 FieldSpec(
                     f"acteur.{champ}",
@@ -388,14 +339,6 @@ def review_registry(cohorte: SuggestionCohorte) -> FieldRegistry:
             ),
             # Ligne de suggestion
             FieldSpec(
-                "ligne.champs",
-                "Tuple de champs de la ligne",
-                "choice",
-                "ligne",
-                choices=tuple_choices,
-                builder=_champs_builder,
-            ),
-            FieldSpec(
                 "ligne.champ",
                 "Champ modifié par la ligne",
                 "choice",
@@ -410,20 +353,6 @@ def review_registry(cohorte: SuggestionCohorte) -> FieldRegistry:
                 "ligne",
                 choices=STATUT_CHOICES,
                 builder=_ligne_statut_builder,
-            ),
-            on_ligne(
-                "ligne.decision_par",
-                "Ligne décidée par",
-                "user",
-                path="decision_par_id",
-                choices=users,
-            ),
-            on_ligne(
-                "ligne.decision_le",
-                "Ligne décidée le",
-                "date",
-                path="decision_le",
-                is_datetime=True,
             ),
             *(
                 FieldSpec(

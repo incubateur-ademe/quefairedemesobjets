@@ -8,6 +8,7 @@ const NONE = {
   corriger_parent: false,
   reporter_correction: false,
   reporter_parent: false,
+  restaurer_correction: false,
   supprimer_correction: false,
   supprimer_parent: false,
 }

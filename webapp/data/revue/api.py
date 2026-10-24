@@ -6,6 +6,7 @@ from data.models.suggestion import SOURCE_TYPE_ACTIONS, SuggestionCohorte
 from data.revue import cohortes, masse
 from data.revue.annuaire import lookup as annuaire_lookup
 from data.revue.auth import SuperuserSessionAuth
+from data.revue.choix import champs_choix
 from data.revue.cohortes import (
     attach_counts,
     cohortes_filter_metadata,
@@ -30,6 +31,7 @@ from data.revue.revue import (
 from data.revue.schemas import (
     AnnuaireEntrepriseOut,
     AnnuaireQuery,
+    ChampChoixOut,
     CohorteDetailOut,
     CohortePageOut,
     CohortesQuery,
@@ -54,6 +56,7 @@ from data.revue.schemas import (
     PropositionDeleteQuery,
     PropositionIn,
     ReportIn,
+    RestaurerIn,
     StatsOut,
     StatsQuery,
     TacheOut,
@@ -62,6 +65,7 @@ from data.revue.schemas import (
 from data.revue.services import decide_groupe, decide_lignes
 from data.revue.services import delete_proposition as delete_proposition_service
 from data.revue.services import report as report_service
+from data.revue.services import restaurer as restaurer_service
 from data.revue.services import upsert_proposition as upsert_proposition_service
 from data.revue.taches import cohorte_taches
 from django.http import HttpRequest, HttpResponse
@@ -87,6 +91,12 @@ def list_cohortes(request: HttpRequest, query: Query[CohortesQuery]):
         page=query.page,
         page_size=query.page_size,
     )
+
+
+@router.get("/champs/choix", response=dict[str, ChampChoixOut])
+def champs_choix_view(request: HttpRequest):
+    """Values of the fields edited with a select (choices and codes)."""
+    return champs_choix()
 
 
 @router.get("/cohortes/filtres", response=FilterMetaOut)
@@ -270,6 +280,13 @@ def report(request: HttpRequest, groupe_id: int, payload: ReportIn):
     return report_service(
         groupe_id, payload.cible, payload.champs, payload.expected_modifie_le
     )
+
+
+@router.post("/groupes/{groupe_id}/restaurer", response=WRITE_RESPONSES)
+def restaurer(request: HttpRequest, groupe_id: int, payload: RestaurerIn):
+    """Correction with the current value of the acteur, cancelling the suggestion
+    of the source."""
+    return restaurer_service(groupe_id, payload.champs, payload.expected_modifie_le)
 
 
 @router.get(

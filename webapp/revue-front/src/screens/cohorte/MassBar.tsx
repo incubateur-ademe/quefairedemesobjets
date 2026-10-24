@@ -20,6 +20,7 @@ const LABELS: Record<MassAction, string> = {
   resubmit: "Remettre à valider",
   report_correction: "▶ Reporter vers la correction",
   report_parent: "⏩ Reporter vers le parent",
+  restore_correction: "Corriger avec la valeur initiale",
 }
 
 const VERBS: Record<MassAction, string> = {
@@ -28,6 +29,7 @@ const VERBS: Record<MassAction, string> = {
   resubmit: "Remettre à valider",
   report_correction: "Reporter vers la correction les suggestions de",
   report_parent: "Reporter vers le parent les suggestions de",
+  restore_correction: "Corriger avec la valeur initiale",
 }
 
 export function needsConfirmation(
@@ -74,7 +76,7 @@ export function MassBar({
     ...(vue === "groupes" && policy.can_reject_group ? (["reject"] as const) : []),
     "resubmit",
     ...(policy.editable_models.includes("RevisionActeur")
-      ? (["report_correction"] as const)
+      ? (["report_correction", "restore_correction"] as const)
       : []),
     ...(policy.shows_parent ? (["report_parent"] as const) : []),
   ]

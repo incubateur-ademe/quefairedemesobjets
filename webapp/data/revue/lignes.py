@@ -19,6 +19,7 @@ from data.models.suggestion import (
     SuggestionUnitaire,
 )
 from data.models.suggestions.source import SuggestionSourceModel
+from data.revue.choix import EDITABLE
 from data.revue.policies import PARENT, REVISION, ReviewPolicy
 from qfdmo.models.acteur import RevisionActeur
 
@@ -27,7 +28,9 @@ NOT_REPORTABLE = {
     REVISION: set(SuggestionSourceModel.get_not_reportable_on_revision_fields()),
     PARENT: set(SuggestionSourceModel.get_not_reportable_on_parent_fields()),
 }
-NOT_EDITABLE = set(SuggestionSourceModel.get_not_editable_fields())
+# The codes and services are edited with selects in this screen
+# (data.revue.choix), unlike in the admin
+NOT_EDITABLE = set(SuggestionSourceModel.get_not_editable_fields()) - EDITABLE
 ORDERED_FIELDS = SuggestionSourceModel.get_ordered_fields()
 IDENTITY_FIELDS = ["identifiant_unique", "identifiant_externe", "nom", "ville"]
 
@@ -76,7 +79,7 @@ def _admin_url(name: str, identifiant_unique: str | None) -> str | None:
     return reverse(f"admin:qfdmo_{name}_change", args=[quote(identifiant_unique)])
 
 
-def _values(instance, champs: list[str]) -> dict[str, str]:
+def field_values(instance, champs: list[str]) -> dict[str, str]:
     model = SuggestionSourceModel.from_acteur(instance, fields_to_include=champs)
     return {champ: getattr(model, champ, None) or "" for champ in champs}
 
@@ -92,9 +95,11 @@ class _GroupeContext:
         self.parent = groupe.get_parent_revision_acteur_or_none()
         self.nb_enfants = nb_enfants
         champs = sorted({champ for su in self.sus for champ in su.champs})
-        self.acteur_values = _values(self.acteur, champs) if self.acteur else None
-        self.revision_values = _values(self.revision, champs) if self.revision else None
-        self.parent_values = _values(self.parent, champs) if self.parent else None
+        self.acteur_values = field_values(self.acteur, champs) if self.acteur else None
+        self.revision_values = (
+            field_values(self.revision, champs) if self.revision else None
+        )
+        self.parent_values = field_values(self.parent, champs) if self.parent else None
 
     def sus_of(self, champs: tuple[str, ...]) -> list[SuggestionUnitaire]:
         return [su for su in self.sus if tuple(su.champs) == champs]
@@ -191,6 +196,10 @@ def _serialize_ligne(
             "reporter_parent": has_parent
             and reportable(PARENT)
             and ACTEUR in by_modele,
+            # Correction with the value of the acteur, cancelling the suggestion
+            "restaurer_correction": reportable(REVISION)
+            and ACTEUR in by_modele
+            and context.acteur is not None,
             # A reported value may be removed, even when it cannot be typed
             "supprimer_correction": reportable(REVISION) and REVISION in by_modele,
             "supprimer_parent": has_parent

@@ -13,6 +13,7 @@ function setup(write: Answer = () => groupe(1), url = "/data/revue/cohortes/7") 
     }
     if (path.endsWith("/stats")) return STATS
     if (path.endsWith("/taches")) return []
+    if (path.endsWith("/champs/choix")) return {}
     if (path.endsWith("/revue/filtres")) return { champs: [] }
     if (path.endsWith("/groupes")) return page([groupe(1), groupe(2)])
     return COHORTE
@@ -66,6 +67,7 @@ describe("CohorteScreen", () => {
     const api = fakeApi((path) => {
       if (path.endsWith("/stats")) return STATS
       if (path.endsWith("/taches")) return []
+      if (path.endsWith("/champs/choix")) return {}
       if (path.endsWith("/revue/filtres")) return { champs: [] }
       if (path.endsWith("/groupes"))
         return page([
@@ -184,6 +186,7 @@ describe("CohorteScreen shortcuts", () => {
       if (method !== "GET") return groupe(1)
       if (path.endsWith("/stats")) return STATS
       if (path.endsWith("/taches")) return []
+      if (path.endsWith("/champs/choix")) return {}
       if (path.endsWith("/revue/filtres")) return { champs: [] }
       if (path.endsWith("/groupes")) return page([validated, groupe(2)])
       return COHORTE

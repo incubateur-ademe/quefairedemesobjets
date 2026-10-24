@@ -1,5 +1,5 @@
 import { groupe, ligne } from "../screens/cohorte/fixtures"
-import { withProposition, withReport, withStatut } from "./mutations"
+import { withProposition, withReport, withRestauration, withStatut } from "./mutations"
 
 describe("optimistic updates", () => {
   it("decides the whole groupe and disables its actions", () => {
@@ -44,5 +44,30 @@ describe("optimistic updates", () => {
       withProposition(set, "1:url", "RevisionActeur", null).lignes[1].correction
         .propose,
     ).toBeNull()
+  })
+
+  it("restores the value of the acteur, « __empty__ » when it is empty", () => {
+    const restorable = { ...ligne(1, ["x"]).capacites, restaurer_correction: true }
+    const base = groupe(1, {
+      lignes: [
+        ligne(1, ["nom"], { capacites: restorable }),
+        ligne(1, ["url"], {
+          capacites: restorable,
+          acteur: {
+            actuel: { url: "" },
+            propose: { url: "https://a.fr" },
+            etat: "valeur",
+          },
+        }),
+        ligne(1, ["siret"]),
+      ],
+    })
+
+    const next = withRestauration(base)
+
+    expect(next.lignes[0].correction.propose).toEqual({ nom: "nom actuel" })
+    expect(next.lignes[1].correction.propose).toEqual({ url: "__empty__" })
+    expect(next.lignes[2].correction.propose).toBeNull()
+    expect(withRestauration(base, ["1:url"]).lignes[0].correction.propose).toBeNull()
   })
 })

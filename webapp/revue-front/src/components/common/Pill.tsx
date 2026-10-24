@@ -1,19 +1,45 @@
 import type { ReactNode } from "react"
 
+import { formatDateTime } from "../../domain/format"
 import { COHORTE_STATUTS, STATUTS, type Statut, type Tone } from "../../domain/statuts"
 
-export function Pill({ tone, children }: { tone: Tone; children: ReactNode }) {
+export function Pill({
+  tone,
+  title,
+  children,
+}: {
+  tone: Tone
+  title?: string
+  children: ReactNode
+}) {
   return (
-    <span className={`pill p-${tone}`}>
+    <span className={`pill p-${tone}`} title={title}>
       <span className="dot" />
       {children}
     </span>
   )
 }
 
-export function StatutPill({ statut }: { statut: string }) {
+/** Statut of a groupe or a ligne; its decision (who, when) in title. */
+export function StatutPill({
+  statut,
+  decision,
+}: {
+  statut: string
+  decision?: { par: { username: string } | null; le: string | null }
+}) {
   const meta = STATUTS[statut as Statut]
-  return meta ? <Pill tone={meta.tone}>{meta.label}</Pill> : <span>{statut}</span>
+  const title =
+    decision?.par && decision.le
+      ? `${decision.par.username} · ${formatDateTime(decision.le)}`
+      : undefined
+  return meta ? (
+    <Pill tone={meta.tone} title={title}>
+      {meta.label}
+    </Pill>
+  ) : (
+    <span title={title}>{statut}</span>
+  )
 }
 
 export function CohorteStatutPill({ statut }: { statut: string }) {

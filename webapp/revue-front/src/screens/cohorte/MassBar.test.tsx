@@ -9,6 +9,7 @@ const COUNTS = {
   reject: 2,
   resubmit: 0,
   report_correction: 1,
+  restore_correction: 1,
   report_parent: 0,
 }
 
@@ -19,6 +20,7 @@ function setup(total = 2) {
     if (method !== "GET") return groupe(1)
     if (path.endsWith("/stats")) return STATS
     if (path.endsWith("/taches")) return []
+    if (path.endsWith("/champs/choix")) return {}
     if (path.endsWith("/revue/filtres")) return { champs: [] }
     if (path.endsWith("/groupes")) {
       const query = (options as { params: { query: { afficher: string } } }).params

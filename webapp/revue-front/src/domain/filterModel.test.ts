@@ -30,6 +30,7 @@ const FIELDS = new Map(
     field("id", "number", ["eq", "between"]),
     field("type_action", "choice", ["eq", "in"]),
     field("cree_le", "date", ["gt"]),
+    field("nom", "text", ["eq", "neq", "icontains"]),
   ].map((f) => [f.key, f]),
 )
 
@@ -89,6 +90,24 @@ describe("draft to API values", () => {
       { field: "id", operator: "between", value: ["1", "10"] },
     ])
     expect(toApiFilter(toDraftFilter(api, FIELDS), FIELDS)).toEqual(api)
+  })
+
+  it("compares a text to the empty value when nothing is typed", () => {
+    const draft: FilterGroup = {
+      op: "and",
+      conditions: [
+        { field: "nom", operator: "eq" },
+        { field: "nom", operator: "neq", value: " " },
+        { field: "nom", operator: "icontains", value: "" },
+      ],
+    }
+    expect(toApiFilter(draft, FIELDS)).toEqual({
+      op: "and",
+      conditions: [
+        { field: "nom", operator: "eq", value: "" },
+        { field: "nom", operator: "neq", value: "" },
+      ],
+    })
   })
 })
 

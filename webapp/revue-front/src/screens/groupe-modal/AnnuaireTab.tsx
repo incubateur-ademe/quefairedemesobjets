@@ -75,7 +75,7 @@ function AnnuaireResult({
         nom={result.entreprise.nom}
         adresse={result.entreprise.adresse}
         activite={result.entreprise.activite_code}
-        etat={result.entreprise.etat === "inactif" ? "inactif" : null}
+        etat={result.entreprise.etat}
       />
       {champ === "siret" &&
         (result.etablissement ? (
@@ -86,7 +86,7 @@ function AnnuaireResult({
             nom={result.etablissement.nom}
             adresse={result.etablissement.adresse}
             activite={result.etablissement.activite_code}
-            etat={result.etablissement.etat === "ferme" ? "fermé" : null}
+            etat={result.etablissement.etat === "ferme" ? "fermé" : "actif"}
           />
         ) : (
           <div className="kgrid__item">
@@ -109,7 +109,8 @@ function Bloc({
   nom: string
   adresse: string
   activite: string
-  etat: "fermé" | "inactif" | null
+  /** État administratif: « actif », else « inactif » or « fermé » */
+  etat: string
 }) {
   const label = nafLabel(activite)
   return (
@@ -118,7 +119,12 @@ function Bloc({
       <dd>
         <div className="ae-nom">
           {nom || <span className="inherit">nom non diffusé</span>}
-          {etat && <span className="ae-ferme">{etat}</span>}
+        </div>
+        <div>
+          État administratif :{" "}
+          <span className={`pill ${etat === "actif" ? "p-ok" : "p-danger"}`}>
+            {etat}
+          </span>
         </div>
         <div>{adresse || <span className="inherit">adresse non diffusée</span>}</div>
         <div className="muted">

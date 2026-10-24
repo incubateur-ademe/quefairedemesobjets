@@ -15,6 +15,7 @@ const STATUTS: Record<Tache["statut"], { label: string; tone: Tone }> = {
 const ACTIONS: Record<Tache["action"], string> = {
   report_correction: "Report vers la correction",
   report_parent: "Report vers le parent",
+  restore_correction: "Correction avec la valeur initiale",
 }
 
 /** Number of tasks of the cohorte, and of those still pending or running. */
