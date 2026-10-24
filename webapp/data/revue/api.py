@@ -2,11 +2,9 @@
 
 Handlers stay thin: business rules live in the other modules of data.revue."""
 
-from django.http import HttpRequest, HttpResponse
-from ninja import Query, Router
-
+from data.models.suggestion import SOURCE_TYPE_ACTIONS, SuggestionCohorte
+from data.revue.annuaire import lookup as annuaire_lookup
 from data.revue.auth import SuperuserSessionAuth
-from data.models.suggestion import SuggestionCohorte
 from data.revue.cohortes import (
     attach_counts,
     cohortes_filter_metadata,
@@ -14,6 +12,8 @@ from data.revue.cohortes import (
     get_source_cohorte,
     logs_page,
 )
+from data.revue.detail import serialize_groupe_detail
+from data.revue.errors import RevueApiError
 from data.revue.exports import XLSX_CONTENT_TYPE, export_filename, logs_xlsx
 from data.revue.filters import parse_filter
 from data.revue.lignes import groupes_queryset, serialize_groupes
@@ -26,12 +26,15 @@ from data.revue.revue import (
     stats,
 )
 from data.revue.schemas import (
+    AnnuaireEntrepriseOut,
+    AnnuaireQuery,
     CohorteDetailOut,
     CohortePageOut,
     CohortesQuery,
     ErrorOut,
     FilterMetaOut,
     GroupeDecisionIn,
+    GroupeDetailOut,
     GroupeOut,
     GroupePageOut,
     GroupesQuery,
@@ -46,13 +49,12 @@ from data.revue.schemas import (
     StatsQuery,
     UserOut,
 )
-from data.revue.services import (
-    decide_groupe,
-    decide_lignes,
-    delete_proposition as delete_proposition_service,
-    report as report_service,
-    upsert_proposition as upsert_proposition_service,
-)
+from data.revue.services import decide_groupe, decide_lignes
+from data.revue.services import delete_proposition as delete_proposition_service
+from data.revue.services import report as report_service
+from data.revue.services import upsert_proposition as upsert_proposition_service
+from django.http import HttpRequest, HttpResponse
+from ninja import Query, Router
 
 router = Router(auth=SuperuserSessionAuth(), tags=["Revue suggestions"])
 
@@ -170,6 +172,23 @@ def review_stats(request: HttpRequest, cohorte_id: int, query: Query[StatsQuery]
     )
 
 
+@router.get("/groupes/{groupe_id}", response={200: GroupeDetailOut, 404: ErrorOut})
+def groupe_detail(request: HttpRequest, groupe_id: int):
+    groupe = (
+        groupes_queryset()
+        .filter(
+            id=groupe_id,
+            suggestion_cohorte__type_action__in=SOURCE_TYPE_ACTIONS,
+        )
+        .first()
+    )
+    if groupe is None:
+        raise RevueApiError(404, "not_found", "Groupe introuvable")
+    return serialize_groupe_detail(
+        groupe, get_policy(groupe.suggestion_cohorte.type_action)
+    )
+
+
 @router.post("/groupes/{groupe_id}/decision", response=WRITE_RESPONSES)
 def groupe_decision(request: HttpRequest, groupe_id: int, payload: GroupeDecisionIn):
     return decide_groupe(
@@ -213,3 +232,13 @@ def report(request: HttpRequest, groupe_id: int, payload: ReportIn):
     return report_service(
         groupe_id, payload.cible, payload.champs, payload.expected_modifie_le
     )
+
+
+@router.get(
+    "/annuaire-entreprises",
+    response={200: AnnuaireEntrepriseOut, 422: ErrorOut, 502: ErrorOut},
+)
+def annuaire_entreprises(request: HttpRequest, query: Query[AnnuaireQuery]):
+    """Entreprise and établissement of a SIRET / SIREN, from the public API
+    « Recherche d'entreprises » (cached one day)."""
+    return annuaire_lookup(query.champ, query.valeur)

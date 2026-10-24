@@ -4,3 +4,8 @@ declare module "data-url:*" {
 }
 
 declare module "*.css"
+
+declare module "bundle-text:*" {
+  const text: string
+  export default text
+}

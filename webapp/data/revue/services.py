@@ -143,6 +143,15 @@ def decide_lignes(
 # --- Corrections ---
 
 CAPACITY = {REVISION: "correction", PARENT: "parent"}
+LATLONG = ("latitude", "longitude")
+
+
+def can_create_localisation(
+    groupe: SuggestionGroupe, policy: ReviewPolicy, modele
+) -> bool:
+    if groupe.statut != AVALIDER or modele not in policy.editable_models:
+        return False
+    return modele != PARENT or bool(groupe.parent_revision_acteur_id)
 
 
 def _target_id(groupe: SuggestionGroupe, modele: str) -> str | None:
@@ -174,9 +183,15 @@ def upsert_proposition(
     groupe_id, modele: str, champs: list[str], valeurs: dict, expected_modifie_le
 ) -> dict:
     def write(groupe, policy, state):
-        (ligne,) = _lignes(state, [champs], groupe, policy)
-        if not ligne["capacites"][f"corriger_{CAPACITY[modele]}"]:
-            _refuse(groupe, policy, "Cette ligne n'est pas corrigeable")
+        if tuple(champs) == LATLONG and LATLONG not in state["lignes"]:
+            # A correction of the localisation may be created from the map, even
+            # when the source suggests no localisation (new ligne)
+            if not can_create_localisation(groupe, policy, modele):
+                _refuse(groupe, policy, "La localisation n'est pas corrigeable")
+        else:
+            (ligne,) = _lignes(state, [champs], groupe, policy)
+            if not ligne["capacites"][f"corriger_{CAPACITY[modele]}"]:
+                _refuse(groupe, policy, "Cette ligne n'est pas corrigeable")
         unknown = set(valeurs) - set(champs)
         if unknown:
             raise RevueApiError(
@@ -186,7 +201,7 @@ def upsert_proposition(
             groupe,
             modele,
             valeurs,
-            [tuple(c) for c in state["lignes"]],
+            [*state["lignes"], *([LATLONG] if LATLONG not in state["lignes"] else [])],
             identifiant_unique=_target_id(groupe, modele) or "",
         )
         if not ok:

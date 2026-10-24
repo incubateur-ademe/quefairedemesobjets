@@ -11,9 +11,9 @@ import { useNotifyError } from "../components/common/ErrorToaster"
 import { useApp } from "../context"
 import { ApiError, unwrap } from "./client"
 import { queryKeys } from "./queries"
-import type { Groupe, GroupePage, Ligne, Modele } from "./types"
+import type { Groupe, GroupeDetail, GroupePage, Ligne, Modele } from "./types"
 
-type Snapshot = [readonly unknown[], GroupePage | undefined][]
+type Snapshot = [readonly unknown[], unknown][]
 
 export function patchGroupeInCaches(
   queryClient: QueryClient,
@@ -21,6 +21,11 @@ export function patchGroupeInCaches(
   groupeId: number,
   update: (groupe: Groupe) => Groupe,
 ) {
+  // The modal of the groupe shows the same lignes
+  queryClient.setQueryData<GroupeDetail>(
+    queryKeys.groupe(groupeId),
+    (detail) => detail && { ...detail, ...update(detail) },
+  )
   queryClient.setQueriesData<GroupePage>(
     { queryKey: queryKeys.groupes(cohorteId) },
     (page) =>
@@ -120,9 +125,14 @@ export function useGroupeWrite(cohorteId: number) {
     mutationFn: ({ request }) => request(),
     onMutate: async ({ groupe, optimistic }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.groupes(cohorteId) })
-      const snapshot = queryClient.getQueriesData<GroupePage>({
-        queryKey: queryKeys.groupes(cohorteId),
-      })
+      await queryClient.cancelQueries({ queryKey: queryKeys.groupe(groupe.id) })
+      const snapshot: Snapshot = [
+        ...queryClient.getQueriesData({ queryKey: queryKeys.groupes(cohorteId) }),
+        [
+          queryKeys.groupe(groupe.id),
+          queryClient.getQueryData(queryKeys.groupe(groupe.id)),
+        ],
+      ]
       patchGroupeInCaches(queryClient, cohorteId, groupe.id, optimistic)
       return snapshot
     },
@@ -139,7 +149,9 @@ export function useGroupeWrite(cohorteId: number) {
         notifyError(`Groupe ${groupe.id} : ${error.message}`)
       }
     },
-    onSettled: () => {
+    onSettled: (_data, _error, { groupe }) => {
+      // Map points and identifiers of the modal depend on the propositions
+      queryClient.invalidateQueries({ queryKey: queryKeys.groupe(groupe.id) })
       queryClient.invalidateQueries({ queryKey: queryKeys.stats(cohorteId) })
       queryClient.invalidateQueries({ queryKey: queryKeys.cohorte(cohorteId) })
       queryClient.invalidateQueries({ queryKey: ["cohortes"] })
@@ -197,7 +209,8 @@ export function useGroupeActions(cohorteId: number) {
       }),
     upsertProposition: (
       groupe: Groupe,
-      ligne: Ligne,
+      // The ligne may not exist yet (new correction of the localisation)
+      ligne: Pick<Ligne, "key" | "champs">,
       modele: Modele,
       valeurs: Record<string, string>,
     ) =>

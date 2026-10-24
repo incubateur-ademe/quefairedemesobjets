@@ -25,6 +25,9 @@ const config: Config = {
     "^(.*/)?wa$": "<rootDir>/src/__mocks__/wa.tsx",
     // Parcel named pipelines (ex: data-url:remixicon/icons/…svg)
     "^data-url:.*$": "<rootDir>/src/__mocks__/dataUrl.ts",
+    "^bundle-text:.*$": "<rootDir>/src/__mocks__/dataUrl.ts",
+    // MapLibre needs WebGL: replaced by a fake map in jsdom
+    "^maplibre-gl$": "<rootDir>/src/__mocks__/maplibre.ts",
     "\\.css$": "<rootDir>/src/__mocks__/style.ts",
   },
 }

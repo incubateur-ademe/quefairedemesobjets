@@ -24,7 +24,8 @@ import { scrollRowIntoView } from "../../domain/scroll"
 import { useSearchParams } from "../../router"
 import { WaButton, WaSpinner } from "../../wa"
 import { CohorteHeader, Counters } from "./CohorteHeader"
-import { cursorItems, groupeCursor, GroupesView } from "./GroupesView"
+import { GroupeModal } from "../groupe-modal/GroupeModal"
+import { cursorItems, groupeCursor, GroupesView, type ModalTab } from "./GroupesView"
 import { PAGE_SIZES, readReviewState, TUPLES_SEPARATOR } from "./searchState"
 import { TuplesBar } from "./TuplesBar"
 
@@ -46,8 +47,9 @@ const SHORTCUTS: Shortcut[] = [
     label:
       "remettre à valider l’élément courant (une ligne d’un groupe refusé rouvre le groupe)",
   },
+  { keys: ["⏎"], label: "ouvrir le détail du groupe courant" },
   { keys: ["/"], label: "filtres avancés" },
-  { keys: ["Échap"], label: "fermer les filtres, annuler une correction" },
+  { keys: ["Échap"], label: "fermer le détail ou les filtres, annuler une correction" },
 ]
 
 const isTyping = (target: EventTarget | null) =>
@@ -93,9 +95,23 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
     (page) => setSearch({ page: String(page) }),
   )
 
+  const modalGroupeId = search.groupe ? Number(search.groupe) : null
+  const modalTab = (search.onglet as ModalTab) || "localisation"
+  const openModal = (groupe: Groupe, tab: ModalTab) =>
+    setSearch({
+      groupe: String(groupe.id),
+      onglet: tab === "localisation" ? undefined : tab,
+    })
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) {
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        modalGroupeId !== null ||
+        isTyping(event.target)
+      ) {
         return
       }
       const key = event.key.toLowerCase()
@@ -111,6 +127,11 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         if (groupe?.capacites.refuser) {
           actions.decideGroupe(groupe, "reject").catch(() => {})
           cursor.nextGroupe()
+        }
+      } else if (key === "enter") {
+        const groupe = cursor.groupe()
+        if (groupe) {
+          openModal(groupe, "localisation")
         }
       } else if (event.key === "/") {
         event.preventDefault()
@@ -207,6 +228,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
               actions={actions}
               cursor={cursor.current}
               onCursor={cursor.set}
+              onOpen={openModal}
             />
           )
         ) : (
@@ -232,6 +254,19 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
           <span className="muted">{formatNumber(groupes.data.total)} au total</span>
         )}
       </div>
+      <GroupeModal
+        groupeId={modalGroupeId}
+        tab={modalTab}
+        policy={cohorte.data.policy}
+        actions={actions}
+        onTab={(tab) =>
+          setSearch(
+            { onglet: tab === "localisation" ? undefined : tab },
+            { replace: true },
+          )
+        }
+        onClose={() => setSearch({ groupe: undefined, onglet: undefined })}
+      />
       <LogsDrawer
         cohorteId={search.logs ? cohorteId : null}
         onClose={() => setSearch({ logs: undefined })}
