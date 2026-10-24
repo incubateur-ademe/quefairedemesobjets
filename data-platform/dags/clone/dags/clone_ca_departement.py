@@ -20,7 +20,6 @@ with DAG(
         " DB"
     ),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.CONTOURS_ADMINISTRATIFS,
         TAGS.DEPARTEMENT,

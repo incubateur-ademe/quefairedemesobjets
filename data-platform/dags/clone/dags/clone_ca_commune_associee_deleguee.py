@@ -20,7 +20,6 @@ with DAG(
         " Administratifs dans notre DB"
     ),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.CONTOURS_ADMINISTRATIFS,
         TAGS.COMMUNE,

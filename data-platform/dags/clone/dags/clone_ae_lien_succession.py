@@ -28,7 +28,6 @@ with DAG(
         " dans notre DB"
     ),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.ANNAIRE_ENTREPRISE,
         TAGS.ETABLISSEMENT,

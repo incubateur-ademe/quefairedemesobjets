@@ -13,6 +13,9 @@ from cluster.tasks.business_logic.cluster_acteurs_config_create import (
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
 )
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db_groupes import (
+    cluster_acteurs_suggestions_to_db_groupes,
+)
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -53,7 +56,14 @@ def cluster_acteurs_suggestions_to_db_wrapper(ti, params, dag, run_id) -> None:
         msg = log.banner_string(f"Dry run ={config.dry_run}, on n'écrit pas en DB")
         raise AirflowSkipException(msg)
 
-    cluster_acteurs_suggestions_to_db(
+    if config.use_legacy_suggestions:
+        logger.warning("use_legacy_suggestions=True")
+        to_db = cluster_acteurs_suggestions_to_db
+    else:
+        logger.warning("use_legacy_suggestions=False")
+        to_db = cluster_acteurs_suggestions_to_db_groupes
+
+    to_db(
         df_clusters=df_clusters,
         suggestions=suggestions,
         identifiant_action=dag.dag_display_name,

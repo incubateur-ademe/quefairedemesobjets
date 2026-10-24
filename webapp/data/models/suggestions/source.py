@@ -18,6 +18,7 @@ from data.models.suggestion import (
     SuggestionUnitaire,
 )
 from data.models.suggestions.abstract import SuggestionGroupeType
+from data.models.suggestions.constants import GROUPED_FIELDS
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from more_itertools import flatten
@@ -213,8 +214,6 @@ class SuggestionSourceModel(BaseModel):
 
     @classmethod
     def get_ordered_fields(cls) -> list[tuple[str]]:
-        GROUPED_FIELDS = [("latitude", "longitude")]
-
         ordered_fields = []
         grouped_fields_processed = []
         for field in cls.model_fields:
