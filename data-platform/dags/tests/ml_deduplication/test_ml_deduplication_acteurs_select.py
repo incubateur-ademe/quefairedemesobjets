@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from ml_deduplication.config.constants import (
     ACTEURS_TABLE_PREFIX,
-    acteurs_table_name,
+    temp_acteurs_table_name,
 )
 from ml_deduplication.config.models import MLDeduplicationConfig
 from ml_deduplication.tasks.business_logic.ml_deduplication_acteurs_select import (
@@ -44,22 +44,20 @@ def _config(limit_acteurs: int | None = None) -> MLDeduplicationConfig:
 
 
 class TestActeursTableName:
-
     def test_prefix(self):
-        assert acteurs_table_name("ml_run_1").startswith(ACTEURS_TABLE_PREFIX)
+        assert temp_acteurs_table_name("ml_run_1").startswith(ACTEURS_TABLE_PREFIX)
 
     def test_sanitizes_run_id(self):
-        assert acteurs_table_name("2026-09-29T10:00:00") == (
+        assert temp_acteurs_table_name("2026-09-29T10:00:00") == (
             f"{ACTEURS_TABLE_PREFIX}_20260929T100000"
         )
 
     def test_empty_run_id(self):
-        assert acteurs_table_name("") == f"{ACTEURS_TABLE_PREFIX}_"
+        assert temp_acteurs_table_name("") == f"{ACTEURS_TABLE_PREFIX}_"
 
 
 @pytest.mark.django_db
 class TestMLDeduplicationActeursSelect:
-
     def _patch_read_base(self, monkeypatch, df):
         captured = {}
 
@@ -94,7 +92,7 @@ class TestMLDeduplicationActeursSelect:
 
         assert captured["kwargs"]["limit"] == 100
         assert not df.empty
-        assert table_name == acteurs_table_name("ml_test")
+        assert table_name == temp_acteurs_table_name("ml_test")
         # The pool was persisted to the temp table.
         assert created and created[0][1] == table_name
 
