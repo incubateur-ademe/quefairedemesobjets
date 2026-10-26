@@ -2,6 +2,7 @@ import {
   clearSearchTermCookie,
   setSearchTermCookie,
   computeAvailableHeight,
+  removeHash,
 } from "../js/helpers"
 
 describe("computeAvailableHeight", () => {
@@ -100,5 +101,15 @@ describe("search term cookie helpers", () => {
       expect(written).toContain("Secure")
       expect(written).toContain("Partitioned")
     })
+  })
+})
+
+describe("removeHash", () => {
+  it("strips the hash without adding a history entry", () => {
+    const before = history.length
+    window.location.hash = "#tab-top"
+    removeHash()
+    expect(window.location.hash).toBe("")
+    expect(history.length).toBe(before + 1)
   })
 })

@@ -36,6 +36,7 @@ def db_write_cp_suggestions_wrapper(ti, dag, params) -> None:
         df_revision_acteur_cp=normalized_revision_acteur_cp,
         identifiant_action=dag.dag_id,
         dry_run=False,
+        use_legacy_suggestions=params.get("use_legacy_suggestions", False),
     )
 
 

@@ -153,6 +153,19 @@ class TestCacheKeyIgnoresRef:
         third = get(f"/infotri/embed?ref=BBBB&_t={stamp}&x=1", headers=headers)
         assert third.headers.get("X-Cache-Status") == "MISS"
 
+    @pytest.mark.skipif(CACHE_DISABLED, reason="Only valid when NGINX_DISABLE_CACHE=1")
+    @pytest.mark.parametrize("path", ["/", "/dechet", "/dechet/velo/", "/categories/"])
+    def test_ref_is_kept_outside_analytics_only_routes(self, path):
+        # Default: ref stays in the key, the middleware may read it.
+        stamp = time.time()
+        headers = {"Host": BASE_DOMAIN, "Sec-Fetch-Dest": "iframe"}
+
+        get(f"{path}?ref=AAAA&_t={stamp}", headers=headers)
+        other_ref = get(
+            f"{path}?ref=BBBB&_t={stamp}", headers=headers, allow_redirects=False
+        )
+        assert other_ref.headers.get("X-Cache-Status") == "MISS"
+
 
 class TestXCacheStatusHeader:
     @pytest.mark.parametrize(
@@ -161,3 +174,21 @@ class TestXCacheStatusHeader:
     def test_header_always_present(self, path):
         resp = get(path, headers={"Host": BASE_DOMAIN})
         assert "X-Cache-Status" in resp.headers
+
+
+class TestPostHogProxy:
+    # https://posthog.com/docs/advanced/proxy/nginx : /static/, /array/ and /
+    # must all reach PostHog EU through our /ph/ prefix.
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "/ph/static/array.js",
+            "/ph/array/phc_test/config.js",
+            "/ph/decide/?v=3",
+        ],
+    )
+    def test_routes_reach_posthog(self, path):
+        resp = get(path, headers={"Host": BASE_DOMAIN}, timeout=15)
+        # Any real PostHog answer (200, or 4xx for a bogus token) is fine;
+        # 502/504 means nginx could not resolve or verify the upstream.
+        assert resp.status_code < 500, (path, resp.status_code, resp.text[:200])

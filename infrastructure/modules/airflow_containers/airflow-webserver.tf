@@ -27,6 +27,7 @@ resource "scaleway_container" "airflow_webserver" {
     _PIP_ADDITIONAL_REQUIREMENTS                          = ""
     AIRFLOW__API__AUTH_BACKENDS                           = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW__API__THEME                                   = jsonencode({ "globalCss" : { "[data-scope=\"dialog\"][data-part=\"content\"]" : { "max-width" : "95vw !important" } } })
+    AIRFLOW__API__WORKERS                                 = "1"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION            = "true"
     AIRFLOW__CORE__DAGS_FOLDER                            = "/opt/airflow/dags"
     AIRFLOW__CORE__ENABLE_XCOM_PICKLING                   = "true"
@@ -42,7 +43,6 @@ resource "scaleway_container" "airflow_webserver" {
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK               = "true"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG                     = "true"
     AIRFLOW__WEBSERVER__INSTANCE_NAME                     = var.AIRFLOW__WEBSERVER__INSTANCE_NAME
-    AIRFLOW__WEBSERVER__WORKERS                           = "1"
     AIRFLOW_WEBSERVER_WARN_DEPLOYMENT_EXPOSURE            = "false"
     ENVIRONMENT                                           = var.environment
   }

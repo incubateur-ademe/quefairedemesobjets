@@ -168,7 +168,7 @@ def django_model_queryset_to_df(
     return pd.DataFrame(data, dtype=dtype)
 
 
-def django_schema_create_and_check(schema_name: str, sql: str, dry_run=True) -> None:
+def django_schema_create_and_check(schema_name: str, sql: str, dry_run=False) -> None:
     """Create a table in the DB from a schema"""
     django_setup_full()
     from django.db import connections

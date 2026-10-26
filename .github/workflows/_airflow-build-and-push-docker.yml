@@ -46,6 +46,13 @@ jobs:
 
       - uses: docker/setup-buildx-action@594f3bf4285d9ea8dc53c9a0c9c4092420091003
 
+      - name: Extract Airflow version from pyproject.toml
+        id: airflow-version
+        run: |
+          version=$(sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Airflow version: $version"
+
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_scheduler_meta_scaleway
@@ -65,6 +72,8 @@ jobs:
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-scheduler.Dockerfile
+          build-args: |
+            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
 
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_webserver_meta_scaleway
@@ -83,6 +92,8 @@ jobs:
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-webserver.Dockerfile
+          build-args: |
+            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
 
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
@@ -103,3 +114,5 @@ jobs:
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-dag-processor', inputs.image_tag) || steps.airflow_dag-processor_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-dag-processor.Dockerfile
+          build-args: |
+            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}

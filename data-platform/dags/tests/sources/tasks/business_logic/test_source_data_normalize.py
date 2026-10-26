@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 
 import pandas as pd
@@ -187,6 +188,49 @@ class TestSourceDataNormalize:
         # Vérifier que les warnings ont été ajoutés
         assert len(result_df["log_warning"].iloc[0]) == 1
         assert len(result_df["log_warning"].iloc[1]) == 1
+
+    def test_source_data_normalize_logs_warnings_of_ignored_acteurs(self, caplog):
+        caplog.set_level(logging.INFO)
+        dag_config = SourceConfig.model_validate(
+            {
+                "normalization_rules": [
+                    {
+                        "origin": "categories",
+                        "transformation": "clean_sous_categorie_codes",
+                        "destination": "sous_categorie_codes",
+                    },
+                    {"keep": "identifiant_unique"},
+                ],
+                "endpoint": "https://example.com/api",
+                "product_mapping": {
+                    "chaussures, maroquinerie": ["chaussures", "maroquinerie"]
+                },
+                "save_datasource_in_warehouse_db": False,
+            }
+        )
+
+        df, _, df_log_warning, _ = source_data_normalize(
+            dag_config=dag_config,
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["id_ok", "id_ignored"],
+                    "categories": [
+                        ["Chaussures, maroquinerie"],
+                        ["Chaussures", "maroquinerie"],
+                    ],
+                }
+            ),
+            dag_id="dag_id",
+        )
+
+        assert df["identifiant_unique"].tolist() == ["id_ok"]
+        assert df_log_warning["identifiant_unique"].tolist() == ["id_ignored"]
+        assert "Sous-catégorie absente du mapping : `chaussures`" in caplog.text
+        assert "Warnings - clean_sous_categorie_codes : 1 ligne(s)" in caplog.text
+        assert (
+            "Warnings de normalisation sur les acteurs ignorés : 1 log(s) pour"
+            " 1 acteur(s)" in caplog.text
+        )
 
     def test_source_data_normalize_normalization_remove_unknown_columns(self):
         normalization_rules = [

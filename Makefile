@@ -1,6 +1,7 @@
 # Aliases
 BASE_DOMAIN := quefairedemesdechets.ademe.local
-DB_URL := postgres://webapp:webapp@localhost:6543/webapp# pragma: allowlist secret
+WEBAPP_DB_PORT ?= 6543
+DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
 PYTHON := uv run python
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
@@ -10,6 +11,10 @@ ifneq (,$(wildcard ./.env))
     include .env
     export
 endif
+
+# apache/airflow:slim-<version>-python3.12 — extracted from data-platform/pyproject.toml
+AIRFLOW_VERSION ?= $(shell sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
+export AIRFLOW_VERSION
 
 # Makefile config
 .PHONY: check
@@ -67,6 +72,11 @@ format:
 .PHONY: run-airflow
 run-airflow:
 	docker compose --profile airflow up -d
+
+# Run development servers
+.PHONY: build-airflow
+build-airflow:
+	docker compose --profile airflow build
 
 # Local django operations (delegated to webapp/Makefile)
 .PHONY: webapp-migrate

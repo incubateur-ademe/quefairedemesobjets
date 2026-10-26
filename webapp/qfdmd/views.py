@@ -52,6 +52,7 @@ from qfdmd.models import (
 )
 from qfdmd.utils import see_more_button
 from search.models import SearchTerm
+from search.ranking import DisplayThresholds, ranked_by_similarity
 from search.score_breakdown import compute_breakdown
 
 logger = logging.getLogger(__name__)
@@ -576,12 +577,15 @@ class AutocompleteHomeSearchView(ListView):
     # seven results.
     NUMBER_OF_ITEMS_DISPLAYED = 7
 
+    # The backend orders candidates by score, ranking.py re-orders them by raw
+    # similarity.
+    CANDIDATE_POOL_SIZE = 50
+
     SEARCH_TIMEOUT_MS = 3000
 
     @override
     def get_queryset(self):
         query = self.request.GET.get("q", "")
-        limit = self.NUMBER_OF_ITEMS_DISPLAYED
         if not query:
             return []
         try:
@@ -589,28 +593,33 @@ class AutocompleteHomeSearchView(ListView):
                 cursor.execute(
                     "SET LOCAL statement_timeout = %s", [self.SEARCH_TIMEOUT_MS]
                 )
-            results = SearchTerm.objects.searchable().search(
-                Fuzzy(query, unaccent=True)
+            candidates = list(
+                SearchTerm.objects.searchable().search(Fuzzy(query, unaccent=True))[
+                    : self.CANDIDATE_POOL_SIZE
+                ]
             )
-            if getattr(self.request, "beta", False):
-                results = results.annotate_score("_search_score")
-            return results[:limit]
         except OperationalError:
             safe_query = query.replace("\r", "").replace("\n", "")
             logger.warning("Autocomplete search timed out for query: %r", safe_query)
             return []
+        return ranked_by_similarity(
+            candidates,
+            DisplayThresholds.from_settings(),
+            limit=self.NUMBER_OF_ITEMS_DISPLAYED,
+        )
 
     @override
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
-        results = self.get_queryset()
+        results = context["object_list"]
         context["results"] = results
         if getattr(self.request, "beta", False) and results:
             query = self.request.GET.get("q", "")
             context["score_breakdown"] = compute_breakdown(
                 query, [r.pk for r in results]
             )
+            context["display_thresholds"] = DisplayThresholds.from_settings()
         return context
 
 
@@ -662,45 +671,11 @@ class SynonymeDetailView(DetailView):
         return ctx
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        synonyme = self.get_object()
-
-        # First, check if the synonyme has a direct redirection
-        try:
-            synonyme_intermediate_page = synonyme.next_wagtail_page
-            redirect_url = synonyme_intermediate_page.page.url
-            return redirect(redirect_url)
-        except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
-            pass
-
-        # If no direct redirection, check if produit has redirection
-        try:
-            intermediate_page = synonyme.produit.next_wagtail_page
-            synonyme_can_be_redirected = (
-                not hasattr(synonyme, "should_not_redirect_to")
-                or synonyme.should_not_redirect_to.page != intermediate_page.page
-            )
-            if synonyme_can_be_redirected:
-                redirect_url = self._build_redirect_url(
-                    request, intermediate_page.page.url
-                )
-                return redirect(redirect_url)
-        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
-            pass
-
-        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
-        # ont été migré vers des qfdmd.ProduitPage
-        # Finally, check if the produit was automatically migrated to a
-        # ProduitPage by the migrate_produits_legacy command
-        migrated_page = synonyme.produit.legacy_imported_as_produit_page
-        if migrated_page is not None and migrated_page.live:
-            synonyme_can_be_redirected = (
-                not hasattr(synonyme, "should_not_redirect_to")
-                or synonyme.should_not_redirect_to.page.pk != migrated_page.pk
-            )
-            # Guard against a redirect loop when the migrated page lives at
-            # the exact same URL as the legacy synonyme (/dechet/<slug>/)
-            if synonyme_can_be_redirected and migrated_page.url != request.path:
-                return redirect(self._build_redirect_url(request, migrated_page.url))
+        page = self.get_object().wagtail_page
+        # Guard against a redirect loop when the migrated page lives at
+        # the exact same URL as the legacy synonyme (/dechet/<slug>/)
+        if page is not None and page.url != request.path:
+            return redirect(self._build_redirect_url(request, page.url))
 
         return super().get(request, *args, **kwargs)
 

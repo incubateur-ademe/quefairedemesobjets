@@ -88,8 +88,14 @@ urlpatterns = (
         path("embed/backlink", backlink),
         path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
         path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+        # Must stay before "data/": the review screen owns every path below it
+        path("data/revue/", include("data.revue.urls", namespace="revue")),
         path("data/", include(("data.urls", "data"), namespace="data")),
         path("infotri/", include(("infotri.urls", "infotri"), namespace="infotri")),
+        path(
+            "assistant/",
+            include(("assistant.urls", "assistant"), namespace="assistant"),
+        ),
         path(
             "docs/",
             TemplateView.as_view(template_name="techdocs.html"),

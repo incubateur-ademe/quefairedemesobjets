@@ -68,6 +68,15 @@ ASSISTANT = {
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
         cast=str,
     ),
+    # Hosts whose embedded script opens the assistant V2 rather than the
+    # legacy one: beta testers switch case by case, with no change to the
+    # script they previously used.
+    "V2_HOSTS": decouple.config(
+        "ASSISTANT_V2_BETA_TESTERS_HOSTS", default="", cast=decouple.Csv()
+    ),
+    # URL of the preview environment used to deploy the assistant
+    # during the beta program.
+    "V2_BASE_URL": decouple.config("ASSISTANT_V2_BASE_URL", default="", cast=str),
 }
 
 # Carte settings
@@ -136,6 +145,7 @@ BASE_URL = decouple.config(
 BASE_HOST = urlparse(BASE_URL).hostname
 ALLOWED_HOSTS = [
     BASE_HOST,
+    *filter(None, [urlparse(ASSISTANT["V2_BASE_URL"]).hostname]),
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 
@@ -171,6 +181,7 @@ INSTALLED_APPS = [
     "qfdmd",
     "qfdmo",
     "infotri",
+    "assistant",
     "data",
     "adminsortable2",
     "corsheaders",
@@ -178,6 +189,8 @@ INSTALLED_APPS = [
     "djangoql",
     "django_tasks",
     "django_tasks_db",
+    # Only for the export_openapi_schema management command
+    "ninja",
 ]
 
 
@@ -599,12 +612,29 @@ WAGTAILADMIN_BASE_URL = BASE_URL
 WAGTAIL_AUTOSAVE_INTERVAL = 0
 # increase ping delay : 30s
 WAGTAIL_EDITING_SESSION_PING_INTERVAL = 30000
+# Autocomplete display thresholds, see search/ranking.py.
+# Raw similarity decides *whether* a result is shown, score decides *where*.
+SEARCH_DISPLAY_THRESHOLDS = {
+    # Below this raw similarity, a result is never shown.
+    "RAW_SIMILARITY_MINIMUM": decouple.config(
+        "SEARCH_RAW_SIMILARITY_MINIMUM", default=0.5, cast=float
+    ),
+    # At or above this raw similarity, a result is always shown.
+    "RAW_SIMILARITY_SUFFICIENT": decouple.config(
+        "SEARCH_RAW_SIMILARITY_SUFFICIENT", default=0.75, cast=float
+    ),
+    # Between the two, the result needs at least this score to be shown.
+    "SCORE_MINIMUM": decouple.config("SEARCH_SCORE_MINIMUM", default=1.2, cast=float),
+}
 MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
         "FUZZY_ALGORITHM": "trigram",
-        "FUZZY_SIMILARITY_THRESHOLD": 0.2,
+        # The backend applies the coarse cut in SQL, ranking.py the rest.
+        "FUZZY_SIMILARITY_THRESHOLD": SEARCH_DISPLAY_THRESHOLDS[
+            "RAW_SIMILARITY_MINIMUM"
+        ],
         "FUZZY_PREFIX_BOOST": 0.5,
     }
 }

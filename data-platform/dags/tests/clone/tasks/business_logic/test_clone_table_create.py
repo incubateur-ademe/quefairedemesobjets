@@ -8,6 +8,9 @@ from clone.tasks.business_logic.clone_table_create import (
 )
 from pydantic import AnyUrl
 
+PASSWORD = "s3cret-p@ss"  # pragma: allowlist secret
+DSN = f"postgres://warehouse:{PASSWORD}@db.example:5432/warehouse?sslmode=require"
+
 
 class TestSqlTablesCreation:
 
@@ -41,6 +44,53 @@ class TestCommands:
                 x in mock_cmd_run.call_args_list[0][0][0]
                 for x in ["curl", "zcat", "psql"]
             )
+
+    def test_stream_csv_keeps_the_dsn_out_of_the_command(self):
+        with (
+            patch("clone.tasks.business_logic.clone_table_create.cmd_run") as mock_cmd,
+            patch("django.conf.settings.DB_WAREHOUSE", DSN),
+        ):
+            commands_stream_directly(
+                data_endpoint=AnyUrl(url="https://example.com/stock.csv.gz"),
+                delimiter=",",
+                table_name="my_table",
+                dry_run=False,
+            )
+
+        command = mock_cmd.call_args.args[0]
+        assert "psql -c" in command
+        assert "-d " not in command
+        assert PASSWORD not in command
+        assert "db.example" not in command
+        env = mock_cmd.call_args.kwargs["env"]
+        assert env["PGPASSWORD"] == PASSWORD
+        assert env["PGHOST"] == "db.example"
+        assert env["PGPORT"] == "5432"
+        assert env["PGUSER"] == "warehouse"
+        assert env["PGDATABASE"] == "warehouse"
+        assert env["PGSSLMODE"] == "require"
+
+    def test_stream_geojson_keeps_the_dsn_out_of_the_command(self):
+        with (
+            patch("clone.tasks.business_logic.clone_table_create.cmd_run") as mock_cmd,
+            patch("django.conf.settings.DB_WAREHOUSE", DSN),
+        ):
+            commands_stream_directly(
+                data_endpoint=AnyUrl(url="https://example.com/contours.geojson.gz"),
+                delimiter=",",
+                table_name="my_table",
+                dry_run=False,
+            )
+
+        command = mock_cmd.call_args.args[0]
+        assert 'ogr2ogr -f "PostgreSQL" "PG:"' in command
+        assert PASSWORD not in command
+        assert "db.example" not in command
+        env = mock_cmd.call_args.kwargs["env"]
+        assert env["PGPASSWORD"] == PASSWORD
+        assert env["PGHOST"] == "db.example"
+        assert env["PGDATABASE"] == "warehouse"
+        assert env["PGSSLMODE"] == "require"
 
     def test_download_zip(self):
         with (

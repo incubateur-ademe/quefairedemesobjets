@@ -503,6 +503,7 @@ class TestCleanSousCategorieCodes:
         dag_config.product_mapping = {"sscat1": "mapped1"}
         with pytest.raises(SousCategorieCodesWarning):
             clean_sous_categorie_codes("unknown", dag_config)
+        assert "Sous-catégorie absente du mapping : `unknown`" in caplog.text
 
 
 class TestCleanSouscategorieCodesSinoe:

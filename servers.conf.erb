@@ -19,12 +19,16 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
     "0:1" 1;
 }
 
-# iframe.js appends ref=<base64 parent URL> to every embed URL. It is only read
-# client-side (analytics controller), never by Django, so drop it from the cache
-# key: otherwise every embedding page is a cache miss.
-map $args $cache_args {
+# iframe.js appends ref=<base64 parent URL> to every embed URL. On the routes
+# below it is only read client-side (analytics controller), so drop it from the
+# cache key: otherwise every embedding page is a cache miss.
+# Everywhere else ref stays in the key: RequestEnhancementMiddleware redirects
+# ASSISTANT_V2_BETA_TESTERS_HOSTS to the V2 based on it, and legacy redirects
+# echo it, so one embedder's cached response must not reach another.
+# A route added here must never read ref server-side.
+map "$uri?$args" $cache_args {
     default $args;
-    "~^(.*&)?ref=[^&]*(&.*)?$" $1$2;
+    "~^/(?:carte|formulaire|infotri(?:/embed)?)/?\?((?:.*&)?)ref=[^&]*(&.*)?$" $1$2;
 }
 
 map $host $is_valid_host {
@@ -88,21 +92,64 @@ server {
     }
 
     # PostHog proxy - keeps analytics traffic on our domain, bypasses ad-blockers
+    # https://posthog.com/docs/advanced/proxy/nginx
+    # Hosts are set via variables so nginx re-resolves them (valid=300s) instead
+    # of caching the IP forever at startup. Use the system nameservers (Docker's
+    # 127.0.0.11, Scalingo's resolver) - public DNS may be blocked from the
+    # container. ipv6=off: PostHog answers AAAA first and containers are IPv4 only.
+<%
+  nameservers = File.read("/etc/resolv.conf").scan(/^nameserver\s+(\d+\.\d+\.\d+\.\d+)/).flatten rescue []
+  nameservers = ["8.8.8.8", "8.8.4.4"] if nameservers.empty?
+%>
+    resolver <%= nameservers.join(" ") %> valid=300s ipv6=off;
+    resolver_timeout 5s;
+    set $posthog_api_host eu.i.posthog.com;
+    set $posthog_assets_host eu-assets.i.posthog.com;
+    # proxy_pass with a variable passes its URI verbatim, so each location
+    # strips the /ph prefix with a rewrite instead of in proxy_pass.
+
+    # SDK and static files
     location /ph/static/ {
-        proxy_pass https://eu-assets.i.posthog.com/static/;
+        rewrite ^/ph(/.*)$ $1 break;
+        proxy_pass https://$posthog_assets_host;
+        proxy_set_header Host $posthog_assets_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
         proxy_ssl_server_name on;
-        proxy_set_header Host eu-assets.i.posthog.com;
+        proxy_ssl_name $posthog_assets_host;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
-    location /ph/ {
-        proxy_pass https://eu.i.posthog.com/;
+    # SDK remote config (feature flags, conditions, sampling)
+    location /ph/array/ {
+        rewrite ^/ph(/.*)$ $1 break;
+        proxy_pass https://$posthog_assets_host;
+        proxy_set_header Host $posthog_assets_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
         proxy_ssl_server_name on;
-        proxy_set_header Host eu.i.posthog.com;
+        proxy_ssl_name $posthog_assets_host;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+    }
+
+    # Events and API calls
+    location /ph/ {
+        rewrite ^/ph(/.*)$ $1 break;
+        proxy_pass https://$posthog_api_host;
+        proxy_set_header Host $posthog_api_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;
         # Strip Origin/Referer so PostHog doesn't reject requests from local/unknown domains
         proxy_set_header Origin "";
         proxy_set_header Referer "";
+        proxy_ssl_server_name on;
+        proxy_ssl_name $posthog_api_host;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
     location /admin {

@@ -43,7 +43,7 @@ from django.conf import settings
 
 from . import forms as qfdmd_forms
 
-from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS
+from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS, DecorativeImageBlock
 from qfdmd.utils import see_more_button
 from qfdmo.models.utils import NomAsNaturalKeyManager, NomAsNaturalKeyModel
 from search.constants import SEARCH_TAG_HELP_TEXT
@@ -705,7 +705,7 @@ class ProduitPage(
         "<code>produit-carte-default-view-mobile</code>). À activer uniquement "
         "sur les fiches sélectionnées pour l'expérience.",
     )
-    infotri = StreamField([("image", ImageBlock())], blank=True)
+    infotri = StreamField([("image", DecorativeImageBlock())], blank=True)
     body = StreamField(
         STREAMFIELD_COMMON_BLOCKS,
         verbose_name="Corps de texte",
@@ -1471,7 +1471,7 @@ class Produit(index.Indexed, AbstractBaseProduit):
     nom_eco_organisme = models.CharField(blank=True, help_text="Nom de l’éco-organisme")
     filieres_rep = models.CharField(blank=True, help_text="Filière(s) REP concernée(s)")
     slug = models.CharField(blank=True, help_text="Slug - ne pas modifier")
-    infotri = StreamField([("image", ImageBlock())], blank=True)
+    infotri = StreamField([("image", DecorativeImageBlock())], blank=True)
 
     panels = [FieldPanel("infotri")]
 
@@ -1648,6 +1648,32 @@ class Synonyme(SearchTerm, AbstractBaseProduit):
     @property
     def url(self) -> str:
         return self.get_absolute_url()
+
+    @cached_property
+    def wagtail_page(self) -> Page | None:
+        """The Wagtail page that replaces this synonyme's legacy fiche, if any:
+        its own redirection first, then its produit's, then the page its
+        produit was migrated to."""
+        try:
+            return self.next_wagtail_page.page
+        except Synonyme.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
+
+        excluded = getattr(self, "should_not_redirect_to", None)
+        excluded_page_id = excluded.page_id if excluded else None
+        try:
+            page = self.produit.next_wagtail_page.page
+            if page.pk != excluded_page_id:
+                return page
+        except Produit.next_wagtail_page.RelatedObjectDoesNotExist:
+            pass
+
+        # TODO_FINDEMIGRATION : à supprimer une fois que tous les qfdmd.Produit
+        # ont été migré vers des qfdmd.ProduitPage
+        page = self.produit.legacy_imported_as_produit_page
+        if page is not None and page.live and page.pk != excluded_page_id:
+            return page
+        return None
 
     @cached_property
     def bon_etat(self) -> str:

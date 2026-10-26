@@ -9,6 +9,7 @@ from sites_conformes.content_manager.blocks import (
     CommonStreamBlock,
 )
 from wagtail import blocks
+from wagtail.images.blocks import ImageBlock
 from wagtail.snippets.blocks import SnippetChooserBlock
 
 logger = logging.getLogger(__name__)
@@ -118,3 +119,15 @@ STREAMFIELD_COMMON_BLOCKS = [
     ),
     ("tabs", TabsBlock(label=_("Tabs"), group=_("DSFR components"))),
 ]
+
+
+class DecorativeImageBlock(ImageBlock):
+    """ImageBlock whose "decorative" checkbox is ticked by default.
+
+    Infotri pictograms carry no information beyond the surrounding text, so
+    they must not get an alt text.
+    """
+
+    def __init__(self, required=True, **kwargs):
+        super().__init__(required=required, **kwargs)
+        self.child_blocks["decorative"].meta.default = True

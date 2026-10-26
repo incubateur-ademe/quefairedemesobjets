@@ -16,7 +16,8 @@ export function clearActivePinpoints() {
 }
 
 export function removeHash() {
-  history.pushState(
+  if (!window.location.hash) return
+  history.replaceState(
     "",
     document.title,
     window.location.pathname + window.location.search,

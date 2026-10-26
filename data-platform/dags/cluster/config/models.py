@@ -15,6 +15,7 @@ class ClusterConfig(BaseModel):
     # dire qu'on ne peut pas mélanger valeurs par défaut
     # et valeurs obligatoires, voir section validation
     # pour toutes les règles
+    use_legacy_suggestions: bool = False
     dry_run: bool
 
     # SELECTION ACTEURS
@@ -83,6 +84,12 @@ class ClusterConfig(BaseModel):
     def check_dry_run(cls, v):
         if v is None:
             raise ValueError("dry_run à fournir")
+        return v
+
+    @field_validator("use_legacy_suggestions", mode="before")
+    def check_use_legacy_suggestions(cls, v):
+        if v is None:
+            return False
         return v
 
     @field_validator("cluster_intra_source_is_allowed", mode="before")
