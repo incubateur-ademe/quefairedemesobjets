@@ -17,6 +17,7 @@ from pickle import load
 from sentence_transformers import SentenceTransformer  # isort: skip
 import polars as pl
 from sklearn.linear_model import LogisticRegression
+from sqlalchemy import create_engine, make_url
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
@@ -233,9 +234,14 @@ def save_results_to_db(
             "dots and underscores are allowed."
         )
 
-    from sqlalchemy import create_engine
-
-    engine = create_engine(database_uri.replace("postgres", "postgresql+psycopg2"))
+    # Normalize the scheme to the SQLAlchemy postgresql+psycopg2 dialect. A naive
+    # str.replace("postgres", "postgresql+psycopg2") would also rewrite every
+    # other occurrence of "postgres" in the URI (e.g. a `postgresql://` scheme, a
+    # password/host/dbname containing "postgres"), producing a mangled drivername
+    # like `postgresql+psycopg2ql` -> `NoSuchModuleError`. Parsing the URL and
+    # only setting the drivername leaves credentials, host and query params intact.
+    url = make_url(database_uri).set(drivername="postgresql+psycopg2")
+    engine = create_engine(url)
 
     clusters_table = f"{output_table}_clusters"
     df_clusters.with_columns(pl.lit(run_id).alias("run_id")).write_database(

@@ -32,6 +32,7 @@ COPY webapp/qfdmo/ webapp/qfdmo/
 COPY webapp/search/ webapp/search/
 COPY webapp/settings/ webapp/settings/
 COPY webapp/stats/ webapp/stats/
+COPY webapp/assistant/ webapp/assistant/
 
 # Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
 ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
@@ -59,7 +60,7 @@ RUN apt-get install -y --no-install-recommends \
 ARG SCW_CLI_VERSION=2.62.0
 RUN ARCH="$(dpkg --print-architecture)" && \
     curl -fsSL -o /usr/local/bin/scw \
-      "https://github.com/scaleway/scaleway-cli/releases/download/v${SCW_CLI_VERSION}/scaleway-cli_${SCW_CLI_VERSION}_linux_${ARCH}" && \
+    "https://github.com/scaleway/scaleway-cli/releases/download/v${SCW_CLI_VERSION}/scaleway-cli_${SCW_CLI_VERSION}_linux_${ARCH}" && \
     chmod +x /usr/local/bin/scw
 
 # Client Docker CLI (sans daemon) pour le mode local d'inférence ML:
