@@ -47,18 +47,21 @@ SCRIPTS = "/opt/airflow/scripts/infrastructure"
 
 ENVIRONMENT = config("ENVIRONMENT", default="development")
 
-# Inference image registry namespace, per environment. CI pushes preprod images
-# to ns-ml-deduplication-inference-preprod and prod images (main) to
-# ns-ml-deduplication-inference-prod (see
-# .github/workflows/ml-deduplication-inference-build-and-push.yml).
-IMAGE_NAMESPACE = (
-    "ns-ml-deduplication-inference-preprod"
-    if ENVIRONMENT == "preprod"
-    else "ns-ml-deduplication-inference-prod"
-)
+# All builds go to a single shared namespace (ns-ml-deduplication-inference),
+# tagged per environment (see
+# .github/workflows/ml-deduplication-inference-build-and-push.yml):
+# - any branch push        -> <sha>-preprod & preprod-latest
+# - merge to main          -> <sha>-prod & prod-latest
+# - release published      -> <release>-prod & prod-latest
+IMAGE_NAMESPACE = "ns-ml-deduplication-inference"
 
-# Default to the latest image published for the current environment.
-DEFAULT_IMAGE = f"rg.fr-par.scw.cloud/{IMAGE_NAMESPACE}/ml-deduplication-inference:latest"  # noqa: E501
+# Default to the last image published for the current environment. The movable
+# <env>-latest tag always points at the most recent build for that environment.
+DEFAULT_IMAGE_TAG = "preprod-latest" if ENVIRONMENT == "preprod" else "prod-latest"
+DEFAULT_IMAGE = (
+    f"rg.fr-par.scw.cloud/{IMAGE_NAMESPACE}/"
+    f"ml-deduplication-inference:{DEFAULT_IMAGE_TAG}"
+)  # noqa: E501
 
 # When set to 1/true, the DAG bypasses the on-demand Scaleway instance and runs
 # the inference image directly with docker (requires the docker CLI/socket to be
@@ -71,6 +74,10 @@ RUN_LOCAL = config("ML_DEDUPLICATION_RUN_LOCAL", default=False, cast=bool)
 # The inference image is CUDA-based (torch cu13 wheels) and the instance type is
 # GPU-capable, so this can be enabled per environment. Defaults from env.
 USE_GPU = config("ML_DEDUPLICATION_USE_GPU", default=True, cast=bool)
+
+# Default Scaleway commercial type for the on-demand inference instance. Can be
+# overridden per run via the `instance_type` param (L4-1-24G or L4-2-24G).
+DEFAULT_INSTANCE_TYPE = config("ML_DEDUPLICATION_INSTANCE_TYPE", default="L4-2-24G")
 
 # Create dropdowns
 mapping_source_id_by_code = {
@@ -262,6 +269,15 @@ PARAMS = {
             "inference instance (docker run --gpus + --device cuda)."
         ),
     ),
+    "instance_type": Param(
+        DEFAULT_INSTANCE_TYPE,
+        type="string",
+        description_md="""🖥️ **TYPE D'INSTANCE SCALEWAY**: type commercial de
+            l'instance d'inférence à la demande.
+            - `L4-1-24G` : 1× GPU L4, 24 Go de VRAM (par défaut)
+            - `L4-2-24G` : 2× GPU L4, 24 Go de VRAM (plus de mémoire/parallélisme)
+            Ne s'applique pas en mode local (`run_locally`).""",
+    ),
     "duckdb_memory_limit": Param(
         "24GB",
         type=["null", "string"],
@@ -338,6 +354,7 @@ def ml_deduplication_inference():
         ),
         "DUCKDB_MEMORY_LIMIT": "{{ params.duckdb_memory_limit }}",
         "ML_DEDUPLICATION_BATCH_SIZE": "{{ params.batch_size or '' }}",
+        "ML_DEDUPLICATION_INSTANCE_TYPE": "{{ params.instance_type }}",
     }
 
     instance_ops = {
