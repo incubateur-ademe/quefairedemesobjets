@@ -32,6 +32,7 @@ COPY webapp/qfdmo/ webapp/qfdmo/
 COPY webapp/search/ webapp/search/
 COPY webapp/settings/ webapp/settings/
 COPY webapp/stats/ webapp/stats/
+COPY webapp/assistant/ webapp/assistant/
 
 # Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
 ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
