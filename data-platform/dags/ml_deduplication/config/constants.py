@@ -17,7 +17,7 @@ DAG_DISPLAY_NAME = "ML - Deduplication - Inference sur instance on-demand"
 ACTEURS_TABLE_PREFIX = "ml_dedup_acteurs"
 
 
-def acteurs_table_name(run_id: str) -> str:
+def temp_acteurs_table_name(run_id: str) -> str:
     """Name of the temp table holding the selected acteurs pool for a run.
 
     Only letters/digits/underscores are allowed by the inference table-name
@@ -31,5 +31,5 @@ __all__ = [
     "FIELDS_PARENT_DATA_EXCLUDED",
     "FIELDS_PROTECTED",
     "ACTEURS_TABLE_PREFIX",
-    "acteurs_table_name",
+    "temp_acteurs_table_name",
 ]

@@ -2,7 +2,7 @@
 
 import logging
 
-from ml_deduplication.config.constants import acteurs_table_name
+from ml_deduplication.config.constants import temp_acteurs_table_name
 from utils.db_tmp_tables import drop_temporary_table
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def ml_deduplication_cleanup(run_id: str | None, skip: bool = False) -> None:
     if not run_id:
         logger.info("Pas de run_id -> rien à nettoyer")
         return
-    table_name = acteurs_table_name(run_id)
+    table_name = temp_acteurs_table_name(run_id)
     if skip:
         logger.info(
             "Nettoyage ignoré (skip_cleanup=True) : table conservée %s", table_name

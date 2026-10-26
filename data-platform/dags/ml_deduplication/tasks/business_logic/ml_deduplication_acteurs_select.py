@@ -12,7 +12,7 @@ import pandas as pd
 from cluster.tasks.business_logic.cluster_acteurs_read.for_clustering import (
     _cluster_acteurs_read_base,
 )
-from ml_deduplication.config.constants import acteurs_table_name
+from ml_deduplication.config.constants import temp_acteurs_table_name
 from ml_deduplication.config.models import MLDeduplicationConfig
 from utils import logging_utils as log
 from utils.db_tmp_tables import create_temporary_table
@@ -45,7 +45,7 @@ def ml_deduplication_acteurs_select(
         logger.info("Aucun acteur sélectionné, on s'arrête là")
         return df, ""
 
-    table_name = acteurs_table_name(run_id)
+    table_name = temp_acteurs_table_name(run_id)
     logger.info(log.banner_string("Création de la table temporaire du pool d'acteurs"))
     create_temporary_table(df=df, table_name=table_name)
     log.preview_df_as_markdown("acteurs sélectionnés", df)
