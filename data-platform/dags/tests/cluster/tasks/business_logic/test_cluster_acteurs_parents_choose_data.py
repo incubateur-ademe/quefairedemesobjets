@@ -1,6 +1,16 @@
 import pandas as pd
 import pytest
+from data.models.changes.acteur_create_as_parent import ChangeActeurCreateAsParent
+from data.models.changes.acteur_keep_as_parent import ChangeActeurKeepAsParent
+from data.models.changes.acteur_update_parent_id import ChangeActeurUpdateParentId
+from data.models.changes.acteur_verify_in_revision import ChangeActeurVerifyRevision
 from django.contrib.gis.geos import Point
+from qfdmo.models.acteur import VueActeur
+from unit_tests.qfdmo.acteur_factory import (
+    ActeurTypeFactory,
+    SourceFactory,
+    VueActeurFactory,
+)
 from utils.django import django_setup_full
 
 from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data import (
@@ -8,16 +18,6 @@ from dags.cluster.tasks.business_logic.cluster_acteurs_parents_choose_data impor
     field_pick_value,
     fields_to_include_clean,
     value_is_empty,
-)
-from data.models.changes.acteur_create_as_parent import ChangeActeurCreateAsParent
-from data.models.changes.acteur_keep_as_parent import ChangeActeurKeepAsParent
-from data.models.changes.acteur_update_parent_id import ChangeActeurUpdateParentId
-from data.models.changes.acteur_verify_in_revision import ChangeActeurVerifyRevision
-from qfdmo.models.acteur import VueActeur
-from unit_tests.qfdmo.acteur_factory import (
-    ActeurTypeFactory,
-    SourceFactory,
-    VueActeurFactory,
 )
 
 django_setup_full()
@@ -152,9 +152,51 @@ class TestFieldPickValue:
     def test_field_pick_value(self, values, keep_empty, expected):
         assert (
             field_pick_value(
+                "email",
                 values,
                 keep_empty,
             )
+            == expected
+        )
+
+    # --- public_accueilli special case -------------------------------------
+    # "Particuliers et professionnels" (the prioritary value) wins whenever it
+    # is present, or when both "Particuliers" and "Professionnels" are present.
+    @pytest.mark.parametrize(
+        "values, expected",
+        [
+            (
+                ["Particuliers et professionnels", "Professionnels"],
+                "Particuliers et professionnels",
+            ),
+            (["Particuliers", "Professionnels"], "Particuliers et professionnels"),
+            (["Professionnels", "Particuliers"], "Particuliers et professionnels"),
+            # Order of empty-ish values does not matter here.
+            (
+                ["Particuliers et professionnels", None, ""],
+                "Particuliers et professionnels",
+            ),
+        ],
+    )
+    def test_public_accueilli_prioritary_value(self, values, expected):
+        assert (
+            field_pick_value("public_accueilli", values, keep_empty=False) == expected
+        )
+
+    # When every value is empty and we are not asked to keep empties, the
+    # default "Particuliers" is returned.
+    @pytest.mark.parametrize(
+        "values, keep_empty, expected",
+        [
+            ([None, "", " "], False, "Particuliers"),
+            ([None, "", " "], True, None),
+        ],
+    )
+    def test_public_accueilli_default_when_all_empty(
+        self, values, keep_empty, expected
+    ):
+        assert (
+            field_pick_value("public_accueilli", values, keep_empty=keep_empty)
             == expected
         )
 
