@@ -21,10 +21,25 @@ def value_is_empty(value) -> bool:
 
 
 def field_pick_value(
+    field: str,
     values: list[Any],
     keep_empty: bool = False,
 ) -> Any:
     """Get the value of a field from a list of acteurs list."""
+    if field == "public_accueilli":
+        # Special case for field public_accueilli
+        prioritary_value = "Particuliers et professionnels"
+        if (prioritary_value in values) or (
+            all(
+                field_value in values
+                for field_value in ["Professionnels", "Particuliers"]
+            )
+        ):
+            return prioritary_value
+        elif all(value_is_empty(value) for value in values) and not keep_empty:
+            # If all empty, return Particuliers as default
+            return "Particuliers"
+
     for value in values:
         if not value_is_empty(value) or keep_empty:
             return value
@@ -90,7 +105,7 @@ def cluster_acteurs_parents_choose_data(
         for field in fields:
             value_old = getattr(parent, field) if parent else None
             values = [getattr(a, field) for a in acteurs_list]
-            value_new = field_pick_value(values, keep_empty)
+            value_new = field_pick_value(field, values, keep_empty)
             if value_new == value_old:
                 continue
             if value_new is None and not keep_empty:
