@@ -4,9 +4,13 @@ import logging
 
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk.exceptions import AirflowSkipException
+
 from cluster.tasks.airflow_logic.utils import parent_data_new_deserialize
 from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db import (
     cluster_acteurs_suggestions_to_db,
+)
+from cluster.tasks.business_logic.cluster_acteurs_suggestions.to_db_groupes import (
+    cluster_acteurs_suggestions_to_db_groupes,
 )
 from ml_deduplication.config.constants import DAG_DISPLAY_NAME
 from ml_deduplication.config.models import MLDeduplicationConfig
@@ -52,7 +56,14 @@ def ml_deduplication_suggestions_to_db_wrapper(ti) -> None:
         msg = log.banner_string(f"Dry run ={config.dry_run}, on n'écrit pas en DB")
         raise AirflowSkipException(msg)
 
-    cluster_acteurs_suggestions_to_db(
+    if config.use_legacy_suggestions:
+        logger.warning("use_legacy_suggestions=True")
+        to_db = cluster_acteurs_suggestions_to_db
+    else:
+        logger.warning("use_legacy_suggestions=False")
+        to_db = cluster_acteurs_suggestions_to_db_groupes
+
+    to_db(
         df_clusters=df_clusters,
         suggestions=suggestions,
         identifiant_action=DAG_DISPLAY_NAME,
