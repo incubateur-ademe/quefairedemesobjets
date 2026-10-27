@@ -32,6 +32,7 @@ def ml_deduplication_acteurs_select(
     df, _ = _cluster_acteurs_read_base(
         fields=config.fields_all,
         include_source_ids=config.include_source_ids,
+        exclude_source_ids=config.exclude_source_ids,
         include_acteur_type_ids=config.include_acteur_type_ids,
         include_only_if_regex_matches_nom=None,
         include_if_all_fields_filled=None,

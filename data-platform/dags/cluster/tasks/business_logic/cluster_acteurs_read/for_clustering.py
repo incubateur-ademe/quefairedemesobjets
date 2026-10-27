@@ -118,6 +118,7 @@ def cluster_acteurs_read_orphans(
     return _cluster_acteurs_read_base(
         fields=fields,
         include_source_ids=include_source_ids,
+        exclude_source_ids=[],
         include_acteur_type_ids=include_acteur_type_ids,
         include_only_if_regex_matches_nom=include_only_if_regex_matches_nom,
         include_if_all_fields_filled=include_if_all_fields_filled,
@@ -136,6 +137,7 @@ def cluster_acteurs_read_parents(
     return _cluster_acteurs_read_base(
         fields=fields,
         include_source_ids=include_source_ids,
+        exclude_source_ids=[],
         include_acteur_type_ids=include_acteur_type_ids,
         include_only_if_regex_matches_nom=include_only_if_regex_matches_nom,
         include_if_all_fields_filled=include_if_all_fields_filled,
@@ -146,6 +148,7 @@ def cluster_acteurs_read_parents(
 def _cluster_acteurs_read_base(
     fields: list[str],
     include_source_ids: list[int],
+    exclude_source_ids: list[int],
     include_acteur_type_ids: list[int],
     include_only_if_regex_matches_nom: str | None,
     include_if_all_fields_filled: list[str] | None,
@@ -162,20 +165,22 @@ def _cluster_acteurs_read_base(
     2) Transform and enrich DataFrame
 
     Args:
-        ➕ include_source_ids (list[int]): sources to include
+        include_source_ids (list[int]): sources to include
 
-        ➕ include_acteur_type_ids (list[int]): actor types to include
+        exclude_source_ids (list[int]): sources to exclude
 
-        ➕ include_only_if_regex_matches_nom (str): actors included if name matches
+        include_acteur_type_ids (list[int]): actor types to include
+
+        include_only_if_regex_matches_nom (str): actors included if name matches
             If no regex = no filtering = all names are included
 
-        ➕ include_if_all_fields_filled (list[str]): actors included
+        include_if_all_fields_filled (list[str]): actors included
             If ALL fields are filled
 
-        ➕ limit (int | None): maximum number of actors to select (LIMIT).
+        limit (int | None): maximum number of actors to select (LIMIT).
             None = no limit. Useful for quick local tests on a small sample.
 
-        ➕ dtype (Any): dtype for columns of the resulting df
+        dtype (Any): dtype for columns of the resulting df
             (by default all columns will be casted to object dtype)
 
     Returns:
@@ -208,6 +213,11 @@ def _cluster_acteurs_read_base(
             query = query.filter(sources__id__in=include_source_ids)
         else:
             query = query.filter(source_id__in=include_source_ids)
+    if exclude_source_ids:
+        if est_parent:
+            query = query.exclude(sources__id__in=exclude_source_ids)
+        else:
+            query = query.exclude(source_id__in=exclude_source_ids)
     if include_acteur_type_ids:
         query = query.filter(acteur_type_id__in=include_acteur_type_ids)
     if include_only_if_regex_matches_nom:

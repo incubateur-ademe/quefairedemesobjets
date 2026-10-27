@@ -131,7 +131,6 @@ PARAMS = {
                 donc pas visible dans Django Admin).
                 {UI_PARAMS_SEPARATORS.READ_ACTEURS}""",
     ),
-    # TODO: permettre de ne sélectionner aucune source = toutes les sources
     "include_sources": Param(
         [],
         type=["null", "array"],
@@ -142,7 +141,20 @@ PARAMS = {
         description_md="""**➕ INCLUSION ACTEURS**: seuls ceux qui proviennent
                 de ces sources (opérateur **OU/OR**)
 
-                💯 Si aucune valeur spécifiée =  tous les acteurs sont inclus
+                ℹ️ Si aucune valeur spécifiée =  tous les acteurs sont inclus
+                """,
+    ),
+    "exclude_sources": Param(
+        [],
+        type=["null", "array"],
+        # La terminologie Airflow n'est pas très heureuse
+        # mais "examples" est bien la façon de faire des dropdowns
+        # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
+        examples=dropdown_sources,
+        description_md="""**➕ EXCLUSION ACTEURS**: exclusion de ceux qui proviennent
+                de ces sources (opérateur **OU/OR**)
+
+                ℹ️ Si aucune valeur spécifiée, aucun filtrage n'est effectué
                 """,
     ),
     "include_acteur_types": Param(
@@ -303,6 +315,12 @@ PARAMS = {
             "l'inspecter en debug. ⚠️ Ne pas laisser coché en production "
             "(risque d'accumulation de tables temporaires)."
         ),
+    ),
+    "use_legacy_suggestions": Param(
+        False,
+        type="boolean",
+        description_md="""🔄 Si coché, les suggestions seront écrites au format legacy
+            (Suggestion), sinon au format groupes (SuggestionGroupe)""",
     ),
 }
 

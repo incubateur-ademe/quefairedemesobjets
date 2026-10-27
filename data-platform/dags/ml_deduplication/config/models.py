@@ -17,11 +17,15 @@ class MLDeduplicationConfig(BaseModel):
     # pour toutes les règles
     dry_run: bool
 
+    # Mode de compatibilité avec l'ancien process de création de suggestions
+    use_legacy_suggestions: bool = False
+
     # SELECTION ACTEURS
     # La sélection des acteurs est réutilisée telle quelle par rapport
     # au DAG de clustering: elle définit le pool d'acteurs qu'on va donner
     # à l'inférence ML (via une vue temporaire).
     include_sources: list[str]
+    exclude_sources: list[str]
     include_acteur_types: list[str]
 
     # DEDUP
@@ -79,6 +83,7 @@ class MLDeduplicationConfig(BaseModel):
     # + valeurs de la base de données
     # Conversion des codes en ids
     include_source_ids: list[int]
+    exclude_source_ids: list[int]
     include_acteur_type_ids: list[int]
 
     # ---------------------------------------
@@ -109,6 +114,12 @@ class MLDeduplicationConfig(BaseModel):
             raise ValueError("output_table à fournir")
         return v
 
+    @field_validator("use_legacy_suggestions", mode="before")
+    def check_use_legacy_suggestions(cls, v):
+        if v is None:
+            return False
+        return v
+
     # Logique multi-champs
     @model_validator(mode="before")
     def check_model(cls, values):
@@ -130,6 +141,17 @@ class MLDeduplicationConfig(BaseModel):
             values["include_source_ids"] = airflow_params_dropdown_selected_to_ids(
                 mapping_ids_by_codes=values["mapping_sources"],
                 dropdown_selected=values["include_sources"],
+            )
+
+        # Si aucun code source fourni alors on inclut toutes les sources
+        if not values.get("exclude_sources"):
+            values["exclude_sources"] = []
+            values["exclude_source_ids"] = []
+        else:
+            # Sinon on résout les codes sources en ids à partir de la sélection
+            values["exclude_source_ids"] = airflow_params_dropdown_selected_to_ids(
+                mapping_ids_by_codes=values["mapping_sources"],
+                dropdown_selected=values["exclude_sources"],
             )
 
         # ACTEUR TYPE CODES
