@@ -1,0 +1,4 @@
+# Training and evaluation artifacts
+datasets/*
+logs/*
+outputs/*

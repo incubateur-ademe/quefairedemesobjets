@@ -1,0 +1,141 @@
+name: 🐳 Docker image for ml-deduplication inference
+
+# Build and push the ml_deduplication inference image to the Scaleway registry.
+# All builds go into a single shared namespace (ns-ml-deduplication-inference)
+# with environment-prefixed tags:
+# - any branch push        -> preprod, tags <sha>-preprod & preprod-latest
+# - merge to main          -> prod, tags <sha>-prod & prod-latest
+# - release published      -> prod, tags <release-tag>-prod & prod-latest
+#
+# The DAG defaults to <env>-latest, so preprod can always test the last built
+# image and prod is aligned on the released build.
+#
+# `environment:` must be a static string (expressions are not allowed), so the
+# prod/preprod selection is done with jobs guarded by `if:` conditions.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ml_deduplication/**'
+      - '.github/workflows/ml-deduplication-inference-build-and-push.yml'
+  release:
+    types:
+      - published
+
+env:
+  SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
+  SCALEWAY_NAMESPACE: ns-ml-deduplication-inference
+  IMAGE_NAME: ml-deduplication-inference
+
+jobs:
+  build-and-push-preprod:
+    name: 🧪 Build and push (preprod)
+    if: github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    environment: preprod
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      # https://github.com/docker/login-action
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
+
+      # https://github.com/docker/build-push-action
+      - name: "[🟣 Scaleway] Build and push Docker image (preprod)"
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        with:
+          context: ml_deduplication
+          file: ml_deduplication/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-preprod
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:preprod-latest
+          build-args: |
+            MODEL_DIR=models/xgboost
+          cache-from: type=gha,scope=ml-deduplication-inference
+          cache-to: type=gha,scope=ml-deduplication-inference,mode=max
+
+  build-and-push-prod:
+    name: 🚀 Build and push (prod - main)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+
+      # https://github.com/docker/login-action
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
+
+      # https://github.com/docker/build-push-action
+      - name: "[🟣 Scaleway] Build and push Docker image (prod)"
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: ml_deduplication
+          file: ml_deduplication/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-prod
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:prod-latest
+          build-args: |
+            MODEL_DIR=models/xgboost
+          cache-from: type=gha,scope=ml-deduplication-inference
+          cache-to: type=gha,scope=ml-deduplication-inference,mode=max
+
+  build-and-push-prod-release:
+    name: 🎯 Build and push (prod - release)
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+
+      # https://github.com/docker/login-action
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5
+
+      # https://github.com/docker/build-push-action
+      - name: "[🟣 Scaleway] Build and push Docker image (release)"
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: ml_deduplication
+          file: ml_deduplication/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }}-prod
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:prod-latest
+          build-args: |
+            MODEL_DIR=models/xgboost
+          cache-from: type=gha,scope=ml-deduplication-inference
+          cache-to: type=gha,scope=ml-deduplication-inference,mode=max
