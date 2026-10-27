@@ -35,6 +35,7 @@
     "diff-match-patch": "^1.0.5",
     "maplibre-gl": "^6.11.2",
     "openapi-fetch": "^0.17.0",
+    "postcss": "^8.5.31",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "remixicon": "^4.9.1"
