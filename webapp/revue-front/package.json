@@ -29,14 +29,15 @@
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
     "@socialgouv/codes-naf": "^1.1.1",
-    "@tanstack/react-query": "^5.104.1",
+    "@tanstack/react-query": "^5.104.5",
     "@tanstack/react-table": "^8.21.3",
-    "@tanstack/react-virtual": "^3.14.13",
+    "@tanstack/react-virtual": "^3.14.21",
     "diff-match-patch": "^1.0.5",
     "maplibre-gl": "^6.11.2",
     "openapi-fetch": "^0.17.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "posthog-js": "^1.438.12",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "remixicon": "^4.9.1"
   },
   "devDependencies": {
