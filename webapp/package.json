@@ -11,7 +11,7 @@
     "e2e_test": " npx playwright test --update-snapshots"
   },
   "dependencies": {
-    "@axe-core/playwright": "^4.13.0",
+    "@axe-core/playwright": "^4.14.0",
     "@gouvfr/dsfr": "1.14",
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo": "^8.0.23",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@parcel/optimizer-svgo": "^2.16.4",
     "@parcel/transformer-inline-string": "^2.16.4",
-    "@playwright/test": "^1.64.0",
+    "@playwright/test": "^1.64.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.26",
