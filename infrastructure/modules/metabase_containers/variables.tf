@@ -17,7 +17,7 @@ variable "metabase_registry_image" {
 variable "tag_docker" {
   description = "Tag Docker de l'image Metabase"
   type        = string
-  default     = "v0.63.17.x"
+  default     = "v0.64.3.x"
 }
 
 variable "metabase_cpu_limit" {
