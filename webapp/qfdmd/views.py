@@ -12,6 +12,7 @@ from django.db import (
     connection,
     transaction,
 )
+from django.db.models import Q
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import escape
@@ -380,9 +381,34 @@ class TypeProduitFilter(django_filters.ChoiceFilter):
         return qs
 
 
+class ConsignesFilter(django_filters.ChoiceFilter):
+    """Fiches with or without a « Grille de consignes » (#3284).
+
+    For the editors to find the fiches the migration left aside: it only
+    converts what it can read, and leaves a draft or nothing otherwise (see
+    `qfdmd.consignes_migration`). Reads the published body, not the drafts.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("choices", [("avec", "Avec"), ("sans", "Sans")])
+        kwargs.setdefault("label", "Grille de consignes")
+        kwargs.setdefault("empty_label", "Toutes")
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        # JSONB containment: one block of the body has this type.
+        has_grid = Q(body__contains=[{"type": "consignes"}])
+        if value == "avec":
+            return qs.filter(has_grid)
+        if value == "sans":
+            return qs.exclude(has_grid)
+        return qs
+
+
 class ProduitPageFilterSet(WagtailFilterSet):
     migration_status = MigrationStatusFilter()
     type_produit = TypeProduitFilter()
+    consignes = ConsignesFilter()
 
     class Meta:
         model = ProduitPage
@@ -393,6 +419,7 @@ class ProduitPageFilterSet(WagtailFilterSet):
 # ont été migré vers des qfdmd.ProduitPage
 class MigrationOnlyFilterSet(WagtailFilterSet):
     migration_status = MigrationStatusFilter()
+    consignes = ConsignesFilter()
 
     class Meta:
         model = ProduitPage

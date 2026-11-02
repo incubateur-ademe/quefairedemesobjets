@@ -156,3 +156,20 @@ class TestConsignesRendering:
 
         desc = html.index('class="fr-card__desc')
         assert desc < html.index("Apportez-le en déchèterie.")
+
+
+class TestConsignesFilter:
+    """Retour de test : retrouver dans Wagtail les fiches que la migration
+    n'a pas converties."""
+
+    def test_splits_the_fiches_on_their_grid(self):
+        from qfdmd.models import ProduitPage
+        from qfdmd.views import ConsignesFilter
+
+        with_grid = page_with(paragraph("intro"), grid(consigne("Déposer")))
+        without = page_with(paragraph("intro"))
+        pages = ProduitPage.objects.filter(pk__in=[with_grid.pk, without.pk])
+
+        assert list(ConsignesFilter().filter(pages, "sans")) == [without]
+        assert list(ConsignesFilter().filter(pages, "avec")) == [with_grid]
+        assert ConsignesFilter().filter(pages, "").count() == 2
