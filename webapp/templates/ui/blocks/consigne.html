@@ -1,7 +1,9 @@
-{% load wagtailcore_tags wagtail_dsfr_tags %}
+{% load wagtailcore_tags %}
 {% comment %}
 Une consigne (#3284) : carte verticale DSFR, badges d'état ou de lieu de dépôt
-et de bonus réparation dans le détail du haut.
+et de bonus réparation dans le détail du haut. Couleurs et libellés des badges
+d'état : ceux des fiches en production (Réparable menthe, Bon état cumulus,
+Mauvais état glycine, % Bonus Réparation tilleul verveine).
 {% endcomment %}
 <div class="fr-card{% if value.lien %} fr-enlarge-link{% endif %}">
   <div class="fr-card__body">
@@ -9,22 +11,27 @@ et de bonus réparation dans le détail du haut.
       <h3 class="fr-card__title">
         {% if value.lien %}<a href="{% pageurl value.lien %}">{{ value.titre }}</a>{% else %}{{ value.titre }}{% endif %}
       </h3>
-      {{ value.contenu|richtext_p_add_class:"fr-card__desc" }}
+      {% comment %}
+      Un seul conteneur, quel que soit le contenu : une consigne migrée depuis
+      un texte n'a pas de <p>, et un texte nu passait avant le titre dans la
+      carte DSFR (flexbox ordonnée, le titre est à order: 2).
+      {% endcomment %}
+      <div class="fr-card__desc [&>:last-child]:qf-mb-0">{{ value.contenu }}</div>
       {% if value.etat or value.lieu_de_depot or value.bonus_reparation %}
         <div class="fr-card__start">
           <ul class="fr-badges-group">
             {% if value.etat == "reparable" %}
-              <li><p class="fr-badge fr-badge--green-bourgeon fr-badge--no-icon">Réparable</p></li>
+              <li><p class="fr-badge fr-badge--green-menthe fr-badge--no-icon">Réparable</p></li>
             {% elif value.etat == "bon_etat" %}
-              <li><p class="fr-badge fr-badge--green-emeraude fr-badge--no-icon">Bon état</p></li>
+              <li><p class="fr-badge fr-badge--blue-cumulus fr-badge--no-icon">Bon état</p></li>
             {% elif value.etat == "mauvais_etat" %}
-              <li><p class="fr-badge fr-badge--orange-terre-battue fr-badge--no-icon">Mauvais état</p></li>
+              <li><p class="fr-badge fr-badge--purple-glycine fr-badge--no-icon">Mauvais état</p></li>
             {% endif %}
             {% if value.lieu_de_depot %}
               <li><p class="fr-badge fr-badge--{{ value.lieu_de_depot.couleur }} fr-badge--no-icon">{{ value.lieu_de_depot.libelle }}</p></li>
             {% endif %}
             {% if value.bonus_reparation %}
-              <li><p class="fr-badge fr-badge--purple-glycine fr-badge--no-icon">Bonus réparation</p></li>
+              <li><p class="fr-badge fr-badge--green-tilleul-verveine fr-badge--no-icon">% Bonus Réparation</p></li>
             {% endif %}
           </ul>
         </div>

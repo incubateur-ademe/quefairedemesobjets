@@ -123,6 +123,36 @@ class TestConsignesRendering:
         # The chosen width, 4/12 by default.
         assert "fr-col-md-4" in html
         assert "Réparable" in html
-        assert "Bonus réparation" in html
+        assert "% Bonus Réparation" in html
         assert "fr-badge--yellow-tournesol" in html
         assert "Bac de tri" in html
+
+    @pytest.mark.parametrize(
+        "etat,couleur",
+        [
+            ("reparable", "green-menthe"),
+            ("bon_etat", "blue-cumulus"),
+            ("mauvais_etat", "purple-glycine"),
+        ],
+    )
+    def test_each_etat_has_the_color_of_the_site(self, etat, couleur):
+        """Retour de test : the colours of the badges in production."""
+        html = str(page_with(grid(consigne("Titre", etat=etat))).body)
+
+        assert f"fr-badge--{couleur}" in html
+
+    def test_the_bonus_badge_is_tilleul_verveine(self):
+        html = str(page_with(grid(consigne("Réparer", bonus_reparation=True))).body)
+
+        assert "fr-badge--green-tilleul-verveine" in html
+
+    def test_a_bare_text_content_stays_under_the_title(self):
+        """Migrated text consignes are not wrapped in <p>: as anonymous flex
+        items of the DSFR card they came before the title (order 2)."""
+        item = consigne("Déposer")
+        item["value"]["contenu"] = "Apportez-le en déchèterie."
+
+        html = str(page_with(grid(item)).body)
+
+        desc = html.index('class="fr-card__desc')
+        assert desc < html.index("Apportez-le en déchèterie.")
