@@ -23,6 +23,7 @@ from sources.tasks.transform.transform_column import (
     clean_horaires_osm,
     clean_number,
     clean_public_accueilli,
+    clean_public_accueilli_sinoe_libelle_type_service,
     clean_reprise,
     clean_siren,
     clean_siret,
@@ -335,6 +336,33 @@ class TestCleanPublicAccueilli:
     def test_clean_public_accueilli_warning(self, value):
         with pytest.raises(PublicAccueilliWarning):
             clean_public_accueilli(value, None)
+
+
+class TestCleanPublicAccueilliSinoeLibelleTypeService:
+    @pytest.mark.parametrize(
+        "value, expected_value",
+        [
+            (None, ""),
+            ("Déchèterie", ""),
+            ("Déchèterie professionnelle", "Professionnels"),
+            (
+                "Plateforme d'apports de déchets verts",
+                "",
+            ),
+            ("Centre d'apport volontaire", ""),
+        ],
+    )
+    def test_clean_public_accueilli_sinoe_libelle_type_service(
+        self, value, expected_value
+    ):
+        assert (
+            clean_public_accueilli_sinoe_libelle_type_service(value, None)
+            == expected_value
+        )
+
+    def test_clean_public_accueilli_sinoe_libelle_type_service_warning(self):
+        with pytest.raises(PublicAccueilliWarning):
+            clean_public_accueilli_sinoe_libelle_type_service("inconnu", None)
 
 
 class TestCleanReprise:

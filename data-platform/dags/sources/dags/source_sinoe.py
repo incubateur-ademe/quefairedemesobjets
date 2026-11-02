@@ -26,10 +26,6 @@ with DAG(
     ],
     **default_params,
     params=ParamsDict(
-        # TODO : à exploiter
-        # code_type_service	"04B" -> déduire le public accueilli
-        # annee
-        # date_fermeture_service
         # https://data.sinoe-dechets.ademe.fr/datasets/liste-des-services-de-decheteries-donnees-publiques
         # "https://data.sinoe-dechets.ademe.fr/data-fair/api/v1/datasets/liste-des-services-de-decheteries-donnees-publiques/lines"
         {
@@ -58,6 +54,13 @@ with DAG(
                         "origin": "code_type_dechet_admis",
                         "transformation": "clean_sous_categorie_codes_sinoe",
                         "destination": "sous_categorie_codes",
+                    },
+                    {
+                        "origin": "libelle_type_service",
+                        "transformation": (
+                            "clean_public_accueilli_sinoe_libelle_type_service"
+                        ),
+                        "destination": "public_accueilli",
                     },
                     # 3. Ajout des colonnes avec une valeur par défaut
                     {

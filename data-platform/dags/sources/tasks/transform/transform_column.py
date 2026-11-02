@@ -188,6 +188,32 @@ def clean_public_accueilli(value, _):
     )
 
 
+def clean_public_accueilli_sinoe_libelle_type_service(value, _):
+    from utils.django import django_setup_full
+
+    django_setup_full()
+
+    from qfdmo.models.acteur import ActeurPublicAccueilli
+
+    if not value or (isinstance(value, float) and pd.isna(value)):
+        return ActeurPublicAccueilli.UNKNOWN.value
+
+    values_mapping = {
+        "decheterie": ActeurPublicAccueilli.UNKNOWN.value,
+        "decheterie professionnelle": ActeurPublicAccueilli.PROFESSIONNELS.value,
+        "plateforme d'apports de dechets verts": (ActeurPublicAccueilli.UNKNOWN.value),
+        "centre d'apport volontaire": ActeurPublicAccueilli.UNKNOWN.value,
+    }
+    normalized = format_libelle_to_code(str(value))
+    if normalized not in values_mapping:
+        raise PublicAccueilliWarning(
+            "Public accueilli SINOE (libelle_type_service) "
+            f"`{value}` not found in mapping : {values_mapping.keys()}"
+        )
+
+    return values_mapping[normalized]
+
+
 def clean_reprise(value, _):
     from qfdmo.models.acteur import ActeurReprise
 
