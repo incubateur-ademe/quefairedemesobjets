@@ -6,6 +6,7 @@ from django.urls import reverse
 
 from opendata.lieux import open_data
 from qfdmo.models.acteur import DataLicense, DisplayedActeur
+from qfdmo.models.action import GroupeAction
 from unit_tests.qfdmo.acteur_factory import (
     DisplayedActeurFactory,
     DisplayedPropositionServiceFactory,
@@ -13,6 +14,7 @@ from unit_tests.qfdmo.acteur_factory import (
     SourceFactory,
 )
 from unit_tests.qfdmo.action_factory import ActionFactory, GroupeActionFactory
+from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -86,27 +88,28 @@ class TestOpenData:
 
 
 class TestLieu:
-    def test_serves_an_open_place(self, client, reparer):
+    def test_serves_an_open_place_with_the_columns_of_the_dataset(
+        self, client, reparer
+    ):
         acteur = place(reparer)
 
-        response = client.get(reverse("api_v1:lieu", args=[acteur.uuid]))
+        response = get_lieu(client, acteur)
 
         assert response.status_code == 200
         assert response.json()["identifiant"] == acteur.uuid
+        assert set(response.json()) == OPENDATA_COLUMNS
 
     def test_a_closed_place_is_not_found(self, client, reparer):
         acteur = place(reparer, licence=DataLicense.NO_LICENSE)
 
-        response = client.get(reverse("api_v1:lieu", args=[acteur.uuid]))
+        assert get_lieu(client, acteur).status_code == 404
 
-        assert response.status_code == 404
-
-    def test_serves_the_columns_of_the_dataset(self, client, reparer):
-        acteur = place(reparer)
+    def test_a_place_without_location_has_no_coordinates(self, client, reparer):
+        acteur = place(reparer, at=None)
 
         item = get_lieu(client, acteur).json()
 
-        assert set(item) == OPENDATA_COLUMNS
+        assert (item["latitude"], item["longitude"]) == (None, None)
 
     def test_paternite_names_the_site_then_the_open_sources(self, client, reparer):
         acteur = place(reparer)
@@ -166,8 +169,6 @@ class TestLieu:
         assert sans_site["logo"] is None
 
     def test_propositions_carry_action_and_sous_categories(self, client, reparer):
-        from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
-
         acteur = place(reparer)
         proposition = acteur.proposition_services.get()
         proposition.sous_categories.add(SousCategorieObjetFactory(code="velo"))
@@ -187,12 +188,20 @@ class TestLieu:
         assert item["propose_le_bonus_reparation"] is True
         assert item["qualites_et_labels"] == "bonusrepar"
 
+    def test_labels_are_joined_in_code_order(self, client, reparer):
+        acteur = place(reparer)
+        acteur.labels.add(
+            LabelQualiteFactory(code="repar_acteurs"), LabelQualiteFactory(code="ess")
+        )
+
+        item = get_lieu(client, acteur).json()
+
+        assert item["qualites_et_labels"] == "ess|repar_acteurs"
+
 
 class TestGestes:
     def test_lists_the_groupes_in_display_order(self, client):
         """The fixtures load the five groupes: the API serves them, in order."""
-        from qfdmo.models.action import GroupeAction
-
         payload = client.get(reverse("api_v1:gestes")).json()
 
         expected = list(GroupeAction.objects.order_by("order"))
