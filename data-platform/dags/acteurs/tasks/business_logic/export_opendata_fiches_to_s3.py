@@ -1,8 +1,9 @@
 """Publish the open data of the fiches (produits and consignes) on S3.
 
 The rows live in the CMS, which the Airflow Django settings do not load: the
-webapp serves them as CSV on its API v1 (`/api/v1/produits.csv`,
-`/api/v1/consignes.csv`), the task fetches each file and stores it like the
+webapp serves them as CSV on its API v1 (`/api/v1/produits` and
+`/api/v1/consignes` with `Accept: text/csv`), the task fetches each file and
+stores it like the
 acteurs export: a dated copy per run, and the undated file as the latest state.
 """
 
@@ -23,8 +24,10 @@ TIMEOUT_SECONDS = 120
 def export_opendata_fiche_to_s3(
     export_opendata_config: ExportOpendataConfig, filename: str
 ):
-    url = f"{WEBAPP_URL}/api/v1/{filename}"
-    response = requests.get(url, timeout=TIMEOUT_SECONDS)
+    url = f"{WEBAPP_URL}/api/v1/{filename.removesuffix('.csv')}"
+    response = requests.get(
+        url, headers={"Accept": "text/csv"}, timeout=TIMEOUT_SECONDS
+    )
     response.raise_for_status()
 
     remote_dir = export_opendata_config.fiches_remote_dir

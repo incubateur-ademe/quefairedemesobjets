@@ -160,7 +160,7 @@ class TestApi:
         assert payload["items"][0]["bonus_reparation"] is True
 
     def test_the_csv_carries_the_same_columns(self, client, fiche):
-        response = client.get(reverse("api_v1:consignes-csv"))
+        response = client.get(reverse("api_v1:consignes"), HTTP_ACCEPT="text/csv")
 
         assert response["Content-Type"].startswith("text/csv")
         rows = list(csv.DictReader(StringIO(response.content.decode())))
@@ -169,11 +169,37 @@ class TestApi:
         assert rows[1]["etat"] == ""
 
     def test_the_produits_csv(self, client, fiche):
-        rows = list(
-            csv.DictReader(
-                StringIO(client.get(reverse("api_v1:produits-csv")).content.decode())
-            )
-        )
+        response = client.get(reverse("api_v1:produits"), HTTP_ACCEPT="text/csv")
+        rows = list(csv.DictReader(StringIO(response.content.decode())))
 
         assert list(rows[0]) == PRODUIT_COLUMNS
         assert any(row["nom"] == "Pot de yaourt" for row in rows)
+
+    def test_the_csv_is_the_whole_table_whatever_the_page(self, client, fiche):
+        response = client.get(
+            reverse("api_v1:consignes"), {"limit": 1}, HTTP_ACCEPT="text/csv"
+        )
+
+        assert len(list(csv.DictReader(StringIO(response.content.decode())))) == 2
+
+    @pytest.mark.parametrize("accept", ["", "*/*", "application/json"])
+    def test_json_unless_csv_is_asked(self, client, fiche, accept):
+        response = client.get(reverse("api_v1:consignes"), HTTP_ACCEPT=accept)
+
+        assert response["Content-Type"].startswith("application/json")
+
+    @pytest.mark.parametrize("accept", ["text/csv", "application/json"])
+    def test_caches_tell_the_formats_apart(self, client, fiche, accept):
+        response = client.get(reverse("api_v1:produits"), HTTP_ACCEPT=accept)
+
+        assert "Accept" in response["Vary"]
+        assert "max-age=3600" in response["Cache-Control"]
+
+    def test_the_openapi_documents_the_csv(self, client):
+        paths = client.get("/api/v1/openapi.json").json()["paths"]
+
+        assert (
+            "text/csv"
+            in paths["/api/v1/produits"]["get"]["responses"]["200"]["content"]
+        )
+        assert "/api/v1/produits.csv" not in paths
