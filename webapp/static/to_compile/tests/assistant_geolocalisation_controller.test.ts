@@ -22,10 +22,6 @@ beforeEach(async () => {
     value: { getCurrentPosition },
     configurable: true,
   })
-  global.fetch = jest.fn(async () => ({
-    ok: true,
-    json: async () => ({ adresse: "12 rue de la Paix" }),
-  })) as unknown as typeof fetch
   visit.mockClear()
   application = Application.start()
   application.register("assistant-geolocalisation", GeolocalisationController)
@@ -44,21 +40,37 @@ describe("assistant geolocalisation", () => {
     expect(link().getAttribute("aria-busy")).toBe("true")
   })
 
-  it("opens the solutions around the position, named and precise", async () => {
-    getCurrentPosition.mockImplementation((success) =>
-      success({ coords: { latitude: 48.85, longitude: 2.35 } }),
-    )
+  it.each([
+    [
+      "found",
+      async () => ({ ok: true, json: async () => ({ adresse: "12 rue de la Paix" }) }),
+      "12 rue de la Paix",
+    ],
+    ["unknown", async () => ({ ok: false }), "Autour de moi"],
+    [
+      "unreachable",
+      async () => Promise.reject(new TypeError("offline")),
+      "Autour de moi",
+    ],
+  ])(
+    "opens the solutions around the position, named and precise (%s)",
+    async (_, reverse, adresse) => {
+      global.fetch = jest.fn(reverse) as unknown as typeof fetch
+      getCurrentPosition.mockImplementation((success) =>
+        success({ coords: { latitude: 48.85, longitude: 2.35 } }),
+      )
 
-    link().click()
-    await settle()
-    await settle()
+      link().click()
+      await settle()
+      await settle()
 
-    const url = new URL(visit.mock.calls[0][0])
-    expect(url.searchParams.get("adresse")).toBe("12 rue de la Paix")
-    expect(url.searchParams.get("longitude")).toBe("2.35")
-    expect(url.searchParams.get("precise")).toBe("true")
-    expect(link().hasAttribute("aria-busy")).toBe(false)
-  })
+      const url = new URL(visit.mock.calls[0][0])
+      expect(url.searchParams.get("adresse")).toBe(adresse)
+      expect(url.searchParams.get("longitude")).toBe("2.35")
+      expect(url.searchParams.get("precise")).toBe("true")
+      expect(link().hasAttribute("aria-busy")).toBe(false)
+    },
+  )
 
   it("follows the link when the position is refused", () => {
     getCurrentPosition.mockImplementation((_success, error) => error())
