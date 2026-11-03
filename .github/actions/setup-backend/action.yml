@@ -19,15 +19,7 @@ runs:
       with:
         enable-cache: true
 
-    - name: Cache virtual environment
-      id: cache-venv
-      uses: actions/cache@v6
-      with:
-        path: .venv
-        key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
-
     - name: Install Python dependencies
-      if: steps.cache-venv.outputs.cache-hit != 'true'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: uv sync ${{ inputs.uv-groups }}
