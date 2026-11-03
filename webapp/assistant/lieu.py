@@ -1,6 +1,9 @@
 """What the lieu page shows, from the lieu's raw fields."""
 
+from typing import TypedDict
+
 from assistant.consignes import GESTES_ORDER
+from qfdmo.models.acteur import DisplayedActeur
 
 # The label codes of the Bonus Réparation, one per eco-organisme.
 BONUS_REPARATION_CODES = ("bonusrepar", "BonusRepar_ASL", "bonusrepar_ABJ_TH")
@@ -8,12 +11,16 @@ BONUS_REPARATION_CODES = ("bonusrepar", "BonusRepar_ASL", "bonusrepar_ABJ_TH")
 HOME_SERVICE_PRESTATION = "SUR_PLACE_OU_A_DOMICILE"
 
 
-def offers_bonus(lieu) -> bool:
-    """True if the lieu carries one of the Bonus Réparation labels."""
+class Geste(TypedDict):
+    code: str
+    libelle: str
+
+
+def offers_bonus(lieu: DisplayedActeur) -> bool:
     return any(label.code in BONUS_REPARATION_CODES for label in lieu.labels.all())
 
 
-def practical_info_of(lieu) -> list[str]:
+def practical_info_of(lieu: DisplayedActeur) -> list[str]:
     """The details worth knowing before going, as sentences, most important
     first."""
     infos = []
@@ -34,7 +41,7 @@ def practical_info_of(lieu) -> list[str]:
     return infos
 
 
-def gestes_of(lieu, sous_categorie_ids=()) -> list[dict]:
+def gestes_of(lieu: DisplayedActeur, sous_categorie_ids=()) -> list[Geste]:
     """The gestes (GroupeAction) the lieu offers, once each, in display order.
 
     With the fiche's sous-catégories, only the gestes offered for that objet;

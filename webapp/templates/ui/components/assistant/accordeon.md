@@ -8,6 +8,13 @@ Section repliable, utilisée pour les horaires et les informations d'un lieu.
 {% include "ui/components/assistant/accordeon.html" with intitule="Horaires" apercu=apercu contenu=contenu %}
 ```
 
+| Paramètre  | Requis | Rôle                         |
+| ---------- | ------ | ---------------------------- |
+| `intitule` | ✅     | titre de l'accordéon         |
+| `apercu`   | ⚪️     | résumé affiché une fois plié |
+| `contenu`  | ✅     | contenu déplié               |
+| `ouvert`   | ⚪️     | déplié dès l'affichage       |
+
 ## Pourquoi `<details>` et pas un contrôleur Stimulus
 
 Le pliage, l'état ouvert/fermé, le rôle ARIA et la navigation clavier sont
