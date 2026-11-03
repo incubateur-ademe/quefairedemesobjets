@@ -5,10 +5,7 @@
 {% block main %}
     <div class="qfa-ecran">
         <div class="qfa-panneau">
-            <a class="qfa-changer-geste" href="{% url 'assistant:solutions' %}?{{ parametres }}">
-                <span class="qfa-changer-geste__retour" aria-hidden="true"></span>
-                <span class="qfa-changer-geste__libelle">Revenir aux solutions</span>
-            </a>
+            {% include "ui/components/assistant/bouton_changer_geste.html" with url=url_solutions libelle="Revenir aux solutions" gestes=None %}
         </div>
 
         <article class="qfa-lieu">
