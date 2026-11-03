@@ -28,32 +28,6 @@ from opendata.lieux import GesteSchema, LieuSchema, for_the_api, open_data
 from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import GroupeAction
 
-router = Router()
-
-
-@router.get(
-    "/lieux/{identifiant}",
-    response=LieuSchema,
-    url_name="lieu",
-    summary="Un lieu",
-)
-@decorate_view(CACHE_FIVE_MINUTES)
-def lieu(request, identifiant: str):
-    """Le lieu portant cet identifiant, s'il est sous licence ouverte."""
-    acteurs = for_the_api(open_data(DisplayedActeur.objects.all()))
-    return get_object_or_404(acteurs, uuid=identifiant)
-
-
-@router.get(
-    "/gestes",
-    response=list[GesteSchema],
-    url_name="gestes",
-    summary="Les gestes, valeurs du paramètre `geste`",
-)
-@decorate_view(CACHE_ONE_HOUR)
-def gestes(request):
-    return GroupeAction.objects.order_by("order")
-
 
 class ProduitSchema(Schema):
     identifiant: int
@@ -120,6 +94,33 @@ def _csv_openapi(columns) -> dict:
             }
         }
     }
+
+
+router = Router()
+
+
+@router.get(
+    "/lieux/{identifiant}",
+    response=LieuSchema,
+    url_name="lieu",
+    summary="Un lieu",
+)
+@decorate_view(CACHE_FIVE_MINUTES)
+def lieu(request, identifiant: str):
+    """Le lieu portant cet identifiant, s'il est sous licence ouverte."""
+    acteurs = for_the_api(open_data(DisplayedActeur.objects.all()))
+    return get_object_or_404(acteurs, uuid=identifiant)
+
+
+@router.get(
+    "/gestes",
+    response=list[GesteSchema],
+    url_name="gestes",
+    summary="Les gestes, valeurs du paramètre `geste`",
+)
+@decorate_view(CACHE_ONE_HOUR)
+def gestes(request):
+    return GroupeAction.objects.order_by("order")
 
 
 # Rows are rebuilt on every request: precompute them if the fiches grow past
