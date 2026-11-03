@@ -1,42 +1,9 @@
-import json
-
 import pytest
 
 from qfdmd.models import LieuDeDepot
-from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
+from unit_tests.qfdmd.helpers import consigne, grid, page_with, paragraph
 
 pytestmark = pytest.mark.django_db
-
-
-def consigne(titre, id="00000000-0000-0000-0000-000000000000", **extra):
-    """A list item as the CMS stores it, id included."""
-    return {
-        "type": "item",
-        "id": id,
-        "value": {
-            "titre": titre,
-            "contenu": f"<p>{titre}</p>",
-            "gestes": ["donner"],
-            **extra,
-        },
-    }
-
-
-def grid(*consignes, column_width="4"):
-    return {
-        "type": "consignes",
-        "value": {"column_width": column_width, "consignes": list(consignes)},
-    }
-
-
-def paragraph(text):
-    return {"type": "paragraph", "value": f"<p>{text}</p>"}
-
-
-def page_with(*blocks, **kwargs):
-    """Raw JSON, as read from the database: the values go through the
-    blocks' normalisation, unlike Python values handed to the factory."""
-    return ProduitPageFactory(body=json.dumps(list(blocks)), **kwargs)
 
 
 class TestProduitPageConsignes:
@@ -53,7 +20,9 @@ class TestProduitPageConsignes:
         assert [c.value["titre"] for c in page.consignes] == ["A", "B", "C"]
 
     def test_each_consigne_keeps_the_identifier_of_the_cms(self):
-        page = page_with(grid(consigne("A", id="a-1"), consigne("B", id="b-2")))
+        page = page_with(
+            grid(consigne("A", block_id="a-1"), consigne("B", block_id="b-2"))
+        )
 
         assert [c.id for c in page.consignes] == ["a-1", "b-2"]
 

@@ -80,7 +80,7 @@ class CarteBlock(blocks.StructBlock):
         icon = "map"
 
 
-# The three conditions of an objet, badges of the fiche (Figma 24381:25) and
+# The three conditions of an objet, badges of the fiche and
 # values of the `etat` column in the consignes open data.
 ETAT_CHOICES = [
     ("reparable", "Réparable"),
@@ -104,7 +104,7 @@ class ConsigneBlock(blocks.StructBlock):
     """One consigne: what to do with the objet or déchet for given gestes.
 
     Typed fields rather than free badges so the content can be exported as
-    open data and read by the assistant (#3284).
+    open data and read by the assistant.
     """
 
     titre = blocks.CharBlock(label="Titre")

@@ -1,9 +1,9 @@
 """Fill the "Grille de consignes" block of a fiche from its existing content.
 
 The consignes of a fiche were written as free cards before the typed block
-existed (#3284), always in the same place: the **first row of cards** of the
+existed, always in the same place: the **first row of cards** of the
 body, right after the introduction and before the map. Every fiche follows
-that layout (checked on the 45 live ones), so that row is what converts;
+that layout, so that row is what converts;
 later cards ("Des emballages pensés pour être réemployés", "Que faire de mon
 canapé ?") are never consignes.
 
@@ -49,7 +49,7 @@ from qfdmd.models import LieuDeDepot, ProduitPage
 logger = logging.getLogger(__name__)
 
 MAX_PER_GRID = 4
-# Width of a grid built from lone cards, by their number (spec #3284).
+# Width of a grid built from lone cards, by their number.
 COLUMN_WIDTH_FOR = {1: "12", 2: "6", 3: "4", 4: "3"}
 
 # Blocks that hold cards: a grid of them, or one on its own.
@@ -74,14 +74,14 @@ ETAT_BY_TITLE_WORD = {
     "deposer": "mauvais_etat",
 }
 # Spec: the gestes of an objet follow its état. "Déposer" is the code `trier`.
-# Prêter and louer stay out of the MVP: the fiches carry no consigne for them,
+# Prêter and louer are left out: the fiches carry no consigne for them,
 # so their lieux would show under "Donner ou revendre" unexplained.
 GESTES_BY_ETAT = {
     "reparable": ["reparer"],
     "bon_etat": ["donner", "revendre"],
     "mauvais_etat": ["trier"],
 }
-# A text consigne, by the fiche's « À usage unique » flag (spec #3284).
+# A text consigne, by the fiche's « À usage unique » flag.
 TEXT_CONSIGNE_DECHET = {"titre": "Déposer", "gestes": ["trier"]}
 TEXT_CONSIGNE_OBJET = {
     "titre": "Donner, revendre ou déposer",

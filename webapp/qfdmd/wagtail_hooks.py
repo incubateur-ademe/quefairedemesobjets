@@ -475,7 +475,7 @@ def register_finalize_migration_menu_item():
 
 class GenerateConsignesMenuItem(ActionMenuItem):
     """Convert the first row of cards into a consignes grid, in a draft
-    revision (#3284)."""
+    revision."""
 
     name = "generate-consignes"
     label = "Convertir les cartes en grille de consignes"
