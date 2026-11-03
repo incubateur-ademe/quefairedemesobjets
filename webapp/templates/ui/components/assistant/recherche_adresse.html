@@ -1,24 +1,21 @@
-{% comment %}
-Hidden fields carry what the user does not type: the coordinates, rendered unlocalized
-(« -1,55 » is not a number), and whether the input is a precise address rather than a
-municipality.
-{% endcomment %}
+{% comment %}`unlocalize`: « -1,55 » is not a number.{% endcomment %}
 {% load l10n %}
 {% url 'api_v1:adresses' as url_recherche %}
+{% firstof id "recherche-adresse" as base_id %}
 <div class="qfa-combobox"
-     id="{{ id|default:'recherche-adresse' }}"
+     id="{{ base_id }}"
      data-controller="assistant-combobox"
      data-assistant-combobox-url-value="{{ url_recherche }}"
      data-assistant-combobox-min-length-value="3"
      data-assistant-combobox-require-choice-value="true">
-    <label class="qfa-combobox__label" for="{{ id|default:'recherche-adresse' }}-champ">
+    <label class="qfa-combobox__label" for="{{ base_id }}-champ">
         {{ label|default:"Où souhaitez-vous trouver des solutions ?" }}
     </label>
 
     <span class="qfa-combobox__cadre" data-assistant-combobox-target="cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
-               id="{{ id|default:'recherche-adresse' }}-champ"
+               id="{{ base_id }}-champ"
                name="adresse"
                class="qfa-combobox__champ"
                value="{{ adresse|default:'' }}"
@@ -27,17 +24,17 @@ municipality.
                             keydown->assistant-combobox#navigate"
                role="combobox"
                aria-expanded="false"
-               aria-controls="{{ id|default:'recherche-adresse' }}-liste"
+               aria-controls="{{ base_id }}-liste"
                aria-autocomplete="list"
                autocomplete="off"
                autocorrect="off"
                spellcheck="false"
-               {% if erreur %}aria-describedby="{{ id|default:'recherche-adresse' }}-erreur" aria-invalid="true"{% endif %}
+               {% if erreur %}aria-describedby="{{ base_id }}-erreur" aria-invalid="true"{% endif %}
                placeholder="{{ placeholder|default:'ex : une adresse ou commune' }}">
     </span>
 
     <ul class="qfa-combobox__liste"
-        id="{{ id|default:'recherche-adresse' }}-liste"
+        id="{{ base_id }}-liste"
         role="listbox"
         data-assistant-combobox-target="list"
         data-action="mousedown->assistant-combobox#keepFocus
@@ -52,16 +49,16 @@ municipality.
            data-assistant-combobox-target="hidden" data-key="precise">
 
     {% if erreur %}
-        <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ id|default:'recherche-adresse' }}-erreur">
+        <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ base_id }}-erreur">
             {{ erreur }}
         </p>
     {% endif %}
 
-    <p class="qfa-combobox__erreur" id="{{ id|default:'recherche-adresse' }}-aucun-resultat"
+    <p class="qfa-combobox__erreur" id="{{ base_id }}-aucun-resultat"
        data-assistant-combobox-target="aucunResultat" hidden>
         Nous ne connaissons pas cette adresse. Choisissez une suggestion dans la liste.
     </p>
 
-    <p class="qfa-sr-only" role="status" aria-live="polite"
+    <p class="qfa-sr-only" role="status"
        data-assistant-combobox-target="status"></p>
 </div>
