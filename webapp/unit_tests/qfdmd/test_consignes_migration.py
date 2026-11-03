@@ -13,10 +13,10 @@ from qfdmd.consignes_migration import (
     apply_plan,
     badge_texts,
     first_row_of_cards,
-    generate_on_deploy,
     normalise,
     plan_conversion,
 )
+from qfdmd.management.commands.generate_consignes import generate_on_deploy
 from qfdmd.models import LieuDeDepot
 from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
 
