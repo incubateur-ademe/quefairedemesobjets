@@ -48,20 +48,23 @@ SCRIPTS = "/opt/airflow/scripts/infrastructure"
 ENVIRONMENT = config("ENVIRONMENT", default="development")
 
 # All builds go to a single shared namespace (ns-ml-deduplication-inference),
-# tagged per environment (see
-# .github/workflows/ml-deduplication-inference-build-and-push.yml):
-# - any branch push        -> <sha>-preprod & preprod-latest
-# - merge to main          -> <sha>-prod & prod-latest
-# - release published      -> <release>-prod & prod-latest
+# hosted in the qfdmod-prod project, with preprod/prod discriminated by image
+# name (see .github/workflows/ml-deduplication-inference-build-and-push.yml):
+# - preprod builds    -> image ml-deduplication-inference-preprod, <sha>-preprod
+#                        & preprod-latest tags
+# - main/release      -> image ml-deduplication-inference, <sha>-prod /
+#                        <release>-prod & prod-latest tags
 IMAGE_NAMESPACE = "ns-ml-deduplication-inference"
+IMAGE_NAME = (
+    "ml-deduplication-inference-preprod"
+    if ENVIRONMENT == "preprod"
+    else "ml-deduplication-inference"
+)
 
 # Default to the last image published for the current environment. The movable
 # <env>-latest tag always points at the most recent build for that environment.
 DEFAULT_IMAGE_TAG = "preprod-latest" if ENVIRONMENT == "preprod" else "prod-latest"
-DEFAULT_IMAGE = (
-    f"rg.fr-par.scw.cloud/{IMAGE_NAMESPACE}/"
-    f"ml-deduplication-inference:{DEFAULT_IMAGE_TAG}"
-)  # noqa: E501
+DEFAULT_IMAGE = f"rg.fr-par.scw.cloud/{IMAGE_NAMESPACE}/{IMAGE_NAME}:{DEFAULT_IMAGE_TAG}"  # noqa: E501
 
 # When set to 1/true, the DAG bypasses the on-demand Scaleway instance and runs
 # the inference image directly with docker (requires the docker CLI/socket to be

@@ -2,13 +2,17 @@ name: 🐳 Docker image for ml-deduplication inference
 
 # Build and push the ml_deduplication inference image to the Scaleway registry.
 # All builds go into a single shared namespace (ns-ml-deduplication-inference)
-# with environment-prefixed tags:
-# - any branch push        -> preprod, tags <sha>-preprod & preprod-latest
-# - merge to main          -> prod, tags <sha>-prod & prod-latest
-# - release published      -> prod, tags <release-tag>-prod & prod-latest
+# in the qfdmod-prod project, with the preprod/prod discrimination done through
+# separate image names, each with its own environment tag:
+# - any branch push        -> image ml-deduplication-inference-preprod, tags
+#                             <sha>-preprod & preprod-latest
+# - merge to main          -> image ml-deduplication-inference, tags
+#                             <sha>-prod & prod-latest
+# - release published      -> image ml-deduplication-inference, tags
+#                             <release-tag>-prod & prod-latest
 #
-# The DAG defaults to <env>-latest, so preprod can always test the last built
-# image and prod is aligned on the released build.
+# The DAG defaults to the <env>-latest image, so preprod can always test the
+# last built preprod image and prod is aligned on the released build.
 #
 # `environment:` must be a static string (expressions are not allowed), so the
 # prod/preprod selection is done with jobs guarded by `if:` conditions.
@@ -27,6 +31,7 @@ env:
   SCALEWAY_REGISTRY: rg.fr-par.scw.cloud
   SCALEWAY_NAMESPACE: ns-ml-deduplication-inference
   IMAGE_NAME: ml-deduplication-inference
+  IMAGE_NAME_PREPROD: ml-deduplication-inference-preprod
 
 jobs:
   build-and-push-preprod:
@@ -59,8 +64,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-preprod
-            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:preprod-latest
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME_PREPROD }}:${{ github.sha }}-preprod
+            ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME_PREPROD }}:preprod-latest
           build-args: |
             MODEL_DIR=models/xgboost
           cache-from: type=gha,scope=ml-deduplication-inference
