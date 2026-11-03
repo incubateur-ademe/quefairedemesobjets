@@ -1,4 +1,4 @@
-"""Open data of the fiches: produits and their consignes (#3266, #3284).
+"""Open data of the fiches: produits and their consignes.
 
 Two tables joined on `identifiant_produit`, in the conventions of the acteurs
 CSV published on data.ademe.fr: snake_case columns without accents, `|`

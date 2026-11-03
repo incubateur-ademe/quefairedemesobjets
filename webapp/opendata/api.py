@@ -96,8 +96,8 @@ def _csv_openapi(columns) -> dict:
     }
 
 
-# ponytail: the rows of every fiche are built per request, a few hundred
-# pages; cache them in a table if the fiches grow past that.
+# Rows are rebuilt on every request: precompute them if the fiches grow past
+# a few hundred.
 @router.get(
     "/produits",
     response=list[ProduitSchema],

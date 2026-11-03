@@ -18,7 +18,7 @@ from opendata.fiches import (
     write_csv,
 )
 from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory
-from unit_tests.qfdmd.test_consignes_block import consigne, grid, page_with
+from unit_tests.qfdmd.helpers import consigne, grid, page_with
 from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 pytestmark = pytest.mark.django_db
@@ -44,7 +44,7 @@ def fiche(famille):
         grid(
             consigne(
                 "Réparer",
-                id="rep",
+                block_id="rep",
                 contenu=(
                     "<p>Un <b>réparateur</b></p><ul><li>près de chez vous</li></ul>"
                 ),
@@ -52,7 +52,7 @@ def fiche(famille):
                 bonus_reparation=True,
                 gestes=["reparer"],
             ),
-            consigne("Au bac", id="bac", lieu_de_depot=bac.pk, gestes=["trier"]),
+            consigne("Au bac", block_id="bac", lieu_de_depot=bac.pk, gestes=["trier"]),
         ),
         parent=famille,
         title="Pot de yaourt",
