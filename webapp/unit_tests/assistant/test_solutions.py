@@ -10,6 +10,7 @@ from unit_tests.assistant.helpers import (
     query_of,
     rename_search_term,
 )
+from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 from unit_tests.qfdmo.action_factory import GroupeActionFactory
 
 pytestmark = pytest.mark.django_db
@@ -118,6 +119,29 @@ class TestSolutionsScreen:
         page = solutions(client, geste="reparer")
 
         assert back_link(page)["href"].startswith(f"{reverse('assistant:home')}?")
+
+    def test_the_pins_link_carries_the_parcours(self, client, fiche):
+        """Without it, "Revenir aux solutions" would lose geste and address."""
+        page = solutions(client, geste="reparer", fiche=fiche.slug, adresse="Auray")
+
+        query = query_of(carte(page)["data-assistant-carte-lieu-url-value"])
+        assert query["geste"] == ["reparer"]
+        assert query["adresse"] == ["Auray"]
+
+    def test_the_lieu_page_leads_back_to_the_same_solutions(self, client, fiche):
+        """Round trip: solutions -> pin link -> lieu page -> back link. Both
+        links must speak the same vocabulary, or the objet is lost on the way
+        back."""
+        lieu = DisplayedActeurFactory()
+        page = solutions(client, geste="reparer", fiche=fiche.slug, adresse="Auray")
+        pin_url = carte(page)["data-assistant-carte-lieu-url-value"]
+
+        lieu_page = html_of(client.get(pin_url.replace("__uuid__", lieu.uuid)))
+
+        back = query_of(back_link(lieu_page)["href"])
+        assert back["fiche"] == [fiche.slug]
+        assert back["geste"] == ["reparer"]
+        assert back["adresse"] == ["Auray"]
 
     def test_a_block_of_two_gestes_shows_both_icons_and_its_label(self, client):
         """ "Donner ou revendre" spans two GroupeAction."""

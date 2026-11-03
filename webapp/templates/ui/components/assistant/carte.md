@@ -12,6 +12,7 @@ pendant l'exploration.
    longitude=2.3488
    latitude=48.8534
    adresse_precise=True
+   parametres_lieu="geste=reparer&fiche=telephone-mobile"
    lieux=lieux %}
 ```
 
@@ -22,6 +23,7 @@ pendant l'exploration.
 | `latitude`        | ✅     | centre initial                                                                |
 | `fiche`           | ⚪️     | slug d'une fiche, restreint les lieux à ses sous-catégories                   |
 | `adresse_precise` | ⚪️     | affiche la punaise de l'adresse ; jamais pour une commune                     |
+| `parametres_lieu` | ⚪️     | query string ajoutée au lien de chaque punaise vers `assistant:lieu`          |
 | `lieux`           | ⚪️     | liste rendue côté serveur pour la version accessible                          |
 | `debug`           | ⚪️     | affiche l'overlay de durée des requêtes (`chrono_controller`)                 |
 
@@ -45,6 +47,8 @@ pendant l'exploration.
 - **Couleur** : celle du premier geste (`data-geste` sur le composant, jetons
   `--qfa-geste-*` du CSS) ; la couleur du Bonus Réparation la remplace sur la
   carte « réparer », avec la pastille « % ».
+- **Punaises** : des liens vers `assistant:lieu`, avec `parametres_lieu` pour
+  revenir aux mêmes solutions.
 
 ## Persistance entre écrans
 

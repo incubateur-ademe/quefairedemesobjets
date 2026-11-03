@@ -1,3 +1,3 @@
-from .pages import HomeView, ProduitView, SearchView, SolutionsView
+from .pages import HomeView, LieuView, ProduitView, SearchView, SolutionsView
 
-__all__ = ["HomeView", "ProduitView", "SearchView", "SolutionsView"]
+__all__ = ["HomeView", "LieuView", "ProduitView", "SearchView", "SolutionsView"]

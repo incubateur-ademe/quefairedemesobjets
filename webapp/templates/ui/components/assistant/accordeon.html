@@ -1,0 +1,13 @@
+{% comment %}
+`<details>`: folding, state and keyboard are native, and work without JavaScript.
+{% endcomment %}
+<details class="qfa-accordeon" {% if ouvert %}open{% endif %}>
+    <summary class="qfa-accordeon__entete">
+        <span class="qfa-accordeon__textes">
+            <span class="qfa-accordeon__intitule">{{ intitule }}</span>
+            {% if apercu %}<span class="qfa-accordeon__apercu">{{ apercu }}</span>{% endif %}
+        </span>
+        <span class="qfa-accordeon__chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="qfa-accordeon__contenu">{{ contenu }}</div>
+</details>
