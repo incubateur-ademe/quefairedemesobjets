@@ -35,6 +35,7 @@ assistant/
 ├── parcours.py     fiche, objet, synonyme and address carried by the URL
 ├── objets.py       label or synonyme → ProduitPage, objet suggestions
 ├── adresses.py     address suggestions (BAN proxy)
+├── solutions.py    gestes asked for and nearest places of the solutions screen
 ├── consignes.py    consignes per geste: the CMS grid, or static blocks
 ├── api.py          endpoints of the screens: lieux.geojson, objets, adresses
 └── views/

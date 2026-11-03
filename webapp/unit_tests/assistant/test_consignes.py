@@ -223,18 +223,20 @@ class TestConsignesFromTheCms:
             grid(
                 consigne(
                     "Le faire réparer",
-                    id="rep",
+                    block_id="rep",
                     etat="reparable",
                     bonus_reparation=True,
                     gestes=["reparer"],
                 ),
                 consigne(
                     "Donner ou revendre",
-                    id="don",
+                    block_id="don",
                     etat="bon_etat",
                     gestes=["donner", "revendre", "echanger"],
                 ),
-                consigne("Au bac", block_id="bac", lieu_de_depot=bac.pk, gestes=["trier"]),
+                consigne(
+                    "Au bac", block_id="bac", lieu_de_depot=bac.pk, gestes=["trier"]
+                ),
             ),
             parent=None,
         )
@@ -268,7 +270,7 @@ class TestConsignesFromTheCms:
             grid(
                 consigne(
                     "Donner",
-                    id="don",
+                    block_id="don",
                     etat="bon_etat",
                     gestes=["donner", "preter", "louer"],
                 )

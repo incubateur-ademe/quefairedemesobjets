@@ -12,41 +12,12 @@ import {
   pinpointElement,
   type PinpointColors,
 } from "../../js/assistant/pinpoint"
-import type { Map as MapLibreMap, Marker } from "maplibre-gl"
-
-type Timing = { server: number; total: number; places: number }
-
-/**
- * What survives a screen change: the canvas is a Turbo permanent element, so
- * the MapLibre instance, its tiles and pins travel with the node, and the next
- * solutions screen picks them up instead of building a new map.
- */
-type PersistedMap = {
-  map: MapLibreMap
-  Marker: typeof Marker
-  markers: Map<string, Marker>
-  places: Place[]
-  addressMarker: Marker | null
-  /** Gestes + objet: when they change, the pins are wrong and start over. */
-  key: string
-  /** Address the map was centered on: the view only moves when it changes. */
-  address: [number, number]
-  /** Last viewport requested: the same one is never asked twice in a row. */
-  lastRequestedUrl: string
-  /** The first places found around a new address frame the view, once. */
-  needsFit: boolean
-  onMoveEnd: (() => void) | null
-}
-
-type CanvasWithMap = HTMLElement & { assistantMap?: PersistedMap }
-
-const CANVAS_ID = "assistant-carte-canvas"
-
-/** Reads `acteurs;dur=12.3` from the Server-Timing header. */
-function serverDuration(header: string | null): number {
-  const match = header?.match(/acteurs;dur=([\d.]+)/)
-  return match ? Number(match[1]) : 0
-}
+import {
+  CANVAS_ID,
+  type CanvasWithMap,
+  type PersistedMap,
+} from "../../js/assistant/persisted_map"
+import { serverDuration, type Timing } from "./chrono_controller"
 
 const UUID_PLACEHOLDER = "__uuid__"
 
@@ -58,7 +29,6 @@ const FIT_MAX_ZOOM = 16
 const FIT_PADDING = { top: 64, bottom: 32, left: 32, right: 32 }
 /** Matches the fade of `.qfa-pinpoint--leaving` in the stylesheet. */
 const LEAVE_MS = 200
-/** How long to wait for Turbo to put the permanent canvas back. */
 const CANVAS_WAIT_MS = 2000
 
 export default class extends Controller<HTMLElement> {
@@ -90,8 +60,8 @@ export default class extends Controller<HTMLElement> {
   declare latitudeValue: number
   declare preciseAddressValue: boolean
 
-  private state: PersistedMap | null = null
-  private pendingRequest: AbortController | null = null
+  #state: PersistedMap | null = null
+  #pendingRequest: AbortController | null = null
 
   async connect() {
     const canvas = await this.#canvasOnceRendered()
@@ -102,7 +72,7 @@ export default class extends Controller<HTMLElement> {
     // Disconnected while the map was being created: the next instance owns
     // the canvas.
     if (!state || !this.element.isConnected) return
-    this.state = state
+    this.#state = state
     canvas.assistantMap = state
 
     if (existing) this.#reuse(existing)
@@ -114,7 +84,7 @@ export default class extends Controller<HTMLElement> {
 
     if (!existing) {
       await state.map.once("load")
-      if (this.state !== state) return
+      if (this.#state !== state) return
       // MapLibre opens the compact attribution on load; keep it folded.
       canvas
         .querySelector(".maplibregl-ctrl-attrib")
@@ -205,25 +175,25 @@ export default class extends Controller<HTMLElement> {
   /** Marker of the entered address; none for a municipality, which has no
    * position to show. */
   #placeAddressMarker() {
-    if (!this.state) return
-    this.state.addressMarker?.remove()
-    this.state.addressMarker = null
+    if (!this.#state) return
+    this.#state.addressMarker?.remove()
+    this.#state.addressMarker = null
     if (!this.preciseAddressValue) return
 
-    this.state.addressMarker = new this.state.Marker({
+    this.#state.addressMarker = new this.#state.Marker({
       element: addressElement(this.#colors()),
       anchor: "center",
       subpixelPositioning: true,
     })
       .setLngLat([this.longitudeValue, this.latitudeValue])
-      .addTo(this.state.map)
+      .addTo(this.#state.map)
   }
 
   disconnect() {
-    this.pendingRequest?.abort()
-    const state = this.state
+    this.#pendingRequest?.abort()
+    const state = this.#state
     const canvas = this.#canvas()
-    this.state = null
+    this.#state = null
     if (!state) return
 
     if (state.onMoveEnd) state.map.off("moveend", state.onMoveEnd)
@@ -246,7 +216,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   async #load() {
-    const state = this.state
+    const state = this.#state
     const canvas = this.#canvas()
     if (!state || !canvas) return
     // Parked behind another screen: a collapsed viewport, nothing to fetch.
@@ -270,13 +240,13 @@ export default class extends Controller<HTMLElement> {
     if (url === state.lastRequestedUrl) return
     state.lastRequestedUrl = url
 
-    this.pendingRequest?.abort()
-    this.pendingRequest = new AbortController()
+    this.#pendingRequest?.abort()
+    this.#pendingRequest = new AbortController()
 
     const start = performance.now()
     try {
       const response = await fetch(url, {
-        signal: this.pendingRequest.signal,
+        signal: this.#pendingRequest.signal,
       })
       if (!response.ok) throw new Error(`response ${response.status}`)
 
@@ -308,7 +278,7 @@ export default class extends Controller<HTMLElement> {
 
   /** Frames the first places found around a new address, once. */
   #fitOnce(places: Place[]) {
-    const state = this.state
+    const state = this.#state
     if (!state?.needsFit) return
     state.needsFit = false
     if (places.length === 0) return
@@ -330,7 +300,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #placesUrl(): string {
-    const state = this.state!
+    const state = this.#state!
     const area = this.#visibleArea()
     // Around the address first, then the visible area.
     const params = state.needsFit
@@ -350,7 +320,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #visibleArea(): Area {
-    const bounds = this.state!.map.getBounds()
+    const bounds = this.#state!.map.getBounds()
     return {
       west: bounds.getWest(),
       south: bounds.getSouth(),
@@ -360,7 +330,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   #draw() {
-    const state = this.state
+    const state = this.#state
     if (!state) return
     const expected = new Set(state.places.map((place) => place.uuid))
 
