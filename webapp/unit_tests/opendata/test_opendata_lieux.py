@@ -120,7 +120,50 @@ class TestLieu:
 
         item = get_lieu(client, acteur).json()
 
-        assert item["paternite"] == "Que faire de mes objets et déchets|ADEME|Alpha|Zed"
+        assert [entry["nom"] for entry in item["paternite"]] == [
+            "Que faire de mes objets et déchets",
+            "ADEME",
+            "Alpha",
+            "Zed",
+        ]
+        assert [entry["code"] for entry in item["paternite"][:2]] == [None, None]
+
+    def test_paternite_describes_each_source(self, client, reparer, settings):
+        settings.BASE_URL = "https://qfdmo.fr"
+        acteur = place(reparer)
+        acteur.sources.set(
+            [
+                SourceFactory(
+                    code="ecomaison",
+                    libelle="Ecomaison",
+                    url="https://ecomaison.com",
+                    logo_file="logos/ecomaison.png",
+                    licence=DataLicense.OPEN_LICENSE,
+                ),
+                SourceFactory(
+                    code="sans_site",
+                    libelle="Sans site",
+                    url="",
+                    licence=DataLicense.OPEN_LICENSE,
+                ),
+            ]
+        )
+
+        site, ademe, ecomaison, sans_site = get_lieu(client, acteur).json()["paternite"]
+
+        assert site == {
+            "code": None,
+            "nom": "Que faire de mes objets et déchets",
+            "url": "https://qfdmo.fr",
+            "logo": None,
+        }
+        assert ademe["url"] == "https://www.ademe.fr"
+        assert ecomaison["code"] == "ecomaison"
+        assert ecomaison["url"] == "https://ecomaison.com"
+        assert ecomaison["logo"].startswith("https://qfdmo.fr/")
+        assert ecomaison["logo"].endswith("logos/ecomaison.png")
+        assert sans_site["url"] is None
+        assert sans_site["logo"] is None
 
     def test_propositions_carry_action_and_sous_categories(self, client, reparer):
         from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
