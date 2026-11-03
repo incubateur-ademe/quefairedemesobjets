@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 
 from qfdmo.models.action import GroupeAction
 
-# Figma « DSM Assistant V2 » (24382:53).
 LIBELLES_COURTS = {
     "reparer": "Réparer",
     "donner_echanger_rapporter": "Donner",
