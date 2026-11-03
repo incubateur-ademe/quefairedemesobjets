@@ -6,28 +6,20 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-
-  color: var(--qfa-texte-titre);
-  font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
-}
-
-/* Frame of the iframe: set here rather than in iframe.js, which the legacy assistant shares. */
+/* The frame of the iframe is set here rather than in iframe.js, which the legacy assistant shares. */
 html {
   overflow: auto;
+  scroll-behavior: smooth;
 }
 
 body {
   max-width: 800px;
   margin: 0 auto;
   border: 3px solid var(--qfa-cadre);
-  border-radius: 4px;
+  border-radius: var(--qfa-rayon-sm);
   overflow: clip;
+  color: var(--qfa-texte-titre);
+  font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -37,43 +29,49 @@ body {
 }
 
 :root {
-  --qfa-geste-reparation: #009081; /* green-menthe-main-548 */
-  --qfa-geste-don: #417dc4; /* blue-cumulus-main-526 */
-  /* brown-caramel-sun-425-hover */
+  --qfa-geste-reparation: #009081;
+  --qfa-geste-don: #417dc4;
   --qfa-geste-vente: #bb8568;
-  --qfa-geste-loc: #ce614a; /* pink-tuile-main-556 */
-  --qfa-geste-loc-icone: #e4794a; /* orange-terre-battue-main-645 */
-  --qfa-geste-tri: #a558a0; /* purple-glycine-main-494 */
+  --qfa-geste-loc: #ce614a;
+  --qfa-geste-loc-icone: #e4794a;
+  --qfa-geste-tri: #a558a0;
 
   --qfa-bonus-color: var(--qfa-geste-reparation);
-  --qfa-user-address: #e1000f; /* red-marianne */
+  --qfa-user-address: #e1000f;
 
-  --qfa-geste-reparation-fond: #dffdf7; /* green-menthe-975 */
-  --qfa-fond-vert-eau: #dffdf7; /* green-menthe-975 */
-  --qfa-geste-don-fond: #dae6fd; /* blue-cumulus-925 */
-  --qfa-geste-vente-fond: #f3e2d9; /* brown-caramel-925 */
-  --qfa-geste-loc-fond: #fddfd8; /* orange-terre-battue-925 */
-  --qfa-geste-tri-fond: #fee7fc; /* purple-glycine-950 */
+  --qfa-geste-reparation-fond: #dffdf7;
+  --qfa-fond-vert-eau: var(--qfa-geste-reparation-fond);
+  --qfa-geste-don-fond: #dae6fd;
+  --qfa-geste-vente-fond: #f3e2d9;
+  --qfa-geste-loc-fond: #fddfd8;
+  --qfa-geste-tri-fond: #fee7fc;
 
-  --qfa-etat-reparable-fond: #dffdf7;
+  --qfa-etat-reparable-fond: var(--qfa-geste-reparation-fond);
   --qfa-etat-reparable-texte: #37635f;
   --qfa-etat-bon-fond: #e1fee8;
   --qfa-etat-bon-texte: #18753c;
-  --qfa-etat-mauvais-fond: #fee7fc;
+  --qfa-etat-mauvais-fond: var(--qfa-geste-tri-fond);
   --qfa-etat-mauvais-texte: #6e445a;
   --qfa-etat-bonus-fond: #fef7da;
   --qfa-etat-bonus-texte: #66673d;
-  /* beige-gris-galet 975 / sun-407 */
   --qfa-etat-defaut-fond: #f9f6f2;
   --qfa-etat-defaut-texte: #6a6156;
 
   --qfa-texte-titre: #161616;
   --qfa-texte-courant: #3a3a3a;
-  --qfa-accent: #37635f; /* green-menthe-sun-373 */
+  --qfa-accent: #37635f;
   --qfa-bordure: #dddddd;
   --qfa-cadre: #4f9d91;
-  --qfa-erreur: #ce0500; /* border-plain-error, text-action-high-error */
+  --qfa-erreur: #ce0500;
   --qfa-fond-survol: #f6f6f6;
+  --qfa-blanc: #fff;
+  --qfa-focus: #0a76f6;
+  --qfa-texte-discret: #666;
+
+  --qfa-taille-texte-sm: 14px;
+  --qfa-taille-texte-md: 16px;
+  --qfa-interligne-serre: 1.4;
+  --qfa-interligne: 1.5;
 
   --qfa-espace-1v: 4px;
   --qfa-espace-2v: 8px;
@@ -101,7 +99,7 @@ body {
   display: block;
   margin-bottom: var(--qfa-espace-2v);
   color: var(--qfa-texte-titre);
-  font-size: 14px;
+  font-size: var(--qfa-taille-texte-sm);
   font-weight: 600;
   line-height: normal;
 }
@@ -113,11 +111,11 @@ body {
   padding: 10px var(--qfa-espace-3v);
   border: 2px solid var(--qfa-accent);
   border-radius: var(--qfa-rayon-sm);
-  background: #fff;
+  background: var(--qfa-blanc);
 }
 
 .qfa-combobox__cadre:focus-within {
-  outline: 2px solid #0a76f6;
+  outline: 2px solid var(--qfa-focus);
   outline-offset: 2px;
 }
 
@@ -138,14 +136,14 @@ body {
   border: 0;
   color: var(--qfa-texte-titre);
   font-family: inherit;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: var(--qfa-taille-texte-md);
+  line-height: var(--qfa-interligne);
 
   text-overflow: ellipsis;
 }
 
 .qfa-combobox__champ::placeholder {
-  color: #666;
+  color: var(--qfa-texte-discret);
 }
 
 .qfa-combobox__champ:focus-visible {
@@ -157,7 +155,7 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
-  background: #fff;
+  background: var(--qfa-blanc);
   border: 2px solid var(--qfa-accent);
   border-top: 0;
   border-radius: 0 0 var(--qfa-rayon-sm) var(--qfa-rayon-sm);
@@ -185,8 +183,8 @@ body {
   border-bottom: 1px solid var(--qfa-bordure);
   color: var(--qfa-texte-titre);
   cursor: pointer;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
 }
 
 .qfa-combobox__option[aria-selected="true"],
@@ -212,7 +210,7 @@ body {
   color: var(--qfa-texte-titre);
   font-size: 13px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: var(--qfa-interligne-serre);
   white-space: nowrap;
 }
 
@@ -281,7 +279,7 @@ body {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1px;
-  line-height: 1.4;
+  line-height: var(--qfa-interligne-serre);
   white-space: nowrap;
 }
 
@@ -321,7 +319,7 @@ body {
   background: var(--qfa-fond-survol);
   color: var(--qfa-texte-courant);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: var(--qfa-interligne);
 }
 
 .qfa-alerte__icone {
@@ -377,16 +375,16 @@ body {
   border: 0;
   border-radius: var(--qfa-rayon-md);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--qfa-taille-texte-sm);
   font-weight: 600;
-  line-height: 1.4;
+  line-height: var(--qfa-interligne-serre);
   text-decoration: none;
   cursor: pointer;
 }
 
 .qfa-bouton--primaire {
   background: var(--qfa-accent);
-  color: #fff;
+  color: var(--qfa-blanc);
 }
 
 .qfa-bouton--tertiaire {
@@ -395,7 +393,7 @@ body {
 }
 
 .qfa-bouton:focus-visible {
-  outline: 2px solid #0a76f6;
+  outline: 2px solid var(--qfa-focus);
   outline-offset: 2px;
 }
 
@@ -447,6 +445,6 @@ body {
 .qfa-combobox__erreur {
   margin: var(--qfa-espace-1v) 0 0;
   color: var(--qfa-erreur);
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: var(--qfa-taille-texte-md);
+  line-height: var(--qfa-interligne);
 }

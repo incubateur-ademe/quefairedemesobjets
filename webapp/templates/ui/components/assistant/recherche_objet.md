@@ -14,6 +14,10 @@ défaire.
 | `id`          | ⚪️     | préfixe des identifiants ARIA |
 | `label`       | ⚪️     | libellé du champ              |
 | `placeholder` | ⚪️     | exemple de saisie             |
+| `objet`       | ⚪️     | texte du champ                |
+| `fiche`       | ⚪️     | slug de la fiche retenue      |
+| `synonyme`    | ⚪️     | slug du synonyme retenu       |
+| `erreur`      | ⚪️     | message du serveur            |
 
 Le composant émet `assistant-combobox:chosen` avec `{ label, slug }` quand
 l'usager retient une suggestion.

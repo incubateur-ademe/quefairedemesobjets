@@ -3,7 +3,7 @@
 Lien « En savoir plus » et bloc de marques République française / ADEME /
 Que faire de mes objets et déchets.
 
-## Utilisation
+## Comment l'utiliser
 
 ```django
 {% include "ui/components/assistant/footer.html" %}

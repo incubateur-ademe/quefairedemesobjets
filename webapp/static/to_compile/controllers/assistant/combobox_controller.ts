@@ -40,25 +40,21 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasStatusTarget: boolean
   declare readonly cadreTarget: HTMLElement
   declare readonly hasCadreTarget: boolean
-  /** "Nous ne connaissons pas…", shown while the query matches nothing. */
   declare readonly aucunResultatTarget: HTMLElement
   declare readonly hasAucunResultatTarget: boolean
-  /** The server's message, from the previous submission. */
   declare readonly erreurTargets: HTMLElement[]
-  /** Hidden fields filled on choice, so that the form submits them. */
   declare readonly hiddenTargets: HTMLInputElement[]
   declare urlValue: string
   declare minLengthValue: number
-  /** The address: typed text is worth nothing without a chosen suggestion. */
   declare requireChoiceValue: boolean
 
   static debounces = [{ name: "search", wait: TYPING_DELAY_MS }]
 
-  private pendingRequest: AbortController | null = null
-  private suggestions: Suggestion[] = []
-  private active = -1
+  #pendingRequest: AbortController | null = null
+  #suggestions: Suggestion[] = []
+  #active = -1
   /** The text the current list answers. */
-  private searched = ""
+  #searched = ""
 
   connect() {
     useDebounce(this)
@@ -66,7 +62,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   disconnect() {
-    this.pendingRequest?.abort()
+    this.#pendingRequest?.abort()
   }
 
   clickOutside() {
@@ -78,8 +74,8 @@ export default class extends Controller<HTMLElement> {
     // iOS commits its predictive text when the user taps a suggestion: one
     // more `input`, same text. Searching again would rebuild the list under
     // the finger, and the tap would land on a node that no longer exists.
-    if (query === this.searched) return
-    this.searched = query
+    if (query === this.#searched) return
+    this.#searched = query
     // Any keystroke invalidates the previous choice: otherwise, editing the
     // text without choosing again would submit the previous address's
     // coordinates.
@@ -92,16 +88,16 @@ export default class extends Controller<HTMLElement> {
       return this.#close()
     }
 
-    this.pendingRequest?.abort()
-    this.pendingRequest = new AbortController()
+    this.#pendingRequest?.abort()
+    this.#pendingRequest = new AbortController()
 
     try {
-      const response = await fetch(`${this.urlValue}?q=${encodeURIComponent(query)}`, {
-        signal: this.pendingRequest.signal,
-      })
+      const url = new URL(this.urlValue, window.location.origin)
+      url.searchParams.set("q", query)
+      const response = await fetch(url, { signal: this.#pendingRequest.signal })
       if (!response.ok) throw new Error(`response ${response.status}`)
       const { results } = await response.json()
-      this.suggestions = results
+      this.#suggestions = results
       this.#showNoResult(!results.length && !isTypingANumber(query))
       if (results.length) this.#render()
       else this.#close()
@@ -116,16 +112,16 @@ export default class extends Controller<HTMLElement> {
       // Submitted as is, the text would carry no position: the map would fall
       // back on its default view (Paris) instead of saying it is unknown.
       event.preventDefault()
-      if (this.suggestions.length) this.#choose(Math.max(this.active, 0))
+      if (this.#suggestions.length) this.#choose(Math.max(this.#active, 0))
       else this.#showNoResult(true)
       return
     }
-    if (!this.suggestions.length) return
+    if (!this.#suggestions.length) return
 
     const keys: Record<string, () => void> = {
-      ArrowDown: () => this.#activate(this.active + 1),
-      ArrowUp: () => this.#activate(this.active - 1),
-      Enter: () => this.#choose(this.active),
+      ArrowDown: () => this.#activate(this.#active + 1),
+      ArrowUp: () => this.#activate(this.#active - 1),
+      Enter: () => this.#choose(this.#active),
       Escape: () => this.#close(),
     }
     const action = keys[event.key]
@@ -145,18 +141,18 @@ export default class extends Controller<HTMLElement> {
   }
 
   chooseFromClick(event: MouseEvent) {
-    const option = (event.target as HTMLElement).closest("[data-index]")
-    if (option) this.#choose(Number((option as HTMLElement).dataset.index))
+    const option = (event.target as HTMLElement).closest<HTMLElement>("[data-index]")
+    if (option) this.#choose(Number(option.dataset.index))
   }
 
   #activate(index: number) {
-    const total = this.suggestions.length
-    this.active = ((index % total) + total) % total
+    const total = this.#suggestions.length
+    this.#active = ((index % total) + total) % total
     this.#render()
   }
 
   #choose(index: number) {
-    const suggestion = this.suggestions[index]
+    const suggestion = this.#suggestions[index]
     if (!suggestion) return
 
     this.inputTarget.value = suggestion.label
@@ -165,7 +161,7 @@ export default class extends Controller<HTMLElement> {
     this.#close()
     // After closing: a late `input` replaying the label must not clear the
     // choice just made.
-    this.searched = suggestion.label
+    this.#searched = suggestion.label
   }
 
   /** Copies the suggestion into the hidden fields, by `data-key`. */
@@ -194,14 +190,14 @@ export default class extends Controller<HTMLElement> {
   }
 
   #render() {
-    this.listTarget.innerHTML = this.suggestions
+    this.listTarget.innerHTML = this.#suggestions
       .map((suggestion, index) => {
         const detail = suggestion.detail
           ? ` <span class="qfa-combobox__detail">- ${escape(suggestion.detail)}</span>`
           : ""
         return (
           `<li role="option" data-index="${index}" id="${this.#optionId(index)}"` +
-          ` aria-selected="${index === this.active}"` +
+          ` aria-selected="${index === this.#active}"` +
           ` class="qfa-combobox__option">${escape(suggestion.label)}${detail}</li>`
         )
       })
@@ -211,11 +207,11 @@ export default class extends Controller<HTMLElement> {
     this.inputTarget.setAttribute("aria-expanded", "true")
     this.inputTarget.setAttribute(
       "aria-activedescendant",
-      this.active >= 0 ? this.#optionId(this.active) : "",
+      this.#active >= 0 ? this.#optionId(this.#active) : "",
     )
     this.#announce(
-      this.suggestions.length
-        ? `${this.suggestions.length} suggestion${this.suggestions.length > 1 ? "s" : ""}`
+      this.#suggestions.length
+        ? `${this.#suggestions.length} suggestion${this.#suggestions.length > 1 ? "s" : ""}`
         : "Aucune suggestion",
     )
   }
@@ -236,11 +232,11 @@ export default class extends Controller<HTMLElement> {
 
   #close() {
     // Reopening needs a new search, even for the same text.
-    if (!this.listTarget.hidden) this.searched = ""
+    if (!this.listTarget.hidden) this.#searched = ""
     this.listTarget.hidden = true
     this.listTarget.innerHTML = ""
-    this.suggestions = []
-    this.active = -1
+    this.#suggestions = []
+    this.#active = -1
     this.inputTarget.setAttribute("aria-expanded", "false")
     this.inputTarget.removeAttribute("aria-activedescendant")
   }
