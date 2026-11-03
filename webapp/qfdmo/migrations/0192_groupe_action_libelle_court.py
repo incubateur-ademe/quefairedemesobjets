@@ -2,26 +2,6 @@
 
 from django.db import migrations, models
 
-# Libellés relevés sur le Figma « DSM Assistant V2 » (nœud 24382:53).
-LIBELLES_COURTS = {
-    "reparer": "Réparer",
-    "donner_echanger_rapporter": "Donner",
-    "emprunter_preter_louer": "Prêter",
-    "vendre_acheter": "Vendre",
-    "trier": "Déposer",
-}
-
-
-def peupler(apps, schema_editor):
-    GroupeAction = apps.get_model("qfdmo", "GroupeAction")
-    for code, libelle in LIBELLES_COURTS.items():
-        GroupeAction.objects.filter(code=code).update(libelle_court=libelle)
-
-
-def vider(apps, schema_editor):
-    GroupeAction = apps.get_model("qfdmo", "GroupeAction")
-    GroupeAction.objects.update(libelle_court="")
-
 
 class Migration(migrations.Migration):
 
@@ -41,5 +21,4 @@ class Migration(migrations.Migration):
                 verbose_name="Libellé court",
             ),
         ),
-        migrations.RunPython(peupler, vider),
     ]
