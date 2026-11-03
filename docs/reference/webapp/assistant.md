@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Assistant V2 for sorting, reuse and repair: three screens embedded in an iframe
-(home, objet fiche, solutions on a map).
+Assistant V2 for sorting, reuse and repair: four screens embedded in an iframe
+(home, objet fiche, solutions on a map, detail of a lieu).
 
 ## Internal dependencies
 
@@ -11,7 +11,7 @@ This app has **no model**. It orchestrates:
 
 | Source                  | Role                                                |
 | ----------------------- | --------------------------------------------------- |
-| `qfdmo.DisplayedActeur` | lieux shown on the map                              |
+| `qfdmo.DisplayedActeur` | lieux shown on the map and on the lieu page         |
 | `qfdmo.GroupeAction`    | the « gestes » and their short labels               |
 | `qfdmd.ProduitPage`     | an objet's fiche, its consignes grid, its synonymes |
 
@@ -37,9 +37,10 @@ assistant/
 ├── adresses.py     address suggestions (BAN proxy)
 ├── solutions.py    gestes asked for and nearest places of the solutions screen
 ├── consignes.py    consignes per geste: the CMS grid, or static blocks
+├── lieu.py         what the lieu page shows
 ├── api.py          endpoints of the screens: lieux.geojson, objets, adresses
 └── views/
-    ├── pages.py    Home, Recherche, Produit, Solutions
+    ├── pages.py    Home, Recherche, Produit, Solutions, Lieu
     └── mixins.py   TurboFrameMixin: reduced template on a Turbo-Frame header
 ```
 
@@ -51,6 +52,7 @@ assistant/
 | `/assistant/recherche/`    | `SearchView`    | redirect to the fiche |
 | `/assistant/objet/<slug>/` | `ProduitView`   | HTML                  |
 | `/assistant/solutions/`    | `SolutionsView` | HTML (map)            |
+| `/assistant/lieu/<uuid>/`  | `LieuView`      | HTML                  |
 
 The screens call the [API v1](../apis/v1.md): the map (`/lieux.geojson`) and
 the two search fields (`/objets`, `/adresses`).

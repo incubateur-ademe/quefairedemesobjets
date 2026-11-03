@@ -1636,6 +1636,18 @@ class AssistantPreview(LookbookPreview):
             {"libelle": libelle, "gestes": ["reparer"], "url": "#"},
         )
 
+    @component_docs("ui/components/assistant/accordeon.md")
+    def accordeon(self, ouvert=False, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/accordeon.html",
+            {
+                "intitule": "Horaires d'ouverture",
+                "apercu": "Ouvert du lundi au samedi",
+                "contenu": "Lundi au vendredi : 9h-18h. Samedi : 9h-12h.",
+                "ouvert": ouvert,
+            },
+        )
+
     @component_docs("ui/components/assistant/footer.md")
     def footer(self, **kwargs):
         return render_to_string("ui/components/assistant/footer.html", {})
