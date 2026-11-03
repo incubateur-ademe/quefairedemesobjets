@@ -18,9 +18,9 @@ resource "scaleway_container" "metabase" {
     http {
       path = "/api/health"
     }
-    failure_threshold = 20
-    interval          = "10s"
-    timeout           = "5s"
+    failure_threshold = 30
+    interval          = "30s"
+    timeout           = "10s"
   }
 
   liveness_probe {
