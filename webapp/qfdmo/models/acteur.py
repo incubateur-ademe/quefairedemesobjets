@@ -308,32 +308,21 @@ OFFERS_CACHE_TTL = 60 * 60 * 12
 
 GEOGRAPHIC_SCAN_THRESHOLD = 1_000
 
-MISS = object()
+_MISSING = object()
 
 
 def acteur_ids_offering(groupe_action_codes, sous_categorie_ids) -> list[str] | None:
-    """Ids of the acteurs offering one of these gestes for this objet, France-wide.
+    """Ids of the acteurs offering one of these gestes for this objet, France-wide,
+    or `None` when they are too many to be worth listing.
 
-    Returns `None` when they are too many to be listed: past the threshold,
-    the geographic scan finds its 20 results effortlessly and the list is
-    useless.
-
-    The number of acteurs per geste/objet pair spans five orders of magnitude,
-    from 0 for "réparer un emballage" to 110,320 for "trier un emballage".
-    Without this list, a rare pair scans the 388,000 acteurs looking for
-    almost nonexistent results: measured at 2.5 s against 3 ms once the list
-    is known.
-
-    The pair only changes with imports, hence the long cache.
+    A rare geste/objet pair would otherwise make the geographic scan walk every
+    acteur looking for almost no result; a common one finds its places nearby.
     """
-    from django.core.cache import cache
-
     codes = ",".join(sorted(groupe_action_codes))
     key = f"offres:{codes}:{','.join(map(str, sorted(sous_categorie_ids)))}"
-    # `None` is a legitimate cached value ("too many"), so a miss needs its own
-    # sentinel: otherwise the big pairs would be recomputed on every call.
-    ids = cache.get(key, MISS)
-    if ids is MISS:
+    # `None` is a cached answer ("too many"): a miss needs its own sentinel.
+    ids = cache.get(key, _MISSING)
+    if ids is _MISSING:
         propositions = DisplayedPropositionService.objects.filter(
             action__groupe_action__code__in=groupe_action_codes,
             sous_categories__in=sous_categorie_ids,
@@ -441,22 +430,13 @@ class DisplayedActeurQuerySet(models.QuerySet):
         )
 
     def proposing(self, groupe_action_codes, sous_categorie_ids=None):
-        """Acteurs offering one of these gestes, optionally for a given objet.
+        """Acteurs offering one of these gestes (GroupeAction codes), optionally
+        for a given objet.
 
-        `groupe_action_codes` is a code or a list of codes: a block of the
-        fiche may span two gestes ("Donner ou revendre").
-
-        A "geste" as the user sees it is a GroupeAction (5 in the database),
-        not an Action (11): choosing "donner" must include the acteurs that
-        only declare `echanger` or `rapporter`.
-
-        The geste and the objet are looked up on the *same* proposition: a
-        bike repairer that also takes furniture donations is not a furniture
-        repairer.
-
-        The filter goes through EXISTS rather than a join to avoid duplicated
-        rows: 9,363 acteurs have several propositions within one groupe, which
-        would yield fewer than 20 distinct places.
+        The geste and the objet are matched on the same proposition: a bike
+        repairer that also takes furniture donations is not a furniture
+        repairer. EXISTS rather than a join, so an acteur with several matching
+        propositions is listed once.
         """
         codes = (
             [groupe_action_codes]
@@ -479,16 +459,10 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def nearest_to(self, longitude, latitude):
         """Physical acteurs sorted from nearest to farthest.
 
-        `GeometryDistance` is the PostGIS KNN operator `<->`, distinct from
-        `Distance` (`ST_Distance`): it lets PostgreSQL walk the GiST index in
-        increasing distance order and stop at the LIMIT, instead of computing
-        the distance of every candidate and then sorting. Measured on 388,000
-        acteurs: 2 ms against 437 ms in Paris. The value is meant for sorting,
-        not display: annotate `Distance` alongside if it must be shown.
-
-        No distance bound: `ST_DWithin` would prevent the ordered scan of the
-        GiST index and cost two orders of magnitude more. The result cap is
-        enough to bound the work.
+        `GeometryDistance` (KNN operator `<->`) walks the GiST index in distance
+        order and stops at the LIMIT; `Distance` would compute every distance
+        then sort. Its value is for sorting only: annotate `Distance` to show
+        one. No `ST_DWithin` bound: it would prevent the ordered index scan.
         """
         reference_point = Point(float(longitude), float(latitude), srid=4326)
         return self.physical().order_by(GeometryDistance("location", reference_point))
@@ -496,9 +470,8 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def within(self, bbox):
         """Acteurs of the visible area, from nearest to its center to farthest.
 
-        The filter uses `bboverlaps` (operator `&&`) rather than `within`: on a
-        geography column, `within` ignores the GiST index and costs 2 s
-        against 1 ms for the same result, places being points.
+        `bboverlaps` (`&&`) rather than `within`, which ignores the GiST index on
+        a geography column; for points the result is the same.
         """
         area = Polygon.from_bbox(bbox)
         area.srid = 4326
@@ -956,6 +929,7 @@ def clean_parent(parent):
 
 
 class DisplayedActeurLinkMixin:
+
     identifiant_unique: str
 
     @property
@@ -1382,6 +1356,7 @@ class FinalActeur(BaseActeur):
 
 
 class VueActeurManager(FinalActeurManager, models.Manager):
+
     def get_visible_acteurs(self):
         return self.get_queryset().filter(
             Q(est_dans_carte=True) | Q(est_dans_opendata=True),
