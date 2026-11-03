@@ -27,7 +27,6 @@ runs:
         key: venv-${{ inputs.uv-groups }}-${{ hashFiles('uv.lock') }}
 
     - name: Install Python dependencies
-      if: steps.cache-venv.outputs.cache-hit != 'true'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: uv sync ${{ inputs.uv-groups }}
