@@ -47,7 +47,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
   const assertIframeAttributes = (iframeAttributes: any, expectedSrc: string) => {
     expect(iframeAttributes.src).toBe(expectedSrc)
     expect(iframeAttributes).toStrictEqual({
-      allow: "geolocation; clipboard-write",
+      allow: "geolocation *; clipboard-write *",
       allowFullscreen: true,
       frameBorder: "0",
       id: "lvao_iframe",
