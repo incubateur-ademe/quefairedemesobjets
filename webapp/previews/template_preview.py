@@ -7,6 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory
@@ -16,12 +17,14 @@ from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
+from assistant.adresses import suggest_adresses
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
 from core.widgets import (
     SearchAutocompleteInput,
 )
 from infotri.forms import InfotriForm
+from previews.widgets import AdresseDatalistInput
 from qfdmd.forms import QfSearchForm
 from qfdmd.middleware import RequestEnhancementMiddleware
 from qfdmd.models import ProduitPage, Synonyme
@@ -30,6 +33,7 @@ from qfdmo.forms import (
     LegendeForm,
     ViewModeForm,
 )
+from qfdmo.lieux_query import sous_categorie_ids_for
 from qfdmo.models.acteur import (
     ActeurType,
     DisplayedActeur,
@@ -1507,12 +1511,62 @@ class TestsPreview(LookbookPreview):
         )
 
 
+def geste_choices():
+    """Read at each form instantiation, not at import: the table is empty
+    during migrations and tests."""
+    groupes = (
+        GroupeAction.objects.filter(afficher=True)
+        .order_by("order")
+        .prefetch_related("actions")
+    )
+    return [(groupe.code, groupe.libelle) for groupe in groupes]
+
+
+class GesteForm(DsfrBaseForm):
+    geste = forms.ChoiceField(label="Geste", choices=geste_choices)
+    objet = forms.CharField(
+        label="Slug d'une fiche produit (facultatif)", required=False
+    )
+    adresse = forms.CharField(
+        label="Adresse ou commune",
+        required=False,
+        initial="Paris",
+        widget=AdresseDatalistInput(
+            attrs={"placeholder": "Paris, Lyon, 12 rue de la Paix…"}
+        ),
+        help_text="Centre de la carte. Les suggestions viennent de la BAN.",
+    )
+
+
 class AssistantPreview(LookbookPreview):
     """Assistant V2 components."""
 
     # Serves assistant.js/css alone: the legacy stack starts its own Stimulus
     # application and would load the DSFR, which the assistant does not use.
     assets = "assistant"
+
+    @register_form_class(GesteForm)
+    @component_docs("ui/components/assistant/carte.md")
+    def carte(self, geste="reparer", objet="", adresse="Paris", **kwargs):
+        longitude, latitude, precise = _coordinates_of(adresse)
+        acteurs = (
+            DisplayedActeur.objects.all()
+            .proposing(geste, _sous_categorie_ids(objet))
+            .nearest_to(longitude, latitude)
+            .for_the_map()
+        )
+        return render_to_string(
+            "ui/components/assistant/carte.html",
+            {
+                "gestes": [geste],
+                "fiche": objet,
+                "longitude": longitude,
+                "latitude": latitude,
+                "adresse_precise": precise,
+                "lieux": acteurs,
+                "debug": True,
+            },
+        )
 
     @component_docs("ui/components/assistant/recherche_objet.md")
     def recherche_objet(self, **kwargs):
@@ -1561,6 +1615,27 @@ class AssistantPreview(LookbookPreview):
             "ui/components/assistant/alerte.html", {"message": message}
         )
 
+    @component_docs("ui/components/assistant/bloc_geste.md")
+    def bloc_geste(self, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bloc_geste.html", REPARER_BLOCK
+        )
+
+    @component_docs("ui/components/assistant/bloc_gestes.md")
+    def bloc_gestes(self, **kwargs):
+        """The blocks in display order: repairable, good condition, worn out."""
+        return render_to_string(
+            "ui/components/assistant/bloc_gestes.html",
+            {"blocs": [REPARER_BLOCK, DONNER_BLOCK, TRIER_BLOCK]},
+        )
+
+    @component_docs("ui/components/assistant/bouton_changer_geste.md")
+    def bouton_changer_geste(self, libelle="Réparer", **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bouton_changer_geste.html",
+            {"libelle": libelle, "gestes": ["reparer"], "url": "#"},
+        )
+
     @component_docs("ui/components/assistant/footer.md")
     def footer(self, **kwargs):
         return render_to_string("ui/components/assistant/footer.html", {})
@@ -1573,6 +1648,37 @@ CONDITIONS = [
     ("bonus", "Bonus Réparation"),
 ]
 
+REPARER_BLOCK = {
+    "gestes": ["reparer"],
+    "libelle": "Réparer",
+    "consigne": (
+        "Vous pensez que votre téléphone mobile peut être réparé ? Pensez au "
+        "Bonus Réparation ! Grâce à la réparation, vous prolongez la durée de "
+        "vie de votre téléphone, tout en économisant de l'argent."
+    ),
+    "badges": [
+        {"condition": "reparable", "libelle": "Réparable"},
+        {"condition": "bonus", "libelle": "Bonus Réparation"},
+    ],
+    "url": "#",
+}
+
+DONNER_BLOCK = {
+    "gestes": ["donner_echanger_rapporter", "vendre_acheter"],
+    "libelle": "Donner ou revendre",
+    "consigne": "Votre objet fonctionne encore ? Donnez-lui une seconde vie.",
+    "badges": [{"condition": "bon_etat", "libelle": "Bon état"}],
+    "url": "#",
+}
+
+TRIER_BLOCK = {
+    "gestes": ["trier"],
+    "libelle": "Déposer",
+    "consigne": "Hors d'usage, votre objet se dépose en point de collecte.",
+    "badges": [{"condition": "mauvais_etat", "libelle": "Mauvais état"}],
+    "url": "#",
+}
+
 
 def _side_by_side(renders):
     """Lines up several variants to compare them at a glance."""
@@ -1580,3 +1686,26 @@ def _side_by_side(renders):
         '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">{}</div>',
         mark_safe("".join(renders)),
     )
+
+
+# Longitude, latitude, and whether the address is precise.
+PARIS = (2.3488, 48.8534, False)
+
+
+def _coordinates_of(adresse):
+    """The first BAN suggestion, through the assistant's own proxy and cache,
+    falling back on Paris."""
+    suggestions = suggest_adresses(adresse)
+    if not suggestions:
+        return PARIS
+    first = suggestions[0]
+    return (first["longitude"], first["latitude"], first["precise"])
+
+
+def _sous_categorie_ids(slug):
+    if not slug:
+        return []
+    try:
+        return sous_categorie_ids_for(slug)
+    except Http404:
+        return []

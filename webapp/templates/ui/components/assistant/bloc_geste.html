@@ -1,0 +1,39 @@
+{% comment %}
+`consigne` is HTML from the CMS, marked safe upstream.
+{% endcomment %}
+<article class="qfa-bloc-geste" data-gestes="{{ gestes|join:' ' }}">
+    {% if badges %}
+        <p class="qfa-bloc-geste__badges">
+            {% for badge in badges %}
+                {% include "ui/components/assistant/badge.html" with condition=badge.condition libelle=badge.libelle %}
+            {% endfor %}
+        </p>
+    {% endif %}
+
+    <h3 class="qfa-bloc-geste__titre">
+        <span class="qfa-bloc-geste__icones">
+            {% for geste in gestes %}
+                {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+            {% endfor %}
+        </span>
+        {{ libelle }}
+    </h3>
+
+    <div class="qfa-bloc-geste__consigne">{{ consigne }}</div>
+
+    {% comment %}
+    `_top`: the link lives in the `assistant-fiche` frame, and the solutions
+    page has none; Turbo would otherwise show « Content missing ».
+    {% endcomment %}
+    {% if not sans_carte %}
+        <a class="qfa-bouton qfa-bouton--primaire"
+           href="{{ url }}"
+           data-turbo-frame="_top"
+           data-controller="assistant-prefetch"
+           data-action="mouseenter->assistant-prefetch#prefetch
+                        touchstart->assistant-prefetch#prefetch">
+            Je découvre les solutions
+            <span class="qfa-bouton__fleche" aria-hidden="true"></span>
+        </a>
+    {% endif %}
+</article>

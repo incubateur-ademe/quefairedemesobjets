@@ -1,0 +1,53 @@
+{% load l10n static %}
+<div
+    class="qfa-carte"
+    data-controller="assistant-carte"
+    data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
+    data-assistant-carte-url-value="{% url 'api_v1:lieux-geojson' %}"
+    data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
+    data-assistant-carte-style-url-value="{% static 'assistant/carte-style.json' %}"
+    {% comment %}Comma separated: the controller sends one `geste` per code.{% endcomment %}
+    data-assistant-carte-geste-value="{{ gestes|join:',' }}"
+    data-assistant-carte-fiche-value="{{ fiche|default:'' }}"
+    {% comment %}
+    `unlocalize` is required: the French locale formats decimals with a comma,
+    which Number() reads as NaN.
+    {% endcomment %}
+    data-assistant-carte-longitude-value="{{ longitude|unlocalize }}"
+    data-assistant-carte-latitude-value="{{ latitude|unlocalize }}"
+    data-assistant-carte-precise-address-value="{{ adresse_precise|yesno:'true,false' }}"
+    data-geste="{{ gestes.0 }}"
+>
+    {% include "ui/components/assistant/carte_canvas.html" %}
+
+    {% if debug %}
+        <div class="qfa-chrono" data-controller="assistant-chrono">
+            <strong data-assistant-chrono-target="value">—</strong>
+            <span data-assistant-chrono-target="detail"></span>
+        </div>
+    {% endif %}
+
+    {% comment %}Present from the start, so screen readers announce its changes.{% endcomment %}
+    <p
+        class="qfa-alerte qfa-carte__message"
+        data-assistant-carte-target="message"
+        role="status"
+        aria-live="polite"
+        hidden
+    >
+        <span class="qfa-alerte__icone" aria-hidden="true"></span>
+        <span data-assistant-carte-target="messageText"></span>
+    </p>
+
+    {% comment %}
+    A MapLibre map is not accessible: this list is the accessible path to the
+    results.
+    {% endcomment %}
+    <ul class="qfa-carte__accessible-list">
+        {% for lieu in lieux %}
+            <li>{{ lieu.nom_commercial|default:lieu.nom }}</li>
+        {% empty %}
+            <li>Aucun lieu à proximité pour ce geste.</li>
+        {% endfor %}
+    </ul>
+</div>
