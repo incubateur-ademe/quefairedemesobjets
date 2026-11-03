@@ -3,8 +3,8 @@
 The rows live in the CMS, which the Airflow Django settings do not load: the
 webapp serves them as CSV on its API v1 (`/api/v1/produits` and
 `/api/v1/consignes` with `Accept: text/csv`), the task fetches each file and
-stores it like the
-acteurs export: a dated copy per run, and the undated file as the latest state.
+stores it like the acteurs export: a dated copy per run, and the undated file
+as the latest state.
 """
 
 import logging
@@ -40,7 +40,7 @@ def export_opendata_fiche_to_s3(
         replace=True,
     )
     key = f"{remote_dir}/{filename}"
-    logger.info(f"{url} → s3://{export_opendata_config.bucket_name}/{key}")
+    logger.info("%s → s3://%s/%s", url, export_opendata_config.bucket_name, key)
     s3_hook.load_bytes(
         response.content,
         key=key,

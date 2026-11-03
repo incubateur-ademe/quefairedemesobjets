@@ -15,11 +15,13 @@ def remove_old_s3_opendata_csv(
     remote_dir: str | None = None,
     kept_filenames: tuple[str, ...] = (MAIN_OPENDATA_FILENAME,),
 ):
+    if remote_dir is None:
+        remote_dir = export_opendata_config.remote_dir
     # Récupérer la liste des fichiers existants dans le répertoire
     s3_hook = S3Hook(aws_conn_id=export_opendata_config.s3_connection_id)
     older_than_one_month_files = s3_hook.list_keys(
         bucket_name=export_opendata_config.bucket_name,
-        prefix=remote_dir or export_opendata_config.remote_dir,
+        prefix=remote_dir,
         to_datetime=pendulum.now("UTC").subtract(days=30),
     )
     older_than_one_month_files = [
