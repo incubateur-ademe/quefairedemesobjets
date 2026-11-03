@@ -2,3 +2,10 @@ project_id            = "your-project-id"
 organization_id       = "your-organization-id"
 access_key            = "access-key"
 secret_key            = "secret-key"  # pragma: allowlist secret
+
+webapp_db_username    = ""
+webapp_db_password    = ""
+warehouse_db_username = ""
+warehouse_db_password = ""
+airflow_db_username   = ""
+airflow_db_password   = ""
