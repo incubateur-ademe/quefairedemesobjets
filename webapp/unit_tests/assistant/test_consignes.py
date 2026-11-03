@@ -123,6 +123,17 @@ class TestFicheObjet:
             assert button["href"].startswith(reverse("assistant:solutions"))
             assert button.get_text(strip=True) == "Je découvre les solutions"
 
+    def test_without_any_geste_the_fiche_says_so(self, client, fiche):
+        GroupeAction.objects.all().delete()
+
+        page = html_of(client.get(reverse("assistant:produit", args=[fiche.slug])))
+
+        assert page.select("article.qfa-bloc-geste") == []
+        assert (
+            "Aucune consigne n'est disponible"
+            in page.select_one(".qfa-bloc-gestes").get_text()
+        )
+
     def test_a_fiche_without_map_has_no_button(self, client):
         """Véhicule hors d'usage: no map on the site, so no solution to show."""
         fiche = ProduitPageFactory(parent=None)

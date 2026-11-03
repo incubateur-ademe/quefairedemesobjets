@@ -175,19 +175,18 @@ export default class extends Controller<HTMLElement> {
     state.map.resize()
 
     if (state.key !== this.#key()) {
-      state.markers.forEach((marker) => marker.remove())
-      state.markers.clear()
-      state.places = []
+      this.#forgetPlaces(state)
       state.key = this.#key()
     }
 
-    // Only a new address recenters: otherwise the view stays where the user
-    // left it.
+    // A new address is a new search; otherwise the view and its pins stay
+    // where the user left them.
     const [lng, lat] = state.address
     const addressChanged =
       Math.abs(lng - this.longitudeValue) > 1e-6 ||
       Math.abs(lat - this.latitudeValue) > 1e-6
     if (addressChanged) {
+      this.#forgetPlaces(state)
       state.address = [this.longitudeValue, this.latitudeValue]
       state.needsFit = true
       state.map.jumpTo({
@@ -195,6 +194,12 @@ export default class extends Controller<HTMLElement> {
         zoom: INITIAL_ZOOM,
       })
     }
+  }
+
+  #forgetPlaces(state: PersistedMap) {
+    state.markers.forEach((marker) => marker.remove())
+    state.markers.clear()
+    state.places = []
   }
 
   /** Marker of the entered address; none for a municipality, which has no
