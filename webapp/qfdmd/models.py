@@ -718,7 +718,7 @@ class ProduitPage(
         """Every consigne of the page in reading order, across the grids.
 
         The one place the assistant and the open data export read: a page
-        may hold several grids (#3284), with any content between them. Each
+        may hold several grids, with any content between them. Each
         item is a bound list child: `.id` is the identifier the open data
         publishes, `.value` the fields of the consigne.
         """
@@ -1600,7 +1600,7 @@ class LieuDeDepot(models.Model):
     """Where a déchet goes: bac de tri, conteneur à verre, déchèterie…
 
     Shown as a badge on a consigne of a déchet page, exported as
-    `lieu_de_depot` in the consignes open data (#3284).
+    `lieu_de_depot` in the consignes open data.
     """
 
     code = models.SlugField(

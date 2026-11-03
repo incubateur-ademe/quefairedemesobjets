@@ -15,8 +15,8 @@ from django.db import (
 from django.db.models import Q
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.html import escape
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from wagtail.views import serve as wagtail_serve
 from django.utils.decorators import method_decorator
@@ -37,6 +37,7 @@ from wagtail.models import Page
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
+from qfdmd.consignes_migration import apply_plan, plan_conversion
 from qfdmd.legacy_migration import (
     finalize_produit_migration,
     MigrationError,
@@ -382,7 +383,7 @@ class TypeProduitFilter(django_filters.ChoiceFilter):
 
 
 class ConsignesFilter(django_filters.ChoiceFilter):
-    """Fiches with or without a « Grille de consignes » (#3284).
+    """Fiches with or without a « Grille de consignes ».
 
     For the editors to find the fiches the migration left aside: it only
     converts what it can read, and leaves a draft or nothing otherwise (see
@@ -925,8 +926,6 @@ def generate_consignes(request: HttpRequest, id: str) -> HttpResponse:
     GET shows a confirmation page. POST converts and saves a draft revision,
     then redirects to the editor for review.
     """
-    from qfdmd.consignes_migration import apply_plan, plan_conversion
-
     page = get_object_or_404(Page, pk=id).specific
     if not isinstance(page, ProduitPage):
         messages.error(
@@ -938,22 +937,25 @@ def generate_consignes(request: HttpRequest, id: str) -> HttpResponse:
         plan = plan_conversion(page)
         count = apply_plan(page, plan, user=request.user)
         details = [f"{u.titre} : {u.reason}" for u in plan.unresolved] + plan.notes
-        detail = ("<br/>" + "<br/>".join(escape(d) for d in details)) if details else ""
+        detail = format_html_join("", "<br/>{}", ((d,) for d in details))
 
         if not count:
             messages.warning(
                 request,
-                mark_safe(
-                    "Aucune carte de la première rangée n'a pu être convertie." + detail
+                format_html(
+                    "Aucune carte de la première rangée n'a pu être convertie.{}",
+                    detail,
                 ),
             )
             return redirect("wagtailadmin_pages:edit", id)
 
         messages.success(
             request,
-            mark_safe(
-                f"{count} consigne(s) générée(s) dans un brouillon : relisez-les"
-                " avant de publier." + detail
+            format_html(
+                "{} consigne(s) générée(s) dans un brouillon : relisez-les"
+                " avant de publier.{}",
+                count,
+                detail,
             ),
         )
         return redirect("wagtailadmin_pages:edit", id)
