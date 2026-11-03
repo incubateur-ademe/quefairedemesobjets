@@ -2,6 +2,7 @@
 one, from the static blocks below otherwise."""
 
 import re
+from typing import TypedDict
 from urllib.parse import urlencode
 
 from django.urls import reverse
@@ -9,12 +10,38 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from wagtail.rich_text import expand_db_html
 
+from assistant.parcours import Parcours
 from qfdmd.blocks import ETAT_CHOICES
 from qfdmd.models import ProduitPage
 from qfdmo.models.action import Action, GroupeAction
 
+
+class Badge(TypedDict):
+    condition: str
+    libelle: str
+
+
+class Consigne(TypedDict, total=False):
+    """A block of the fiche; `sans_carte`: no map on the site, so no solution
+    to send to."""
+
+    code: str
+    gestes: list[str]
+    libelle: str
+    consigne: str
+    badges: list[Badge]
+    url: str
+    sans_carte: bool
+
+
 ETATS = dict(ETAT_CHOICES)
 EXCLUDED_GROUPES = {"emprunter_preter_louer"}
+
+# A rich text link to a page, as Wagtail stores it: `<a linktype="page" id="3">`.
+PAGE_LINK = re.compile(r"<a\b[^>]*\blinktype=\"page\"[^>]*>")
+PAGE_ID = re.compile(r"\bid=\"(\d+)\"")
+# Anchors Wagtail expanded, still bound to the fiche frame.
+FRAMED_LINK = re.compile(r"<a\b(?![^>]*data-turbo-frame)")
 
 GESTES_ORDER = (
     "reparer",
@@ -29,7 +56,7 @@ BLOCKS = (
         "code": "reparer",
         "gestes": ("reparer",),
         "libelle": "Réparer",
-        "etat": ("reparable", "Réparable"),
+        "etat": "reparable",
         "bonus": True,
         "consigne": (
             "Votre objet est abîmé mais réparable ? La réparation prolonge sa"
@@ -42,7 +69,7 @@ BLOCKS = (
         "code": "donner_revendre",
         "gestes": ("donner_echanger_rapporter", "vendre_acheter"),
         "libelle": "Donner ou revendre",
-        "etat": ("bon_etat", "Bon état"),
+        "etat": "bon_etat",
         "bonus": False,
         "consigne": (
             "Votre objet fonctionne encore et peut servir à quelqu'un d'autre ?"
@@ -55,7 +82,7 @@ BLOCKS = (
         "code": "trier",
         "gestes": ("trier",),
         "libelle": "Déposer",
-        "etat": ("mauvais_etat", "Mauvais état"),
+        "etat": "mauvais_etat",
         "bonus": False,
         "consigne": (
             "Votre objet est hors d'usage ? Il ne se jette pas avec les ordures"
@@ -74,13 +101,11 @@ def block_for(gestes) -> dict | None:
     )
 
 
-def consignes_for(produit_page, parcours=None) -> list[dict]:
-    """Blocks of the fiche, each with the link to its solutions.
-
-    `parcours` carries the objet and the address to the solutions screen.
-    `sans_carte`: the fiche shows no map on the site, so there is no solution
-    to send to.
-    """
+def consignes_for(
+    produit_page: ProduitPage | None, parcours: Parcours | None = None
+) -> list[Consigne]:
+    """Blocks of the fiche, each with the link to its solutions, which carries
+    the objet and the address of the `parcours`."""
     base = parcours.as_params() if parcours else {}
     if produit_page is not None and getattr(produit_page, "slug", None):
         base = {**base, "fiche": produit_page.slug}
@@ -97,24 +122,21 @@ def consignes_for(produit_page, parcours=None) -> list[dict]:
     return [{**block, "sans_carte": sans_carte} for block in blocks if block]
 
 
-def _shows_map(produit_page) -> bool:
+def _shows_map(produit_page: ProduitPage) -> bool:
     return any(b["type"] == "carte" for b in produit_page.body.get_prep_value())
 
 
-def _links(gestes, base) -> dict:
+def _solutions_url(gestes, base) -> str:
     params = urlencode({**base, "geste": gestes}, doseq=True)
-    return {
-        "url": f"{reverse('assistant:solutions')}?{params}",
-    }
+    return f"{reverse('assistant:solutions')}?{params}"
 
 
-def _from_static(block, known, base) -> dict | None:
+def _from_static(block, known, base) -> Consigne | None:
     gestes = [code for code in block["gestes"] if code in known]
     if not gestes:
         return None
 
-    etat, etat_label = block["etat"]
-    badges = [{"condition": etat, "libelle": etat_label}]
+    badges = [{"condition": block["etat"], "libelle": ETATS[block["etat"]]}]
     if block["bonus"]:
         badges.append({"condition": "bonus", "libelle": "Bonus Réparation"})
 
@@ -124,11 +146,11 @@ def _from_static(block, known, base) -> dict | None:
         "libelle": block["libelle"],
         "consigne": block["consigne"],
         "badges": badges,
-        **_links(gestes, base),
+        "url": _solutions_url(gestes, base),
     }
 
 
-def _from_cms(child, groupes, base) -> dict | None:
+def _from_cms(child, groupes, base) -> Consigne | None:
     """A consigne of the grid, in the shape of the static blocks: its Action
     codes become GroupeAction codes, once each, in the order of the actions."""
     value = child.value
@@ -156,7 +178,7 @@ def _from_cms(child, groupes, base) -> dict | None:
         "libelle": value["titre"],
         "consigne": _consigne_html(value["contenu"].source, base),
         "badges": badges,
-        **_links(gestes, base),
+        "url": _solutions_url(gestes, base),
     }
 
 
@@ -169,13 +191,6 @@ def _groupes_by_action(cms) -> dict[str, str]:
         .exclude(groupe_action__code__in=EXCLUDED_GROUPES)
         .values_list("code", "groupe_action__code")
     )
-
-
-# A rich text link to a page, as Wagtail stores it: `<a linktype="page" id="3">`.
-PAGE_LINK = re.compile(r"<a\b[^>]*\blinktype=\"page\"[^>]*>")
-PAGE_ID = re.compile(r"\bid=\"(\d+)\"")
-# Anchors Wagtail expanded, still bound to the fiche frame.
-FRAMED_LINK = re.compile(r"<a\b(?![^>]*data-turbo-frame)")
 
 
 def _consigne_html(source, base) -> str:

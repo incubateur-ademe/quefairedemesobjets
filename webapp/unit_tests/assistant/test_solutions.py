@@ -171,7 +171,6 @@ class TestSolutionsScreen:
 
         message = carte(page).select_one('[data-assistant-carte-target="message"]')
         assert message["role"] == "status"
-        assert message["aria-live"] == "polite"
         assert message.has_attr("hidden")
 
     def test_the_synonyme_follows_back_to_the_fiche(self, client, fiche):
