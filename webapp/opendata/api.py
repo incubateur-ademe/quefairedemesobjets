@@ -11,12 +11,12 @@ from io import StringIO
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.views.decorators.cache import cache_control
 from django.views.decorators.vary import vary_on_headers
 from ninja import Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import paginate
 
+from core.http_cache import CACHE_FIVE_MINUTES, CACHE_ONE_HOUR
 from opendata.fiches import (
     CONSIGNE_COLUMNS,
     PRODUIT_COLUMNS,
@@ -29,8 +29,6 @@ from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import GroupeAction
 
 router = Router()
-
-CACHE_FIVE_MINUTES = cache_control(public=True, max_age=300, stale_while_revalidate=60)
 
 
 @router.get(
@@ -52,12 +50,9 @@ def lieu(request, identifiant: str):
     url_name="gestes",
     summary="Les gestes, valeurs du paramètre `geste`",
 )
+@decorate_view(CACHE_ONE_HOUR)
 def gestes(request):
     return GroupeAction.objects.order_by("order")
-
-
-# Editorial content, published a few times a week at most.
-CACHE_ONE_HOUR = cache_control(public=True, max_age=3600, stale_while_revalidate=300)
 
 
 class ProduitSchema(Schema):
