@@ -8,8 +8,7 @@ WORKDIR /build
 # Install JS deps first for better caching
 COPY webapp/ ./webapp/
 COPY package-lock.json package.json .
-RUN npm -w webapp ci
-RUN npm -w webapp/revue-front ci
+RUN npm ci -w webapp -w webapp/revue-front
 RUN npm -w webapp run build
 RUN npm -w webapp/revue-front run build
 
