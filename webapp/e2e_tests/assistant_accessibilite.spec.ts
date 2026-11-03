@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test"
 import { dragAssistantMap, mockAssistantAddressServices, navigateTo } from "./helpers"
 
 // Out at sea: no place within reach, in the sample database as in production.
-const AU_LARGE = "longitude=-5.5&latitude=46"
+const OPEN_SEA = "longitude=-5.5&latitude=46"
 
 async function expectNoViolations(page: Page) {
   // Turbo marks the document busy while a visit renders.
@@ -61,7 +61,7 @@ test.describe("♿ Accessibilité de l'assistant", () => {
     await test.step("Solutions sans aucun lieu", async () => {
       await navigateTo(
         page,
-        `/assistant/solutions/?geste=reparer&fiche=velo&adresse=Au%20large&${AU_LARGE}`,
+        `/assistant/solutions/?geste=reparer&fiche=velo&adresse=Au%20large&${OPEN_SEA}`,
       )
       await expect(page.locator(".qfa-carte__message")).toContainText(
         "Aucun lieu trouvé ici",
