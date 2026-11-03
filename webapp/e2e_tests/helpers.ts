@@ -933,7 +933,7 @@ export const AURAY = { latitude: 47.668099, longitude: -2.990838 }
 export const MONTBELIARD = { latitude: 47.509724, longitude: 6.798538 }
 
 /** The assistant's address services, which would otherwise reach the BAN. */
-export async function mockAssistantAddressServices(page: Page) {
+export async function mockAssistantAddressServices(page: Page): Promise<void> {
   await page.route(/\/qfdmo\/autocomplete\/reverse\?/, (route) =>
     route.fulfill({ json: { adresse: "Auray", ...AURAY } }),
   )
@@ -960,7 +960,7 @@ export async function chooseSuggestion(
   field: string,
   text: string,
   option: string,
-) {
+): Promise<void> {
   await context.locator(`#${field}-champ`).fill(text)
   await context
     .locator(`#${field}-liste [role=option]`, { hasText: option })
@@ -968,11 +968,11 @@ export async function chooseSuggestion(
     .click()
 }
 
-export async function pinpointUuids(context: Page | FrameLocator) {
+export async function pinpointUuids(context: Page | FrameLocator): Promise<string[]> {
   const pinpoints = context.locator(".qfa-pinpoint:not(.qfa-pinpoint--address)")
   await pinpoints.first().waitFor({ state: "attached" })
-  return pinpoints.evaluateAll((nodes) =>
-    nodes.map((node) => (node as HTMLElement).dataset.uuid!),
+  return pinpoints.evaluateAll<string[], HTMLElement>((nodes) =>
+    nodes.map((node) => node.dataset.uuid ?? ""),
   )
 }
 
@@ -987,7 +987,11 @@ export async function waitForLieux(page: Page, matches: (url: string) => boolean
   return features.map((feature) => feature.properties.uuid)
 }
 
-export async function dragAssistantMap(page: Page, dx: number, dy: number) {
+export async function dragAssistantMap(
+  page: Page,
+  dx: number,
+  dy: number,
+): Promise<void> {
   // The map only listens to its moves once loaded.
   await page.waitForFunction(() =>
     (
@@ -996,7 +1000,8 @@ export async function dragAssistantMap(page: Page, dx: number, dy: number) {
       }
     )?.assistantMap?.map.loaded(),
   )
-  const box = (await page.locator(".qfa-carte__canvas").boundingBox())!
+  const box = await page.locator(".qfa-carte__canvas").boundingBox()
+  if (!box) throw new Error("The map canvas is not rendered")
   const x = box.x + box.width / 2
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
