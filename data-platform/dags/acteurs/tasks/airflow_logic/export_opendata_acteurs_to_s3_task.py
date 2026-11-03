@@ -12,7 +12,7 @@ from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
 
-TASK_NAME = "export_opendata_csv_to_s3"
+TASK_NAME = "export_opendata_acteurs_to_s3"
 
 
 def task_info_get():
@@ -30,7 +30,7 @@ def task_info_get():
     """
 
 
-def export_opendata_csv_to_s3_wrapper(ti, params) -> None:
+def export_opendata_acteurs_to_s3_wrapper(ti, params) -> None:
     logger.info(task_info_get())
     export_opendata_config = ExportOpendataConfig(**params)
 
@@ -38,9 +38,9 @@ def export_opendata_csv_to_s3_wrapper(ti, params) -> None:
     export_opendata_csv_to_s3(export_opendata_config=export_opendata_config)
 
 
-def export_opendata_csv_to_s3_task(dag: DAG) -> PythonOperator:
+def export_opendata_acteurs_to_s3_task(dag: DAG) -> PythonOperator:
     return PythonOperator(
         task_id=TASK_NAME,
-        python_callable=export_opendata_csv_to_s3_wrapper,
+        python_callable=export_opendata_acteurs_to_s3_wrapper,
         dag=dag,
     )
