@@ -10,6 +10,11 @@
     data-assistant-carte-geste-value="{{ gestes|join:',' }}"
     data-assistant-carte-fiche-value="{{ fiche|default:'' }}"
     {% comment %}
+    `__uuid__` is replaced by each place's uuid; `parametres_lieu` lets the place
+    page lead back to the same solutions.
+    {% endcomment %}
+    data-assistant-carte-lieu-url-value="{% url 'assistant:lieu' uuid='__uuid__' %}{% if parametres_lieu %}?{{ parametres_lieu }}{% endif %}"
+    {% comment %}
     `unlocalize` is required: the French locale formats decimals with a comma,
     which Number() reads as NaN.
     {% endcomment %}

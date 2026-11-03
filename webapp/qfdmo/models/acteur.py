@@ -495,7 +495,10 @@ class DisplayedActeurQuerySet(models.QuerySet):
     def for_the_detail(self):
         """A place and everything its page shows, without cascading queries."""
         return self.select_related("acteur_type").prefetch_related(
-            "labels", "sources", "proposition_services__action__groupe_action"
+            "labels",
+            "sources",
+            "proposition_services__action__groupe_action",
+            "proposition_services__sous_categories",
         )
 
 

@@ -1,6 +1,8 @@
 from dataclasses import replace
 from urllib.parse import urlencode
 
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -8,6 +10,7 @@ from django.views.generic import DetailView, TemplateView
 
 from assistant.consignes import block_for, consignes_for
 from assistant.forms import SearchForm
+from assistant.lieu import gestes_of, offers_bonus, practical_info_of
 from assistant.objets import synonyme_label
 from assistant.parcours import Parcours
 from assistant.solutions import (
@@ -18,6 +21,7 @@ from assistant.solutions import (
     nearest_lieux,
     position_of,
     requested_gestes,
+    sous_categorie_ids_of,
 )
 from qfdmd.models import ProduitPage
 
@@ -95,6 +99,9 @@ class SolutionsView(TurboFrameMixin, TemplateView):
             gestes=gestes,
             libelle_geste=label_of(block_for(gestes), groupes_in_order(gestes)),
             url_fiche=self._fiche_url(parcours),
+            parametres_lieu=urlencode(
+                {**parcours.as_params(), "geste": gestes}, doseq=True
+            ),
             longitude=longitude,
             latitude=latitude,
             erreur_adresse=address_error(parcours),
@@ -109,3 +116,33 @@ class SolutionsView(TurboFrameMixin, TemplateView):
             return f"{reverse('assistant:home')}?{urlencode(parcours.as_params())}"
         destination = reverse("assistant:produit", kwargs={"slug": parcours.fiche})
         return f"{destination}?{urlencode(replace(parcours, fiche='').as_params())}"
+
+
+class LieuView(TurboFrameMixin, DetailView):
+    model = DisplayedActeur
+    template_name = "ui/pages/assistant/lieu.html"
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+    context_object_name = "lieu"
+
+    def get_queryset(self):
+        queryset = DisplayedActeur.objects.all().for_the_detail()
+        parcours = Parcours.from_query(self.request.GET)
+        if not parcours.is_located:
+            return queryset
+        position = Point(parcours.longitude, parcours.latitude, srid=4326)
+        return queryset.annotate(distance=Distance("location", position))
+
+    def get_context_data(self, **kwargs):
+        parcours = Parcours.from_query(self.request.GET)
+        back = {**parcours.as_params()}
+        if gestes := requested_gestes(self.request.GET):
+            back["geste"] = gestes
+        return super().get_context_data(
+            parcours=parcours,
+            parametres=urlencode(back, doseq=True),
+            infos_pratiques=practical_info_of(self.object),
+            bonus_reparation=offers_bonus(self.object),
+            gestes=gestes_of(self.object, sous_categorie_ids_of(parcours.fiche)),
+            **kwargs,
+        )
