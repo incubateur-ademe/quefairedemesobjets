@@ -39,7 +39,7 @@ The frontend is written in **TypeScript** and compiled with **Parcel**.
 - **Sources to collect**: `static/to_collect/` additionnal assets
 - **Output**: `static/compiled/` (files served by Django via `STATICFILES_DIRS`)
 
-Main entry points: `qfdmo.ts`, `qfdmd.ts`, `admin.ts`, and the embed bundles (`embed/assistant.ts`, `embed/carte.ts`, `embed/formulaire.ts`, `embed/infotri.ts`, etc.).
+Main entry points: `qfdmo.ts`, `quefaire.ts`, `admin.ts`, and the embed bundles (`embed/assistant.ts`, `embed/carte.ts`, `embed/formulaire.ts`, `embed/infotri.ts`, etc.).
 
 The frontend stack uses **Stimulus** for controllers and **Turbo** for navigation. Scripts are loaded in layouts (e.g. `base.html`) via `{% static 'qfdmo.js' %}` tags.
 
