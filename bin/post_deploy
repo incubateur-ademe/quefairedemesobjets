@@ -5,6 +5,7 @@ cd /app/webapp
 
 python manage.py createcachetable
 python manage.py migrate
+python manage.py populate_libelle_court
 
 # TEMPORARY, required to have search function after deploy
 python manage.py enable_unaccent
