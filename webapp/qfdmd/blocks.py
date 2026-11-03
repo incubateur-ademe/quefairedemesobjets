@@ -13,6 +13,8 @@ from wagtail import blocks
 from wagtail.images.blocks import ImageBlock
 from wagtail.snippets.blocks import SnippetChooserBlock
 
+from qfdmo.models.action import Action
+
 logger = logging.getLogger(__name__)
 
 
@@ -95,8 +97,6 @@ def action_choices():
     the carte's filters, and `trier` is hidden there while being the geste
     of every déchet consigne.
     """
-    from qfdmo.models.action import Action
-
     return list(Action.objects.order_by("order").values_list("code", "libelle"))
 
 

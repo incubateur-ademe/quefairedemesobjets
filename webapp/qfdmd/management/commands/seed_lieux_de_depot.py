@@ -1,9 +1,6 @@
-# The lieux de dépôt the fiches already name in their badges (census of the
-# first row of cards of the 45 live fiches, 2026-09-28), with the badge
-# colour each one wears there. Editable in the CMS afterwards; existing codes
-# are left as they are.
+from django.core.management.base import BaseCommand
 
-from django.db import migrations
+from qfdmd.models import LieuDeDepot
 
 LIEUX = [
     ("bac_de_tri", "Bac de tri", "yellow-tournesol"),
@@ -21,19 +18,14 @@ LIEUX = [
 ]
 
 
-def seed(apps, schema_editor):
-    LieuDeDepot = apps.get_model("qfdmd", "LieuDeDepot")
-    for code, libelle, couleur in LIEUX:
-        LieuDeDepot.objects.get_or_create(
-            code=code, defaults={"libelle": libelle, "couleur": couleur}
+class Command(BaseCommand):
+    help = "Create the missing lieux de dépôt, leaving existing ones untouched."
+
+    def handle(self, *args, **options):
+        created = sum(
+            LieuDeDepot.objects.get_or_create(
+                code=code, defaults={"libelle": libelle, "couleur": couleur}
+            )[1]
+            for code, libelle, couleur in LIEUX
         )
-
-
-class Migration(migrations.Migration):
-    dependencies = [
-        ("qfdmd", "0094_lieudedepot_and_consignes_block"),
-    ]
-
-    operations = [
-        migrations.RunPython(seed, migrations.RunPython.noop),
-    ]
+        self.stdout.write(f"{created} lieu(x) de dépôt créé(s)")

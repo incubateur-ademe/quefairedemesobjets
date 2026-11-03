@@ -27,9 +27,9 @@ into the grid in a **draft revision**: nothing is published until an editor
 has read it.
 
 Entry points: `plan_conversion()` computes without writing, `apply_plan()`
-writes the draft. The admin action in `qfdmd/views.py` chains the two;
-`generate_on_deploy()` (the `generate_consignes` command, run by every
-deploy) publishes when nothing is left to read.
+writes the draft. The admin action in `qfdmd/views.py` chains the two; the
+`generate_consignes` command, run by every deploy, publishes when nothing is
+left to read.
 """
 
 import json
@@ -345,48 +345,6 @@ def apply_plan(page: ProduitPage, plan: Plan, user=None, publish=False) -> int:
         },
     )
     return len(plan.consignes)
-
-
-def generate_on_deploy(page: ProduitPage) -> str:
-    """Give a live fiche its grid, once. Returns what was done, for the log.
-
-    A fiche whose live version or pending draft already holds a grid is left
-    alone, so every deploy can run this. A clean conversion is published; one
-    with cards left behind becomes a draft for an editor to finish. An
-    editor's pending draft is never lost: publishing would bury it under the
-    new revision, so it is converted the same way and saved back on top.
-    """
-    draft = (
-        page.get_latest_revision_as_object() if page.has_unpublished_changes else None
-    )
-    if _has_grid(page) or (draft and _has_grid(draft)):
-        return "déjà une grille"
-
-    plan = plan_conversion(page)
-    if not plan.consignes:
-        return "rien à convertir"
-    if plan.unresolved:
-        base = draft or page
-        written = apply_plan(base, plan_conversion(base) if draft else plan)
-        return (
-            f"brouillon, {written} consignes, {len(plan.unresolved)} cartes à reprendre"
-        )
-
-    apply_plan(page, plan, publish=True)
-    if draft:
-        draft_plan = plan_conversion(draft)
-        if not apply_plan(draft, draft_plan):
-            draft.save_revision()  # unchanged, but on top again
-    return f"publiée, {len(plan.consignes)} consignes" + (
-        ", brouillon en cours converti aussi" if draft else ""
-    )
-
-
-def _has_grid(page: ProduitPage) -> bool:
-    # The raw data, not `page.body` itself: iterating binds the blocks, and
-    # get_prep_value() then re-serialises the cards in a shape the parsing
-    # of first_row_of_cards() does not read.
-    return any(block["type"] == "consignes" for block in page.body.get_prep_value())
 
 
 def badge_texts(card: dict) -> list[str]:
