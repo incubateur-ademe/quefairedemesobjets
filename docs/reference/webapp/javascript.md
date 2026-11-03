@@ -41,6 +41,11 @@ Make sure the server response contains a `<turbo-frame>` with the same `id` so T
 
 We use `Maplibre` js technologie with `Carte Facile` vectorial layers in application and OpenStreetMap layers for the backoffice
 
+The assistant V2 does not import `carte-facile`: its desaturated style is a
+static copy, `static/to_collect/assistant/carte-style.json` (the package would
+pull its own copy of maplibre-gl). To refresh it after a `carte-facile`
+upgrade, copy the package's desaturated style JSON over that file.
+
 ### Assistant combobox
 
 `assistant-combobox` copies each chosen suggestion into the hidden fields by

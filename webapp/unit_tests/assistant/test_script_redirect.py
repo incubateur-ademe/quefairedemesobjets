@@ -8,7 +8,8 @@ from django.test import RequestFactory
 
 from qfdmd.middleware import RequestEnhancementMiddleware
 from qfdmd.models import LegacyIntermediateProduitPage
-from unit_tests.qfdmd.qfdmod_factory import ProduitPageFactory, SynonymeFactory
+from unit_tests.assistant.helpers import query_of
+from unit_tests.qfdmd.qfdmod_factory import SynonymeFactory
 
 BETA = {"V2_HOSTS": ["beta.example.fr"], "V2_BASE_URL": ""}
 
@@ -39,7 +40,8 @@ class TestScriptRedirect:
         )
         assert response.status_code == 302
         assert response.url.startswith("https://qfdmo.fr/assistant/?")
-        assert "s=1" in response.url and "ref=" in response.url
+        assert query_of(response.url)["s"] == ["1"]
+        assert "ref" in query_of(response.url)
         assert response.headers["Cache-Control"].startswith("max-age=0, no-cache")
 
     def test_assistant_v2_can_live_on_its_own_domain(self, client, settings):
@@ -57,30 +59,39 @@ class TestScriptRedirect:
         assert response.status_code == 302
         assert response.url.startswith("https://qfdmo.fr/assistant/?")
 
-    def test_data_objet_preselects_the_fiche(self, client):
-        page = ProduitPageFactory(parent=None)
+    def test_data_objet_preselects_the_fiche(self, client, fiche):
         response = client.get(
-            f"/dechet/{page.slug}/", {"ref": ref("https://beta.example.fr/")}
+            f"/dechet/{fiche.slug}/", {"ref": ref("https://beta.example.fr/")}
         )
         assert response.status_code == 302
         assert response.url.startswith(
-            f"https://qfdmo.fr/assistant/objet/{page.slug}/?"
+            f"https://qfdmo.fr/assistant/objet/{fiche.slug}/?"
         )
 
-    def test_legacy_synonyme_opens_its_fiche(self, client):
+    def test_data_synonyme_travels_to_the_fiche(self, client, fiche):
+        """`iframe.js` forwards `data-synonyme` as is: the fiche shows it."""
+        response = client.get(
+            f"/dechet/{fiche.slug}/",
+            {"synonyme": "mixeur", "ref": ref("https://beta.example.fr/")},
+        )
+        assert response.url.startswith(
+            f"https://qfdmo.fr/assistant/objet/{fiche.slug}/?"
+        )
+        assert query_of(response.url)["synonyme"] == ["mixeur"]
+
+    def test_legacy_synonyme_opens_its_fiche(self, client, fiche):
         """Embedders pass synonyme slugs (`montre-connectee`): follow them to
         their fiche, as the legacy assistant does."""
-        page = ProduitPageFactory(parent=None)
         synonyme = SynonymeFactory(nom="Montre connectée")
         LegacyIntermediateProduitPage.objects.create(
-            page=page, produit=synonyme.produit
+            page=fiche, produit=synonyme.produit
         )
         response = client.get(
             f"/dechet/{synonyme.slug}/", {"ref": ref("https://beta.example.fr/")}
         )
         assert response.status_code == 302
         assert response.url.startswith(
-            f"https://qfdmo.fr/assistant/objet/{page.slug}/?"
+            f"https://qfdmo.fr/assistant/objet/{fiche.slug}/?"
         )
 
     def test_unknown_fiche_stays_on_legacy(self):

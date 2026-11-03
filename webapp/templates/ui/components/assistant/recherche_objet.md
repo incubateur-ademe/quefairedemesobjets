@@ -19,8 +19,8 @@ défaire.
 | `synonyme`    | ⚪️     | slug du synonyme retenu       |
 | `erreur`      | ⚪️     | message du serveur            |
 
-Le composant émet `assistant-combobox:chosen` avec `{ label, slug }` quand
-l'usager retient une suggestion.
+Le composant émet `assistant-combobox:chosen` avec `{ label, slug, synonyme }`
+quand l'usager retient une suggestion (`synonyme` seulement pour un synonyme).
 
 ## Endpoint
 

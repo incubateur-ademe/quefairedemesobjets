@@ -4,3 +4,15 @@ import "./styles/assistant.css"
 import "@iframe-resizer/child"
 
 import "./js/assistant/application"
+
+// iframe-resizer observes the <body> found at startup, but Turbo Drive swaps
+// the body on every visit: observe the current one instead.
+const bodyObserver = new ResizeObserver(() => window.parentIFrame?.resize())
+let isFirstLoad = true
+
+document.addEventListener("turbo:load", () => {
+  bodyObserver.disconnect()
+  bodyObserver.observe(document.body)
+  if (!isFirstLoad) window.parentIFrame?.scrollToOffset(0, 0)
+  isFirstLoad = false
+})
