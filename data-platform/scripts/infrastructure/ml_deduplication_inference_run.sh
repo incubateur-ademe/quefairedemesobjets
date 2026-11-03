@@ -34,7 +34,6 @@ OUTPUT_TABLE="${ML_DEDUPLICATION_OUTPUT_TABLE:-}"
 RUN_ID="${ML_DEDUPLICATION_RUN_ID:-inference_$(date +%Y%m%dT%H%M%S)}"
 MODEL_THRESHOLD="${ML_DEDUPLICATION_MODEL_THRESHOLD:-}"
 LINKAGE_COLUMN="${ML_DEDUPLICATION_LINKAGE_COLUMN:-}"
-SPLIT_BY_DEPARTEMENT="${ML_DEDUPLICATION_SPLIT_BY_DEPARTEMENT:-0}"
 # Docker network to join so the container can reach the warehouse DB (defaults
 # to the compose network when running from the scheduler container).
 DOCKER_NETWORK="${ML_DEDUPLICATION_DOCKER_NETWORK:-}"
@@ -55,7 +54,6 @@ PYTHON_CMD="python -m ml_deduplication.inference.xgboost.run_inference"
 args="--model-path /model --output-dir /outputs --run-id ${RUN_ID}"
 [ -n "${MODEL_THRESHOLD}" ] && args="${args} --model-threshold ${MODEL_THRESHOLD}"
 [ -n "${LINKAGE_COLUMN}" ] && args="${args} --linkage-column ${LINKAGE_COLUMN}"
-[ "${SPLIT_BY_DEPARTEMENT}" = "1" ] && args="${args} --split-by-departement"
 [ -n "${BATCH_SIZE}" ] && args="${args} --batch-size ${BATCH_SIZE}"
 if [ "${USE_GPU}" = "1" ] || [ "${USE_GPU}" = "true" ]; then
   args="${args} --device cuda"

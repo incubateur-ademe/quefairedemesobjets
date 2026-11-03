@@ -49,7 +49,6 @@ class MLDeduplicationConfig(BaseModel):
     image_ref: str
     model_threshold: float | None
     linkage_column: str | None
-    split_by_departement: bool
 
     # LOCAL DEV
     # Si True, on n'utilise pas d'instance Scaleway: l'inférence tourne

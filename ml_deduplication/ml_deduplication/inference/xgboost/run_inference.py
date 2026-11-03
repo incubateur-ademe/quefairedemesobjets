@@ -31,6 +31,7 @@ from ml_deduplication.modeling.xgboost.preprocessing import (
     preprocess_entities_df_batched,
 )
 from ml_deduplication.modeling.xgboost.schema import OPTIMIZED_SCHEMA
+from ml_deduplication.modeling.xgboost.utils import create_duckdb_con
 from ml_deduplication.training.xgboost.training import apply_calibrator
 
 logging.basicConfig(
@@ -208,6 +209,10 @@ def linkage_rule(column: str) -> tuple[list[str], list[str]]:
     return [business_rule], [column]
 
 
+def keep_positive(df_scores: pl.DataFrame, threshold: float) -> pl.DataFrame:
+    return df_scores.filter(pl.col("score_true_calibrated") >= threshold)
+
+
 def save_results_to_db(
     database_uri: str,
     output_table: str,
@@ -265,8 +270,6 @@ def main():
             "or --acteurs-table (not both, not none)."
         )
         raise SystemExit(1)
-
-    split_by_departement = args.split_by_departement
 
     linkage_columns_to_keep: list[str] = []
     linkage_sql_exprs: list[str] = []
@@ -328,132 +331,71 @@ def main():
             threshold = training_results["best_threshold"]
     logger.info("This run will use the value %s as threshold", threshold)
 
+    duckdb_con = create_duckdb_con()
     df_calibrated_predictions = None
-    if split_by_departement:
-        dfs_predictions = []
-        dfs_clusters = []
+
+    additional_columns_to_keep = [
+        *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+        *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
+        "parent_id",
+        *linkage_columns_to_keep,
+    ]
+    additional_business_rules_sql_exprs = [
+        "coalesce(parent_id_l,'-1') <> coalesce(parent_id_r,'-2')",
+        *linkage_sql_exprs,
+    ]
+
+    positive_frames = []
+    n_pairs_total = 0
+
+    if args.batch_size > 0:
+        # Stream candidate pairs in batches from duckdb so the heavy
+        # features matrix is never fully materialized in memory. Only the
+        # positive pairs (score >= threshold) are kept for clustering.
+        logger.info("Scoring candidate pairs in batches of %d", args.batch_size)
         with logging_redirect_tqdm():
-            for departement, df in tqdm(
-                df_acteurs.group_by(pl.col("code_postal").str.slice(0, 2))
-            ):
-                departement_code: str = departement[0]
-                if len(df) < 2:
-                    logger.info(
-                        "Not enough acteurs in departement %s to clusterize",
-                        departement_code,
-                    )
-                    continue
-                logger.info("Starting prediction for departement %s", departement_code)
-
-                X_temp = preprocess_entities_df(
-                    df,
+            for batch in tqdm(
+                preprocess_entities_df_batched(
+                    df_acteurs,
                     embedding_model=embedding_model,
-                    additional_columns_to_keep=[
-                        *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
-                        *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
-                        "parent_id",
-                        *linkage_columns_to_keep,
-                    ],
+                    duckdb_con=duckdb_con,
+                    additional_columns_to_keep=additional_columns_to_keep,
                     include_label=False,
-                    additional_business_rules_sql_exprs=[
-                        "coalesce(parent_id_l,'-1') <> coalesce(parent_id_r,'-2')",
-                        *linkage_sql_exprs,
-                    ],
-                )
-                if (X_temp is None) or (len(X_temp) == 0):
-                    continue
-                # Step 3 : predict
-                df_predictions_tmp = model.predict(X_temp)
-                df_calibrated_predictions_tmp = apply_calibrator(
-                    calibrator, df_predictions_tmp
-                )
-
-                _, df_clusters_tmp = model.cluster(
-                    df_calibrated_predictions_tmp.with_columns(
-                        pl.col("score_true_calibrated").alias("score_true")
+                    additional_business_rules_sql_exprs=(
+                        additional_business_rules_sql_exprs
                     ),
-                    df_entities=df,
-                    threshold=threshold,
-                )
-                if len(df_predictions_tmp) > 0:
-                    dfs_predictions.append(df_calibrated_predictions_tmp)
-                if len(df_clusters_tmp) > 0:
-                    dfs_clusters.append(
-                        df_clusters_tmp.with_columns(
-                            pl.format(
-                                "dep_{}_{}".format(departement_code, "{}"),
-                                "cluster_id",
-                            ).alias("cluster_id")
-                        )
-                    )
-        df_calibrated_predictions = pl.concat(dfs_predictions, how="vertical")
-        df_clusters = pl.concat(dfs_clusters, how="vertical")
-    else:
-        additional_columns_to_keep = [
-            *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
-            *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
-            "parent_id",
-            *linkage_columns_to_keep,
-        ]
-        additional_business_rules_sql_exprs = [
-            "coalesce(parent_id_l,'-1') <> coalesce(parent_id_r,'-2')",
-            *linkage_sql_exprs,
-        ]
-
-        def keep_positive(df_scores: pl.DataFrame) -> pl.DataFrame:
-            return df_scores.filter(pl.col("score_true_calibrated") >= threshold)
-
-        positive_frames = []
-        n_pairs_total = 0
-
-        if args.batch_size > 0:
-            # Stream candidate pairs in batches from duckdb so the heavy
-            # features matrix is never fully materialized in memory. Only the
-            # positive pairs (score >= threshold) are kept for clustering.
-            logger.info("Scoring candidate pairs in batches of %d", args.batch_size)
-            with logging_redirect_tqdm():
-                for batch in tqdm(
-                    preprocess_entities_df_batched(
-                        df_acteurs,
-                        embedding_model=embedding_model,
-                        additional_columns_to_keep=additional_columns_to_keep,
-                        include_label=False,
-                        additional_business_rules_sql_exprs=(
-                            additional_business_rules_sql_exprs
-                        ),
-                        df_embeddings=df_embeddings,
-                        batch_size=args.batch_size,
-                    ),
-                    desc="Scoring candidate pairs",
-                ):
-                    n_pairs_total += len(batch)
-                    df_predictions_tmp = model.predict(batch, slim=True)
-                    df_calibrated_tmp = apply_calibrator(calibrator, df_predictions_tmp)
-                    df_positive_tmp = keep_positive(df_calibrated_tmp)
-                    if len(df_positive_tmp) > 0:
-                        positive_frames.append(df_positive_tmp)
-        else:
-            # Non-batched path: the full pairs frame is built and scored at
-            # once. Only suitable for small inputs (see --batch-size).
-            X = preprocess_entities_df(
-                df_acteurs,
-                embedding_model=embedding_model,
-                additional_columns_to_keep=additional_columns_to_keep,
-                include_label=False,
-                additional_business_rules_sql_exprs=(
-                    additional_business_rules_sql_exprs
+                    df_embeddings=df_embeddings,
+                    batch_size=args.batch_size,
                 ),
-                df_embeddings=df_embeddings,
-            )
-            if (X is None) or (len(X) == 0):
-                n_pairs_total = 0
-            else:
-                n_pairs_total = len(X)
-                df_predictions = model.predict(X, slim=True)
-                df_calibrated = apply_calibrator(calibrator, df_predictions)
-                df_positive = keep_positive(df_calibrated)
-                if len(df_positive) > 0:
-                    positive_frames.append(df_positive)
+                desc="Scoring candidate pairs",
+            ):
+                n_pairs_total += len(batch)
+                df_predictions_tmp = model.predict(batch, slim=True)
+                df_calibrated_tmp = apply_calibrator(calibrator, df_predictions_tmp)
+                df_positive_tmp = keep_positive(df_calibrated_tmp, threshold)
+                if len(df_positive_tmp) > 0:
+                    positive_frames.append(df_positive_tmp)
+    else:
+        # Non-batched path: the full pairs frame is built and scored at
+        # once. Only suitable for small inputs (see --batch-size).
+        X = preprocess_entities_df(
+            df_acteurs,
+            embedding_model=embedding_model,
+            duckdb_con=duckdb_con,
+            additional_columns_to_keep=additional_columns_to_keep,
+            include_label=False,
+            additional_business_rules_sql_exprs=(additional_business_rules_sql_exprs),
+            df_embeddings=df_embeddings,
+        )
+        if (X is None) or (len(X) == 0):
+            n_pairs_total = 0
+        else:
+            n_pairs_total = len(X)
+            df_predictions = model.predict(X, slim=True)
+            df_calibrated = apply_calibrator(calibrator, df_predictions)
+            df_positive = keep_positive(df_calibrated, threshold)
+            if len(df_positive) > 0:
+                positive_frames.append(df_positive)
 
         if n_pairs_total == 0:
             logger.warning(
@@ -473,12 +415,12 @@ def main():
             )
             raise SystemExit(0)
 
-        df_edges = pl.concat(positive_frames)
-        _, df_clusters = model.cluster(
-            df_edges.with_columns(pl.col("score_true_calibrated").alias("score_true")),
-            df_entities=df_acteurs,
-            threshold=threshold,
-        )
+    df_edges = pl.concat(positive_frames)
+    _, df_clusters = model.cluster(
+        df_edges.with_columns(pl.col("score_true_calibrated").alias("score_true")),
+        df_entities=df_acteurs,
+        threshold=threshold,
+    )
 
     df_clusters_multi = df_clusters.filter(
         pl.col("cluster_id").count().over("cluster_id") > 1

@@ -1,17 +1,21 @@
-"""Integration tests for the full preprocessing pipeline (`preprocess_entities_df`).
+"""Integration tests for the full preprocessing pipeline.
 
 Exercises preprocess -> blocking -> feature generation end-to-end on a small
 synthetic entity frame, with a fake embedding model in place of a real
-SentenceTransformer.
+SentenceTransformer. Both the single-pass (`preprocess_entities_df`) and the
+batched (`preprocess_entities_df_batched`) entry points run on a shared
+duckdb connection.
 """
 
 import numpy as np
 import polars as pl
+import pytest
 
 from ml_deduplication.modeling.xgboost.preprocessing import (
     preprocess_entities_df,
     preprocess_entities_df_batched,
 )
+from ml_deduplication.modeling.xgboost.utils import create_duckdb_con
 
 
 class FakeEmbedder:
@@ -84,8 +88,15 @@ def _duplicate_pair() -> list[dict]:
     ]
 
 
+@pytest.fixture
+def con():
+    c = create_duckdb_con()
+    yield c
+    c.close()
+
+
 class TestPreprocessEntitiesDf:
-    def test_returns_none_when_no_pairs(self):
+    def test_returns_none_when_no_pairs(self, con):
         # two entities that share nothing (different source is fine but nothing
         # links them) -> no candidate pairs
         df = _frame(
@@ -122,11 +133,18 @@ class TestPreprocessEntitiesDf:
                 },
             ]
         )
-        assert preprocess_entities_df(df, FakeEmbedder(), include_label=True) is None
+        assert (
+            preprocess_entities_df(
+                df, FakeEmbedder(), duckdb_con=con, include_label=True
+            )
+            is None
+        )
 
-    def test_returns_features_and_label(self):
+    def test_returns_features_and_label(self, con):
         df = _frame(_duplicate_pair())
-        result = preprocess_entities_df(df, FakeEmbedder(), include_label=True)
+        result = preprocess_entities_df(
+            df, FakeEmbedder(), duckdb_con=con, include_label=True
+        )
         assert isinstance(result, tuple)
         X, y = result
         assert "label" not in X.columns
@@ -136,16 +154,18 @@ class TestPreprocessEntitiesDf:
         assert "identifiant_unique_l" in X.columns
         assert "identifiant_unique_r" in X.columns
 
-    def test_returns_features_only_when_no_label(self):
+    def test_returns_features_only_when_no_label(self, con):
         df = _frame(_duplicate_pair())
-        X = preprocess_entities_df(df, FakeEmbedder(), include_label=False)
+        X = preprocess_entities_df(
+            df, FakeEmbedder(), duckdb_con=con, include_label=False
+        )
         assert not isinstance(X, tuple)
         assert "label" not in X.columns
         assert X["identifiant_unique_l"].to_list() == ["e1"]
 
 
 class TestIterFeatureBatches:
-    def test_batches_concatenate_to_full_preprocess(self):
+    def test_batches_concatenate_to_full_preprocess(self, con):
         # 8 entities sharing siren/department/geo but with distinct sources
         # cross-pair into 8*7/2 = 28 candidate pairs. A small batch_size forces
         # multiple batches whose concatenation must equal the full pipeline.
@@ -169,13 +189,19 @@ class TestIterFeatureBatches:
                 for i in range(8)
             ]
         )
-        X_full = preprocess_entities_df(df, FakeEmbedder(), include_label=False)
+        X_full = preprocess_entities_df(
+            df, FakeEmbedder(), duckdb_con=con, include_label=False
+        )
         assert X_full is not None
         n_full = len(X_full)
 
         batches = list(
             preprocess_entities_df_batched(
-                df, FakeEmbedder(), include_label=False, batch_size=2
+                df,
+                FakeEmbedder(),
+                duckdb_con=con,
+                include_label=False,
+                batch_size=2,
             )
         )
         assert len(batches) > 1
@@ -189,9 +215,8 @@ class TestIterFeatureBatches:
         assert X_batched.schema == X_full_sorted.schema
         for col in X_full_sorted.columns:
             if col == "adresse_clean_distance":
-                # duckdb (list_cosine_similarity) and polars (polars-distance)
-                # legitimately differ by a few ULPs of float32 on the cosine, so
-                # compare with a tolerance instead of exact equality.
+                # duckdb (list_cosine_similarity) may legitimately differ by a
+                # few ULPs of float32 on the cosine, so compare with a tolerance.
                 assert np.allclose(
                     X_batched[col].to_numpy(),
                     X_full_sorted[col].to_numpy(),
@@ -201,10 +226,9 @@ class TestIterFeatureBatches:
             else:
                 assert X_batched[col].equals(X_full_sorted[col])
 
-    def test_no_candidate_pairs_yields_no_batches(self):
+    def test_no_candidate_pairs_yields_no_batches(self, con):
         # Two entities that share nothing produce no candidate pairs, so the
-        # generator yields nothing (the empty-input case itself is rejected by
-        # preprocess_features before blocking).
+        # generator yields nothing.
         df = _frame(
             [
                 {
@@ -241,7 +265,12 @@ class TestIterFeatureBatches:
         )
         assert (
             list(
-                preprocess_entities_df_batched(df, FakeEmbedder(), include_label=False)
+                preprocess_entities_df_batched(
+                    df,
+                    FakeEmbedder(),
+                    duckdb_con=con,
+                    include_label=False,
+                )
             )
             == []
         )

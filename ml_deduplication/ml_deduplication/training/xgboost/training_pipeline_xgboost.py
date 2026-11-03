@@ -20,6 +20,7 @@ from ml_deduplication.modeling.xgboost.model import (
     XGBoostBusinessRulesModel,
 )
 from ml_deduplication.modeling.xgboost.preprocessing import preprocess_entities_df
+from ml_deduplication.modeling.xgboost.utils import create_duckdb_con
 from ml_deduplication.training.settings import LOGS_FOLDER
 from ml_deduplication.training.xgboost.training import (
     apply_calibrator,
@@ -114,25 +115,35 @@ def run_training_pipeline(
     )
 
     # Final training without early stopping.
-    X_train_full, y_train = preprocess_entities_df(
-        df_entities_train,
-        embedding_model=embedding_model,
-        additional_columns_to_keep=[
-            *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
-            *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
-        ],
-    )
+    duckdb_con_train = create_duckdb_con()
+    try:
+        X_train_full, y_train = preprocess_entities_df(
+            df_entities_train,
+            duckdb_con=duckdb_con_train,
+            embedding_model=embedding_model,
+            additional_columns_to_keep=[
+                *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+                *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
+            ],
+        )
+    finally:
+        duckdb_con_train.close()
     final_model.train(train_data=(X_train_full, y_train))
 
     # Final evaluation on untouched test set.
-    X_test, y_test = preprocess_entities_df(
-        df_entities_test,
-        embedding_model=embedding_model,
-        additional_columns_to_keep=[
-            *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
-            *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
-        ],
-    )
+    duckdb_con_test = create_duckdb_con()
+    try:
+        X_test, y_test = preprocess_entities_df(
+            df_entities_test,
+            duckdb_con=duckdb_con_test,
+            embedding_model=embedding_model,
+            additional_columns_to_keep=[
+                *DEFAULT_SHOULD_BE_DIFFERENT_FIELDS,
+                *DEFAULT_SHOULD_BE_EQUAL_FIELDS,
+            ],
+        )
+    finally:
+        duckdb_con_test.close()
     df_pairs_preds_test = final_model.predict(X_test)
     df_calibrated_pairs_preds_test = apply_calibrator(
         calibrator,

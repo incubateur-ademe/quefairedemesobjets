@@ -1,17 +1,22 @@
 import logging
+from collections.abc import Generator
 
+import duckdb
 import polars as pl
 from sentence_transformers import SentenceTransformer
 
 from ml_deduplication.modeling.xgboost.blocking import (
-    block_df,
-    block_features_batches,
+    run_blocking,
 )
 from ml_deduplication.modeling.xgboost.features_engineering import (
-    build_adresse_lookup,
     generate_features,
 )
 from ml_deduplication.modeling.xgboost.schema import OPTIMIZED_SCHEMA
+from ml_deduplication.modeling.xgboost.utils import (
+    get_features_df_batches_from_duckdb,
+    get_features_df_from_duckdb,
+    load_df_acteurs_to_duckdb,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +55,15 @@ def strip_ville_from_name(data: dict) -> str:
 
 def preprocess_features(
     df_features: pl.DataFrame,
-    embedding_model: SentenceTransformer,
+    embedding_model: SentenceTransformer | None = None,
     df_embeddings: pl.DataFrame | None = None,
 ) -> pl.DataFrame:
+
+    if all(e is None for e in [embedding_model, df_embeddings]):
+        raise ValueError(
+            "Please provide either an embedding model or a dataframe containing precomputed embeddings."
+        )
+
     df_features_preprocessed = df_features.clone()
 
     df_features_preprocessed = df_features_preprocessed.with_columns(
@@ -139,22 +150,21 @@ def preprocess_features(
     return df_features_preprocessed
 
 
-def preprocess_entities_df_batched(
+def _run_preprocessing_pipeline(
     df_entities: pl.DataFrame,
     embedding_model: SentenceTransformer,
-    include_label: bool = True,
-    additional_columns_to_keep: None | list[str] = None,
-    additional_business_rules_sql_exprs: list[str] | None = None,
-    df_embeddings: pl.DataFrame | None = None,
-    batch_size: int = 1_000_000,
-):
-    """Stream candidate pairs as batches of generated features.
+    duckdb_con: duckdb.DuckDBPyConnection,
+    include_label: bool,
+    additional_columns_to_keep: None | list[str],
+    additional_business_rules_sql_exprs: list[str] | None,
+    df_embeddings: pl.DataFrame | None,
+) -> int | None:
+    """Run preprocess + blocking + feature generation inside ``duckdb_con``.
 
-    Streaming counterpart of :func:`preprocess_entities_df`. Runs the duckdb
-    blocking step once, then yields one polars :class:`DataFrame` of generated
-    features per batch of ``batch_size`` candidate pairs. This keeps the heavy
-    features matrix (and the per-batch adresse-vector distance computation)
-    bounded in memory regardless of the total number of candidate pairs.
+    Leaves the ``pairs_features`` table materialized in duckdb (dropping the
+    intermediate ``pairs`` / ``features`` tables). Returns the number of
+    candidate pairs, or ``None`` when no candidates were found so the caller can
+    short-circuit before reading the feature table.
     """
     logger.info("Starting data preprocessing...")
     df_features_preprocessed = preprocess_features(
@@ -162,78 +172,109 @@ def preprocess_entities_df_batched(
     )
 
     additional_columns_to_keep = additional_columns_to_keep or []
-    if include_label:
-        additional_columns_to_keep.extend(["cluster_id", "cluster_id_split"])
-    additional_columns_to_keep = list(set(additional_columns_to_keep))
+    load_df_acteurs_to_duckdb(
+        con=duckdb_con,
+        df_acteurs=df_features_preprocessed,
+        additional_columns_to_keep=additional_columns_to_keep,
+    )
 
     logger.info("Starting blocking...")
-    # Features are computed directly in duckdb (block_features_batches) so each
-    # streamed batch is slim and never materializes the fat pair join.
-    for batch_features in block_features_batches(
-        df_features_preprocessed,
+    num_candidates = run_blocking(
+        duckdb_con,
         additional_business_rules_sql_exprs,
+    )
+    logger.info("Finished blocking.")
+    if num_candidates == 0:
+        return None
+    logger.info("Starting generating features...")
+
+    generate_features(
+        duckdb_con,
+        include_label,
         additional_columns_to_keep,
-        batch_size=batch_size,
-    ):
-        logger.info("Streaming batch of %d feature pairs...", len(batch_features))
-        if include_label:
-            batch_features = batch_features.with_columns(
-                pl.coalesce(
-                    (pl.col("cluster_id_l") == pl.col("cluster_id_r")), False
-                ).alias("label"),
-                pl.when("label")
-                .then("cluster_id_l")
-                .otherwise(None)
-                .alias("cluster_id"),
-            )
-        yield batch_features
+    )
     logger.info("Finished generating features.")
+    return num_candidates
 
 
 def preprocess_entities_df(
     df_entities: pl.DataFrame,
     embedding_model: SentenceTransformer,
+    duckdb_con: duckdb.DuckDBPyConnection,
     include_label: bool = True,
     additional_columns_to_keep: None | list[str] = None,
     additional_business_rules_sql_exprs: list[str] | None = None,
     df_embeddings: pl.DataFrame | None = None,
 ) -> pl.DataFrame | tuple[pl.DataFrame, pl.DataFrame] | None:
-    logger.info("Starting data preprocessing...")
-    df_features_preprocessed = preprocess_features(
-        df_entities, embedding_model, df_embeddings
-    )
+    """Build the frame ready to be scored in a single pass (no batching).
 
-    additional_columns_to_keep = additional_columns_to_keep or []
-    if include_label:
-        additional_columns_to_keep.extend(["cluster_id", "cluster_id_split"])
-
-    additional_columns_to_keep = list(set(additional_columns_to_keep))
-
-    logger.info("Starting blocking...")
-    df_pairs = block_df(
-        df_features_preprocessed,
-        additional_business_rules_sql_exprs,
-        additional_columns_to_keep,
-    )
-    logger.info("Finished blocking.")
-    if len(df_pairs) == 0:
-        return None
-    logger.info("Starting generating features...")
-    adresse_lookup = build_adresse_lookup(
-        df_features_preprocessed.select("identifiant_unique", "adresse_clean_vector")
-    )
-    df_pairs_features = generate_features(
-        df_pairs,
+    Runs preprocessing, blocking and feature generation inside ``duckdb_con``,
+    then returns the materialized feature frame. Returns ``None`` when no
+    candidate pairs were found. When ``include_label`` is ``True``, returns a
+    ``(X, y)`` tuple; otherwise the plain feature frame ``X``.
+    """
+    n = _run_preprocessing_pipeline(
+        df_entities,
+        embedding_model,
+        duckdb_con,
         include_label,
         additional_columns_to_keep,
-        adresse_lookup=adresse_lookup,
+        additional_business_rules_sql_exprs,
+        df_embeddings,
     )
-    logger.info("Finished generating features.")
-    X = df_pairs_features
+    if n is None:
+        return None
 
+    logger.info("Reading features from duckdb...")
+    df_pairs_features = get_features_df_from_duckdb(duckdb_con)
+    logger.info("Finished data processing.")
+    X = df_pairs_features.select(pl.selectors.exclude("label"))
     if include_label:
         y = df_pairs_features.select(pl.col("label"))
-        return X.select(pl.selectors.exclude("label")), y
-
-    logger.info("Finished data processing.")
+        return X, y
     return X
+
+
+def preprocess_entities_df_batched(
+    df_entities: pl.DataFrame,
+    embedding_model: SentenceTransformer,
+    duckdb_con: duckdb.DuckDBPyConnection,
+    include_label: bool = True,
+    additional_columns_to_keep: None | list[str] = None,
+    additional_business_rules_sql_exprs: list[str] | None = None,
+    df_embeddings: pl.DataFrame | None = None,
+    batch_size: int = 1_000_000,
+) -> Generator[pl.DataFrame | tuple[pl.DataFrame, pl.DataFrame]]:
+    """Yield candidate-pair feature batches from a single duckdb blocking pass.
+
+    Builds the ``pairs_features`` table once inside ``duckdb_con``, then streams
+    it in ordered Arrow record batches of ``batch_size`` rows, converted on the
+    fly to polars. Each yielded item is ``(X, y)`` when ``include_label`` is
+    ``True``, otherwise just ``X`` (the ``label`` column excluded). If no
+    candidate pairs are found, the generator yields nothing. This keeps the
+    heavy features matrix bounded in memory regardless of the total number of
+    candidate pairs.
+    """
+    n = _run_preprocessing_pipeline(
+        df_entities,
+        embedding_model,
+        duckdb_con,
+        include_label,
+        additional_columns_to_keep,
+        additional_business_rules_sql_exprs,
+        df_embeddings,
+    )
+    if n is None:
+        return
+
+    logger.info("Streaming features from duckdb in batches of %d...", batch_size)
+    for batch_arrow in get_features_df_batches_from_duckdb(
+        duckdb_con, batch_size=batch_size
+    ):
+        X = batch_arrow.select(pl.selectors.exclude("label"))
+        if include_label:
+            y = batch_arrow.select(pl.col("label"))
+            yield X, y
+        else:
+            yield X
+    logger.info("Finished data processing.")

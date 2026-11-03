@@ -268,11 +268,6 @@ PARAMS = {
         type=["null", "string"],
         description_md="Column holding the dataset id for cross-dataset linkage.",
     ),
-    "split_by_departement": Param(
-        False,
-        type="boolean",
-        description_md="Run inference split per departement.",
-    ),
     "use_gpu": Param(
         USE_GPU,
         type="boolean",
@@ -354,9 +349,6 @@ def ml_deduplication_inference():
         "ML_DEDUPLICATION_IMAGE": "{{ params.image_ref }}",
         "ML_DEDUPLICATION_MODEL_THRESHOLD": "{{ params.model_threshold or '' }}",
         "ML_DEDUPLICATION_LINKAGE_COLUMN": "{{ params.linkage_column or '' }}",
-        "ML_DEDUPLICATION_SPLIT_BY_DEPARTEMENT": (
-            "{{ '1' if params.split_by_departement else '0' }}"
-        ),
         # Local mode: when "1"/"true", create/wait/destroy become no-ops and
         # run_inference runs the image locally with docker instead of on a
         # Scaleway instance.
@@ -469,7 +461,6 @@ if __name__ == "__main__":
                 "ville",
             ],
             "include_acteur_types": ["commerce (id=4)", "artisan (id=3)"],
-            "split_by_departement": False,
             "dedup_enrich_keep_empty": False,
             "dedup_enrich_exclude_sources": [],
             "dedup_enrich_priority_sources": [],

@@ -9,6 +9,7 @@ from ml_deduplication.modeling.xgboost.model import (
     DEFAULT_SHOULD_BE_EQUAL_FIELDS,
 )
 from ml_deduplication.modeling.xgboost.preprocessing import preprocess_entities_df
+from ml_deduplication.modeling.xgboost.utils import create_duckdb_con
 from ml_deduplication.training.settings import RANDOM_SEED
 from ml_deduplication.training.utils import assign_kfolds
 
@@ -44,54 +45,72 @@ def prepare_folds(
     ]
 
     folds = []
+    duckdb_con_train = create_duckdb_con()
+    duckdb_con_dev = create_duckdb_con()
+    try:
+        for fold in range(n_splits):
+            if (
+                (cache_data_dir is not None)
+                and cache_data_dir.exists()
+                and len(list(cache_data_dir.glob(f"*_fold_{fold}.parquet"))) > 0
+            ):
+                df_train = pl.read_parquet(
+                    cache_data_dir / f"df_train_fold_{fold}.parquet"
+                )
+                X_train = pl.read_parquet(
+                    cache_data_dir / f"X_train_fold_{fold}.parquet"
+                )
+                y_train = pl.read_parquet(
+                    cache_data_dir / f"y_train_fold_{fold}.parquet"
+                )
+                df_dev = pl.read_parquet(cache_data_dir / f"df_dev_fold_{fold}.parquet")
+                X_dev = pl.read_parquet(cache_data_dir / f"X_dev_fold_{fold}.parquet")
+                y_dev = pl.read_parquet(cache_data_dir / f"y_dev_fold_{fold}.parquet")
+            else:
+                logger.info("Preprocessing fold %s/%s", fold + 1, n_splits)
 
-    for fold in range(n_splits):
-        if (
-            (cache_data_dir is not None)
-            and cache_data_dir.exists()
-            and len(list(cache_data_dir.glob(f"*_fold_{fold}.parquet"))) > 0
-        ):
-            df_train = pl.read_parquet(cache_data_dir / f"df_train_fold_{fold}.parquet")
-            X_train = pl.read_parquet(cache_data_dir / f"X_train_fold_{fold}.parquet")
-            y_train = pl.read_parquet(cache_data_dir / f"y_train_fold_{fold}.parquet")
-            df_dev = pl.read_parquet(cache_data_dir / f"df_dev_fold_{fold}.parquet")
-            X_dev = pl.read_parquet(cache_data_dir / f"X_dev_fold_{fold}.parquet")
-            y_dev = pl.read_parquet(cache_data_dir / f"y_dev_fold_{fold}.parquet")
-        else:
-            logger.info("Preprocessing fold %s/%s", fold + 1, n_splits)
+                df_train = df_with_folds.filter(pl.col("fold") != fold).drop("fold")
+                df_dev = df_with_folds.filter(pl.col("fold") == fold).drop("fold")
 
-            df_train = df_with_folds.filter(pl.col("fold") != fold).drop("fold")
-            df_dev = df_with_folds.filter(pl.col("fold") == fold).drop("fold")
+                X_train, y_train = preprocess_entities_df(
+                    df_train,
+                    duckdb_con=duckdb_con_train,
+                    embedding_model=embedding_model,
+                    additional_columns_to_keep=additional_columns_to_keep,
+                )
 
-            X_train, y_train = preprocess_entities_df(
-                df_train,
-                embedding_model=embedding_model,
-                additional_columns_to_keep=additional_columns_to_keep,
-            )
+                X_dev, y_dev = preprocess_entities_df(
+                    df_dev,
+                    duckdb_con=duckdb_con_dev,
+                    embedding_model=embedding_model,
+                    additional_columns_to_keep=additional_columns_to_keep,
+                )
+                if cache_data_dir is not None:
+                    cache_data_dir.mkdir(exist_ok=True)
+                    df_train.write_parquet(
+                        cache_data_dir / f"df_train_fold_{fold}.parquet"
+                    )
+                    X_train.write_parquet(
+                        cache_data_dir / f"X_train_fold_{fold}.parquet"
+                    )
+                    y_train.write_parquet(
+                        cache_data_dir / f"y_train_fold_{fold}.parquet"
+                    )
+                    df_dev.write_parquet(cache_data_dir / f"df_dev_fold_{fold}.parquet")
+                    X_dev.write_parquet(cache_data_dir / f"X_dev_fold_{fold}.parquet")
+                    y_dev.write_parquet(cache_data_dir / f"y_dev_fold_{fold}.parquet")
 
-            X_dev, y_dev = preprocess_entities_df(
-                df_dev,
-                embedding_model=embedding_model,
-                additional_columns_to_keep=additional_columns_to_keep,
-            )
-            if cache_data_dir is not None:
-                cache_data_dir.mkdir(exist_ok=True)
-                df_train.write_parquet(cache_data_dir / f"df_train_fold_{fold}.parquet")
-                X_train.write_parquet(cache_data_dir / f"X_train_fold_{fold}.parquet")
-                y_train.write_parquet(cache_data_dir / f"y_train_fold_{fold}.parquet")
-                df_dev.write_parquet(cache_data_dir / f"df_dev_fold_{fold}.parquet")
-                X_dev.write_parquet(cache_data_dir / f"X_dev_fold_{fold}.parquet")
-                y_dev.write_parquet(cache_data_dir / f"y_dev_fold_{fold}.parquet")
+            fold_data = {
+                "df_entities_train": df_train,
+                "X_train": X_train,
+                "y_train": y_train,
+                "df_entities_dev": df_dev,
+                "X_dev": X_dev,
+                "y_dev": y_dev,
+            }
 
-        fold_data = {
-            "df_entities_train": df_train,
-            "X_train": X_train,
-            "y_train": y_train,
-            "df_entities_dev": df_dev,
-            "X_dev": X_dev,
-            "y_dev": y_dev,
-        }
-
-        folds.append(fold_data)
-
+            folds.append(fold_data)
+    finally:
+        duckdb_con_train.close()
+        duckdb_con_dev.close()
     return folds

@@ -1,14 +1,20 @@
-"""Tests for the XGBoost blocking step (`block_df`).
+"""Tests for the XGBoost blocking step (`run_blocking`).
 
-Candidate generation happens in duckdb with three predicates (siren, first-two
-code_postal digits, 30km geo distance) combined with the business rules
-(acteur type compatibility and distinct source). Tests use small synthetic
-frames and assert on the resulting candidate pairs.
+Candidate generation now happens inside an existing duckdb connection: the
+caller loads the preprocessed entities into `features_minimal`
+(`load_df_acteurs_to_duckdb`), then `run_blocking` builds the mutually-exclusive
+predicate tables (departement / geo / siren) and merges them into the `pairs`
+table. These tests drive that flow and assert on the resulting candidate pairs.
 """
 
 import polars as pl
+import pytest
 
-from ml_deduplication.modeling.xgboost.blocking import block_df, block_df_batches
+from ml_deduplication.modeling.xgboost.blocking import run_blocking
+from ml_deduplication.modeling.xgboost.utils import (
+    create_duckdb_con,
+    load_df_acteurs_to_duckdb,
+)
 
 
 def _frame(rows: list[dict]) -> pl.DataFrame:
@@ -46,12 +52,20 @@ def _frame(rows: list[dict]) -> pl.DataFrame:
 PARIS = {"lat": 48.85, "lon": 2.35}
 
 
-def _pair_keys(out: pl.DataFrame) -> set[tuple[str, str]]:
-    return set(zip(out["identifiant_unique_l"], out["identifiant_unique_r"]))
+def _pair_keys(con) -> set[tuple[str, str]]:
+    pairs = con.sql("SELECT identifiant_unique_l, identifiant_unique_r FROM pairs").pl()
+    return set(zip(pairs["identifiant_unique_l"], pairs["identifiant_unique_r"]))
+
+
+@pytest.fixture
+def con():
+    c = create_duckdb_con()
+    yield c
+    c.close()
 
 
 class TestBlocking:
-    def test_blocks_and_dedups_on_siren_departement_geo(self):
+    def test_blocks_and_dedups_on_siren_departement_geo(self, con):
         df = _frame(
             [
                 {
@@ -82,17 +96,12 @@ class TestBlocking:
                 },
             ]
         )
-        out = block_df(df)
-        # e1-e2 found through all three predicates but deduped to one pair
-        assert _pair_keys(out) == {("e1", "e2")}
-        # e3 is far away and shares nothing -> excluded
-        row = out.to_pandas().iloc[0]
-        assert row["identifiant_unique_l"] == "e1"
-        assert row["identifiant_unique_r"] == "e2"
-        assert row["geo_distance"] < 1000
+        load_df_acteurs_to_duckdb(df, con)
+        run_blocking(con)
+        # e1-e2 is found through all three predicates but deduped to one pair
+        assert _pair_keys(con) == {("e1", "e2")}
 
-    def test_same_source_is_excluded(self):
-        # same siren but same source -> the source rule rejects the pair
+    def test_same_source_is_excluded(self, con):
         df = _frame(
             [
                 {
@@ -114,10 +123,12 @@ class TestBlocking:
                 },
             ]
         )
-        out = block_df(df)
-        assert out.is_empty()
+        load_df_acteurs_to_duckdb(df, con)
+        n = run_blocking(con)
+        assert n == 0
+        assert _pair_keys(con) == set()
 
-    def test_acteur_type_3_and_4_compatible(self):
+    def test_acteur_type_3_and_4_compatible(self, con):
         df = _frame(
             [
                 {
@@ -139,10 +150,11 @@ class TestBlocking:
                 },
             ]
         )
-        out = block_df(df)
-        assert _pair_keys(out) == {("e1", "e2")}
+        load_df_acteurs_to_duckdb(df, con)
+        run_blocking(con)
+        assert _pair_keys(con) == {("e1", "e2")}
 
-    def test_incompatible_acteur_type_excluded(self):
+    def test_incompatible_acteur_type_excluded(self, con):
         # type 1 vs 2 (neither 3 nor 4) -> not compatible -> excluded
         df = _frame(
             [
@@ -165,13 +177,14 @@ class TestBlocking:
                 },
             ]
         )
-        out = block_df(df)
-        assert out.is_empty()
+        load_df_acteurs_to_duckdb(df, con)
+        run_blocking(con)
+        assert _pair_keys(con) == set()
 
-    def test_geo_only_pairs_nearby(self):
+    def test_geo_only_pairs_nearby(self, con):
         # e1 & e2 are in different departments but geographically adjacent ->
-        # they pair ONLY through the 30km geo predicate. e3 is far from both
-        # and in a different department -> excluded.
+        # they pair ONLY through the geo predicate. e3 is far from both and in
+        # a different department -> excluded.
         df = _frame(
             [
                 {
@@ -203,18 +216,16 @@ class TestBlocking:
                 },
             ]
         )
-        out = block_df(df)
-        assert _pair_keys(out) == {("e1", "e2")}
+        load_df_acteurs_to_duckdb(df, con)
+        run_blocking(con)
+        assert _pair_keys(con) == {("e1", "e2")}
 
-    def test_empty_input_returns_empty(self):
+    def test_empty_input_returns_zero(self, con):
         df = _frame([])
-        out = block_df(df)
-        assert out.is_empty()
-        assert {"identifiant_unique_l", "identifiant_unique_r", "geo_distance"} <= set(
-            out.columns
-        )
+        load_df_acteurs_to_duckdb(df, con)
+        assert run_blocking(con) == 0
 
-    def test_additional_business_rules_injected(self):
+    def test_additional_business_rules_injected(self, con):
         df = _frame(
             [
                 {
@@ -236,11 +247,14 @@ class TestBlocking:
                 },
             ]
         )
+        load_df_acteurs_to_duckdb(df, con)
         # a contradictory extra rule removes every candidate
-        out = block_df(df, additional_business_rules_sql_exprs=["1 = 0"])
-        assert out.is_empty()
+        run_blocking(con, additional_business_rules_sql_exprs=["1 = 0"])
+        assert _pair_keys(con) == set()
 
-    def test_additional_columns_to_keep(self):
+    def test_reusing_same_connection_is_idempotent(self, con):
+        # A second pipeline run on the same connection must not collide with
+        # pre-existing tables (CREATE OR REPLACE keeps re-runs safe).
         df = _frame(
             [
                 {
@@ -250,7 +264,6 @@ class TestBlocking:
                     **PARIS,
                     "source": 1,
                     "type": 1,
-                    "ville": "paris",
                 },
                 {
                     "id": "e2",
@@ -260,45 +273,13 @@ class TestBlocking:
                     "lon": 2.3501,
                     "source": 2,
                     "type": 1,
-                    "ville": "paris",
                 },
             ]
         )
-        out = block_df(df, additional_columns_to_keep=["ville_clean"])
-        assert "ville_clean_l" in out.columns
-        assert "ville_clean_r" in out.columns
-
-
-class TestBlockDfBatches:
-    def test_batches_concatenate_to_block_df(self):
-        # 4 entities with the same siren, department and geo location generate
-        # 4*3/2 = 6 candidate pairs. A batch_size of 2 must split them into
-        # several ordered batches whose concatenation equals block_df's output.
-        df = _frame(
-            [
-                {
-                    "id": f"e{i}",
-                    "siren": "1",
-                    "code_postal": "75001",
-                    "lat": 48.85 + 1e-4 * i,
-                    "lon": 2.35 + 1e-4 * i,
-                    "source": i + 1,
-                    "type": 1,
-                }
-                for i in range(4)
-            ]
-        )
-        out_full = block_df(df).sort(["identifiant_unique_l", "identifiant_unique_r"])
-        batches = list(block_df_batches(df, batch_size=2))
-        assert len(batches) > 1
-        for batch in batches:
-            assert len(batch) <= 2
-        out_batched = pl.concat(batches).sort(
-            ["identifiant_unique_l", "identifiant_unique_r"]
-        )
-        assert out_full.columns == out_batched.columns
-        assert out_full.equals(out_batched)
-
-    def test_empty_input_yields_no_batches(self):
-        df = _frame([])
-        assert list(block_df_batches(df, batch_size=2)) == []
+        load_df_acteurs_to_duckdb(df, con)
+        run_blocking(con)
+        assert _pair_keys(con) == {("e1", "e2")}
+        # run again on the same connection -> still works and same result
+        load_df_acteurs_to_duckdb(df, con)
+        run_blocking(con)
+        assert _pair_keys(con) == {("e1", "e2")}
