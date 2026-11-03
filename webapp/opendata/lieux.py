@@ -1,6 +1,7 @@
 """Open data of the places: the perimeter and the columns of the acteurs
 dataset published on data.ademe.fr."""
 
+from django.conf import settings
 from django.db.models import Exists, OuterRef
 from ninja import Field, Schema
 
@@ -43,6 +44,13 @@ class PropositionSchema(Schema):
     sous_categories: list[str]
 
 
+class PaterniteSchema(Schema):
+    code: str | None = None
+    nom: str
+    url: str | None = None
+    logo: str | None = None
+
+
 class PerimetreSchema(Schema):
     type: str
     valeur: str
@@ -59,7 +67,7 @@ class LieuSchema(Schema):
     """
 
     identifiant: str = Field(..., alias="uuid")
-    paternite: str
+    paternite: list[PaterniteSchema]
     nom: str
     nom_commercial: str | None = None
     siren: str | None = None
@@ -93,16 +101,30 @@ class LieuSchema(Schema):
     date_de_derniere_modification: str
 
     @staticmethod
-    def resolve_paternite(obj) -> str:
-        """Same string as the dataset: the site, ADEME, then the open sources."""
-        libelles = sorted(
+    def resolve_paternite(obj) -> list[dict]:
+        """Same contributors as the dataset, in the same order: the site,
+        ADEME, then the open sources by name."""
+        sources = sorted(
             {
-                source.libelle
+                source
                 for source in obj.sources.all()
                 if source.licence == DataLicense.OPEN_LICENSE
-            }
+            },
+            key=lambda source: source.libelle,
         )
-        return "|".join(["Que faire de mes objets et déchets", "ADEME", *libelles])
+        return [
+            {"nom": "Que faire de mes objets et déchets", "url": settings.BASE_URL},
+            {"nom": "ADEME", "url": "https://www.ademe.fr"},
+            *(
+                {
+                    "code": source.code,
+                    "nom": source.libelle,
+                    "url": source.url or None,
+                    "logo": source.logo_file_absolute_url or None,
+                }
+                for source in sources
+            ),
+        ]
 
     @staticmethod
     def resolve_latitude(obj) -> float | None:
