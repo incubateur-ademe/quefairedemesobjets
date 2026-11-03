@@ -61,6 +61,7 @@ packages = [
   "search",
   "settings",
   "stats",
+  "assistant",
 ]
 
 [tool.pytest.ini_options]
