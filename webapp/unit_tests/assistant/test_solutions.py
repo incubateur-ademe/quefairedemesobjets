@@ -23,6 +23,13 @@ def carte(page):
     return page.select_one('[data-controller="assistant-carte"]')
 
 
+def accessible_list(page):
+    return [
+        item.get_text(strip=True)
+        for item in page.select(".qfa-carte__accessible-list li")
+    ]
+
+
 def back_link(page):
     return page.select_one("a.qfa-changer-geste")
 
@@ -138,10 +145,39 @@ class TestSolutionsScreen:
 
         page = solutions(client, geste="reparer", longitude="2.36", latitude="48.85")
 
-        assert [
-            item.get_text(strip=True)
-            for item in page.select(".qfa-carte__accessible-list li")
-        ] == ["Atelier test"]
+        assert accessible_list(page) == ["Atelier test"]
+
+    def test_an_unknown_fiche_narrows_no_place(self, client, reparer):
+        place_offering(reparer, at=Point(2.36, 48.85, srid=4326), nom="Atelier test")
+
+        page = solutions(
+            client,
+            geste="reparer",
+            fiche="inconnue",
+            longitude="2.36",
+            latitude="48.85",
+        )
+
+        assert accessible_list(page) == ["Atelier test"]
+
+    def test_the_accessible_list_says_when_there_is_no_place(self, client):
+        page = solutions(client, geste="reparer", longitude="2.36", latitude="48.85")
+
+        assert accessible_list(page) == ["Aucun lieu à proximité pour ce geste."]
+
+    def test_the_map_message_is_a_live_region_from_the_start(self, client):
+        """Screen readers only announce changes to a region already present."""
+        page = solutions(client, geste="reparer")
+
+        message = carte(page).select_one('[data-assistant-carte-target="message"]')
+        assert message["role"] == "status"
+        assert message["aria-live"] == "polite"
+        assert message.has_attr("hidden")
+
+    def test_the_synonyme_follows_back_to_the_fiche(self, client, fiche):
+        page = solutions(client, geste="reparer", fiche=fiche.slug, synonyme="chaise")
+
+        assert query_of(back_link(page)["href"])["synonyme"] == ["chaise"]
 
     def test_the_map_canvas_is_a_permanent_element_inside_the_map(self, client):
         """Turbo carries the canvas from screen to screen; here it lives in

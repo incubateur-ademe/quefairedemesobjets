@@ -76,6 +76,14 @@ class TestReponse:
         assert payload["type"] == "FeatureCollection"
         assert len(payload["features"]) == 1
 
+    def test_an_unknown_geste_finds_no_place(self, client, reparer):
+        place_offering(reparer)
+
+        response = get_lieux(client, geste="inconnu")
+
+        assert response.status_code == 200
+        assert json.loads(response.content)["features"] == []
+
     def test_caps_results_at_twenty_places(self, client, reparer):
         for _ in range(MAX_PLACES_ON_MAP + 5):
             place_offering(reparer)
