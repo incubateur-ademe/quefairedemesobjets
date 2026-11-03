@@ -26,8 +26,9 @@ def task_info_get(task_name: str, filename: str) -> str:
     🎯 pourquoi: Mettre à jour régulièrement les consignes en open-data
 
     🏗️ comment: Le fichier est servi par l'API v1 de la webapp
-    (/api/v1/{filename}) et copié dans le bucket S3 : une copie datée, et le
-    fichier non daté comme dernier état
+    (/api/v1/{filename.removesuffix('.csv')}, Accept: text/csv) et copié
+    dans le bucket S3 : une copie datée, et le fichier non daté comme dernier
+    état
     """
 
 
