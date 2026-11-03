@@ -92,4 +92,4 @@ Dans le CMS, l'action de page « Convertir les cartes en grille de consignes » 
 
 ## Production
 
-Les lignes sont construites par `webapp/opendata/fiches.py` et servies par `webapp/opendata/api.py`. Le DAG `export_opendata_dag` (`data-platform/dags/acteurs/dags/export_opendata.py`) télécharge `/api/v1/produits.csv` et `/api/v1/consignes.csv` et les dépose dans le bucket `lvao-opendata`, répertoire `fiches/`.
+Les lignes sont construites par `webapp/opendata/fiches.py` et servies par `webapp/opendata/api.py`. Le DAG `export_opendata_dag` (`data-platform/dags/acteurs/dags/export_opendata.py`) télécharge `/api/v1/produits.csv` et `/api/v1/consignes.csv` et les dépose dans le bucket `lvao-opendata`, répertoire `fiches/`, comme l'export des acteurs : une copie datée par exécution (`<horodatage>_produits.csv`), et `produits.csv` / `consignes.csv` comme dernier état. Les copies datées de plus de 30 jours sont supprimées.

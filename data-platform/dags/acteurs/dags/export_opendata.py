@@ -1,8 +1,10 @@
-from acteurs.tasks.airflow_logic.export_opendata_csv_to_s3_task import (
-    export_opendata_csv_to_s3_task,
+from acteurs.tasks.airflow_logic.export_opendata_acteurs_to_s3_task import (
+    export_opendata_acteurs_to_s3_task,
 )
 from acteurs.tasks.airflow_logic.export_opendata_fiches_to_s3_task import (
-    export_opendata_fiches_to_s3_task,
+    export_opendata_consignes_to_s3_task,
+    export_opendata_produits_to_s3_task,
+    remove_old_s3_opendata_fiches_task,
 )
 from acteurs.tasks.airflow_logic.remove_old_s3_opendata_csv_task import (
     remove_old_s3_opendata_csv_task,
@@ -43,7 +45,9 @@ with DAG(
 ) as dag:
 
     chain(
-        export_opendata_csv_to_s3_task(dag=dag),
+        export_opendata_acteurs_to_s3_task(dag=dag),
         remove_old_s3_opendata_csv_task(dag=dag),
-        export_opendata_fiches_to_s3_task(dag=dag),
+        export_opendata_produits_to_s3_task(dag=dag),
+        export_opendata_consignes_to_s3_task(dag=dag),
+        remove_old_s3_opendata_fiches_task(dag=dag),
     )
