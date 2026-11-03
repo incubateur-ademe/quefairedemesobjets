@@ -1,0 +1,9 @@
+<a class="qfa-changer-geste" href="{{ url }}">
+    <span class="qfa-changer-geste__retour" aria-hidden="true"></span>
+    <span class="qfa-changer-geste__icones">
+        {% for geste in gestes %}
+            {% include "ui/components/assistant/icone_geste.html" with geste=geste %}
+        {% endfor %}
+    </span>
+    <span class="qfa-changer-geste__libelle">{{ libelle }}</span>
+</a>

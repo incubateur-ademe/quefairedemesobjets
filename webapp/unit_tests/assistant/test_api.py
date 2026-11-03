@@ -1,9 +1,11 @@
-"""API v1 endpoints of the assistant's search fields."""
+"""API v1 endpoints of the assistant's screens."""
 
 import pytest
+from django.contrib.gis.geos import Point
 from django.urls import reverse
 
-from unit_tests.assistant.helpers import rename_search_term
+from qfdmo.models.acteur import DataLicense
+from unit_tests.assistant.helpers import PARIS, place_offering, rename_search_term
 
 pytestmark = pytest.mark.django_db
 
@@ -32,3 +34,35 @@ class TestObjets:
         ]
 
         assert {"label": label, "slug": fiche.slug} in results
+
+
+class TestLieuxGeojson:
+    def test_the_map_keeps_every_source(self, client, reparer):
+        """The GeoJSON is what the assistant draws, not what is redistributed."""
+        place_offering(reparer, licence=DataLicense.NO_LICENSE)
+
+        payload = client.get(
+            reverse("api_v1:lieux-geojson"), {**PARIS, "geste": "reparer"}
+        ).json()
+
+        assert len(payload["features"]) == 1
+
+    def test_around_a_point_only_the_places_within_20_km(self, client, reparer):
+        near = place_offering(
+            reparer,
+            at=Point(2.3488, 48.95, srid=4326),  # ~11 km north
+            licence=DataLicense.OPEN_LICENSE,
+        )
+        place_offering(
+            reparer,
+            at=Point(2.3488, 49.10, srid=4326),  # ~27 km north
+            licence=DataLicense.OPEN_LICENSE,
+        )
+
+        payload = client.get(
+            reverse("api_v1:lieux-geojson"), {**PARIS, "geste": "reparer"}
+        ).json()
+
+        assert [feature["properties"]["uuid"] for feature in payload["features"]] == [
+            near.uuid
+        ]

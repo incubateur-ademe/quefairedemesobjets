@@ -1,4 +1,4 @@
-"""Objets: from what the user types to the fiche it designates."""
+"""Objets: from what the user types to a fiche and its synonymes."""
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import OperationalError, connection, transaction
@@ -24,6 +24,16 @@ FICHE_RELATIONS = ("produit_page", "page")
 def capitalize_first(text: str) -> str:
     """`str.capitalize()` would also lower the rest: « Bonus Réparation »."""
     return text[:1].upper() + text[1:]
+
+
+def fiche_for_label(label: str):
+    """The fiche of a term matching `label` exactly, for a URL carrying only
+    the text. Exact rather than fuzzy: a guess would open the wrong fiche."""
+    for model, field in LABEL_FIELDS:
+        for term in model.objects.filter(**{f"{field}__iexact": label})[:5]:
+            if page := fiche_of(term):
+                return page
+    return None
 
 
 def fiche_of(term):
@@ -78,6 +88,10 @@ def _specifics(ids: list[int]) -> dict[int, object]:
     return resolved
 
 
+def _is_synonyme(specific) -> bool:
+    return not isinstance(specific, ProduitPageSearchTerm)
+
+
 def _suggestion(specific) -> dict | None:
     """Label and fiche of a term; None when it leads to no live fiche."""
     if specific is None:
@@ -87,4 +101,39 @@ def _suggestion(specific) -> dict | None:
     if not label or page is None:
         return None
 
-    return {"label": capitalize_first(label), "slug": page.slug}
+    suggestion = {"label": capitalize_first(label), "slug": page.slug}
+    if _is_synonyme(specific):
+        suggestion["synonyme"] = specific.slug
+    return suggestion
+
+
+def synonyme_of(slug: str, fiche):
+    """The synonyme named by `slug`, if it still leads to `fiche`, else None:
+    a synonyme removed or moved since the URL was shared is ignored.
+    `SearchTag` first: the tags imported from `Synonyme` reuse its slugs."""
+    if not slug:
+        return None
+    for model in (SearchTag, Synonyme):
+        for term in model.objects.filter(slug=slug)[:5]:
+            if _leads_to(term, fiche):
+                return term
+    return None
+
+
+def synonyme_of_term(term_id, fiche):
+    """The synonyme behind a `SearchTerm` id (the site search's cookie), if it
+    leads to `fiche`, else None."""
+    specific = _specifics([term_id]).get(term_id) if term_id else None
+    if specific is None or not _is_synonyme(specific):
+        return None
+    return specific if _leads_to(specific, fiche) else None
+
+
+def synonyme_label(slug: str, fiche) -> str:
+    term = synonyme_of(slug, fiche)
+    return capitalize_first(term.get_title() or "") if term else ""
+
+
+def _leads_to(term, fiche) -> bool:
+    page = fiche_of(term)
+    return page is not None and page.pk == fiche.pk
