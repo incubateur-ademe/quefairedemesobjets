@@ -1,9 +1,4 @@
-"""The places query of the API v1: the same words as the assistant's URLs.
-
-Shared by the assistant's map (`assistant/api.py`) and the open data of the
-places (`opendata/api.py`): one parameter vocabulary, one selection chain
-(`DisplayedActeurQuerySet`), whoever the client is.
-"""
+"""Parameters and selection of the places, shared by every endpoint listing them."""
 
 import json
 import math
@@ -13,14 +8,6 @@ from ninja import Field, Schema
 from pydantic import field_validator, model_validator
 
 from qfdmo.models.acteur import DisplayedActeur
-
-# Leaflet bbox shape, as sent by the map: corner, axis, absolute bound.
-BBOX_CORNERS = (
-    ("southWest", "lng", 180),
-    ("southWest", "lat", 90),
-    ("northEast", "lng", 180),
-    ("northEast", "lat", 90),
-)
 
 
 def sous_categorie_ids_for(slug: str) -> list[int]:
@@ -53,8 +40,8 @@ class LieuxQuery(Schema):
     an area the user is not looking at.
     """
 
-    # ponytail: not validated against GroupeAction, that would cost the
-    # endpoint its single query. An unknown code yields an empty collection.
+    # Not checked against GroupeAction, to keep a single query: an unknown
+    # code yields no place.
     geste: list[str] = Field(
         ...,
         description="Code d'un GroupeAction (`/gestes`). Répétable : "
@@ -87,13 +74,17 @@ class LieuxQuery(Schema):
             return None
         try:
             corners = json.loads(raw)
-            bbox = [float(corners[corner][axis]) for corner, axis, _ in BBOX_CORNERS]
+            west, south, east, north = (
+                float(corners[corner][axis])
+                for corner in ("southWest", "northEast")
+                for axis in ("lng", "lat")
+            )
         except (ValueError, KeyError, TypeError):
             raise ValueError("unreadable bbox")
-        for value, (_, _, bound) in zip(bbox, BBOX_CORNERS):
+        for value, bound in ((west, 180), (south, 90), (east, 180), (north, 90)):
             if not math.isfinite(value) or abs(value) > bound:
                 raise ValueError("bbox out of range")
-        return bbox
+        return [west, south, east, north]
 
     @model_validator(mode="after")
     def position_required(self):
@@ -105,6 +96,6 @@ class LieuxQuery(Schema):
         """The places, through the same manager as every screen."""
         ids = sous_categorie_ids_for(self.fiche) if self.fiche else []
         acteurs = DisplayedActeur.objects.all().proposing(self.geste, ids)
-        if self.bbox:
+        if self.bbox is not None:
             return acteurs.within(self.bbox)
         return acteurs.nearest_to(self.longitude, self.latitude)

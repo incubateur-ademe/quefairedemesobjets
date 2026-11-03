@@ -2,9 +2,8 @@
 
 The places of the acteurs dataset published on data.ademe.fr (`lieux.py`) and
 the two tables of the fiches (`fiches.py`), as paginated JSON; the fiches also
-as a whole CSV table with `Accept: text/csv`. Mounted at `/api/v1/` next to the
-assistant's router (`core/api.py`): same parameters as the assistant's screens
-(`qfdmo/lieux_query.py`).
+as a whole CSV table with `Accept: text/csv`. Mounted at `/api/v1/`
+(`core/api.py`).
 """
 
 from functools import wraps
@@ -110,11 +109,9 @@ router = Router()
 @decorate_view(CACHE_FIVE_MINUTES)
 @paginate
 def lieux(request, query: Query[LieuxQuery]):
-    """Les mêmes lieux que l'assistant affiche, restreints aux sources sous
-    licence ouverte : le périmètre du jeu de données publié sur data.ademe.fr.
-
-    Triés par proximité du point donné, ou du centre de la zone `bbox`.
-    """
+    """Les lieux sous licence ouverte, le périmètre du jeu de données publié
+    sur data.ademe.fr, triés par proximité du point donné ou du centre de la
+    zone `bbox`."""
     return for_the_api(open_data(query.queryset()))
 
 
