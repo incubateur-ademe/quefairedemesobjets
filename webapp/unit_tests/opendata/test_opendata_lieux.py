@@ -18,8 +18,8 @@ from unit_tests.qfdmo.sscatobj_factory import SousCategorieObjetFactory
 
 pytestmark = pytest.mark.django_db
 
-PARIS = {"latitude": "48.8534", "longitude": "2.3488"}
 PARIS_POINT = Point(2.3488, 48.8534, srid=4326)
+PARIS = {"longitude": PARIS_POINT.x, "latitude": PARIS_POINT.y}
 
 # The columns of the CSV published on data.ademe.fr that the API serves.
 OPENDATA_COLUMNS = {
@@ -118,8 +118,9 @@ class TestLieux:
         for _ in range(3):
             place(reparer)
 
-        # count, places, then one query per prefetched relation.
-        with django_assert_max_num_queries(12):
+        with django_assert_max_num_queries(12) as one_place:
+            get_lieux(client, geste="reparer", limit=1)
+        with django_assert_max_num_queries(len(one_place)):
             get_lieux(client, geste="reparer")
 
     def test_unknown_fiche_is_a_404(self, client, reparer):
