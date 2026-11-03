@@ -24,6 +24,7 @@ from assistant.solutions import (
     sous_categorie_ids_of,
 )
 from qfdmd.models import ProduitPage
+from qfdmo.models.acteur import DisplayedActeur
 
 from .mixins import TurboFrameMixin
 
@@ -140,7 +141,9 @@ class LieuView(TurboFrameMixin, DetailView):
             back["geste"] = gestes
         return super().get_context_data(
             parcours=parcours,
-            parametres=urlencode(back, doseq=True),
+            url_solutions=(
+                f"{reverse('assistant:solutions')}?{urlencode(back, doseq=True)}"
+            ),
             infos_pratiques=practical_info_of(self.object),
             bonus_reparation=offers_bonus(self.object),
             gestes=gestes_of(self.object, sous_categorie_ids_of(parcours.fiche)),

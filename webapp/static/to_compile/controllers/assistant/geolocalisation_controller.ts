@@ -17,17 +17,17 @@ export default class extends Controller<HTMLAnchorElement> {
   declare readonly libelleTarget: HTMLElement
   declare reverseGeocodeUrlValue: string
 
-  private locating = false
-  private label = ""
+  #locating = false
+  #label = ""
 
   locate(event: MouseEvent) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return
     if (!("geolocation" in navigator)) return
     event.preventDefault()
-    if (this.locating) return
-    this.locating = true
+    if (this.#locating) return
+    this.#locating = true
     this.element.setAttribute("aria-busy", "true")
-    this.label = this.libelleTarget.textContent ?? ""
+    this.#label = this.libelleTarget.textContent ?? ""
     this.libelleTarget.textContent = LOCATING_LABEL
 
     navigator.geolocation.getCurrentPosition(
@@ -62,9 +62,9 @@ export default class extends Controller<HTMLAnchorElement> {
 
   #visit(url: string) {
     // Restored before leaving, for the back button.
-    this.locating = false
+    this.#locating = false
     this.element.removeAttribute("aria-busy")
-    this.libelleTarget.textContent = this.label
+    this.libelleTarget.textContent = this.#label
     Turbo.visit(url)
   }
 }
