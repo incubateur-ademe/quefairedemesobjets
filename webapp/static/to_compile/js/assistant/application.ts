@@ -7,4 +7,4 @@ import ComboboxController from "../../controllers/assistant/combobox_controller"
 const application = Application.start()
 application.register("assistant-combobox", ComboboxController)
 
-application.debug = Boolean(document.documentElement.dataset.stimulusDebug)
+application.debug = document.documentElement.dataset.stimulusDebug === "true"

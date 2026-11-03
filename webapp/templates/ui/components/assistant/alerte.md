@@ -2,7 +2,7 @@
 
 Encart d'information, par exemple un avertissement de tri propre à un objet.
 
-## Utilisation
+## Comment l'utiliser
 
 ```django
 {% include "ui/components/assistant/alerte.html" with message="Cet objet ne se jette pas avec les ordures ménagères." %}

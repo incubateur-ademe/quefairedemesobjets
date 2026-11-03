@@ -1,17 +1,4 @@
 {% load dsfr_tags static %}
-{% comment %}
-Two asset stacks coexist in the project, and they must never be loaded
-together: each starts its own Stimulus application, which would scan the same
-DOM and register competing controllers.
-
-A preview picks its stack through the `assets` attribute of its class:
-
-    class AssistantPreview(LookbookPreview):
-        assets = "assistant"
-
-By default the legacy stack (DSFR + quefaire) is served, leaving the existing
-previews untouched.
-{% endcomment %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>

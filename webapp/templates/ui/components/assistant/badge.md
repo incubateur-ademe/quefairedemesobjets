@@ -2,7 +2,7 @@
 
 Étiquette d'état d'un objet, ou mise en avant du Bonus Réparation.
 
-## Utilisation
+## Comment l'utiliser
 
 ```django
 {% include "ui/components/assistant/badge.html" with condition="reparable" libelle="Réparable" %}

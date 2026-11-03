@@ -3,11 +3,21 @@
 Champ de saisie d'adresse avec suggestions, en proxy devant la Base Adresse
 Nationale.
 
-## Utilisation
+## Comment l'utiliser
 
 ```django
 {% include "ui/components/assistant/recherche_adresse.html" %}
 ```
+
+| Paramètre               | Requis | Rôle                                  |
+| ----------------------- | ------ | ------------------------------------- |
+| `id`                    | ⚪️     | préfixe des identifiants ARIA         |
+| `label`                 | ⚪️     | libellé du champ                      |
+| `placeholder`           | ⚪️     | exemple de saisie                     |
+| `adresse`               | ⚪️     | texte du champ                        |
+| `longitude`, `latitude` | ⚪️     | coordonnées de l'adresse retenue      |
+| `precise`               | ⚪️     | adresse précise plutôt qu'une commune |
+| `erreur`                | ⚪️     | message du serveur                    |
 
 ## Ce que transportent les champs cachés
 
