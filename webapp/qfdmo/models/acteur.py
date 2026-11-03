@@ -319,7 +319,9 @@ def acteur_ids_offering(groupe_action_codes, sous_categorie_ids) -> list[str] | 
     acteur looking for almost no result; a common one finds its places nearby.
     """
     codes = ",".join(sorted(groupe_action_codes))
-    key = f"offres:{codes}:{','.join(map(str, sorted(sous_categorie_ids)))}"
+    key = (
+        f"acteur_ids_offering:{codes}:{','.join(map(str, sorted(sous_categorie_ids)))}"
+    )
     # `None` is a cached answer ("too many"): a miss needs its own sentinel.
     ids = cache.get(key, _MISSING)
     if ids is _MISSING:
