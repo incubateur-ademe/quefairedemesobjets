@@ -135,6 +135,14 @@ variable "SCW_SECRET_KEY" {
   type      = string
   sensitive = true
 }
+variable "SCW_SECRET_KEY_INFRA" {
+  type      = string
+  sensitive = true
+}
+variable "SCW_ACCESS_KEY_INFRA" {
+  type      = string
+  sensitive = true
+}
 variable "ML_DEDUPLICATION_SSH_KEY_B64" {
   description = "Private SSH key (base64-encoded) used to SSH into the on-demand ml-deduplication inference instance. Decoded to a temp file at runtime by the provisioning scripts."
   type        = string

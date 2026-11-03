@@ -43,28 +43,30 @@ resource "scaleway_container" "airflow_scheduler" {
     ML_DEDUPLICATION_SSH_PUB_KEY                          = var.ML_DEDUPLICATION_SSH_PUB_KEY
   }
   secret_environment_variables = {
-    AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
     AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-    AIRFLOW_METADATA_DB_URL                 = var.AIRFLOW_METADATA_DB_URL
-    AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
     AIRFLOW_CONN_SCALEWAYLOGS               = var.AIRFLOW_CONN_SCALEWAYLOGS
+    AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
+    AIRFLOW_METADATA_DB_URL                 = var.AIRFLOW_METADATA_DB_URL
     DATABASE_URL                            = var.DATABASE_URL
     DB_WAREHOUSE                            = var.DB_WAREHOUSE
     DB_WEBAPP_SAMPLE                        = var.DB_WEBAPP_SAMPLE
+    MATTERMOST_WEBHOOK_URL                  = var.MATTERMOST_WEBHOOK_URL
+    ML_DEDUPLICATION_SSH_KEY_B64            = var.ML_DEDUPLICATION_SSH_KEY_B64
     POSTGRES_DB                             = var.POSTGRES_DB
     POSTGRES_HOST                           = var.POSTGRES_HOST
     POSTGRES_PASSWORD                       = var.POSTGRES_PASSWORD
     POSTGRES_PORT                           = var.POSTGRES_PORT
     POSTGRES_SCHEMA                         = var.POSTGRES_SCHEMA
     POSTGRES_USER                           = var.POSTGRES_USER
+    POSTHOG_PERSONAL_API_KEY                = var.POSTHOG_PERSONAL_API_KEY
     SCW_ACCESS_KEY                          = var.SCW_ACCESS_KEY
     SCW_DEFAULT_ORGANIZATION_ID             = var.SCW_DEFAULT_ORGANIZATION_ID
     SCW_DEFAULT_PROJECT_ID                  = var.SCW_DEFAULT_PROJECT_ID
     SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
-    ML_DEDUPLICATION_SSH_KEY_B64            = var.ML_DEDUPLICATION_SSH_KEY_B64
+    SCW_SECRET_KEY_INFRA                    = var.SCW_SECRET_KEY_INFRA
     SECRET_KEY                              = var.SECRET_KEY
-    MATTERMOST_WEBHOOK_URL                  = var.MATTERMOST_WEBHOOK_URL
-    POSTHOG_PERSONAL_API_KEY                = var.POSTHOG_PERSONAL_API_KEY
+    SCW_ACCESS_KEY_INFRA                    = var.SCW_ACCESS_KEY_INFRA
   }
 }
