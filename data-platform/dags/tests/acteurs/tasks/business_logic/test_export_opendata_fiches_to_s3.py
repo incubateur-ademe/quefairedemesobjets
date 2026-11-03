@@ -43,7 +43,8 @@ class TestExportOpendataFicheToS3:
         ):
             export_opendata_fiche_to_s3(CONFIG, "produits.csv")
 
-        assert get.call_args.args[0].endswith("/api/v1/produits.csv")
+        assert get.call_args.args[0].endswith("/api/v1/produits")
+        assert get.call_args.kwargs["headers"] == {"Accept": "text/csv"}
         dated, latest = hook_class.return_value.load_bytes.call_args_list
         assert dated.kwargs["key"] == "fiches-test/20261102010000_produits.csv"
         assert "acl_policy" not in dated.kwargs
