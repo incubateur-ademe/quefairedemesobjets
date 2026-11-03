@@ -86,6 +86,11 @@ def lieu_page(client, lieu, params=None):
     return html_of(client.get(reverse("assistant:lieu", args=[lieu.uuid]), params))
 
 
+def contact_lines(page):
+    """The lines of the "Adresse et contact" section."""
+    return list(page.select_one(".qfa-lieu__section p").stripped_strings)
+
+
 def definitions(page):
     """The "more about the lieu" list, as {term: [values]}."""
     terms = {}
@@ -115,7 +120,7 @@ class TestLieuPage:
 
         page = lieu_page(client, lieu)
 
-        assert "0299000000" in page.select_one("main").get_text()
+        assert "0299000000" in contact_lines(page)
         assert page.select('a[href^="tel:"]') == []
 
     def test_the_website_is_not_a_link(self, client):
@@ -123,8 +128,8 @@ class TestLieuPage:
 
         page = lieu_page(client, lieu)
 
-        assert "https://exemple.fr" in page.select_one("main").get_text()
-        assert page.select('a[href*="exemple.fr"]') == []
+        assert contact_lines(page)[-1] == "https://exemple.fr"
+        assert page.select_one(".qfa-lieu__section p").find("a") is None
 
     def test_data_freshness_is_shown(self, client):
         lieu = DisplayedActeurFactory()

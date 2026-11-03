@@ -37,8 +37,9 @@ class TestRoutes:
 
         assert response.status_code == 200
 
-    def test_unknown_produit_returns_404(self, client):
-        response = client.get(reverse("assistant:produit", args=["inconnu"]))
+    @pytest.mark.parametrize("screen", ["produit", "lieu"])
+    def test_an_unknown_page_returns_404(self, client, screen):
+        response = client.get(reverse(f"assistant:{screen}", args=["inconnu"]))
 
         assert response.status_code == 404
 
