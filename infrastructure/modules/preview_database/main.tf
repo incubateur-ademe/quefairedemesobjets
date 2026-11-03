@@ -191,6 +191,9 @@ resource "null_resource" "seed_from_sample" {
           python manage.py enable_unaccent
           python manage.py enable_trigram || true
           python manage.py purge_orphan_searchterm_index || true
+          python manage.py populate_libelle_court
+          python manage.py seed_lieux_de_depot
+          # TODO: remove once the consignes grid is live in production.
           python manage.py generate_consignes
           echo 'Management commands complete.'
         "

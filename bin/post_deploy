@@ -7,8 +7,11 @@ python manage.py createcachetable
 python manage.py migrate
 python manage.py populate_libelle_court
 
+python manage.py seed_lieux_de_depot
+
 # Grid of consignes of the live fiches, from their first row of cards.
 # No-op on a fiche that already has one.
+# TODO: remove once the consignes grid is live in production.
 python manage.py generate_consignes
 
 # TEMPORARY, required to have search function after deploy
