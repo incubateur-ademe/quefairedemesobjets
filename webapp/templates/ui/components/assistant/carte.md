@@ -15,15 +15,15 @@ pendant l'exploration.
    lieux=lieux %}
 ```
 
-| Paramètre         | Requis | Rôle                                                                 |
-| ----------------- | ------ | -------------------------------------------------------------------- |
-| `gestes`          | ✅     | codes de `GroupeAction` (`trier`, pas `deposer`) ; le premier colore |
-| `longitude`       | ✅     | centre initial                                                       |
-| `latitude`        | ✅     | centre initial                                                       |
-| `fiche`           | ⚪️     | slug d'une fiche, restreint les lieux à ses sous-catégories          |
-| `adresse_precise` | ⚪️     | affiche la punaise de l'adresse ; jamais pour une commune            |
-| `lieux`           | ⚪️     | liste rendue côté serveur pour la version accessible                 |
-| `debug`           | ⚪️     | affiche l'overlay de durée des requêtes (`chrono_controller`)        |
+| Paramètre         | Requis | Rôle                                                                          |
+| ----------------- | ------ | ----------------------------------------------------------------------------- |
+| `gestes`          | ✅     | codes de `GroupeAction` (« Déposer » a pour code `trier`) ; le premier colore |
+| `longitude`       | ✅     | centre initial                                                                |
+| `latitude`        | ✅     | centre initial                                                                |
+| `fiche`           | ⚪️     | slug d'une fiche, restreint les lieux à ses sous-catégories                   |
+| `adresse_precise` | ⚪️     | affiche la punaise de l'adresse ; jamais pour une commune                     |
+| `lieux`           | ⚪️     | liste rendue côté serveur pour la version accessible                          |
+| `debug`           | ⚪️     | affiche l'overlay de durée des requêtes (`chrono_controller`)                 |
 
 ## Code
 

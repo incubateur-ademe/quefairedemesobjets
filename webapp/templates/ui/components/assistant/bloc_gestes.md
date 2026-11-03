@@ -2,7 +2,7 @@
 
 Liste ordonnée des gestes possibles pour un objet.
 
-## Utilisation
+## Comment l'utiliser
 
 ```django
 {% include "ui/components/assistant/bloc_gestes.html" with blocs=blocs %}

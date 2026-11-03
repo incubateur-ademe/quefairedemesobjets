@@ -2,7 +2,7 @@
 
 Retour de l'écran solutions vers la fiche objet, en rappelant le geste actif.
 
-## Utilisation
+## Comment l'utiliser
 
 ```django
 {% include "ui/components/assistant/bouton_changer_geste.html" with libelle="Réparer" gestes=gestes url=url %}

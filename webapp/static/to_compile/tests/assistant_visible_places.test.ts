@@ -4,7 +4,7 @@ import {
   placesFromGeoJSON,
   type Area,
   type Place,
-} from "./visible_places"
+} from "../js/assistant/visible_places"
 
 const PARIS: Area = { west: 2.2, south: 48.8, east: 2.4, north: 48.9 }
 
