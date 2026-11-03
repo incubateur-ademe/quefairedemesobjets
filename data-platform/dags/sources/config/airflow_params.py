@@ -10,6 +10,7 @@ from sources.tasks.transform.transform_column import (
     clean_email,
     clean_horaires_osm,
     clean_public_accueilli,
+    clean_public_accueilli_sinoe_libelle_type_service,
     clean_reprise,
     clean_siren,
     clean_siret,
@@ -52,6 +53,9 @@ TRANSFORM_COLUMN_MAPPING = {
     "clean_code_postal": clean_code_postal,
     "clean_horaires_osm": clean_horaires_osm,
     "clean_public_accueilli": clean_public_accueilli,
+    "clean_public_accueilli_sinoe_libelle_type_service": (
+        clean_public_accueilli_sinoe_libelle_type_service
+    ),
     "clean_reprise": clean_reprise,
     "clean_siren": clean_siren,
     "clean_siret": clean_siret,
