@@ -29,6 +29,7 @@ env:
   SECRET_KEY: coucou # pragma: allowlist secret
   DJANGO_SETTINGS_MODULE: settings.test
   CI: true
+  UV_PROJECT_ENVIRONMENT: .venv
 
 jobs:
   run:
