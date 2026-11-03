@@ -19,11 +19,6 @@ runs:
       with:
         enable-cache: true
 
-    # Do not cache .venv: restored venvs pin absolute paths to the runner's Python
-    # (e.g. /usr/bin/python3.12). When the image or uv-managed Python changes, uv
-    # discards the venv and `uv run` may resync without dev/lint groups if sync
-    # was skipped on cache hit — causing intermittent "Failed to spawn: pytest/ruff".
-    # Wheel caching via setup-uv enable-cache is enough for CI speed.
     - name: Install Python dependencies
       shell: bash
       working-directory: ${{ inputs.working-directory }}
