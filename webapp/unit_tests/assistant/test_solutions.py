@@ -122,11 +122,18 @@ class TestSolutionsScreen:
 
     def test_the_pins_link_carries_the_parcours(self, client, fiche):
         """Without it, "Revenir aux solutions" would lose geste and address."""
-        page = solutions(client, geste="reparer", fiche=fiche.slug, adresse="Auray")
+        page = solutions(
+            client,
+            geste="reparer",
+            fiche=fiche.slug,
+            adresse="Auray",
+            synonyme="chaise",
+        )
 
         query = query_of(carte(page)["data-assistant-carte-lieu-url-value"])
         assert query["geste"] == ["reparer"]
         assert query["adresse"] == ["Auray"]
+        assert query["synonyme"] == ["chaise"]
 
     def test_the_lieu_page_leads_back_to_the_same_solutions(self, client, fiche):
         """Round trip: solutions -> pin link -> lieu page -> back link. Both
