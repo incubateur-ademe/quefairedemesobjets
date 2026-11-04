@@ -38,7 +38,8 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "remixicon": "^4.9.1",
-    "@sentry/browser": "^11.9.0"
+    "@sentry/browser": "^11.9.0",
+    "postcss": "^8.5.32"
   },
   "devDependencies": {
     "@parcel/optimizer-data-url": "^2.16.4",
