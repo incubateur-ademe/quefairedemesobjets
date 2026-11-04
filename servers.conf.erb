@@ -107,6 +107,8 @@ server {
     set $posthog_assets_host eu-assets.i.posthog.com;
     # proxy_pass with a variable passes its URI verbatim, so each location
     # strips the /ph prefix with a rewrite instead of in proxy_pass.
+    # proxy_ssl_verify_depth: nginx defaults to 1, too short for Let's Encrypt YE2,
+    # whose chain has extra intermediates (leaf, YE2, Root YE, ISRG Root X2, X1).
 
     # SDK and static files
     location /ph/static/ {
@@ -118,6 +120,7 @@ server {
         proxy_ssl_server_name on;
         proxy_ssl_name $posthog_assets_host;
         proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
         proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
@@ -131,6 +134,7 @@ server {
         proxy_ssl_server_name on;
         proxy_ssl_name $posthog_assets_host;
         proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
         proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
@@ -149,6 +153,7 @@ server {
         proxy_ssl_server_name on;
         proxy_ssl_name $posthog_api_host;
         proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
         proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
