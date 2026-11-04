@@ -9,8 +9,7 @@ WORKDIR /build
 COPY package-lock.json package.json .
 COPY webapp/package.json webapp/package.json
 COPY webapp/revue-front/package.json webapp/revue-front/package.json
-RUN npm -w webapp ci
-RUN npm -w webapp/revue-front ci
+RUN npm ci -w webapp -w webapp/revue-front
 COPY webapp/ ./webapp/
 RUN npm -w webapp run build
 RUN npm -w webapp/revue-front run build
@@ -41,42 +40,47 @@ RUN NGINX_ALLOW_ALL_HOSTS=1 \
 
 
 ############################################
-# Stage 3: runtime (Python 3.12)
+# Stage 3: system packages needed at runtime
 ############################################
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim-bookworm AS runtime_base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    UV_LINK_MODE=copy
+    VIRTUAL_ENV="/app/.venv" \
+    PATH="/app/.venv/bin:${PATH}"
 
-WORKDIR /app
-
-# System deps: GDAL for GeoDjango, gettext for compilemessages,
-# libpq5 for psycopg at runtime (mirrors the Scalingo Aptfile),
-# git for uv to install django-dsfr from its git fork (tool.uv.sources)
+# GDAL for GeoDjango, libpq5 for psycopg (mirrors the Scalingo Aptfile)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
       ca-certificates \
-      curl \
-      gettext \
       gdal-bin \
-      git \
-      libgdal-dev \
       libpq5 \
       nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv (official installer)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --no-modify-path
+
+############################################
+# Stage 4: Python dependencies and static files
+############################################
+FROM runtime_base AS python_build
+
+ENV UV_LINK_MODE=copy \
+    UV_NO_CACHE=1
+
+# gettext for compilemessages, git for uv to install django-dsfr from its git
+# fork (tool.uv.sources)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
+
+WORKDIR /app
 
 # Install python deps (cached as long as lockfiles unchanged)
 COPY pyproject.toml uv.lock .
 COPY webapp/pyproject.toml webapp/pyproject.toml
-RUN /root/.local/bin/uv sync --project webapp --frozen --no-dev
-
-# Use the venv for subsequent RUN/CMD
-ENV VIRTUAL_ENV="/app/.venv" \
-    PATH="/app/.venv/bin:${PATH}"
+RUN uv sync --project webapp --frozen --no-dev
 
 # Copy app code
 COPY webapp/ /app/webapp
@@ -90,6 +94,18 @@ WORKDIR /app/webapp
 # Copy built frontend assets, then collect them
 COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
 RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
+
+
+############################################
+# Stage 5: runtime
+############################################
+FROM runtime_base
+
+# Kept apart, so a code change does not push all the dependencies again
+COPY --from=python_build /app/.venv /app/.venv
+COPY --from=python_build /app/webapp /app/webapp
+
+WORKDIR /app/webapp
 
 # Nginx: use the same nginx.conf + rendered servers.conf as Scalingo.
 # The rendered servers.conf is compiled in stage 2 with preview vars.

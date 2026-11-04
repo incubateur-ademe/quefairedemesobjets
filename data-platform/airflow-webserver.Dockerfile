@@ -42,16 +42,16 @@ ENV VIRTUAL_ENV=/opt/airflow/.venv \
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Kept out of the venv, so a code change does not push all the dependencies again
-COPY webapp/core/ /opt/airflow/webapp/core/
-COPY webapp/data/ /opt/airflow/webapp/data/
-COPY webapp/dsfr_hacks/ /opt/airflow/webapp/dsfr_hacks/
-COPY webapp/infotri/ /opt/airflow/webapp/infotri/
-COPY webapp/qfdmd/ /opt/airflow/webapp/qfdmd/
-COPY webapp/qfdmo/ /opt/airflow/webapp/qfdmo/
-COPY webapp/search/ /opt/airflow/webapp/search/
-COPY webapp/settings/ /opt/airflow/webapp/settings/
-COPY webapp/stats/ /opt/airflow/webapp/stats/
-COPY webapp/assistant/ /opt/airflow/webapp/assistant/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/core/ /opt/airflow/webapp/core/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/data/ /opt/airflow/webapp/data/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/dsfr_hacks/ /opt/airflow/webapp/dsfr_hacks/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/infotri/ /opt/airflow/webapp/infotri/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/qfdmd/ /opt/airflow/webapp/qfdmd/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/qfdmo/ /opt/airflow/webapp/qfdmo/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/search/ /opt/airflow/webapp/search/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/settings/ /opt/airflow/webapp/settings/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/stats/ /opt/airflow/webapp/stats/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/assistant/ /opt/airflow/webapp/assistant/
 
 WORKDIR /opt/airflow
 COPY ./data-platform/dags /opt/airflow/dags
