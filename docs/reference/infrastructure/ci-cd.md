@@ -14,13 +14,15 @@ Backend jobs use a **single workspace virtual environment** at the repo root, sy
 
 ## Creating or updating a Pull Request
 
-When a Pull Request is created, updated or marked as ready for review (events `opened`, `synchronize` or `ready_for_review`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
+When a Pull Request is created, updated or marked as ready for review (events `opened`, `synchronize`, `ready_for_review` or `converted_to_draft`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
 
 Tests and linters are run and it is possible to deploy the PR branch to the `preprod` environment.
 
-Draft pull requests run no CI, E2E or deployment: they start when the pull request is marked as ready for review.
+Draft pull requests run no CI, E2E or deployment: they start when the pull request is marked as ready for review, and converting a pull request to draft cancels what is running.
 
 In a [stack of pull requests](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests), only the top pull request runs CI, E2E and deployments, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.
+
+The `Check draft and stack` job reads this from the API rather than from the event: `gh stack submit` opens each pull request before linking the stack, and no workflow event follows. On `opened`, it waits a minute for the stack to be linked, so a stack of more than about 12 pull requests can still run CI on the first ones it opens. When the top pull request is closed without merging, the new top keeps its skipped checks until its next push.
 
 The `skip` input of `ci.yml` is applied inside `_backend-test-job.yml`, not on the calling job, because a skipped calling job never reports the required `... / run` checks.
 
