@@ -16,8 +16,36 @@ env:
   CI: true
 
 jobs:
+  changes:
+    name: 🔎 Changed areas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      python: ${{ steps.areas.outputs.python }}
+      frontend: ${{ steps.areas.outputs.frontend }}
+      revue: ${{ steps.areas.outputs.revue }}
+      infra: ${{ steps.areas.outputs.infra }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Empty outputs mean "run everything": outside a PR, or if this step fails.
+      - name: Find changed areas
+        id: areas
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          files=$(gh pr diff "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --name-only)
+          echo "$files" | bash .github/scripts/ci_changed_areas.sh >> "$GITHUB_OUTPUT"
+
   backend-webapp-linter:
     name: 📝 Backend Webapp Linter
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.python != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -32,6 +60,8 @@ jobs:
 
   data-platform-linter:
     name: 📝 Data Platform Linter
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.python != 'false' }}
     runs-on: ubuntu-latest
     env:
       POSTGRES_HOST: localhost
@@ -83,6 +113,8 @@ jobs:
 
   infrastructure-linter:
     name: 📝 Infrastructure Linter
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.infra != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -101,6 +133,8 @@ jobs:
 
   frontend_linter:
     name: 📝 Frontend Linter
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.frontend != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -116,26 +150,32 @@ jobs:
 
   backend_unit_tests:
     name: ✅ Backend Unit Tests
-    needs: backend-webapp-linter
+    needs: [changes, backend-webapp-linter]
+    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       make-target: unit-test
+      skip: ${{ needs.changes.outputs.python == 'false' }}
       check-migrations: true
 
   backend_integration_tests:
     name: ✅ Backend Integration Tests
-    needs: backend-webapp-linter
+    needs: [changes, backend-webapp-linter]
+    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       make-target: integration-test
+      skip: ${{ needs.changes.outputs.python == 'false' }}
 
   backend_data_tests:
     name: ✅ Backend Data Tests
-    needs: data-platform-linter
+    needs: [changes, data-platform-linter]
+    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.data-platform-linter.result) }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       working-directory: data-platform
       make-target: dags-test
+      skip: ${{ needs.changes.outputs.python == 'false' }}
 
   frontend_tests:
     name: ✅ Frontend Tests
@@ -155,6 +195,8 @@ jobs:
 
   revue_frontend:
     name: ✅ Review Screen Frontend (revue-front)
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.revue != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -186,6 +228,8 @@ jobs:
 
   revue_api_types:
     name: 📝 Review Screen API Types Up To Date
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.outputs.revue != 'false' || needs.changes.outputs.python != 'false') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1

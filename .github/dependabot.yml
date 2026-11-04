@@ -16,16 +16,13 @@ updates:
     allow:
       - dependency-type: "all"
     groups:
-      python-production-minor-patch:
-        dependency-type: "production"
+      # Covers transitive dependencies too, which dependency-type groups miss.
+      python-minor-patch:
         update-types:
           - "minor"
           - "patch"
-      python-development-minor-patch:
-        dependency-type: "development"
-        update-types:
-          - "minor"
-          - "patch"
+        patterns:
+          - "*"
 
   - package-ecosystem: "npm"
     directory: "/"
@@ -49,67 +46,99 @@ updates:
       - dependency-name: "@swc/core*"
         versions: [">=1.16.12"]
     groups:
-      # Named groups (specific packages get their own PRs)
+      # Major bumps stay in per-family PRs, as they can need code changes
       babel:
+        update-types:
+          - "major"
         patterns:
           - "@babel/*"
       parcel:
+        update-types:
+          - "major"
         patterns:
           - "@parcel/*"
           - "parcel"
           - "parcel*"
       protobufjs:
+        update-types:
+          - "major"
         patterns:
           - "@protobufjs/*"
           - "protobufjs"
       swc:
+        update-types:
+          - "major"
         patterns:
           - "@swc/*"
           - "swc"
       mapbox:
+        update-types:
+          - "major"
         patterns:
           - "@mapbox/*"
           - "mapbox*"
       sentry:
+        update-types:
+          - "major"
         patterns:
           - "@sentry/*"
           - "sentry*"
       jest:
+        update-types:
+          - "major"
         patterns:
           - "*jest*"
           - "@types/jest"
       eslint:
+        update-types:
+          - "major"
         patterns:
           - "*eslint*"
       hotwired:
+        update-types:
+          - "major"
         patterns:
           - "@hotwired/*"
       iframe-resizer:
+        update-types:
+          - "major"
         patterns:
           - "@iframe-resizer/*"
       maplibre:
+        update-types:
+          - "major"
         patterns:
           - "maplibre-gl"
           - "@maplibre/*"
       postcss:
+        update-types:
+          - "major"
         patterns:
           - "postcss*"
       playwright:
+        update-types:
+          - "major"
         patterns:
           - "*playwright*"
       gouvfr:
+        update-types:
+          - "major"
         patterns:
           - "@gouvfr/*"
       testing:
+        update-types:
+          - "major"
         patterns:
           - "@testing-library/*"
       typescript-toolchain:
+        update-types:
+          - "major"
         patterns:
           - "typescript*"
           - "ts-jest"
           - "ts-node"
 
-      # Catch-all: remaining deps grouped by semver
+      # Every minor and patch bump goes in a single PR
       npm-minor-patch:
         update-types:
           - "minor"

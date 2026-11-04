@@ -18,6 +18,10 @@ When a Pull Request is created or updated (events `opened` or `synchronize`), th
 
 Tests and linters are run and it is possible to deploy the PR branch to the `preprod` environment.
 
+On a Pull Request, only the jobs matching the changed files run: [ci_changed_areas.sh](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/scripts/ci_changed_areas.sh) maps files to areas, and an unrecognised file runs everything. `webapp` and `data-platform` are always tested together because they import each other. Everything runs on `main`.
+
+The required backend checks are skipped inside `_backend-test-job.yml`, not on the calling job: only then does the `... / run` check report and let the PR merge.
+
 ### Review workflow flow
 
 ```mermaid
@@ -117,8 +121,8 @@ The `dependabot.yml` file configures automatic dependency updates.
 
 **Ecosystems monitored**:
 
-- **uv**: Python dependencies (weekly)
-- **npm**: JavaScript dependencies (weekly, grouped by categories: parcel, jest, eslint)
+- **uv**: Python dependencies (weekly, one PR for all minor and patch bumps)
+- **npm**: JavaScript dependencies (weekly, one PR for all minor and patch bumps, major bumps grouped by categories: parcel, jest, eslint)
 - **GitHub Actions**: Actions used in the workflows (weekly)
 - **Terraform**: Terraform modules in `/infrastructure` (weekly)
 
