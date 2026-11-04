@@ -31,6 +31,13 @@ map "$uri?$args" $cache_args {
     "~^/(?:carte|formulaire|infotri(?:/embed)?)/?\?((?:.*&)?)ref=[^&]*(&.*)?$" $1$2;
 }
 
+# Forward PostHog keys, which capture v1 SDKs send as a Bearer token. Strip any other credentials.
+# https://posthog.com/docs/advanced/proxy/nginx
+map $http_authorization $posthog_authorization {
+    "~^Bearer ph[csx]_" $http_authorization;
+    default "";
+}
+
 map $host $is_valid_host {
 <% if ENV["NGINX_ALLOW_ALL_HOSTS"] == "1" %>
     # Preview environments: accept any host (domain unknown at build time)
@@ -144,7 +151,7 @@ server {
         proxy_pass https://$posthog_api_host;
         proxy_set_header Host $posthog_api_host;
         proxy_set_header Cookie "";
-        proxy_set_header Authorization "";
+        proxy_set_header Authorization $posthog_authorization;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;
         # Strip Origin/Referer so PostHog doesn't reject requests from local/unknown domains
