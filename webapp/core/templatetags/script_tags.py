@@ -3,9 +3,9 @@ import logging
 from django import template
 from django.conf import settings
 from django.urls import reverse
+from django.utils.text import capfirst
 
-from assistant.objets import capitalize_first, synonyme_of_term
-from qfdmd.models import ProduitPage
+from qfdmd.models import ProduitPage, SearchTag
 from qfdmd.templatetags.qfdmd_tags import get_search_term_name
 
 register = template.Library()
@@ -15,10 +15,11 @@ logger = logging.getLogger(__name__)
 
 def searched_synonyme(request, page):
     """The synonyme of `page` the visitor came through, from the search, or None."""
-    if request is None:
-        return None
-    term = get_search_term_name({"request": request})
-    return synonyme_of_term(term.pk, page) if term else None
+    term = get_search_term_name({"request": request}) if request else None
+    specific = term.get_indexed_instance() if term else None
+    if isinstance(specific, SearchTag) and specific.page == page:
+        return specific
+    return None
 
 
 def generate_iframe_script(request, page=None) -> str:
@@ -68,7 +69,7 @@ def page_formatted_for_script(context: dict) -> str:
     page = context.get("page", "")
     if page and isinstance(page, ProduitPage):
         if synonyme := searched_synonyme(context.get("request"), page):
-            nom = capitalize_first(synonyme.get_title())
+            nom = capfirst(synonyme.get_title())
             return f"Page “{nom} - {page.title}”"
         return f"Page “{page.title}”"
 
