@@ -28,6 +28,8 @@ To avoid this, open a stack as drafts, then mark its pull requests as ready: `gh
 
 When the top pull request is closed without merging, the new top keeps its skipped checks until its next push.
 
+On a Pull Request, only the jobs matching the changed files run: [ci_changed_areas.sh](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/scripts/ci_changed_areas.sh) maps files to areas, and an unrecognised file runs everything. In a stack, files are compared with the stack base, so the top pull request covers the whole stack. `webapp` and `data-platform` are tested together because the DAGs import the webapp. Everything runs on `main`.
+
 The `skip` input of `ci.yml` is applied inside `_backend-test-job.yml`, not on the calling job, because a skipped calling job never reports the required `... / run` checks.
 
 ### Review workflow flow

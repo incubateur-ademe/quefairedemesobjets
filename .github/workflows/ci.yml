@@ -22,9 +22,41 @@ env:
   CI: true
 
 jobs:
+  changes:
+    name: 🔎 Changed areas
+    if: ${{ !inputs.skip }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      python: ${{ steps.areas.outputs.python }}
+      frontend: ${{ steps.areas.outputs.frontend }}
+      revue: ${{ steps.areas.outputs.revue }}
+      infra: ${{ steps.areas.outputs.infra }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Empty outputs run everything: outside a pull request, or if this step fails.
+      - name: Find changed areas
+        id: areas
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # In a stack, compare with the stack base: the top pull request stands
+          # for the whole stack, not only for its own layer.
+          BASE_SHA: ${{ github.event.pull_request.stack.base.sha || github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/compare/$BASE_SHA...$HEAD_SHA?per_page=100" --jq '.files[].filename')
+          # The compare API truncates long lists, and an empty list runs everything.
+          [ "$(echo "$files" | wc -l)" -lt 300 ] || files=""
+          echo "$files" | bash .github/scripts/ci_changed_areas.sh >> "$GITHUB_OUTPUT"
+
   backend-webapp-linter:
     name: 📝 Backend Webapp Linter
-    if: ${{ !inputs.skip }}
+    needs: changes
+    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.python != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -39,7 +71,8 @@ jobs:
 
   data-platform-linter:
     name: 📝 Data Platform Linter
-    if: ${{ !inputs.skip }}
+    needs: changes
+    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.python != 'false' }}
     runs-on: ubuntu-latest
     env:
       POSTGRES_HOST: localhost
@@ -91,7 +124,8 @@ jobs:
 
   infrastructure-linter:
     name: 📝 Infrastructure Linter
-    if: ${{ !inputs.skip }}
+    needs: changes
+    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.infra != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -110,7 +144,8 @@ jobs:
 
   frontend_linter:
     name: 📝 Frontend Linter
-    if: ${{ !inputs.skip }}
+    needs: changes
+    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.frontend != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -126,30 +161,30 @@ jobs:
 
   backend_unit_tests:
     name: ✅ Backend Unit Tests
-    needs: backend-webapp-linter
-    if: ${{ !cancelled() && (inputs.skip || needs.backend-webapp-linter.result == 'success') }}
+    needs: [changes, backend-webapp-linter]
+    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
-      skip: ${{ inputs.skip }}
+      skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
       make-target: unit-test
       check-migrations: true
 
   backend_integration_tests:
     name: ✅ Backend Integration Tests
-    needs: backend-webapp-linter
-    if: ${{ !cancelled() && (inputs.skip || needs.backend-webapp-linter.result == 'success') }}
+    needs: [changes, backend-webapp-linter]
+    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
-      skip: ${{ inputs.skip }}
+      skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
       make-target: integration-test
 
   backend_data_tests:
     name: ✅ Backend Data Tests
-    needs: data-platform-linter
-    if: ${{ !cancelled() && (inputs.skip || needs.data-platform-linter.result == 'success') }}
+    needs: [changes, data-platform-linter]
+    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.data-platform-linter.result) }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
-      skip: ${{ inputs.skip }}
+      skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
       working-directory: data-platform
       make-target: dags-test
 
@@ -171,7 +206,8 @@ jobs:
 
   revue_frontend:
     name: ✅ Review Screen Frontend (revue-front)
-    if: ${{ !inputs.skip }}
+    needs: changes
+    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.revue != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -203,7 +239,8 @@ jobs:
 
   revue_api_types:
     name: 📝 Review Screen API Types Up To Date
-    if: ${{ !inputs.skip }}
+    needs: changes
+    if: ${{ !cancelled() && !inputs.skip && (needs.changes.outputs.revue != 'false' || needs.changes.outputs.python != 'false') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
