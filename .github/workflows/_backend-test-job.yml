@@ -69,6 +69,8 @@ jobs:
 
       - name: Run tests
         run: make -C ${{ inputs.working-directory }} ${{ inputs.make-target }}
+        env:
+          PYTEST_ADDOPTS: -n auto
 
       - name: Check for missing migrations
         if: inputs.check-migrations && inputs.working-directory == 'webapp'
