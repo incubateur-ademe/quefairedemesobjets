@@ -3,7 +3,7 @@ name: 💣 Review
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review]
 
 defaults:
   run:
@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Draft pull requests run no CI/CD, and in a stack only the top pull request does
+# as it contains the whole stack. position and size are both null outside a stack,
+# which also counts as top.
 jobs:
   ci:
     name: 🤖 CI
@@ -21,9 +24,12 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/ci.yml
     secrets: inherit # pragma: allowlist secret
+    with:
+      skip: ${{ github.event.pull_request.draft || github.event.pull_request.stack.position != github.event.pull_request.stack.size }}
 
   webapp:
     name: 🟠 Webapp
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.stack.position == github.event.pull_request.stack.size }}
     uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
     needs: [ci]
@@ -32,6 +38,7 @@ jobs:
 
   airflow:
     name: 🟠 Airflow
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.stack.position == github.event.pull_request.stack.size }}
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
     needs: [ci]
@@ -41,6 +48,7 @@ jobs:
 
   e2e:
     name: 🪤 E2E
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.stack.position == github.event.pull_request.stack.size }}
     permissions:
       contents: write
       pull-requests: write

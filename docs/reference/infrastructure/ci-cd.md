@@ -14,9 +14,15 @@ Backend jobs use a **single workspace virtual environment** at the repo root, sy
 
 ## Creating or updating a Pull Request
 
-When a Pull Request is created or updated (events `opened` or `synchronize`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
+When a Pull Request is created, updated or marked as ready for review (events `opened`, `synchronize` or `ready_for_review`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
 
 Tests and linters are run and it is possible to deploy the PR branch to the `preprod` environment.
+
+Draft pull requests run no CI, E2E or deployment: they start when the pull request is marked as ready for review.
+
+In a [stack of pull requests](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests), only the top pull request runs CI, E2E and deployments, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.
+
+The `skip` input of `ci.yml` is applied inside `_backend-test-job.yml`, not on the calling job, because a skipped calling job never reports the required `... / run` checks.
 
 ### Review workflow flow
 

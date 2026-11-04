@@ -2,6 +2,12 @@ name: 🤖 CI
 
 on:
   workflow_call:
+    inputs:
+      skip:
+        description: "Skip every job while still reporting the required checks"
+        required: false
+        type: boolean
+        default: false
 
 env:
   PGHOST: localhost
@@ -18,6 +24,7 @@ env:
 jobs:
   backend-webapp-linter:
     name: 📝 Backend Webapp Linter
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -32,6 +39,7 @@ jobs:
 
   data-platform-linter:
     name: 📝 Data Platform Linter
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-latest
     env:
       POSTGRES_HOST: localhost
@@ -83,6 +91,7 @@ jobs:
 
   infrastructure-linter:
     name: 📝 Infrastructure Linter
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -101,6 +110,7 @@ jobs:
 
   frontend_linter:
     name: 📝 Frontend Linter
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -117,23 +127,29 @@ jobs:
   backend_unit_tests:
     name: ✅ Backend Unit Tests
     needs: backend-webapp-linter
+    if: ${{ !cancelled() && (inputs.skip || needs.backend-webapp-linter.result == 'success') }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
+      skip: ${{ inputs.skip }}
       make-target: unit-test
       check-migrations: true
 
   backend_integration_tests:
     name: ✅ Backend Integration Tests
     needs: backend-webapp-linter
+    if: ${{ !cancelled() && (inputs.skip || needs.backend-webapp-linter.result == 'success') }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
+      skip: ${{ inputs.skip }}
       make-target: integration-test
 
   backend_data_tests:
     name: ✅ Backend Data Tests
     needs: data-platform-linter
+    if: ${{ !cancelled() && (inputs.skip || needs.data-platform-linter.result == 'success') }}
     uses: ./.github/workflows/_backend-test-job.yml
     with:
+      skip: ${{ inputs.skip }}
       working-directory: data-platform
       make-target: dags-test
 
@@ -155,6 +171,7 @@ jobs:
 
   revue_frontend:
     name: ✅ Review Screen Frontend (revue-front)
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -186,6 +203,7 @@ jobs:
 
   revue_api_types:
     name: 📝 Review Screen API Types Up To Date
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1

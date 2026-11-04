@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+      skip:
+        description: "Skip the tests while still reporting the required check"
+        required: false
+        type: boolean
+        default: false
 
 env:
   PGHOST: localhost
@@ -33,6 +38,8 @@ env:
 
 jobs:
   run:
+    # On the caller job, a skip would leave the required "/ run" check pending.
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-latest
     services:
       postgres:
