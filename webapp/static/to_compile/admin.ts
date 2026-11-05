@@ -26,3 +26,4 @@ Turbo.session.drive = false
 document.addEventListener("DOMContentLoaded", () => {
   stimulus.debug = document.body.dataset.stimulusDebug
 })
+// CI area test, not to be merged
