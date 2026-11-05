@@ -34,14 +34,14 @@ jobs:
     uses: ./.github/workflows/ci-infrastructure.yml
 
   webapp:
-    name: 🟠 Webapp
+    name: 🟠 Deploy webapp
     uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
     with:
       environment: preprod
 
   airflow:
-    name: 🟠 Airflow
+    name: 🟠 Deploy Airflow
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
     with:
