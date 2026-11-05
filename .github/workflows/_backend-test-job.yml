@@ -17,6 +17,10 @@ on:
         required: false
         type: boolean
         default: false
+      display-name:
+        description: "Name of the job in the Actions sidebar"
+        required: true
+        type: string
       skip:
         description: "Skip the tests while still reporting the required check"
         required: false
@@ -38,12 +42,13 @@ env:
 
 jobs:
   run:
-    # On the caller job, a skip would leave the required "/ run" check pending.
-    if: ${{ !inputs.skip }}
+    # The job always runs and skips its steps: skipped by its own `if`, it would
+    # show `inputs.display-name` as its name.
+    name: ${{ inputs.display-name }}
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgis/postgis:15-3.3-alpine
+        image: ${{ !inputs.skip && 'postgis/postgis:15-3.3-alpine' || '' }}
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
@@ -58,20 +63,25 @@ jobs:
           POSTGRES_DB: webapp
     steps:
       - uses: actions/checkout@v7.0.1
+        if: ${{ !inputs.skip }}
 
       - name: Install GIS packages
+        if: ${{ !inputs.skip }}
         uses: ./.github/actions/install-gis
 
       - name: Setup backend environment
+        if: ${{ !inputs.skip }}
         uses: ./.github/actions/setup-backend
         with:
           # --all-packages: root depends only on webapp for Scalingo; data-platform tests need the other member too
           uv-groups: "--all-packages --group dev"
 
       - name: Prepare test databases
+        if: ${{ !inputs.skip }}
         uses: ./.github/actions/prepare-test-databases
 
       - name: Run tests
+        if: ${{ !inputs.skip }}
         run: make -C ${{ inputs.working-directory }} ${{ inputs.make-target }}
         env:
           # As many workers as prepare-test-databases clones, and -n auto only sees 2.
@@ -79,7 +89,7 @@ jobs:
           PYTEST_ADDOPTS: --reuse-db -n 4 --dist loadfile
 
       - name: Check for missing migrations
-        if: inputs.check-migrations && inputs.working-directory == 'webapp'
+        if: ${{ !inputs.skip && inputs.check-migrations && inputs.working-directory == 'webapp' }}
         working-directory: webapp
         run: uv run python manage.py makemigrations --check --no-input --settings=${{ env.DJANGO_SETTINGS_MODULE }}
 
