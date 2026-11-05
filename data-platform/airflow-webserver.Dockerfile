@@ -11,9 +11,9 @@ RUN apt-get update && \
     libpq-dev python3-dev g++ git
 
 # python dependencies
-USER ${AIRFLOW_UID:-50000}
+USER ${AIRFLOW_UID:-50000}:0
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 WORKDIR /opt/airflow/
 
 # Copy workspace structure for uv resolution
@@ -21,22 +21,11 @@ COPY data-platform/pyproject.toml data-platform/pyproject.toml
 COPY pyproject.toml pyproject.toml
 COPY uv.lock uv.lock
 
-# Copy webapp source (needed for package install)
 COPY webapp/pyproject.toml webapp/pyproject.toml
-COPY webapp/core/ webapp/core/
-COPY webapp/data/ webapp/data/
-COPY webapp/dsfr_hacks/ webapp/dsfr_hacks/
-COPY webapp/infotri/ webapp/infotri/
-COPY webapp/qfdmd/ webapp/qfdmd/
-COPY webapp/qfdmo/ webapp/qfdmo/
-COPY webapp/search/ webapp/search/
-COPY webapp/settings/ webapp/settings/
-COPY webapp/stats/ webapp/stats/
-COPY webapp/assistant/ webapp/assistant/
 
 # Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
 ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
-RUN uv sync --project data-platform --frozen --no-editable
+RUN uv sync --project data-platform --frozen --no-editable --no-install-workspace
 
 # Runtime
 # --- --- --- ---
@@ -47,10 +36,22 @@ USER ${AIRFLOW_UID:-50000}
 
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
     PATH="/opt/airflow/.venv/bin:$PATH" \
-    PYTHONPATH="/opt/airflow/dags" \
+    PYTHONPATH="/opt/airflow/dags:/opt/airflow/webapp" \
     PORT="8080"
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+# Kept out of the venv, so a code change does not push all the dependencies again
+COPY webapp/core/ /opt/airflow/webapp/core/
+COPY webapp/data/ /opt/airflow/webapp/data/
+COPY webapp/dsfr_hacks/ /opt/airflow/webapp/dsfr_hacks/
+COPY webapp/infotri/ /opt/airflow/webapp/infotri/
+COPY webapp/qfdmd/ /opt/airflow/webapp/qfdmd/
+COPY webapp/qfdmo/ /opt/airflow/webapp/qfdmo/
+COPY webapp/search/ /opt/airflow/webapp/search/
+COPY webapp/settings/ /opt/airflow/webapp/settings/
+COPY webapp/stats/ /opt/airflow/webapp/stats/
+COPY webapp/assistant/ /opt/airflow/webapp/assistant/
 
 WORKDIR /opt/airflow
 COPY ./data-platform/dags /opt/airflow/dags

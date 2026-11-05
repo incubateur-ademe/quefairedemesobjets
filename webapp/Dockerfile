@@ -6,10 +6,12 @@ FROM node:24-slim AS node_build
 WORKDIR /build
 
 # Install JS deps first for better caching
-COPY webapp/ ./webapp/
 COPY package-lock.json package.json .
+COPY webapp/package.json webapp/package.json
+COPY webapp/revue-front/package.json webapp/revue-front/package.json
 RUN npm -w webapp ci
 RUN npm -w webapp/revue-front ci
+COPY webapp/ ./webapp/
 RUN npm -w webapp run build
 RUN npm -w webapp/revue-front run build
 
