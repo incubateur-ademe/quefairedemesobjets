@@ -22,7 +22,11 @@ Draft pull requests run no CI, E2E or deployment: they start when the pull reque
 
 In a [stack of pull requests](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests), only the top pull request runs CI, E2E and deployments, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.
 
-The `Check draft and stack` job reads this from the API rather than from the event: `gh stack submit` opens each pull request before linking the stack, and no workflow event follows. On `opened`, it waits a minute for the stack to be linked, so a stack of more than about 12 pull requests can still run CI on the first ones it opens. When the top pull request is closed without merging, the new top keeps its skipped checks until its next push.
+The `Check draft and stack` job reads this from the API rather than from the event, as it is more recent than the payload. `gh stack submit` opens each pull request before linking the stack and no workflow event follows, so a pull request opened as ready for review usually does not know its stack yet and runs CI once.
+
+To avoid this, open a stack as drafts, then mark its pull requests as ready: `gh stack submit --auto` creates drafts by default, unlike `--open` or the interactive editor. A push made before linking new pull requests into a stack has the same effect on the pull request that was the top one.
+
+When the top pull request is closed without merging, the new top keeps its skipped checks until its next push.
 
 The `skip` input of `ci.yml` is applied inside `_backend-test-job.yml`, not on the calling job, because a skipped calling job never reports the required `... / run` checks.
 

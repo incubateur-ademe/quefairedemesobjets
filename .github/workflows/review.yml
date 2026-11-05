@@ -32,13 +32,8 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-          ACTION: ${{ github.event.action }}
-          DRAFT: ${{ github.event.pull_request.draft }}
           NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # gh stack submit opens each pull request before linking the stack, and no
-          # workflow event follows: the payload of `opened` cannot tell a stack apart.
-          if [ "$ACTION" = opened ] && [ "$DRAFT" = false ]; then sleep 60; fi
           gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" \
             --jq '"skip=\(.draft or (.stack != null and .stack.position != .stack.size))"' >> "$GITHUB_OUTPUT"
 
