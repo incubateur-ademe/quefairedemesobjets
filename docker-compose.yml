@@ -116,7 +116,8 @@ services:
     user: "0:0"
     build:
       context: .
-      dockerfile: data-platform/airflow-webserver.Dockerfile
+      dockerfile: data-platform/airflow.Dockerfile
+      target: webserver
       args:
         <<: *airflow-build-args
     deploy:
@@ -141,7 +142,8 @@ services:
       - ./data-platform/dags/.env
     build:
       context: .
-      dockerfile: data-platform/airflow-scheduler.Dockerfile
+      dockerfile: data-platform/airflow.Dockerfile
+      target: scheduler
       args:
         <<: *airflow-build-args
     deploy:
@@ -167,7 +169,8 @@ services:
       - ./data-platform/dags/.env
     build:
       context: .
-      dockerfile: data-platform/airflow-dag-processor.Dockerfile
+      dockerfile: data-platform/airflow.Dockerfile
+      target: dag-processor
       args:
         <<: *airflow-build-args
     ports:

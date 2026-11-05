@@ -77,7 +77,7 @@ REGISTRY_IMAGE="${ML_DEDUPLICATION_IMAGE:?ML_DEDUPLICATION_IMAGE must be set (fu
 REGISTRY="${REGISTRY_IMAGE%%/*}"
 
 # Canonical cloud-init shared with the DAG. Baked into the scheduler image at
-# this path (see data-platform/airflow-scheduler.Dockerfile).
+# this path (see data-platform/airflow.Dockerfile).
 CLOUD_INIT_TPL="/opt/airflow/scripts/infrastructure/ml_deduplication_cloud_init.tpl"
 
 # Public key injected into the instance so the DAG can SSH in to drive it

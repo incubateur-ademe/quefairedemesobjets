@@ -108,11 +108,11 @@ Toutes les ressources suivent la nomenclature `lvao-{env}-{nom}` où `env ∈ {p
 
 Trois Serverless Containers distincts pour Airflow 3 (`apache/airflow:slim-3.1.7-python3.12`), construits via Dockerfiles dédiés :
 
-| Container                    | Image                              | Rôle                                                                                                                                          |
-| ---------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lvao-airflow-webserver`     | `airflow-webserver.Dockerfile`     | Interface UI/API Airflow (`airflow api-server`, port 8080). Création du compte admin au premier démarrage via `_AIRFLOW_WWW_USER_*`.          |
-| `lvao-airflow-scheduler`     | `airflow-scheduler.Dockerfile`     | Orchestrateur (`LocalExecutor`). Embarque le runtime **dbt** (`dbt deps`), `gdal-bin`, le CLI Scaleway, `jq`, `unzip` pour les pipelines ETL. |
-| `lvao-airflow-dag-processor` | `airflow-dag-processor.Dockerfile` | Parsing isolé des DAGs avec nginx en façade pour le healthcheck.                                                                              |
+| Container                    | Image                                  | Rôle                                                                                                                                          |
+| ---------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lvao-airflow-webserver`     | `airflow.Dockerfile` (`webserver`)     | Interface UI/API Airflow (`airflow api-server`, port 8080). Création du compte admin au premier démarrage via `_AIRFLOW_WWW_USER_*`.          |
+| `lvao-airflow-scheduler`     | `airflow.Dockerfile` (`scheduler`)     | Orchestrateur (`LocalExecutor`). Embarque le runtime **dbt** (`dbt deps`), `gdal-bin`, le CLI Scaleway, `jq`, `unzip` pour les pipelines ETL. |
+| `lvao-airflow-dag-processor` | `airflow.Dockerfile` (`dag-processor`) | Parsing isolé des DAGs avec nginx en façade pour le healthcheck.                                                                              |
 
 Voir [`data-platform/airflow.md`](../data-platform/airflow.md) pour le détail de la configuration runtime (auth manager, JWT, métadonnées).
 

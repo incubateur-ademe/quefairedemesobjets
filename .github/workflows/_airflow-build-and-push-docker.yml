@@ -103,12 +103,14 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
-          cache-from: type=gha,scope=scheduler
-          cache-to: type=gha,scope=scheduler,mode=max
+          cache-from: type=gha,scope=airflow
+          # Other targets only add their entrypoint to the same layers
+          cache-to: type=gha,scope=airflow,mode=max
           push: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
-          file: data-platform/airflow-scheduler.Dockerfile
+          file: data-platform/airflow.Dockerfile
+          target: scheduler
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
 
@@ -123,12 +125,12 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
-          cache-from: type=gha,scope=webserver
-          cache-to: type=gha,scope=webserver,mode=max
+          cache-from: type=gha,scope=airflow
           push: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
-          file: data-platform/airflow-webserver.Dockerfile
+          file: data-platform/airflow.Dockerfile
+          target: webserver
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
 
@@ -145,11 +147,11 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
-          cache-from: type=gha,scope=dag-processor
-          cache-to: type=gha,scope=dag-processor,mode=max
+          cache-from: type=gha,scope=airflow
           push: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-dag-processor', inputs.image_tag) || steps.airflow_dag-processor_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
-          file: data-platform/airflow-dag-processor.Dockerfile
+          file: data-platform/airflow.Dockerfile
+          target: dag-processor
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
