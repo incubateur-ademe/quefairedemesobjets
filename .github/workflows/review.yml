@@ -3,7 +3,7 @@ name: 💣 Review
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review, converted_to_draft]
 
 defaults:
   run:
@@ -13,34 +13,64 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Draft pull requests run no CI/CD, and in a stack only the top pull request does
+# as it contains the whole stack.
 jobs:
+  scope:
+    name: Check draft and stack
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      skip: ${{ steps.pull_request.outputs.skip }}
+    steps:
+      # An empty output runs everything: outside a pull request, or if this step fails.
+      - name: Read the pull request
+        id: pull_request
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" \
+            --jq '"skip=\(.draft or (.stack != null and .stack.position != .stack.size))"' >> "$GITHUB_OUTPUT"
+
   ci:
     name: 🤖 CI
+    needs: scope
     permissions:
       contents: read
       pull-requests: write
     uses: ./.github/workflows/ci.yml
     secrets: inherit # pragma: allowlist secret
+    with:
+      skip: ${{ needs.scope.outputs.skip == 'true' }}
 
   webapp:
     name: 🟠 Webapp
+    if: ${{ needs.scope.outputs.skip != 'true' }}
     uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
+    needs: [scope, ci]
     with:
       environment: preprod
 
   airflow:
     name: 🟠 Airflow
+    if: ${{ needs.scope.outputs.skip != 'true' }}
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
+    needs: [scope, ci]
     with:
       environment: preprod
       tag_name: pr-${{ github.event.pull_request.number }}
 
   e2e:
     name: 🪤 E2E
+    if: ${{ needs.scope.outputs.skip != 'true' }}
+    needs: scope
     permissions:
       contents: write
       pull-requests: write
