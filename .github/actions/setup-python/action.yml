@@ -1,4 +1,4 @@
-name: Setup Backend Environment
+name: Setup Python Environment
 description: Install uv and Python dependencies for a project directory (webapp or data-platform)
 
 inputs:

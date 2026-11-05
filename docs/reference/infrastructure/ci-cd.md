@@ -4,17 +4,17 @@ This documentation describes the different CI/CD workflows of the project and wh
 
 ## Python / uv in CI
 
-Backend jobs use a **single workspace virtual environment** at the repo root, synced with semantic dependency groups:
+Python jobs use a **single workspace virtual environment** at the repo root, synced with semantic dependency groups:
 
 - **`--group lint`**: Black + Ruff for CI linter.
 - **`--group dev`**: lint + test (pytest, factory-boy) + djade + pre-commit for CI tests / checks.
 - **`--group dev --group webapp-dev`**: Full local dev (adds Django runserver tooling, debug toolbar, etc.).
 
-`uv sync` always runs from the repo root (the workspace root). The reusable job [`.github/workflows/_backend-test-job.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_backend-test-job.yml) syncs `--group dev` from root, then runs `make -C <webapp|data-platform> <target>`.
+`uv sync` always runs from the repo root (the workspace root). The reusable job [`.github/workflows/_pytest-job.yml`](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_pytest-job.yml) syncs `--group dev` from root, then runs `make -C <webapp|data-platform> <target>`.
 
 ## Creating or updating a Pull Request
 
-When a Pull Request is created, updated or marked as ready for review (events `opened`, `synchronize`, `ready_for_review` or `converted_to_draft`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
+When a Pull Request is created, updated or marked as ready for review (events `opened`, `synchronize`, `ready_for_review` or `converted_to_draft`), the **💣 Pull request** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
 
 Tests and linters are run, and `✅ CI` fails if one of them fails.
 
@@ -34,7 +34,7 @@ On a Pull Request, only the jobs matching the changed files run: [ci-areas.yml](
 
 The required check is `✅ CI`: it fails if a CI job failed or was cancelled, and passes if they were skipped. Requiring the jobs themselves would let a pull request merge with a failed linter, as a skipped job counts as passed.
 
-Backend tests run on 4 pytest-xdist workers, against PostgreSQL in memory. Migrations are the slowest part of a test run and each worker would replay them, so [prepare-test-databases](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/actions/prepare-test-databases/action.yml) restores a dump cached on `uv.lock` and the migrations, then clones it per worker. A pull request that changes either migrates once per job, until `main` has saved the new dump.
+Python tests run on 4 pytest-xdist workers, against PostgreSQL in memory. Migrations are the slowest part of a test run and each worker would replay them, so [prepare-test-databases](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/actions/prepare-test-databases/action.yml) restores a dump cached on `uv.lock` and the migrations, then clones it per worker. A pull request that changes either migrates once per job, until `main` has saved the new dump.
 
 ### Review workflow flow
 
@@ -48,7 +48,7 @@ graph TD
 
 ## Merging a PR into main
 
-When a Pull Request is merged into the `main` branch, the **CD** workflow ([cd.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml)) is triggered.
+When a Pull Request is merged into the `main` branch, the **🌚 Main to preprod** workflow ([cd.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml)) is triggered.
 
 Deployment to `preprod` does not wait for CI, and a CI failure does not stop it. The draft release is only updated when CI and both deployments succeeded.
 
@@ -70,7 +70,7 @@ graph TD
 
 ## Publishing a release
 
-When a release is published on GitHub (event `published`), the **Deploy** workflow ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) is triggered to deploy to production.
+When a release is published on GitHub (event `published`), the **🌞 Release to production** workflow ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) is triggered to deploy to production.
 
 The tagged version of the code is deployed to the `prod` environment. Airflow images built for `preprod` on the same commit are tagged with the version number instead of being built again. If one is missing, for example because of the registry cleanup, all of them are built.
 
