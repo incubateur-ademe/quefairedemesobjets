@@ -338,3 +338,4 @@ dbt-serve-docs:
 .PHONY: dbt-clean
 dbt-clean-docs:
 	make -C data-platform/dbt clean-docs
+# CI area test, not to be merged
