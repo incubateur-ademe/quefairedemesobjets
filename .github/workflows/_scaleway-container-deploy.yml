@@ -35,7 +35,12 @@ jobs:
           image=$REGISTRY_IMAGE \
           region=$SCW_DEFAULT_REGION
 
+    # Scaleway does not restart a container whose probe fails: a slow start goes
+    # through `error` and back to `ready`, so only a timeout is a failure.
+    # Keep the timeout above the startup probe budget of the slowest container.
     - name: Check deployment status
+      env:
+        START_TIMEOUT_SECONDS: 360
       run: |
         while true; do
             CONTAINER=$(scw container container get $CONTAINER_ID region=$SCW_DEFAULT_REGION -o json || true)
@@ -47,9 +52,9 @@ jobs:
                 echo "🎉 $REGISTRY_IMAGE is deployed."
                 break
             fi
-            if [ "$STATUS" == "error" ]; then
+            if [ "$SECONDS" -ge "$START_TIMEOUT_SECONDS" ]; then
                 ERROR=$(jq -r '.error_message // "Scaleway gave no error message"' <<< "$CONTAINER")
-                echo "::error title=Scaleway deployment failed::$REGISTRY_IMAGE: ${ERROR//$'\n'/%0A}"
+                echo "::error title=Scaleway deployment failed::$REGISTRY_IMAGE is $STATUS after ${SECONDS}s: ${ERROR//$'\n'/%0A}"
                 exit 1
             fi
 
