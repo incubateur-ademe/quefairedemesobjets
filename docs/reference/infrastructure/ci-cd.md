@@ -34,6 +34,8 @@ On a Pull Request, only the jobs matching the changed files run: [ci-areas.yml](
 
 The required check is `✅ CI`: it fails if a CI job failed or was cancelled, and passes if they were skipped. Requiring the jobs themselves would let a pull request merge with a failed linter, as a skipped job counts as passed.
 
+The `skip` input of `ci-tests.yml` is applied to the steps of `_backend-test-job.yml`, as a job skipped by its own `if` shows `inputs.display-name` as its name. The job takes 3 seconds: an empty service image does not start Postgres.
+
 Backend tests run on 4 pytest-xdist workers, against PostgreSQL in memory. Migrations are the slowest part of a test run and each worker would replay them, so [prepare-test-databases](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/actions/prepare-test-databases/action.yml) restores a dump cached on `uv.lock` and the migrations, then clones it per worker. A pull request that changes either migrates once per job, until `main` has saved the new dump.
 
 ### Review workflow flow
