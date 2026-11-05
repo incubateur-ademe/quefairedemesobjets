@@ -21,6 +21,14 @@ resource "scaleway_container" "airflow_scheduler" {
     failure_threshold = 5
     interval          = "30s"
   }
+  startup_probe {
+    http {
+      path = "/health"
+    }
+    failure_threshold = 30
+    interval          = "10s"
+    timeout           = "1s"
+  }
 
   environment_variables = {
     AIRFLOW__API__AUTH_BACKENDS                           = "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
