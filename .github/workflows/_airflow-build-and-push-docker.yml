@@ -17,6 +17,11 @@ on:
       image_tag:
         required: false
         type: string
+      source_tag:
+        description: "Existing image tag to reuse instead of building"
+        required: false
+        type: string
+        default: ""
       environment:
         required: true
         type: string
@@ -26,9 +31,41 @@ env:
   SCALEWAY_NAMESPACE: ns-qfdmo
 
 jobs:
+  reuse-images:
+    name: ♻️ Reuse existing images
+    if: ${{ inputs.source_tag != '' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    outputs:
+      reused: ${{ steps.retag.outputs.reused }}
+    steps:
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      # A missing image stops here, and the next job builds all of them.
+      - name: Tag the existing images
+        id: retag
+        env:
+          SOURCE_TAG: ${{ inputs.source_tag }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          images="$SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE"
+          for image in airflow-scheduler airflow-webserver airflow-dag-processor; do
+            docker buildx imagetools create --tag "$images/$image:$IMAGE_TAG" "$images/$image:$SOURCE_TAG" || exit 0
+          done
+          echo "reused=true" >> "$GITHUB_OUTPUT"
+
   build-and-push-image:
     name: 🐳 Build and push Docker images
     runs-on: ubuntu-latest
+    needs: reuse-images
+    if: ${{ !cancelled() && needs.reuse-images.outputs.reused != 'true' }}
     environment: ${{ inputs.environment }}
     permissions:
       contents: read

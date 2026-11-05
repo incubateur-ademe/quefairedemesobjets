@@ -99,16 +99,18 @@ graph TD
 
 When a release is published on GitHub (event `published`), the **Deploy** workflow ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) is triggered to deploy to production.
 
-The tagged version of the code is deployed to the `prod` environment.
+The tagged version of the code is deployed to the `prod` environment. Airflow images built for `preprod` on the same commit are tagged with the version number instead of being built again. If one is missing, for example because of the registry cleanup, all of them are built.
 
 ### Deploy workflow flow
 
 ```mermaid
 graph TD
     C[Deployment of the webapp release version to production]
-    F[Build Airflow Docker images<br/>The image is tagged with the version number<br/>This tagged image is used for the production deployment]
-    F --> H[Deployment of the Scheduler on Scaleway in production]
-    F --> I[Deployment of the Webserver on Scaleway in production]
+    F{Images of this commit<br/>in the registry?}
+    F -->|Yes| R[Tag them with the version number]
+    F -->|No| B[Build and tag with the version number]
+    R --> H[Deployment of Airflow on Scaleway in production]
+    B --> H
 ```
 
 ## Scheduled workflows
