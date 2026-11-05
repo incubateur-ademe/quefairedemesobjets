@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="«Que faire de mes objets et déchets» API" href="qfdmo.html"><link rel="prev" title="Organisation interne de la gestion des versions du jeu de données Open Data" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Recherche" href="../../search.html"><link rel="next" title="Public API v1" href="v1.html"><link rel="prev" title="Organisation interne de la gestion des versions du jeu de données Open Data" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>API Guidelines - Documentation Que faire de mes objets et déchets</title>
@@ -290,11 +290,13 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/changelog.html">Changelog du jeu de données Open Data : « Acteurs de l’économie circulaire - Que faire de mes objets et déchets »</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/exposure-opendata-acteur.html">Jeu de données open data : acteurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../opendata/exposure-opendata-fiches.html">Jeu de données open data : fiches objets et déchets (produits et consignes)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data.html">Politique de version du jeu de données Open Data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../opendata/politique-de-version-du-jeu-de-donnees-open-data-interne.html">Organisation interne de la gestion des versions du jeu de données Open Data</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">API Guidelines</a><input aria-label="Toggle navigation of API Guidelines" checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="v1.html">Public API v1</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qfdmo.html">«Que faire de mes objets et déchets» API</a></li>
 <li class="toctree-l3"><a class="reference internal" href="stats.html">Public statistics API</a></li>
 <li class="toctree-l3"><a class="reference internal" href="suggestions.html">Suggestions review API</a></li>
@@ -359,15 +361,16 @@ instance defined in <code class="docutils literal notranslate"><span class="pre"
 <section id="structure">
 <h2>Structure<a class="headerlink" href="#structure" title="Lien vers cette rubrique">¶</a></h2>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">webapp/core/api.py</span></code> creates the <code class="docutils literal notranslate"><span class="pre">NinjaAPI</span></code> instance and registers routers.</p></li>
-<li><p>Each domain app exposes a <code class="docutils literal notranslate"><span class="pre">router</span></code> that is attached to the main API.
-Current routers are:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">webapp/core/api.py</span></code> creates two <code class="docutils literal notranslate"><span class="pre">NinjaAPI</span></code> instances and registers routers:</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">qfdmo.api</span></code> at <code class="docutils literal notranslate"><span class="pre">/api/qfdmo/</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">stats.api</span></code> at <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">api</span></code>, the historical one, mounted at <code class="docutils literal notranslate"><span class="pre">/api/</span></code> (docs at <code class="docutils literal notranslate"><span class="pre">/api/docs</span></code>):
+<code class="docutils literal notranslate"><span class="pre">qfdmo.api</span></code> at <code class="docutils literal notranslate"><span class="pre">/api/qfdmo/</span></code>, <code class="docutils literal notranslate"><span class="pre">stats.api</span></code> at <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">api_v1</span></code>, the public versioned one, mounted at <code class="docutils literal notranslate"><span class="pre">/api/v1/</span></code> (docs at
+<code class="docutils literal notranslate"><span class="pre">/api/v1/docs</span></code>): <code class="docutils literal notranslate"><span class="pre">opendata.api</span></code>, see <a class="reference internal" href="v1.html"><span class="std std-doc">v1.md</span></a></p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">webapp/core/urls.py</span></code> mounts the API under the <code class="docutils literal notranslate"><span class="pre">/api/</span></code> path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">webapp/core/urls.py</span></code> mounts both; <code class="docutils literal notranslate"><span class="pre">api/v1/</span></code> comes first, or Django would
+look for <code class="docutils literal notranslate"><span class="pre">v1/…</span></code> inside the historical API.</p></li>
 </ul>
 </section>
 <section id="how-to-add-a-new-api">
@@ -409,6 +412,12 @@ Current routers are:</p>
 <h2>More details about API by router<a class="headerlink" href="#more-details-about-api-by-router" title="Lien vers cette rubrique">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="v1.html">Public API v1</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="v1.html#principle">Principle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="v1.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="v1.html#tests">Tests</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qfdmo.html">«Que faire de mes objets et déchets» API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qfdmo.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qfdmo.html#interactive-documentation">Interactive documentation</a></li>
@@ -444,12 +453,12 @@ Current routers are:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="qfdmo.html">
+          <a class="next-page" href="v1.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">«Que faire de mes objets et déchets» API</div>
+                <div class="title">Public API v1</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
