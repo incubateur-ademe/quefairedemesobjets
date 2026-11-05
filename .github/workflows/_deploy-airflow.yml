@@ -7,6 +7,11 @@ on:
       tag_name:
         type: string
         required: true
+      source_tag:
+        description: "Existing image tag to reuse instead of building"
+        type: string
+        required: false
+        default: ""
 
 jobs:
   airflow_docker:
@@ -15,6 +20,7 @@ jobs:
     secrets: inherit # pragma: allowlist secret`
     with:
       image_tag: ${{ inputs.tag_name }}
+      source_tag: ${{ inputs.source_tag }}
       environment: ${{ inputs.environment }}
 
   # Job which retrieves the container IDs from the environment

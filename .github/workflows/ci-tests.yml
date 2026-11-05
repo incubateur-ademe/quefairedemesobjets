@@ -1,0 +1,102 @@
+name: 🧪 CI tests
+
+on:
+  workflow_call:
+    inputs:
+      skip:
+        description: "Skip every job while still reporting the checks"
+        required: false
+        type: boolean
+        default: false
+      python:
+        description: "false skips the python jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
+      frontend:
+        description: "false skips the frontend jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
+      revue:
+        description: "false skips the revue jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+
+jobs:
+  backend_unit_tests:
+    name: ✅ Backend Unit Tests
+    uses: ./.github/workflows/_backend-test-job.yml
+    with:
+      skip: ${{ inputs.skip || inputs.python == 'false' }}
+      make-target: unit-test
+      check-migrations: true
+
+  backend_integration_tests:
+    name: ✅ Backend Integration Tests
+    uses: ./.github/workflows/_backend-test-job.yml
+    with:
+      skip: ${{ inputs.skip || inputs.python == 'false' }}
+      make-target: integration-test
+
+  backend_data_tests:
+    name: ✅ Backend Data Tests
+    uses: ./.github/workflows/_backend-test-job.yml
+    with:
+      skip: ${{ inputs.skip || inputs.python == 'false' }}
+      working-directory: data-platform
+      make-target: dags-test
+
+  frontend_tests:
+    name: ✅ Frontend Tests
+    if: ${{ !inputs.skip && inputs.frontend != 'false' }}
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Run tests
+        run: |
+          cp .env.template .env
+          npm run test
+        working-directory: webapp
+
+  revue_frontend:
+    name: ✅ Review Screen Tests
+    if: ${{ !inputs.skip && inputs.revue != 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend
+        with:
+          working-directory: webapp/revue-front
+
+      - name: Run tests
+        run: npm run test
+        working-directory: webapp/revue-front
+
+      - name: Build
+        run: npm run build
+        working-directory: webapp/revue-front
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read

@@ -1,13 +1,33 @@
-name: 🤖 CI
+name: 🎨 CI qualité
 
 on:
   workflow_call:
     inputs:
       skip:
-        description: "Skip every job while still reporting the required checks"
+        description: "Skip every job while still reporting the checks"
         required: false
         type: boolean
         default: false
+      python:
+        description: "false skips the python jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
+      frontend:
+        description: "false skips the frontend jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
+      revue:
+        description: "false skips the revue jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
+      infra:
+        description: "false skips the infra jobs, anything else runs them"
+        required: false
+        type: string
+        default: ""
 
 env:
   PGHOST: localhost
@@ -22,38 +42,9 @@ env:
   CI: true
 
 jobs:
-  changes:
-    name: 🔎 Changed areas
-    if: ${{ !inputs.skip }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      # Empty outputs run everything: outside a pull request, or if the filter fails.
-      python: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.python }}
-      frontend: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.frontend }}
-      revue: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.revue }}
-      infra: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.infra }}
-    steps:
-      - uses: actions/checkout@v7.0.1
-
-      - name: Find changed areas
-        id: areas
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        with:
-          filters: .github/ci-areas.yml
-          predicate-quantifier: some-with-excludes
-          # In a stack, compare with the stack base: the top pull request stands
-          # for the whole stack. The action only reads `base` without a token.
-          token: ""
-          base: ${{ github.event.pull_request.stack.base.sha || github.event.pull_request.base.sha }}
-
   backend-webapp-linter:
-    name: 📝 Backend Webapp Linter
-    needs: changes
-    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.python != 'false' }}
+    name: 📝 Backend Linter
+    if: ${{ !inputs.skip && inputs.python != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -68,8 +59,7 @@ jobs:
 
   data-platform-linter:
     name: 📝 Data Platform Linter
-    needs: changes
-    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.python != 'false' }}
+    if: ${{ !inputs.skip && inputs.python != 'false' }}
     runs-on: ubuntu-latest
     env:
       POSTGRES_HOST: localhost
@@ -121,8 +111,7 @@ jobs:
 
   infrastructure-linter:
     name: 📝 Infrastructure Linter
-    needs: changes
-    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.infra != 'false' }}
+    if: ${{ !inputs.skip && inputs.infra != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -141,8 +130,7 @@ jobs:
 
   frontend_linter:
     name: 📝 Frontend Linter
-    needs: changes
-    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.frontend != 'false' }}
+    if: ${{ !inputs.skip && inputs.frontend != 'false' }}
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7.0.1
@@ -156,56 +144,10 @@ jobs:
         run: npm run format:check
         working-directory: webapp
 
-  backend_unit_tests:
-    name: ✅ Backend Unit Tests
-    needs: [changes, backend-webapp-linter]
-    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
-    uses: ./.github/workflows/_backend-test-job.yml
-    with:
-      skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
-      make-target: unit-test
-      check-migrations: true
-
-  backend_integration_tests:
-    name: ✅ Backend Integration Tests
-    needs: [changes, backend-webapp-linter]
-    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
-    uses: ./.github/workflows/_backend-test-job.yml
-    with:
-      skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
-      make-target: integration-test
-
-  backend_data_tests:
-    name: ✅ Backend Data Tests
-    needs: [changes, data-platform-linter]
-    if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.data-platform-linter.result) }}
-    uses: ./.github/workflows/_backend-test-job.yml
-    with:
-      skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
-      working-directory: data-platform
-      make-target: dags-test
-
-  frontend_tests:
-    name: ✅ Frontend Tests
+  revue_linter:
+    name: 📝 Review Screen Linter
+    if: ${{ !inputs.skip && inputs.revue != 'false' }}
     runs-on: ubuntu-slim
-    needs: frontend_linter
-    steps:
-      - uses: actions/checkout@v7.0.1
-
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
-
-      - name: Run tests
-        run: |
-          cp .env.template .env
-          npm run test
-        working-directory: webapp
-
-  revue_frontend:
-    name: ✅ Review Screen Frontend (revue-front)
-    needs: changes
-    if: ${{ !cancelled() && !inputs.skip && needs.changes.outputs.revue != 'false' }}
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -226,18 +168,9 @@ jobs:
         run: npm run typecheck
         working-directory: webapp/revue-front
 
-      - name: Run tests
-        run: npm run test
-        working-directory: webapp/revue-front
-
-      - name: Build
-        run: npm run build
-        working-directory: webapp/revue-front
-
   revue_api_types:
-    name: 📝 Review Screen API Types Up To Date
-    needs: changes
-    if: ${{ !cancelled() && !inputs.skip && (needs.changes.outputs.revue != 'false' || needs.changes.outputs.python != 'false') }}
+    name: 📝 Review Screen API Types
+    if: ${{ !inputs.skip && (inputs.revue != 'false' || inputs.python != 'false') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
