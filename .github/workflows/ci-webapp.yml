@@ -1,0 +1,97 @@
+name: 🌐 Webapp
+
+on:
+  workflow_call:
+    inputs:
+      django:
+        description: "Run the Django jobs"
+        required: false
+        type: boolean
+        default: true
+      js:
+        description: "Run the JS jobs"
+        required: false
+        type: boolean
+        default: true
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+
+jobs:
+  django-lint:
+    name: 📝 Django
+    if: ${{ inputs.django }}
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
+        with:
+          uv-groups: "--group lint"
+
+      - name: Check code formatting (Black + Ruff)
+        run: make -C webapp check-format
+
+  js-format:
+    name: 📝 JS format
+    if: ${{ inputs.js }}
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: webapp
+
+      - name: Check code formatting
+        run: npm run format:check
+        working-directory: webapp
+
+  unit-tests:
+    name: ✅ Tests
+    if: ${{ inputs.django }}
+    uses: ./.github/workflows/_pytest-job.yml
+    with:
+      display-name: Unit tests
+      check-migrations: true
+      make-target: unit-test
+
+  integration-tests:
+    name: ✅ Tests
+    if: ${{ inputs.django }}
+    uses: ./.github/workflows/_pytest-job.yml
+    with:
+      display-name: Integration tests
+      make-target: integration-test
+
+  js-tests:
+    name: ✅ JS tests
+    if: ${{ inputs.js }}
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
+
+      - name: Run tests
+        run: |
+          cp .env.template .env
+          npm run test
+        working-directory: webapp
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read

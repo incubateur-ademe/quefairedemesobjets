@@ -2,6 +2,12 @@ name: 🪤 E2E
 
 on:
   workflow_call:
+    inputs:
+      force:
+        description: "Run without the frontend label"
+        required: false
+        type: boolean
+        default: false
 
 env:
   PGHOST: localhost
@@ -24,7 +30,7 @@ jobs:
   e2e-prepare:
     name: Prepare assets and database
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
-    if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
+    if: ${{ inputs.force || github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     runs-on: ubuntu-latest
     services:
       postgres:

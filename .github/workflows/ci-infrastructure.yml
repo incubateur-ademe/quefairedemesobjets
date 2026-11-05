@@ -1,0 +1,28 @@
+name: 🏗️ Infrastructure
+
+on:
+  workflow_call:
+
+jobs:
+  format:
+    name: 📝 Format
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install Terragrunt and OpenTofu
+        uses: gruntwork-io/terragrunt-action@8c1d96b76d445fd2e41475a3f0b63dcd1d9cc077 # v3.4.1
+        with:
+          tg_version: "0.83.2"
+          tofu_version: "1.10.3"
+
+      - name: Run Tofu format check
+        run: tofu fmt -recursive -check infrastructure
+
+      - name: Run Terragrunt format check
+        run: terragrunt hcl fmt -check infrastructure
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read
