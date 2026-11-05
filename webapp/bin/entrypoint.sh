@@ -9,6 +9,7 @@ set -euo pipefail
 if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
   echo "Applying database migrations..."
   python manage.py migrate --noinput
+  python manage.py populate_libelle_court
 fi
 
 # Start nginx in the background (proxies :8000 → :8001).
