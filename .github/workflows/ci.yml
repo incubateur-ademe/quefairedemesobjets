@@ -58,8 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - name: Setup backend Python environment
-        uses: ./.github/actions/setup-backend
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
         with:
           uv-groups: "--group lint"
 
@@ -95,8 +95,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - name: Setup backend Python environment
-        uses: ./.github/actions/setup-backend
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
         with:
           uv-groups: "--group lint"
 
@@ -147,8 +147,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
         with:
           working-directory: webapp
 
@@ -160,7 +160,7 @@ jobs:
     name: ✅ Backend Unit Tests
     needs: [changes, backend-webapp-linter]
     if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
-    uses: ./.github/workflows/_backend-test-job.yml
+    uses: ./.github/workflows/_pytest-job.yml
     with:
       skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
       make-target: unit-test
@@ -170,7 +170,7 @@ jobs:
     name: ✅ Backend Integration Tests
     needs: [changes, backend-webapp-linter]
     if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.backend-webapp-linter.result) }}
-    uses: ./.github/workflows/_backend-test-job.yml
+    uses: ./.github/workflows/_pytest-job.yml
     with:
       skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
       make-target: integration-test
@@ -179,7 +179,7 @@ jobs:
     name: ✅ Backend Data Tests
     needs: [changes, data-platform-linter]
     if: ${{ !cancelled() && contains(fromJSON('["success", "skipped"]'), needs.data-platform-linter.result) }}
-    uses: ./.github/workflows/_backend-test-job.yml
+    uses: ./.github/workflows/_pytest-job.yml
     with:
       skip: ${{ inputs.skip || needs.changes.outputs.python == 'false' }}
       working-directory: data-platform
@@ -192,8 +192,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
 
       - name: Run tests
         run: |
@@ -209,8 +209,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
         with:
           working-directory: webapp/revue-front
 
@@ -246,11 +246,11 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
-      - name: Setup backend Python environment
-        uses: ./.github/actions/setup-backend
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
 
-      - name: Setup frontend environment
-        uses: ./.github/actions/setup-frontend
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
 
       - name: Regenerate the OpenAPI schema and the TypeScript types
         run: npm run api:types

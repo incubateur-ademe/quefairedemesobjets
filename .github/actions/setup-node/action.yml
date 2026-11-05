@@ -1,4 +1,4 @@
-name: Setup Frontend Environment
+name: Setup Node Environment
 description: Install Node.js and npm dependencies
 
 inputs:

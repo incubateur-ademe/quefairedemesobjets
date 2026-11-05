@@ -1,4 +1,4 @@
-name: Backend Test Job
+name: Pytest job
 
 on:
   workflow_call:
@@ -62,8 +62,8 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
         with:
           # --all-packages: root depends only on webapp for Scalingo; data-platform tests need the other member too
           uv-groups: "--all-packages --group dev"
