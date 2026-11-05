@@ -47,3 +47,5 @@ Helps the user solve a problem, for example:
 - Copying the production database to preproduction
 - Debugging
   …
+
+CI area test, not to be merged.
