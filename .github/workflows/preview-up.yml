@@ -1,4 +1,4 @@
-name: 🌱 Preview environment - up
+name: 🌱 Preview up
 
 on:
   pull_request:

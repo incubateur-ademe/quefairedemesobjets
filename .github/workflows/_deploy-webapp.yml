@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-django:
-    name: 🗺️ Carte & assistant
+    name: 🗺️ Webapp
     uses: ./.github/workflows/_deploy-on-scalingo.yml
     secrets: inherit # pragma: allowlist secret`
     with:
