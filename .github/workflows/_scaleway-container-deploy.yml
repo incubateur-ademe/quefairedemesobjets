@@ -37,20 +37,19 @@ jobs:
 
     - name: Check deployment status
       run: |
-        EXPECTED_VALUE="ready"
-        ERROR_VALUE="error"
-
         while true; do
-            RESPONSE_VALUE=$(scw container container get $CONTAINER_ID region=fr-par -o json | jq -r '.status')
+            CONTAINER=$(scw container container get $CONTAINER_ID region=$SCW_DEFAULT_REGION -o json || true)
+            STATUS=$(jq -r '.status' <<< "$CONTAINER")
 
-            echo "Current status: $RESPONSE_VALUE"
+            echo "Current status: $STATUS"
 
-            if [ "$RESPONSE_VALUE" == "$EXPECTED_VALUE" ]; then
-                echo "🎉 The expected value '$EXPECTED_VALUE' was returned. Exiting."
+            if [ "$STATUS" == "ready" ]; then
+                echo "🎉 $REGISTRY_IMAGE is deployed."
                 break
             fi
-            if [ "$RESPONSE_VALUE" == "$ERROR_VALUE" ]; then
-                echo "🚨 Ended with error : ERROR_VALUE."
+            if [ "$STATUS" == "error" ]; then
+                ERROR=$(jq -r '.error_message // "Scaleway gave no error message"' <<< "$CONTAINER")
+                echo "::error title=Scaleway deployment failed::$REGISTRY_IMAGE: ${ERROR//$'\n'/%0A}"
                 exit 1
             fi
 
