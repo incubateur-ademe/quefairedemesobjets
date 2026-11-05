@@ -13,17 +13,24 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Draft pull requests run no CI/CD, and in a stack only the top pull request does
-# as it contains the whole stack.
+# Draft pull requests run no CI, and in a stack only the top pull request does as it
+# contains the whole stack. Pull requests do not deploy to preprod: previews have
+# their own workflow, preview-up.yml, which does not wait for CI.
 jobs:
   scope:
-    name: Check draft and stack
-    runs-on: ubuntu-slim
+    name: 🔎 Scope
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       skip: ${{ steps.pull_request.outputs.skip }}
+      # Empty outputs run everything: outside a pull request, or if the filter fails.
+      python: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.python }}
+      frontend: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.frontend }}
+      revue: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.revue }}
+      infra: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.infra }}
     steps:
       # An empty output runs everything: outside a pull request, or if this step fails.
       - name: Read the pull request
@@ -37,35 +44,85 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" \
             --jq '"skip=\(.draft or (.stack != null and .stack.position != .stack.size))"' >> "$GITHUB_OUTPUT"
 
-  ci:
-    name: 🤖 CI
+      - uses: actions/checkout@v7.0.1
+        if: github.event_name == 'pull_request' && steps.pull_request.outputs.skip != 'true'
+
+      - name: Find changed areas
+        id: areas
+        if: github.event_name == 'pull_request' && steps.pull_request.outputs.skip != 'true'
+        continue-on-error: true
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: .github/ci-areas.yml
+          predicate-quantifier: some-with-excludes
+          # In a stack, compare with the stack base: the top pull request stands
+          # for the whole stack. The action only reads `base` without a token.
+          token: ""
+          base: ${{ github.event.pull_request.stack.base.sha || github.event.pull_request.base.sha }}
+
+  quality:
+    name: 🎨 CI qualité
     needs: scope
     permissions:
       contents: read
-      pull-requests: write
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/ci-quality.yml
     with:
       skip: ${{ needs.scope.outputs.skip == 'true' }}
+      python: ${{ needs.scope.outputs.python }}
+      frontend: ${{ needs.scope.outputs.frontend }}
+      revue: ${{ needs.scope.outputs.revue }}
+      infra: ${{ needs.scope.outputs.infra }}
 
-  webapp:
-    name: 🟠 Webapp
-    if: ${{ needs.scope.outputs.skip != 'true' }}
-    uses: ./.github/workflows/_deploy-webapp.yml
-    secrets: inherit # pragma: allowlist secret`
-    needs: [scope, ci]
+  tests:
+    name: 🧪 CI tests
+    needs: scope
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci-tests.yml
     with:
-      environment: preprod
+      skip: ${{ needs.scope.outputs.skip == 'true' }}
+      python: ${{ needs.scope.outputs.python }}
+      frontend: ${{ needs.scope.outputs.frontend }}
+      revue: ${{ needs.scope.outputs.revue }}
 
-  airflow:
-    name: 🟠 Airflow
-    if: ${{ needs.scope.outputs.skip != 'true' }}
-    uses: ./.github/workflows/_deploy-airflow.yml
-    secrets: inherit # pragma: allowlist secret`
-    needs: [scope, ci]
-    with:
-      environment: preprod
-      tag_name: pr-${{ github.event.pull_request.number }}
+  # Once a group has failed, stop the other one. Previews are a separate workflow,
+  # preview-up.yml, so this never touches them.
+  stop_after_quality:
+    name: 🛑 Stop the tests
+    needs: quality
+    if: ${{ failure() }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps: &stop_run
+      - name: Cancel this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY"
+
+  stop_after_tests:
+    name: 🛑 Stop the quality checks
+    needs: tests
+    if: ${{ failure() }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps: *stop_run
+
+  # The only required check: a skipped job counts as passed, so requiring the jobs
+  # themselves would let a pull request merge when a job they depend on failed.
+  ci_passed:
+    name: ✅ CI
+    needs: [scope, quality, tests]
+    if: ${{ always() }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Fail if CI failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
 
   e2e:
     name: 🪤 E2E
@@ -76,27 +133,6 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/e2e.yml
     secrets: inherit #pragma: allowlist secret
-
-  # FIXME: tmp pour tester
-  update_release_draft_for_review:
-    # Uncomment when anchor are supported in GitHub Actions
-    # See : https://github.com/actions/runner/issues/1182
-    # <<: *release_drafter
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    name: 🔢 Release
-    steps:
-      - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
-        id: release-drafter
-        with:
-          config-name: release-config.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    needs: [webapp]
-    if: ${{ !contains( github.ref_name, 'hotfix') }}
-    outputs:
-      tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
