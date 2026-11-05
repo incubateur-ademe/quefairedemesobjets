@@ -1,4 +1,4 @@
-name: 💣 Review
+name: 💣 Pull request
 
 on:
   workflow_dispatch:
@@ -18,13 +18,21 @@ concurrency:
 # their own workflow, preview-up.yml, which does not wait for CI.
 jobs:
   scope:
-    name: Check draft and stack
-    runs-on: ubuntu-slim
+    name: 🔎 Scope
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       skip: ${{ steps.pull_request.outputs.skip }}
+      # Empty outputs run everything: outside a pull request, or if the filter fails.
+      webapp-django: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.webapp-django }}
+      webapp-js: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.webapp-js }}
+      data-platform: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.data-platform }}
+      revue: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.revue }}
+      infrastructure: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.infrastructure }}
+      ci: ${{ steps.areas.outputs.ci }}
     steps:
       # An empty output runs everything: outside a pull request, or if this step fails.
       - name: Read the pull request
@@ -38,22 +46,65 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/pulls/$NUMBER" \
             --jq '"skip=\(.draft or (.stack != null and .stack.position != .stack.size))"' >> "$GITHUB_OUTPUT"
 
-  ci:
-    name: 🤖 CI
+      - uses: actions/checkout@v7.0.1
+        if: github.event_name == 'pull_request' && steps.pull_request.outputs.skip != 'true'
+
+      - name: Find changed areas
+        id: areas
+        if: github.event_name == 'pull_request' && steps.pull_request.outputs.skip != 'true'
+        continue-on-error: true
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: .github/ci-areas.yml
+          predicate-quantifier: some-with-excludes
+          # In a stack, compare with the stack base: the top pull request stands
+          # for the whole stack. The action only reads `base` without a token.
+          token: ""
+          base: ${{ github.event.pull_request.stack.base.sha || github.event.pull_request.base.sha }}
+
+  ci_webapp:
+    name: 🌐 Webapp
     needs: scope
+    if: ${{ needs.scope.outputs.skip != 'true' && (needs.scope.outputs.webapp-django != 'false' || needs.scope.outputs.webapp-js != 'false') }}
     permissions:
       contents: read
-      pull-requests: write
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/ci-webapp.yml
     with:
-      skip: ${{ needs.scope.outputs.skip == 'true' }}
+      django: ${{ needs.scope.outputs.webapp-django != 'false' }}
+      js: ${{ needs.scope.outputs.webapp-js != 'false' }}
+
+  ci_data_platform:
+    name: 📊 Data platform
+    needs: scope
+    if: ${{ needs.scope.outputs.skip != 'true' && needs.scope.outputs.data-platform != 'false' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci-data-platform.yml
+
+  ci_revue:
+    name: 🧐 Revue
+    needs: scope
+    # The API types come from Django, so a webapp change runs this workflow too.
+    if: ${{ needs.scope.outputs.skip != 'true' && (needs.scope.outputs.revue != 'false' || needs.scope.outputs.webapp-django != 'false') }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci-revue.yml
+    with:
+      code: ${{ needs.scope.outputs.revue != 'false' }}
+
+  ci_infrastructure:
+    name: 🏗️ Infrastructure
+    needs: scope
+    if: ${{ needs.scope.outputs.skip != 'true' && needs.scope.outputs.infrastructure != 'false' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci-infrastructure.yml
 
   # The only required check: a skipped job counts as passed, so requiring the jobs
   # themselves would let a pull request merge when a job they depend on failed.
   ci_passed:
     name: ✅ CI
-    needs: [scope, ci]
+    needs: [scope, ci_webapp, ci_data_platform, ci_revue, ci_infrastructure]
     if: ${{ always() }}
     runs-on: ubuntu-slim
     timeout-minutes: 5
@@ -71,6 +122,8 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/e2e.yml
     secrets: inherit #pragma: allowlist secret
+    with:
+      force: ${{ needs.scope.outputs.ci == 'true' }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

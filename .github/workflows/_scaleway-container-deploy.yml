@@ -7,10 +7,13 @@ on:
       registry_image:
         type: string
         required: true
+      component:
+        type: string
+        required: true
 
 jobs:
   deploy_container:
-    name: Scaleway deploy container
+    name: 🚀 Deploy ${{ inputs.component }} to Scaleway
     runs-on: ubuntu-slim
     env:
       CONTAINER_ID: ${{ inputs.container_id }}

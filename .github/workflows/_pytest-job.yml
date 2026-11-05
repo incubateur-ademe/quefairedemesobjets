@@ -1,4 +1,4 @@
-name: Backend Test Job
+name: Pytest job
 
 on:
   workflow_call:
@@ -17,11 +17,10 @@ on:
         required: false
         type: boolean
         default: false
-      skip:
-        description: "Skip the tests while still reporting the required check"
-        required: false
-        type: boolean
-        default: false
+      display-name:
+        description: "Name of the job in the Actions sidebar"
+        required: true
+        type: string
 
 env:
   PGHOST: localhost
@@ -38,8 +37,7 @@ env:
 
 jobs:
   run:
-    # On the caller job, a skip would leave the required "/ run" check pending.
-    if: ${{ !inputs.skip }}
+    name: ${{ inputs.display-name }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -62,8 +60,8 @@ jobs:
       - name: Install GIS packages
         uses: ./.github/actions/install-gis
 
-      - name: Setup backend environment
-        uses: ./.github/actions/setup-backend
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
         with:
           # --all-packages: root depends only on webapp for Scalingo; data-platform tests need the other member too
           uv-groups: "--all-packages --group dev"

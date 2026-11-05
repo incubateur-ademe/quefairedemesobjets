@@ -159,7 +159,7 @@ The screen works on the cohortes of the local database. The command
 | `npm run build:revue`        | Builds the review screen into `webapp/static/compiled/revue/` |
 | `npm run scalingo-postbuild` | Both, run by Scalingo instead of `build`                      |
 
-The Dockerfile and the `setup-frontend` CI action also build the review screen.
+The Dockerfile and the `setup-node` CI action also build the review screen.
 There is no code splitting: whitenoise only keeps hashed files, which would break
 chunks loaded by a relative URL.
 

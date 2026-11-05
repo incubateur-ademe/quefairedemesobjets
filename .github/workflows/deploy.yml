@@ -1,4 +1,4 @@
-name: 🌞 Deploy
+name: 🌞 Release to production
 
 on:
   workflow_dispatch:

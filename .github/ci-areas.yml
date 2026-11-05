@@ -1,17 +1,11 @@
-# Which CI jobs a pull request needs, read by dorny/paths-filter in ci.yml.
+# Which CI jobs a pull request needs, read by dorny/paths-filter in review.yml.
 # An exclusion is final: no other pattern of the same area can include the file back.
-# A file matching `other` runs every job. So does any change to .github, this file included.
+# A file matching `other` runs every job, and any change to .github matches it.
 
-python:
+webapp-django: &webapp-django
   - "uv.lock"
   - "pyproject.toml"
-  - "data-platform/**"
-  - "ml_deduplication/**"
   - "webapp/**"
-  # Loaded by data-platform/dags/utils/docs.py
-  - "docs/reference/data-platform/**"
-  - "!data-platform/**/*.md"
-  - "!ml_deduplication/**/*.md"
   - "!webapp/**/*.md"
   - "!webapp/package.json"
   - "!webapp/revue-front/**"
@@ -23,11 +17,11 @@ python:
   - "!webapp/.parcelrc"
   - "!webapp/.postcssrc"
 
-frontend:
+webapp-js:
   - "package.json"
   - "package-lock.json"
   - "webapp/package.json"
-  # Copied to .env by the frontend tests
+  # Copied to .env by the JS tests
   - "webapp/.env.template"
   - "webapp/static/to_compile/**"
   - "webapp/parcel-transformers/**"
@@ -37,13 +31,21 @@ frontend:
   - "webapp/.parcelrc"
   - "webapp/.postcssrc"
 
+# The DAGs import the webapp models, so a webapp change can break them.
+data-platform:
+  - *webapp-django
+  - "data-platform/**"
+  # Loaded by data-platform/dags/utils/docs.py
+  - "docs/reference/data-platform/**"
+  - "!data-platform/**/*.md"
+
 revue:
   - "package.json"
   - "package-lock.json"
   - "webapp/package.json"
   - "webapp/revue-front/**"
 
-infra:
+infrastructure:
   - "infrastructure/**"
   - "!infrastructure/**/*.md"
 
@@ -59,3 +61,8 @@ other:
   - "!pyproject.toml"
   - "!package.json"
   - "!package-lock.json"
+
+# Also runs the E2E tests without the frontend label: a CI change proves the whole CI.
+ci:
+  - ".github/**"
+  - "!**/*.md"

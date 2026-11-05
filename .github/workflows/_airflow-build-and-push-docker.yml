@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-and-push-image:
-    name: 🐳 Build and push Docker images
+    name: 🐳 Build and push Airflow images
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:

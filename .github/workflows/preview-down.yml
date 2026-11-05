@@ -1,4 +1,4 @@
-name: 🪦 Preview environment - down
+name: 🪦 Preview down
 
 on:
   pull_request:

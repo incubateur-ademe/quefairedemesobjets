@@ -1,4 +1,4 @@
-name: 🐳 Docker image for ml-deduplication inference
+name: 🐳 ML inference image
 
 # Build and push the ml_deduplication inference image to the Scaleway registry.
 # All builds go into a single shared namespace (ns-ml-deduplication-inference)

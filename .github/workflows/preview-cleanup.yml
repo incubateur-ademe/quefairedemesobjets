@@ -1,4 +1,4 @@
-name: 🧹 Preview environment - daily garbage collection
+name: 🧹 Preview cleanup
 
 # Safety net for preview-down.yml: every day, list every preview resource
 # still in Scaleway (containers, databases, buckets), map it to its PR, and
