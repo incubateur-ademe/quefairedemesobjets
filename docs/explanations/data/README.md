@@ -14,7 +14,7 @@ Les fichiers qui concerne la plateforme data :
 
 - `data-platform/pyproject.toml` : définition des dépendances (les dépendances de dev sont dans le `pyproject.toml` racine)
 - `./dags` répertoire dans lequels sont stockés tous les dags executés sur le cluster Airflow
-- `data-platform/dags/airflow-scheduler.Dockerfile` et `data-platform/dags/airflow-webserver.Dockerfile`, fichiers de configuration Docker exécutés dans tous les environnements
+- `data-platform/airflow.Dockerfile`, fichier de configuration Docker avec une cible par composant, exécuté dans tous les environnements
 - `docker-compose.yml` orchestre les conteneurs en environnement de développement
 - `data-platform/dags/tests` répertoire qui contient les tests des dags
 

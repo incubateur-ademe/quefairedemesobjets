@@ -1,6 +1,11 @@
+# Each Airflow component is a target of this file, and has its own image: Scaleway
+# containers only set an image, so the entrypoint has to come with it. Components
+# share every layer but their entrypoint, so they cost a single build and push.
+
+ARG AIRFLOW_VERSION=3.3.1
+
 # Builder python
 # --- --- --- ---
-ARG AIRFLOW_VERSION=3.3.1
 FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS python-builder
 
 # system dependencies
@@ -27,17 +32,16 @@ COPY webapp/pyproject.toml webapp/pyproject.toml
 ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
 RUN uv sync --project data-platform --frozen --no-editable --no-install-workspace
 
-# Runtime
+# Common to all components
 # --- --- --- ---
-ARG AIRFLOW_VERSION
-FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS scheduler
+FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS airflow-common
 
 USER root
 
 # unzip for Airflow DAG
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    curl gdal-bin jq unzip \
+    curl gdal-bin jq nginx unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Scaleway CLI, download a pinned version
@@ -56,13 +60,13 @@ WORKDIR /opt/airflow
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
     LD_LIBRARY_PATH=/usr/lib \
     PYTHONPATH="/opt/airflow/dags:/opt/airflow/webapp" \
-    PATH="/opt/airflow/.venv/bin:$PATH"
+    PATH="/opt/airflow/.venv/bin:$PATH" \
+    DBT_PROFILES_DIR=/opt/airflow/dbt \
+    DBT_PROJECT_DIR=/opt/airflow/dbt
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Before the code, so a code change does not download the dbt packages again
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt \
-    DBT_PROJECT_DIR=/opt/airflow/dbt
 COPY --chown=${AIRFLOW_UID:-50000}:0 \
     data-platform/dbt/dbt_project.yml \
     data-platform/dbt/package-lock.yml \
@@ -70,6 +74,7 @@ COPY --chown=${AIRFLOW_UID:-50000}:0 \
     /opt/airflow/dbt/
 WORKDIR /opt/airflow/dbt
 RUN dbt deps
+WORKDIR /opt/airflow
 
 # Kept out of the venv, so a code change does not push all the dependencies again
 COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/core/ /opt/airflow/webapp/core/
@@ -84,7 +89,6 @@ COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/stats/ /opt/airflow/webapp/stats/
 COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/assistant/ /opt/airflow/webapp/assistant/
 
 COPY --chown=${AIRFLOW_UID:-50000}:0 ./data-platform/dbt/ /opt/airflow/dbt/
-COPY ./data-platform/scripts/ /opt/airflow/scripts/
 
 # Classique Airflow
 COPY ./data-platform/dags/ /opt/airflow/dags/
@@ -97,4 +101,55 @@ COPY ./docs/reference/data-platform/ /opt/airflow/docs/reference/data-platform/
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
 
+# Scheduler
+# --- --- --- ---
+FROM airflow-common AS scheduler
+
+COPY ./data-platform/scripts/ /opt/airflow/scripts/
+
+WORKDIR /opt/airflow/dbt
+
 CMD ["scheduler"]
+
+# Dag processor
+# --- --- --- ---
+FROM airflow-common AS dag-processor
+
+COPY ./scripts/ /opt/airflow/scripts/
+COPY ./data-platform/airflow-dag-processor-start.sh /opt/airflow/airflow-dag-processor-start.sh
+
+USER 0
+# Nginx
+RUN echo 'worker_processes 1; \
+    events { worker_connections 1024; } \
+    http { \
+    server { \
+    listen 80 default_server; \
+    location / { return 200 "Hello"; } \
+    } \
+    }' > /etc/nginx/nginx.conf
+RUN touch /run/nginx.pid
+RUN chown -R ${AIRFLOW_UID:-50000}:0 /var/lib/nginx /var/log/nginx /run/nginx.pid
+RUN chmod +x /opt/airflow/airflow-dag-processor-start.sh
+USER ${AIRFLOW_UID:-50000}:0
+
+EXPOSE 80
+
+ENTRYPOINT ["/opt/airflow/airflow-dag-processor-start.sh"]
+CMD [""]
+
+# Webserver
+# --- --- --- ---
+FROM airflow-common AS webserver
+
+ENV PORT="8080"
+
+COPY ./data-platform/airflow-webserver-start.sh /opt/airflow/airflow-webserver-start.sh
+
+USER root
+RUN chmod +x /opt/airflow/airflow-webserver-start.sh
+USER ${AIRFLOW_UID:-50000}
+
+EXPOSE 8080
+
+ENTRYPOINT ["/opt/airflow/airflow-webserver-start.sh"]
