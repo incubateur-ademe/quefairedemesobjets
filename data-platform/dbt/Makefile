@@ -9,3 +9,7 @@ serve-docs:
 .PHONY: clean-docs
 clean-docs:
 	rm -rf target
+
+.PHONY: copy-docs
+copy-docs:
+	cp target/catalog.json target/index.html target/manifest.json ../../docs/dbt/
