@@ -17,3 +17,4 @@ export function readBootstrap(doc: Document = document): Bootstrap {
   const parsed = JSON.parse(element.textContent) as Bootstrap
   return { ...parsed, basepath: toSafeInternalHref(parsed.basepath) }
 }
+// CI area test, not to be merged
