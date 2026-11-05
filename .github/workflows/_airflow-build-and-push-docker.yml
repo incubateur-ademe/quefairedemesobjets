@@ -62,7 +62,7 @@ jobs:
           echo "reused=true" >> "$GITHUB_OUTPUT"
 
   build-and-push-image:
-    name: 🐳 Build and push Docker images
+    name: 🐳 Build and push Airflow images
     needs: reuse-images
     if: ${{ !cancelled() && needs.reuse-images.outputs.reused != 'true' }}
     runs-on: ubuntu-latest
