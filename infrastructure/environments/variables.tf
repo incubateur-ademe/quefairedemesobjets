@@ -17,3 +17,4 @@ variable "organization_id" {
   description = "ID de l'organisation Scaleway"
   type        = string
 }
+# CI area test, not to be merged
