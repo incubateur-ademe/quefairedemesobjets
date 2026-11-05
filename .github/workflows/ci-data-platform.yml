@@ -1,0 +1,81 @@
+name: 📊 Data platform
+
+on:
+  workflow_call:
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+
+jobs:
+  lint:
+    name: 📝 Lint
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+      POSTGRES_DB: warehouse
+      POSTGRES_SCHEMA: public
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: warehouse
+          POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+          POSTGRES_DB: warehouse
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
+        with:
+          uv-groups: "--group lint"
+
+      - name: Cache DBT packages
+        id: cache-dbt-packages
+        uses: actions/cache@v6
+        with:
+          path: data-platform/dbt/dbt_packages
+          key: dbt-packages-${{ hashFiles('data-platform/dbt/packages.yml', 'data-platform/dbt/package-lock.yml') }}
+
+      - name: Install DBT dependencies
+        if: steps.cache-dbt-packages.outputs.cache-hit != 'true'
+        working-directory: data-platform/dbt
+        run: uv run dbt deps
+
+      - name: Check dbt database connection
+        working-directory: data-platform/dbt
+        run: uv run dbt debug
+
+      - name: Check code formatting (Black + Ruff + SqlFluff)
+        run: make -C data-platform check-format
+
+  tests:
+    name: ✅ Tests
+    uses: ./.github/workflows/_pytest-job.yml
+    with:
+      display-name: DAG tests
+      working-directory: data-platform
+      make-target: dags-test
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read

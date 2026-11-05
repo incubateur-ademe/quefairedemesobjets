@@ -17,10 +17,21 @@ concurrency:
 # Deployments do not wait for CI: a failed check must not stop preprod. The release
 # waits for all of it.
 jobs:
-  ci:
-    name: 🤖 CI
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit #pragma: allowlist secret
+  ci_webapp:
+    name: 🌐 Webapp
+    uses: ./.github/workflows/ci-webapp.yml
+
+  ci_data_platform:
+    name: 📊 Data platform
+    uses: ./.github/workflows/ci-data-platform.yml
+
+  ci_revue:
+    name: 🧐 Revue
+    uses: ./.github/workflows/ci-revue.yml
+
+  ci_infrastructure:
+    name: 🏗️ Infrastructure
+    uses: ./.github/workflows/ci-infrastructure.yml
 
   webapp:
     name: 🟠 Webapp
@@ -46,7 +57,7 @@ jobs:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
-    needs: [ci, webapp, airflow]
+    needs: [ci_webapp, ci_data_platform, ci_revue, ci_infrastructure, webapp, airflow]
     permissions:
       contents: write
     runs-on: ubuntu-slim
