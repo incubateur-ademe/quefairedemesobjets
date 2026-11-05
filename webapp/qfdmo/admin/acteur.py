@@ -4,6 +4,7 @@ from typing import Any, List
 import orjson
 from adminsortable2.admin import SortableAdminMixin
 from core.admin import CodeLibelleModelAdmin, CodeLibelleModelMixin, NotMutableMixin
+from core.constants import DIGITAL_ACTEUR_CODE
 from django import forms
 from django.conf import settings
 from django.contrib.gis import admin
@@ -441,6 +442,34 @@ class CustomRevisionActeurForm(forms.ModelForm):
         if not self.instance.pk and not nom:
             raise ValidationError("Le nom est obligatoire")
         return nom
+
+    # uniquement_sur_rdv can't be None on creation or if the acteur is a parent
+    def clean_uniquement_sur_rdv(self):
+        if not self.instance.pk or self.instance.is_parent:
+            if self.cleaned_data.get("uniquement_sur_rdv") is None:
+                raise ValidationError("Le champ 'Uniquement sur RDV' est obligatoire")
+        return self.cleaned_data.get("uniquement_sur_rdv")
+
+    # exclusivite_de_reprisereparation can't be None on creation or if the acteur is a
+    # parent
+    def clean_exclusivite_de_reprisereparation(self):
+        if not self.instance.pk or self.instance.is_parent:
+            if self.cleaned_data.get("exclusivite_de_reprisereparation") is None:
+                raise ValidationError(
+                    "Le champ 'Exclusivité de reprise/réparation' est obligatoire"
+                )
+        return self.cleaned_data.get("exclusivite_de_reprisereparation")
+
+    # location is mandatory for non digital acteurs
+    def clean_location(self):
+        if not self.instance.pk or self.instance.is_parent:
+            if self.cleaned_data.get("location") is None:
+                acteur_type = self.cleaned_data.get("acteur_type")
+                if not acteur_type or acteur_type.code != DIGITAL_ACTEUR_CODE:
+                    raise ValidationError(
+                        "La location est obligatoire pour les acteurs non digitaux"
+                    )
+        return self.cleaned_data.get("location")
 
 
 class RevisionActeurAdmin(ImportExportMixin, BaseActeurAdmin):

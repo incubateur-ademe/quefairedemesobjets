@@ -76,6 +76,8 @@ class RevisionActeurFactory(Factory):
     location = Point(2, 2)
     acteur_type = SubFactory(ActeurTypeFactory)
     source = SubFactory(SourceFactory)
+    exclusivite_de_reprisereparation = False
+    uniquement_sur_rdv = False
 
 
 class DisplayedActeurFactory(Factory):

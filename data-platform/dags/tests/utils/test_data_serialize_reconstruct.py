@@ -31,6 +31,8 @@ class TestDataSerializeReconstruct:
             "action_principale": action,
             "location": LOCATION,
             "cree_le": DATETIME,
+            "exclusivite_de_reprisereparation": False,
+            "uniquement_sur_rdv": False,
         }
         return data
 
