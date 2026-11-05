@@ -35,11 +35,10 @@ FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS scheduler
 USER root
 
 # unzip for Airflow DAG
-RUN apt-get update
-RUN apt-get install -y unzip curl
-
-RUN apt-get install -y --no-install-recommends \
-    gdal-bin libgdal-dev jq
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    curl gdal-bin jq unzip \
+    && rm -rf /var/lib/apt/lists/*
 
 # Scaleway CLI, download a pinned version
 # rather than through the official get.sh installer, because it resolves the latest
@@ -52,17 +51,6 @@ RUN ARCH="$(dpkg --print-architecture)" && \
     "https://github.com/scaleway/scaleway-cli/releases/download/v${SCW_CLI_VERSION}/scaleway-cli_${SCW_CLI_VERSION}_linux_${ARCH}" && \
     chmod +x /usr/local/bin/scw
 
-# Client Docker CLI (sans daemon) pour le mode local d'inférence ML:
-# il permet d'exécuter `docker run` de l'image d'inférence en s'appuyant sur le
-# socket Docker du host (monté en lecture seule via docker-compose). Nécessaire
-# uniquement pour le mode `run_locally` du DAG ml_deduplication.
-RUN DOCKER_ARCH="$(uname -m | sed 's/x86_64/x86_64/; s/aarch64/aarch64/; s/armv7l/armhf/')" \
-    && curl -fsSL "https://download.docker.com/linux/static/stable/${DOCKER_ARCH}/docker-27.3.1.tgz" -o /tmp/docker.tgz \
-    && tar -xzf /tmp/docker.tgz -C /tmp \
-    && mv /tmp/docker/docker /usr/local/bin/docker \
-    && rm -rf /tmp/docker /tmp/docker.tgz \
-    && docker --version
-
 USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
@@ -72,19 +60,30 @@ ENV VIRTUAL_ENV=/opt/airflow/.venv \
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-# Kept out of the venv, so a code change does not push all the dependencies again
-COPY webapp/core/ /opt/airflow/webapp/core/
-COPY webapp/data/ /opt/airflow/webapp/data/
-COPY webapp/dsfr_hacks/ /opt/airflow/webapp/dsfr_hacks/
-COPY webapp/infotri/ /opt/airflow/webapp/infotri/
-COPY webapp/qfdmd/ /opt/airflow/webapp/qfdmd/
-COPY webapp/qfdmo/ /opt/airflow/webapp/qfdmo/
-COPY webapp/search/ /opt/airflow/webapp/search/
-COPY webapp/settings/ /opt/airflow/webapp/settings/
-COPY webapp/stats/ /opt/airflow/webapp/stats/
-COPY webapp/assistant/ /opt/airflow/webapp/assistant/
+# Before the code, so a code change does not download the dbt packages again
+ENV DBT_PROFILES_DIR=/opt/airflow/dbt \
+    DBT_PROJECT_DIR=/opt/airflow/dbt
+COPY --chown=${AIRFLOW_UID:-50000}:0 \
+    data-platform/dbt/dbt_project.yml \
+    data-platform/dbt/package-lock.yml \
+    data-platform/dbt/packages.yml \
+    /opt/airflow/dbt/
+WORKDIR /opt/airflow/dbt
+RUN dbt deps
 
-COPY ./data-platform/dbt/ /opt/airflow/dbt/
+# Kept out of the venv, so a code change does not push all the dependencies again
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/core/ /opt/airflow/webapp/core/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/data/ /opt/airflow/webapp/data/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/dsfr_hacks/ /opt/airflow/webapp/dsfr_hacks/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/infotri/ /opt/airflow/webapp/infotri/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/qfdmd/ /opt/airflow/webapp/qfdmd/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/qfdmo/ /opt/airflow/webapp/qfdmo/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/search/ /opt/airflow/webapp/search/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/settings/ /opt/airflow/webapp/settings/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/stats/ /opt/airflow/webapp/stats/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/assistant/ /opt/airflow/webapp/assistant/
+
+COPY --chown=${AIRFLOW_UID:-50000}:0 ./data-platform/dbt/ /opt/airflow/dbt/
 COPY ./data-platform/scripts/ /opt/airflow/scripts/
 
 # Classique Airflow
@@ -97,15 +96,5 @@ COPY ./docs/reference/data-platform/ /opt/airflow/docs/reference/data-platform/
 
 RUN mkdir -p /opt/airflow/tmp
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
-
-WORKDIR /opt/airflow/dbt
-USER 0
-RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
-USER ${AIRFLOW_UID:-50000}:0
-
-ENV DBT_PROFILES_DIR=/opt/airflow/dbt
-ENV DBT_PROJECT_DIR=/opt/airflow/dbt
-
-RUN dbt deps
 
 CMD ["scheduler"]
