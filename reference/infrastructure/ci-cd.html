@@ -370,71 +370,43 @@
 <section id="creating-or-updating-a-pull-request">
 <h2>Creating or updating a Pull Request<a class="headerlink" href="#creating-or-updating-a-pull-request" title="Lien vers cette rubrique">¶</a></h2>
 <p>When a Pull Request is created, updated or marked as ready for review (events <code class="docutils literal notranslate"><span class="pre">opened</span></code>, <code class="docutils literal notranslate"><span class="pre">synchronize</span></code>, <code class="docutils literal notranslate"><span class="pre">ready_for_review</span></code> or <code class="docutils literal notranslate"><span class="pre">converted_to_draft</span></code>), the <strong>Review</strong> workflow (<a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml">review.yml</a>) is triggered.</p>
-<p>Tests and linters are run and it is possible to deploy the PR branch to the <code class="docutils literal notranslate"><span class="pre">preprod</span></code> environment.</p>
-<p>Draft pull requests run no CI, E2E or deployment: they start when the pull request is marked as ready for review, and converting a pull request to draft cancels what is running.</p>
-<p>In a <a class="reference external" href="https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests">stack of pull requests</a>, only the top pull request runs CI, E2E and deployments, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.</p>
+<p>Tests and linters are run, and <code class="docutils literal notranslate"><span class="pre">✅</span> <span class="pre">CI</span></code> fails if one of them fails.</p>
+<p>A Pull Request does not deploy to <code class="docutils literal notranslate"><span class="pre">preprod</span></code>. The optional preview (<a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/preview-up.yml">preview-up.yml</a>) is triggered by the <code class="docutils literal notranslate"><span class="pre">preview</span></code> label. It is a separate workflow: it does not wait for CI, and a CI failure does not stop it.</p>
+<p>Draft pull requests run no CI or E2E: they start when the pull request is marked as ready for review, and converting a pull request to draft cancels what is running.</p>
+<p>In a <a class="reference external" href="https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests">stack of pull requests</a>, only the top pull request runs CI and E2E, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">draft</span> <span class="pre">and</span> <span class="pre">stack</span></code> job reads this from the API rather than from the event, as it is more recent than the payload. <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">stack</span> <span class="pre">submit</span></code> opens each pull request before linking the stack and no workflow event follows, so a pull request opened as ready for review usually does not know its stack yet and runs CI once.</p>
 <p>To avoid this, open a stack as drafts, then mark its pull requests as ready: <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">stack</span> <span class="pre">submit</span> <span class="pre">--auto</span></code> creates drafts by default, unlike <code class="docutils literal notranslate"><span class="pre">--open</span></code> or the interactive editor. A push made before linking new pull requests into a stack has the same effect on the pull request that was the top one.</p>
 <p>When the top pull request is closed without merging, the new top keeps its skipped checks until its next push.</p>
 <p>On a Pull Request, only the jobs matching the changed files run: <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/ci-areas.yml">ci-areas.yml</a> maps files to areas for <code class="docutils literal notranslate"><span class="pre">dorny/paths-filter</span></code>, and an unrecognised file runs everything. In a stack, files are compared with the stack base, so the top pull request covers the whole stack. <code class="docutils literal notranslate"><span class="pre">webapp</span></code> and <code class="docutils literal notranslate"><span class="pre">data-platform</span></code> are tested together because the DAGs import the webapp. Everything runs on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">skip</span></code> input of <code class="docutils literal notranslate"><span class="pre">ci.yml</span></code> is applied inside <code class="docutils literal notranslate"><span class="pre">_backend-test-job.yml</span></code>, not on the calling job, because a skipped calling job never reports the required <code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">/</span> <span class="pre">run</span></code> checks.</p>
+<p>The required check is <code class="docutils literal notranslate"><span class="pre">✅</span> <span class="pre">CI</span></code>: it fails if a CI job failed or was cancelled, and passes if they were skipped. Requiring the jobs themselves would let a pull request merge with a failed linter, as a skipped job counts as passed.</p>
 <p>Backend tests run on 4 pytest-xdist workers, against PostgreSQL in memory. Migrations are the slowest part of a test run and each worker would replay them, so <a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/actions/prepare-test-databases/action.yml">prepare-test-databases</a> restores a dump cached on <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> and the migrations, then clones it per worker. A pull request that changes either migrates once per job, until <code class="docutils literal notranslate"><span class="pre">main</span></code> has saved the new dump.</p>
 <section id="review-workflow-flow">
 <h3>Review workflow flow<a class="headerlink" href="#review-workflow-flow" title="Lien vers cette rubrique">¶</a></h3>
 <pre  class="mermaid">
         graph TD
-    B[Review workflow triggered] --&gt; C
-
-    subgraph C[&quot;CI execution&quot;]
-        C1[Backend linter&lt;br/&gt;formatting, ruff, tofu, terragrunt]
-        C2[Frontend linter&lt;br/&gt;prettier]
-        C3[&quot;Backend tests&lt;br/&gt;Migration checks&lt;br/&gt;unit, integration, data&quot;]
-        C4[Frontend tests]
-        C5[E2E tests&lt;br/&gt;if main branch or frontend label]
-
-    end
-
-    subgraph E[Airflow deployment]
-        E1[Webserver deployment]
-        E2[Scheduler deployment]
-    end
-
-    C --&gt; D{Confirm deployment to preprod?}
-    D --&gt;|Yes| F[Webapp deployment to preprod]
-    D --&gt;|Yes| G[Build &amp; push of the Airflow Docker image]
-    G --&gt; E[Deployment of Airflow on Scaleway]
-    F --&gt; H[Update of the Draft release]
+    A[Pull request] --&gt; B[Check draft and stack]
+    B --&gt; C[Linters and tests]
+    B --&gt; E[E2E&lt;br/&gt;with the frontend label]
+    C --&gt; G[CI, the required check]
     </pre></section>
 </section>
 <section id="merging-a-pr-into-main">
 <h2>Merging a PR into main<a class="headerlink" href="#merging-a-pr-into-main" title="Lien vers cette rubrique">¶</a></h2>
 <p>When a Pull Request is merged into the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch, the <strong>CD</strong> workflow (<a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml">cd.yml</a>) is triggered.</p>
-<p>The workflow is very similar to the review workflow: tests and linters are run and it is possible to deploy the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch to the <code class="docutils literal notranslate"><span class="pre">preprod</span></code> environment.</p>
+<p>Deployment to <code class="docutils literal notranslate"><span class="pre">preprod</span></code> does not wait for CI, and a CI failure does not stop it. The draft release is only updated when CI and both deployments succeeded.</p>
 <p>A new commit on <code class="docutils literal notranslate"><span class="pre">main</span></code> cancels the run in progress, so only the last commit gets deployed.</p>
 <section id="cd-workflow-flow">
 <h3>CD workflow flow<a class="headerlink" href="#cd-workflow-flow" title="Lien vers cette rubrique">¶</a></h3>
 <pre  class="mermaid">
         graph TD
-    B[CD workflow triggered] --&gt; C
-
-    subgraph C[&quot;CI execution&quot;]
-        C1[Backend linter&lt;br/&gt;formatting, ruff, tofu, terragrunt]
-        C2[Frontend linter&lt;br/&gt;prettier]
-        C3[&quot;Backend tests&lt;br/&gt;Migration checks&lt;br/&gt;unit, integration, data&quot;]
-        C4[Frontend tests]
-        C5[E2E tests]
-    end
-
-    subgraph E[Airflow deployment]
-        E1[Webserver deployment]
-        E2[Scheduler deployment]
-    end
-
-    C --&gt; D{Confirm deployment to preprod?}
-    D --&gt;|Yes| F[Webapp deployment to preprod]
-    D --&gt;|Yes| G[Build &amp; push of the Airflow Docker image]
-    G --&gt; E[Deployment of Airflow on Scaleway]
-    F --&gt; H[Update of the Draft release]
+    A[Push on main] --&gt; C[CI]
+    A --&gt; W{Confirm deployment to preprod?}
+    W --&gt;|Yes| F[Webapp deployment]
+    W --&gt;|Yes| G[Build Airflow images and deploy on Scaleway]
+    A --&gt; E[E2E tests]
+    C --&gt; H[Update of the draft release]
+    F --&gt; H
+    G --&gt; H
     </pre></section>
 </section>
 <section id="publishing-a-release">

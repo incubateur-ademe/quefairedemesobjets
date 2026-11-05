@@ -14,6 +14,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Deployments do not wait for CI: a failed check must not stop preprod. The release
+# waits for all of it.
 jobs:
   ci:
     name: 🤖 CI
@@ -24,7 +26,6 @@ jobs:
     name: 🟠 Webapp
     uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: preprod
 
@@ -32,7 +33,6 @@ jobs:
     name: 🟠 Airflow
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: preprod
       tag_name: ${{ github.sha }}
@@ -46,7 +46,7 @@ jobs:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
-    needs: [webapp]
+    needs: [ci, webapp, airflow]
     permissions:
       contents: write
     runs-on: ubuntu-slim
