@@ -14,13 +14,13 @@ jobs:
     # A rule protection has been set on this environment
     # so that it only triggers when ran on main branch
     # See https://github.com/incubateur-ademe/quefairedemesobjets/settings/environments/4163451271/edit
-    name: 🔴 Webapp
+    name: 🔴 Deploy webapp
     uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
     with:
       environment: prod
   airflow:
-    name: 🔴 Airflow
+    name: 🔴 Deploy Airflow
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
     with:
