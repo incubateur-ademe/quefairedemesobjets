@@ -1,4 +1,4 @@
-name: "Sync prod > preprod"
+name: 🔄 Sync prod to preprod
 
 on:
   workflow_dispatch:

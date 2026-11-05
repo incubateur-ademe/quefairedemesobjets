@@ -1,4 +1,4 @@
-name: "🟣 Scaleway Container Registry: delete old tags"
+name: 🟣 Delete old registry tags
 on:
   workflow_dispatch:
   schedule:
