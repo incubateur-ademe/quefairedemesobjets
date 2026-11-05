@@ -10,6 +10,12 @@ if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
   echo "Applying database migrations..."
   python manage.py migrate --noinput
   python manage.py populate_libelle_court
+  python manage.py seed_lieux_de_depot
+  # TODO: remove once the consignes grid is live in production.
+  # Grid of consignes of the live fiches, as bin/post_deploy does in
+  # production: the preview database is only seeded once, so redeploys
+  # would otherwise never convert the fiches. No-op once they have one.
+  python manage.py generate_consignes || echo "generate_consignes failed, starting anyway" >&2
 fi
 
 # Start nginx in the background (proxies :8000 → :8001).

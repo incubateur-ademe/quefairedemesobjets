@@ -12,9 +12,11 @@ from django.db import (
     connection,
     transaction,
 )
+from django.db.models import Q
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from wagtail.views import serve as wagtail_serve
 from django.utils.decorators import method_decorator
@@ -35,6 +37,7 @@ from wagtail.models import Page
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
 from core.views import static_file_content_from
+from qfdmd.consignes_migration import apply_plan, plan_conversion
 from qfdmd.legacy_migration import (
     finalize_produit_migration,
     MigrationError,
@@ -379,9 +382,34 @@ class TypeProduitFilter(django_filters.ChoiceFilter):
         return qs
 
 
+class ConsignesFilter(django_filters.ChoiceFilter):
+    """Fiches with or without a « Grille de consignes ».
+
+    For the editors to find the fiches the migration left aside: it only
+    converts what it can read, and leaves a draft or nothing otherwise (see
+    `qfdmd.consignes_migration`). Reads the published body, not the drafts.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("choices", [("avec", "Avec"), ("sans", "Sans")])
+        kwargs.setdefault("label", "Grille de consignes")
+        kwargs.setdefault("empty_label", "Toutes")
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        # JSONB containment: one block of the body has this type.
+        has_grid = Q(body__contains=[{"type": "consignes"}])
+        if value == "avec":
+            return qs.filter(has_grid)
+        if value == "sans":
+            return qs.exclude(has_grid)
+        return qs
+
+
 class ProduitPageFilterSet(WagtailFilterSet):
     migration_status = MigrationStatusFilter()
     type_produit = TypeProduitFilter()
+    consignes = ConsignesFilter()
 
     class Meta:
         model = ProduitPage
@@ -392,6 +420,7 @@ class ProduitPageFilterSet(WagtailFilterSet):
 # ont été migré vers des qfdmd.ProduitPage
 class MigrationOnlyFilterSet(WagtailFilterSet):
     migration_status = MigrationStatusFilter()
+    consignes = ConsignesFilter()
 
     class Meta:
         model = ProduitPage
@@ -888,3 +917,51 @@ def dechet_detail(request: HttpRequest, slug: str) -> HttpResponse:
         return wagtail_serve(request, request.path)
     except Http404:
         return SynonymeDetailView.as_view()(request, slug=slug)
+
+
+def generate_consignes(request: HttpRequest, id: str) -> HttpResponse:
+    """Fill the "Grille de consignes" block of a ProduitPage from its first
+    row of cards, by the rules of the spec.
+
+    GET shows a confirmation page. POST converts and saves a draft revision,
+    then redirects to the editor for review.
+    """
+    page = get_object_or_404(Page, pk=id).specific
+    if not isinstance(page, ProduitPage):
+        messages.error(
+            request, "Cette action n'est disponible que pour les pages Produit."
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    if request.method == "POST":
+        plan = plan_conversion(page)
+        count = apply_plan(page, plan, user=request.user)
+        details = [f"{u.titre} : {u.reason}" for u in plan.unresolved] + plan.notes
+        detail = format_html_join("", "<br/>{}", ((d,) for d in details))
+
+        if not count:
+            messages.warning(
+                request,
+                format_html(
+                    "Aucune carte de la première rangée n'a pu être convertie.{}",
+                    detail,
+                ),
+            )
+            return redirect("wagtailadmin_pages:edit", id)
+
+        messages.success(
+            request,
+            format_html(
+                "{} consigne(s) générée(s) dans un brouillon : relisez-les"
+                " avant de publier.{}",
+                count,
+                detail,
+            ),
+        )
+        return redirect("wagtailadmin_pages:edit", id)
+
+    return render(
+        request,
+        "admin/qfdmd/confirm_generate_consignes.html",
+        {"page": page, "already": bool(page.consignes)},
+    )
