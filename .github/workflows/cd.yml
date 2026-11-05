@@ -1,4 +1,4 @@
-name: 🌚 CD
+name: 🌚 Main to preprod
 
 on:
   workflow_dispatch:
