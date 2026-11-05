@@ -1,0 +1,61 @@
+# Which CI jobs a pull request needs, read by dorny/paths-filter in ci.yml.
+# An exclusion is final: no other pattern of the same area can include the file back.
+# A file matching `other` runs every job. So does any change to .github, this file included.
+
+python:
+  - "uv.lock"
+  - "pyproject.toml"
+  - "data-platform/**"
+  - "ml_deduplication/**"
+  - "webapp/**"
+  # Loaded by data-platform/dags/utils/docs.py
+  - "docs/reference/data-platform/**"
+  - "!data-platform/**/*.md"
+  - "!ml_deduplication/**/*.md"
+  - "!webapp/**/*.md"
+  - "!webapp/package.json"
+  - "!webapp/revue-front/**"
+  - "!webapp/static/to_compile/**"
+  - "!webapp/parcel-transformers/**"
+  - "!webapp/*.config.*"
+  - "!webapp/tsconfig.json"
+  - "!webapp/.eslintrc.js"
+  - "!webapp/.parcelrc"
+  - "!webapp/.postcssrc"
+
+frontend:
+  - "package.json"
+  - "package-lock.json"
+  - "webapp/package.json"
+  # Copied to .env by the frontend tests
+  - "webapp/.env.template"
+  - "webapp/static/to_compile/**"
+  - "webapp/parcel-transformers/**"
+  - "webapp/*.config.*"
+  - "webapp/tsconfig.json"
+  - "webapp/.eslintrc.js"
+  - "webapp/.parcelrc"
+  - "webapp/.postcssrc"
+
+revue:
+  - "package.json"
+  - "package-lock.json"
+  - "webapp/package.json"
+  - "webapp/revue-front/**"
+
+infra:
+  - "infrastructure/**"
+  - "!infrastructure/**/*.md"
+
+other:
+  - "**"
+  - "!**/*.md"
+  - "!docs/**"
+  - "!infrastructure/**"
+  - "!data-platform/**"
+  - "!ml_deduplication/**"
+  - "!webapp/**"
+  - "!uv.lock"
+  - "!pyproject.toml"
+  - "!package.json"
+  - "!package-lock.json"

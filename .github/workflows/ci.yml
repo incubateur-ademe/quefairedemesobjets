@@ -29,29 +29,26 @@ jobs:
     permissions:
       contents: read
     outputs:
-      python: ${{ steps.areas.outputs.python }}
-      frontend: ${{ steps.areas.outputs.frontend }}
-      revue: ${{ steps.areas.outputs.revue }}
-      infra: ${{ steps.areas.outputs.infra }}
+      # Empty outputs run everything: outside a pull request, or if the filter fails.
+      python: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.python }}
+      frontend: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.frontend }}
+      revue: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.revue }}
+      infra: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.infra }}
     steps:
       - uses: actions/checkout@v7.0.1
 
-      # Empty outputs run everything: outside a pull request, or if this step fails.
       - name: Find changed areas
         id: areas
         if: github.event_name == 'pull_request'
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: .github/ci-areas.yml
+          predicate-quantifier: some-with-excludes
           # In a stack, compare with the stack base: the top pull request stands
-          # for the whole stack, not only for its own layer.
-          BASE_SHA: ${{ github.event.pull_request.stack.base.sha || github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/compare/$BASE_SHA...$HEAD_SHA?per_page=100" --jq '.files[].filename')
-          # The compare API truncates long lists, and an empty list runs everything.
-          [ "$(echo "$files" | wc -l)" -lt 300 ] || files=""
-          echo "$files" | bash .github/scripts/ci_changed_areas.sh >> "$GITHUB_OUTPUT"
+          # for the whole stack. The action only reads `base` without a token.
+          token: ""
+          base: ${{ github.event.pull_request.stack.base.sha || github.event.pull_request.base.sha }}
 
   backend-webapp-linter:
     name: 📝 Backend Webapp Linter
