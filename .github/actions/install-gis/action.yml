@@ -7,5 +7,7 @@ runs:
     - name: Install GIS packages
       shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install gdal-bin libgdal-dev -y
+        # Azure mirrors can stall for minutes: give up on a slow connection and retry.
+        APT_OPTIONS="-o Acquire::http::Timeout=10 -o Acquire::Retries=3"
+        sudo apt-get $APT_OPTIONS update
+        sudo apt-get $APT_OPTIONS install -y --no-install-recommends gdal-bin
