@@ -29,7 +29,7 @@ env:
 
 jobs:
   test:
-    name: Shard ${{ matrix.shard }}
+    name: 🎭 Shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

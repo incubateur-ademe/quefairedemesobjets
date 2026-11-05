@@ -28,7 +28,7 @@ env:
 
 jobs:
   django-lint:
-    name: 📝 Django
+    name: 📝 Lint + format Python
     if: ${{ inputs.django }}
     runs-on: ubuntu-slim
     steps:
@@ -43,7 +43,7 @@ jobs:
         run: make -C webapp check-format
 
   js-format:
-    name: 📝 JS format
+    name: 📝 Format JS
     if: ${{ inputs.js }}
     runs-on: ubuntu-slim
     steps:
@@ -59,20 +59,20 @@ jobs:
         working-directory: webapp
 
   unit-tests:
-    name: ✅ Tests
+    name: pytest
     if: ${{ inputs.django }}
     uses: ./.github/workflows/_pytest-job.yml
     with:
-      display-name: Unit tests
+      display-name: ✅ Python unit tests
       check-migrations: true
       make-target: unit-test
 
   integration-tests:
-    name: ✅ Tests
+    name: pytest
     if: ${{ inputs.django }}
     uses: ./.github/workflows/_pytest-job.yml
     with:
-      display-name: Integration tests
+      display-name: ✅ Python integration tests
       make-target: integration-test
 
   js-tests:

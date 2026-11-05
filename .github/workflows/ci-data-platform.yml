@@ -17,7 +17,7 @@ env:
 
 jobs:
   lint:
-    name: 📝 Lint
+    name: 📝 Lint + format Python + SQL
     runs-on: ubuntu-latest
     env:
       POSTGRES_HOST: localhost
@@ -68,10 +68,10 @@ jobs:
         run: make -C data-platform check-format
 
   tests:
-    name: ✅ Tests
+    name: pytest
     uses: ./.github/workflows/_pytest-job.yml
     with:
-      display-name: DAG tests
+      display-name: ✅ Python DAG tests
       working-directory: data-platform
       make-target: dags-test
 

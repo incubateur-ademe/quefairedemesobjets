@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   delete_old_tags:
-    name: Delete old tags
+    name: 🗑️ Delete old tags
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository

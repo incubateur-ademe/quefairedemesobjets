@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   sync_prod_to_preprod:
-    name: Sync production database to preprod
+    name: 🔄 Sync production database to preprod
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -63,7 +63,7 @@ jobs:
           scalingo --app ${PREPROD_APP} run "cd webapp && python manage.py migrate && python manage.py reinitialize_suggestions && python manage.py create_remote_db_server"
 
   sync_prod_to_preprod_s3:
-    name: Copy Prod s3 bucket to Copy Preprod s3 bucket
+    name: 🪣 Copy prod S3 bucket to preprod
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository

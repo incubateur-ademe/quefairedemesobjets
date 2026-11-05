@@ -10,7 +10,7 @@ on:
 
 jobs:
   deploy-on-scalingo:
-    name: Deploy to Scalingo
+    name: 🚀 Deploy to Scalingo
     runs-on: "ubuntu-slim"
     environment:
       name: ${{ inputs.environment }}

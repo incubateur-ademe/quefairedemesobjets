@@ -23,7 +23,7 @@ env:
 
 jobs:
   lint:
-    name: 📝 Lint
+    name: 📝 Lint + format + typecheck TS
     if: ${{ inputs.code }}
     runs-on: ubuntu-slim
     steps:
@@ -47,7 +47,7 @@ jobs:
         working-directory: webapp/revue-front
 
   api-types:
-    name: 📝 API types
+    name: 📝 API types up to date
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -70,7 +70,7 @@ jobs:
         run: git diff --exit-code -- webapp/revue-front/src/api
 
   tests:
-    name: ✅ Tests and build
+    name: ✅ TS tests + build
     if: ${{ inputs.code }}
     runs-on: ubuntu-latest
     steps:
