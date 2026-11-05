@@ -1,6 +1,6 @@
-# Which CI jobs a pull request needs, read by dorny/paths-filter in ci.yml.
+# Which CI jobs a pull request needs, read by dorny/paths-filter in review.yml.
 # An exclusion is final: no other pattern of the same area can include the file back.
-# A file matching `other` runs every job. So does any change to .github, this file included.
+# A file matching `other` runs every job, and any change to .github matches it.
 
 python:
   - "uv.lock"
@@ -59,3 +59,8 @@ other:
   - "!pyproject.toml"
   - "!package.json"
   - "!package-lock.json"
+
+# Also runs the E2E tests without the frontend label: a CI change proves the whole CI.
+ci:
+  - ".github/**"
+  - "!**/*.md"
