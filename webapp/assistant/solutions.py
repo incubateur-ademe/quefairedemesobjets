@@ -5,7 +5,7 @@ accessible list."""
 from django.db.models import QuerySet
 from django.http import Http404, QueryDict
 
-from assistant.forms import MISSING_ADRESSE_MESSAGE, UNKNOWN_ADRESSE_MESSAGE
+from assistant.forms import MISSING_ADRESSE_MESSAGE, no_result_message
 from assistant.objets import fiche_for_label
 from assistant.parcours import Parcours
 from qfdmo.lieux_query import sous_categorie_ids_for
@@ -70,4 +70,6 @@ def position_of(parcours: Parcours) -> tuple[float, float]:
 def address_error(parcours: Parcours) -> str:
     if parcours.is_located:
         return ""
-    return UNKNOWN_ADRESSE_MESSAGE if parcours.adresse else MISSING_ADRESSE_MESSAGE
+    if parcours.adresse:
+        return no_result_message(parcours.adresse)
+    return MISSING_ADRESSE_MESSAGE

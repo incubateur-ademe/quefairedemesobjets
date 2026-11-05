@@ -65,7 +65,6 @@ body {
   --qfa-accent: #37635f;
   --qfa-bordure: #dddddd;
   --qfa-cadre: #4f9d91;
-  --qfa-erreur: #ce0500;
   --qfa-fond-survol: #f6f6f6;
   --qfa-blanc: #fff;
   --qfa-focus: #0a76f6;
@@ -1111,13 +1110,9 @@ turbo-frame {
   background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
 }
 
-.qfa-combobox__cadre[data-erreur="true"] {
-  border-color: var(--qfa-erreur);
-}
-
 .qfa-combobox__erreur {
   margin: var(--qfa-espace-1v) 0 0;
-  color: var(--qfa-erreur);
+  color: var(--qfa-texte-titre);
   font-size: var(--qfa-taille-texte-md);
   line-height: var(--qfa-interligne);
 }
