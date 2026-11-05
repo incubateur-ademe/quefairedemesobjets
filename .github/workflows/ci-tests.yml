@@ -42,6 +42,7 @@ jobs:
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       skip: ${{ inputs.skip || inputs.python == 'false' }}
+      display-name: Unit Tests
       make-target: unit-test
       check-migrations: true
 
@@ -50,6 +51,7 @@ jobs:
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       skip: ${{ inputs.skip || inputs.python == 'false' }}
+      display-name: Integration Tests
       make-target: integration-test
 
   backend_data_tests:
@@ -57,6 +59,7 @@ jobs:
     uses: ./.github/workflows/_backend-test-job.yml
     with:
       skip: ${{ inputs.skip || inputs.python == 'false' }}
+      display-name: Data Tests
       working-directory: data-platform
       make-target: dags-test
 
