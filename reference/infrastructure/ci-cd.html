@@ -410,6 +410,7 @@
 <h2>Merging a PR into main<a class="headerlink" href="#merging-a-pr-into-main" title="Lien vers cette rubrique">¶</a></h2>
 <p>When a Pull Request is merged into the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch, the <strong>CD</strong> workflow (<a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml">cd.yml</a>) is triggered.</p>
 <p>The workflow is very similar to the review workflow: tests and linters are run and it is possible to deploy the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch to the <code class="docutils literal notranslate"><span class="pre">preprod</span></code> environment.</p>
+<p>A new commit on <code class="docutils literal notranslate"><span class="pre">main</span></code> cancels the run in progress, so only the last commit gets deployed.</p>
 <section id="cd-workflow-flow">
 <h3>CD workflow flow<a class="headerlink" href="#cd-workflow-flow" title="Lien vers cette rubrique">¶</a></h3>
 <pre  class="mermaid">

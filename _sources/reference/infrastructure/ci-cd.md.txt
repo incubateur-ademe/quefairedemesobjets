@@ -67,6 +67,8 @@ When a Pull Request is merged into the `main` branch, the **CD** workflow ([cd.y
 
 The workflow is very similar to the review workflow: tests and linters are run and it is possible to deploy the `main` branch to the `preprod` environment.
 
+A new commit on `main` cancels the run in progress, so only the last commit gets deployed.
+
 ### CD workflow flow
 
 ```mermaid
