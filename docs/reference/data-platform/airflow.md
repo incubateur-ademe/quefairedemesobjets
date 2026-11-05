@@ -178,3 +178,5 @@ When validating changes to the XCom backend configuration (for example enabling 
   - For any business objects (e.g. `ActeurType`, `Source`) passed through XCom using the dedicated serialization helpers, verify that:
     - The pushed value is JSON‑serialisable.
     - The consumer task can reconstruct or use the value as expected.
+
+CI area test, not to be merged.
