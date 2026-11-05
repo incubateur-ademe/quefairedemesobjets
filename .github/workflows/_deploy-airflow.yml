@@ -15,7 +15,7 @@ on:
 
 jobs:
   airflow_docker:
-    name: 🐳 Airflow Docker
+    name: 🐳 Images
     uses: ./.github/workflows/_airflow-build-and-push-docker.yml
     secrets: inherit # pragma: allowlist secret`
     with:
@@ -26,7 +26,7 @@ jobs:
   # Job which retrieves the container IDs from the environment
   # Approbation is done once here
   get_container_ids:
-    name: 🔑 Get container IDs
+    name: 🔑 Read container IDs
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     outputs:
@@ -42,29 +42,32 @@ jobs:
           echo "dag_processor_id=${{ vars.SCALEWAY_AIRFLOW_DAG_PROCESSOR_CONTAINER_ID }}" >> $GITHUB_OUTPUT
 
   deploy_scaleway_scheduler:
-    name: 🟣⏳ Scaleway Airflow scheduler
+    name: 🟣 Scheduler
     secrets: inherit # pragma: allowlist secret`
     uses: ./.github/workflows/_scaleway-container-deploy.yml
     needs: [airflow_docker, get_container_ids]
     with:
+      component: scheduler
       container_id: ${{ needs.get_container_ids.outputs.scheduler_id }}
       registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler', inputs.tag_name) }}
 
   deploy_scaleway_webserver:
     secrets: inherit # pragma: allowlist secret`
-    name: 🟣⏳ Scaleway Airflow webserver
+    name: 🟣 Webserver
     needs: [airflow_docker, get_container_ids]
     uses: ./.github/workflows/_scaleway-container-deploy.yml
     with:
+      component: webserver
       container_id: ${{ needs.get_container_ids.outputs.webserver_id }}
       registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver', inputs.tag_name) }}
 
   deploy_scaleway_dag_processor:
     secrets: inherit # pragma: allowlist secret`
-    name: 🟣⏳ Scaleway Airflow dag processor
+    name: 🟣 Dag processor
     needs: [airflow_docker, get_container_ids]
     uses: ./.github/workflows/_scaleway-container-deploy.yml
     with:
+      component: dag processor
       container_id: ${{ needs.get_container_ids.outputs.dag_processor_id }}
       registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor', inputs.tag_name) }}
 

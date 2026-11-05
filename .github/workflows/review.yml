@@ -1,4 +1,4 @@
-name: 💣 Review
+name: 💣 Pull request
 
 on:
   workflow_dispatch:
