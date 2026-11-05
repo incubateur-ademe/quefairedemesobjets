@@ -9,3 +9,4 @@ def load_dag_doc_md(filename: str) -> str:
             return doc_path.read_text(encoding="utf-8")
     msg = f"DAG documentation not found: {filename}"
     raise FileNotFoundError(msg)
+# CI area test, not to be merged
