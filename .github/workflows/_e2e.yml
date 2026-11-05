@@ -3,9 +3,6 @@ name: 🪤 E2E shards
 on:
   workflow_call:
     inputs:
-      ref:
-        required: true
-        type: string
       compare:
         required: true
         type: boolean
@@ -58,7 +55,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.compare && 'main' || github.ref }}
       # The regression test files and GitHub actions may not exist on the
       # checked-out ref (e.g. main). We sparse-checkout them from the PR branch
       # and overlay them onto the working tree so both baseline and compare jobs
