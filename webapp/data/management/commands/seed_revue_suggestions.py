@@ -157,12 +157,12 @@ class Command(BaseCommand):
                 f"{nb_groupes} groupes, {nb_lignes} lignes"
             )
 
-        # --- Deletion ---
-
         # Rows of a test transaction have no statistics yet: the planner would pick
         # plans taking 30 seconds on the lignes queries
         with connection.cursor() as cursor:
             cursor.execute("ANALYZE")
+
+    # --- Deletion ---
 
     def delete_seed(self):
         SuggestionCohorte.objects.filter(identifiant_action__startswith=PREFIX).delete()
