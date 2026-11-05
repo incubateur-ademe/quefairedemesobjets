@@ -13,8 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Draft pull requests run no CI/CD, and in a stack only the top pull request does
-# as it contains the whole stack.
+# Draft pull requests run no CI, and in a stack only the top pull request does as it
+# contains the whole stack. Pull requests do not deploy to preprod: previews have
+# their own workflow, preview-up.yml, which does not wait for CI.
 jobs:
   scope:
     name: Check draft and stack
@@ -48,24 +49,18 @@ jobs:
     with:
       skip: ${{ needs.scope.outputs.skip == 'true' }}
 
-  webapp:
-    name: 🟠 Webapp
-    if: ${{ needs.scope.outputs.skip != 'true' }}
-    uses: ./.github/workflows/_deploy-webapp.yml
-    secrets: inherit # pragma: allowlist secret`
+  # The only required check: a skipped job counts as passed, so requiring the jobs
+  # themselves would let a pull request merge when a job they depend on failed.
+  ci_passed:
+    name: ✅ CI
     needs: [scope, ci]
-    with:
-      environment: preprod
-
-  airflow:
-    name: 🟠 Airflow
-    if: ${{ needs.scope.outputs.skip != 'true' }}
-    uses: ./.github/workflows/_deploy-airflow.yml
-    secrets: inherit # pragma: allowlist secret`
-    needs: [scope, ci]
-    with:
-      environment: preprod
-      tag_name: pr-${{ github.event.pull_request.number }}
+    if: ${{ always() }}
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - name: Fail if CI failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
 
   e2e:
     name: 🪤 E2E
@@ -76,27 +71,6 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/e2e.yml
     secrets: inherit #pragma: allowlist secret
-
-  # FIXME: tmp pour tester
-  update_release_draft_for_review:
-    # Uncomment when anchor are supported in GitHub Actions
-    # See : https://github.com/actions/runner/issues/1182
-    # <<: *release_drafter
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    name: 🔢 Release
-    steps:
-      - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
-        id: release-drafter
-        with:
-          config-name: release-config.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    needs: [webapp]
-    if: ${{ !contains( github.ref_name, 'hotfix') }}
-    outputs:
-      tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

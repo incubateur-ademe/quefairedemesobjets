@@ -16,11 +16,13 @@ Backend jobs use a **single workspace virtual environment** at the repo root, sy
 
 When a Pull Request is created, updated or marked as ready for review (events `opened`, `synchronize`, `ready_for_review` or `converted_to_draft`), the **Review** workflow ([review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/review.yml)) is triggered.
 
-Tests and linters are run and it is possible to deploy the PR branch to the `preprod` environment.
+Tests and linters are run, and `✅ CI` fails if one of them fails.
 
-Draft pull requests run no CI, E2E or deployment: they start when the pull request is marked as ready for review, and converting a pull request to draft cancels what is running.
+A Pull Request does not deploy to `preprod`. The optional preview ([preview-up.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/preview-up.yml)) is triggered by the `preview` label. It is a separate workflow: it does not wait for CI, and a CI failure does not stop it.
 
-In a [stack of pull requests](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests), only the top pull request runs CI, E2E and deployments, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.
+Draft pull requests run no CI or E2E: they start when the pull request is marked as ready for review, and converting a pull request to draft cancels what is running.
+
+In a [stack of pull requests](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests), only the top pull request runs CI and E2E, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.
 
 The `Check draft and stack` job reads this from the API rather than from the event, as it is more recent than the payload. `gh stack submit` opens each pull request before linking the stack and no workflow event follows, so a pull request opened as ready for review usually does not know its stack yet and runs CI once.
 
@@ -30,7 +32,7 @@ When the top pull request is closed without merging, the new top keeps its skipp
 
 On a Pull Request, only the jobs matching the changed files run: [ci-areas.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/ci-areas.yml) maps files to areas for `dorny/paths-filter`, and an unrecognised file runs everything. In a stack, files are compared with the stack base, so the top pull request covers the whole stack. `webapp` and `data-platform` are tested together because the DAGs import the webapp. Everything runs on `main`.
 
-The `skip` input of `ci.yml` is applied inside `_backend-test-job.yml`, not on the calling job, because a skipped calling job never reports the required `... / run` checks.
+The required check is `✅ CI`: it fails if a CI job failed or was cancelled, and passes if they were skipped. Requiring the jobs themselves would let a pull request merge with a failed linter, as a skipped job counts as passed.
 
 Backend tests run on 4 pytest-xdist workers, against PostgreSQL in memory. Migrations are the slowest part of a test run and each worker would replay them, so [prepare-test-databases](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/actions/prepare-test-databases/action.yml) restores a dump cached on `uv.lock` and the migrations, then clones it per worker. A pull request that changes either migrates once per job, until `main` has saved the new dump.
 
@@ -38,34 +40,17 @@ Backend tests run on 4 pytest-xdist workers, against PostgreSQL in memory. Migra
 
 ```mermaid
 graph TD
-    B[Review workflow triggered] --> C
-
-    subgraph C["CI execution"]
-        C1[Backend linter<br/>formatting, ruff, tofu, terragrunt]
-        C2[Frontend linter<br/>prettier]
-        C3["Backend tests<br/>Migration checks<br/>unit, integration, data"]
-        C4[Frontend tests]
-        C5[E2E tests<br/>if main branch or frontend label]
-
-    end
-
-    subgraph E[Airflow deployment]
-        E1[Webserver deployment]
-        E2[Scheduler deployment]
-    end
-
-    C --> D{Confirm deployment to preprod?}
-    D -->|Yes| F[Webapp deployment to preprod]
-    D -->|Yes| G[Build & push of the Airflow Docker image]
-    G --> E[Deployment of Airflow on Scaleway]
-    F --> H[Update of the Draft release]
+    A[Pull request] --> B[Check draft and stack]
+    B --> C[Linters and tests]
+    B --> E[E2E<br/>with the frontend label]
+    C --> G[CI, the required check]
 ```
 
 ## Merging a PR into main
 
 When a Pull Request is merged into the `main` branch, the **CD** workflow ([cd.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/cd.yml)) is triggered.
 
-The workflow is very similar to the review workflow: tests and linters are run and it is possible to deploy the `main` branch to the `preprod` environment.
+Deployment to `preprod` does not wait for CI, and a CI failure does not stop it. The draft release is only updated when CI and both deployments succeeded.
 
 A new commit on `main` cancels the run in progress, so only the last commit gets deployed.
 
@@ -73,42 +58,32 @@ A new commit on `main` cancels the run in progress, so only the last commit gets
 
 ```mermaid
 graph TD
-    B[CD workflow triggered] --> C
-
-    subgraph C["CI execution"]
-        C1[Backend linter<br/>formatting, ruff, tofu, terragrunt]
-        C2[Frontend linter<br/>prettier]
-        C3["Backend tests<br/>Migration checks<br/>unit, integration, data"]
-        C4[Frontend tests]
-        C5[E2E tests]
-    end
-
-    subgraph E[Airflow deployment]
-        E1[Webserver deployment]
-        E2[Scheduler deployment]
-    end
-
-    C --> D{Confirm deployment to preprod?}
-    D -->|Yes| F[Webapp deployment to preprod]
-    D -->|Yes| G[Build & push of the Airflow Docker image]
-    G --> E[Deployment of Airflow on Scaleway]
-    F --> H[Update of the Draft release]
+    A[Push on main] --> C[CI]
+    A --> W{Confirm deployment to preprod?}
+    W -->|Yes| F[Webapp deployment]
+    W -->|Yes| G[Build Airflow images and deploy on Scaleway]
+    A --> E[E2E tests]
+    C --> H[Update of the draft release]
+    F --> H
+    G --> H
 ```
 
 ## Publishing a release
 
 When a release is published on GitHub (event `published`), the **Deploy** workflow ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) is triggered to deploy to production.
 
-The tagged version of the code is deployed to the `prod` environment.
+The tagged version of the code is deployed to the `prod` environment. Airflow images built for `preprod` on the same commit are tagged with the version number instead of being built again. If one is missing, for example because of the registry cleanup, all of them are built.
 
 ### Deploy workflow flow
 
 ```mermaid
 graph TD
     C[Deployment of the webapp release version to production]
-    F[Build Airflow Docker images<br/>The image is tagged with the version number<br/>This tagged image is used for the production deployment]
-    F --> H[Deployment of the Scheduler on Scaleway in production]
-    F --> I[Deployment of the Webserver on Scaleway in production]
+    F{Images of this commit<br/>in the registry?}
+    F -->|Yes| R[Tag them with the version number]
+    F -->|No| B[Build and tag with the version number]
+    R --> H[Deployment of Airflow on Scaleway in production]
+    B --> H
 ```
 
 ## Scheduled workflows
