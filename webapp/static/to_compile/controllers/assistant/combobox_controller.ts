@@ -19,15 +19,7 @@ type Suggestion = {
  * address fields. The list opens once something is typed, never on focus.
  */
 export default class extends Controller<HTMLElement> {
-  static targets = [
-    "input",
-    "list",
-    "status",
-    "hidden",
-    "cadre",
-    "aucunResultat",
-    "erreur",
-  ]
+  static targets = ["input", "list", "status", "hidden", "aucunResultat", "erreur"]
   static values = {
     url: String,
     minLength: { type: Number, default: 2 },
@@ -38,8 +30,6 @@ export default class extends Controller<HTMLElement> {
   declare readonly listTarget: HTMLElement
   declare readonly statusTarget: HTMLElement
   declare readonly hasStatusTarget: boolean
-  declare readonly cadreTarget: HTMLElement
-  declare readonly hasCadreTarget: boolean
   declare readonly aucunResultatTarget: HTMLElement
   declare readonly hasAucunResultatTarget: boolean
   declare readonly erreurTargets: HTMLElement[]
@@ -216,12 +206,12 @@ export default class extends Controller<HTMLElement> {
     )
   }
 
-  /** Red frame and message while the query matches nothing. */
   #showNoResult(shown: boolean) {
     if (!this.hasAucunResultatTarget) return
     this.aucunResultatTarget.hidden = !shown
-    if (this.hasCadreTarget) this.cadreTarget.dataset.erreur = String(shown)
     if (shown) {
+      const text = this.inputTarget.value.trim()
+      this.aucunResultatTarget.textContent = `Aucun résultat pour «\u00a0${text}\u00a0»`
       this.inputTarget.setAttribute("aria-invalid", "true")
       this.inputTarget.setAttribute("aria-describedby", this.aucunResultatTarget.id)
     } else {

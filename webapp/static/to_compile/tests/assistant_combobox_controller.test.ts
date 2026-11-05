@@ -30,7 +30,6 @@ function mount({ requireChoice = false, results = RESULTS } = {}) {
     <div data-controller="assistant-combobox" id="champ"
          data-assistant-combobox-url-value="/api/v1/objets"
          data-assistant-combobox-require-choice-value="${requireChoice}">
-      <span data-assistant-combobox-target="cadre"></span>
       <input data-assistant-combobox-target="input"
              data-action="input->assistant-combobox#search
                           keydown->assistant-combobox#navigate">
@@ -97,6 +96,7 @@ describe("assistant combobox", () => {
     await settle()
 
     expect(noResult().hidden).toBe(false)
+    expect(noResult().textContent).toBe("Aucun résultat pour « zzz »")
     expect(input().getAttribute("aria-invalid")).toBe("true")
   })
 

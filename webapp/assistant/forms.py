@@ -7,16 +7,14 @@ from assistant.objets import fiche_for_label
 from assistant.parcours import Parcours
 from qfdmd.models import ProduitPage
 
-UNKNOWN_OBJET_MESSAGE = (
-    "Nous ne connaissons pas cet objet. Choisissez une suggestion dans la liste."
-)
 MISSING_OBJET_MESSAGE = "Veuillez d'abord saisir un objet ou un déchet"
-UNKNOWN_ADRESSE_MESSAGE = (
-    "Nous ne connaissons pas cette adresse. Choisissez une suggestion dans la liste."
-)
 MISSING_ADRESSE_MESSAGE = (
     "Saisissez une adresse pour voir les solutions près de chez vous."
 )
+
+
+def no_result_message(text: str) -> str:
+    return f"Aucun résultat pour «\u00a0{text}\u00a0»"
 
 
 class SearchForm(forms.Form):
@@ -28,7 +26,6 @@ class SearchForm(forms.Form):
         queryset=ProduitPage.objects.live(),
         to_field_name="slug",
         required=False,
-        error_messages={"invalid_choice": UNKNOWN_OBJET_MESSAGE},
     )
     adresse = forms.CharField(required=False, max_length=200)
 
@@ -37,7 +34,7 @@ class SearchForm(forms.Form):
         # Typed text without coordinates: no suggestion was chosen.
         parcours = Parcours.from_query(self.data)
         if parcours.adresse and not parcours.is_located:
-            self.add_error("adresse", UNKNOWN_ADRESSE_MESSAGE)
+            self.add_error("adresse", no_result_message(parcours.adresse))
         if data.get("fiche") is None:
             data["fiche"] = self._fiche_from_label(data)
         return data
@@ -50,5 +47,5 @@ class SearchForm(forms.Form):
             raise forms.ValidationError({"objet": MISSING_OBJET_MESSAGE})
         fiche = fiche_for_label(label)
         if fiche is None:
-            raise forms.ValidationError({"objet": UNKNOWN_OBJET_MESSAGE})
+            raise forms.ValidationError({"objet": no_result_message(label)})
         return fiche
