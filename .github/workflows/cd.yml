@@ -9,6 +9,11 @@ permissions:
   contents: write
   pull-requests: write
 
+# A new commit replaces the run in progress: only the last one gets deployed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     name: 🤖 CI
