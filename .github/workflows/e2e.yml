@@ -82,7 +82,6 @@ jobs:
     needs: e2e-prepare
     uses: ./.github/workflows/_e2e.yml
     with:
-      ref: ${{ github.ref }}
       compare: false
     permissions:
       contents: read
@@ -95,7 +94,6 @@ jobs:
     needs: e2e
     uses: ./.github/workflows/_e2e.yml
     with:
-      ref: main
       compare: true
       # No sharding when comparing
       shard: '["1"]'
