@@ -3,12 +3,23 @@ import logging
 from django import template
 from django.conf import settings
 from django.urls import reverse
+from django.utils.text import capfirst
 
-from qfdmd.models import ProduitPage
+from qfdmd.models import ProduitPage, SearchTag
+from qfdmd.templatetags.qfdmd_tags import get_search_term_name
 
 register = template.Library()
 
 logger = logging.getLogger(__name__)
+
+
+def searched_synonyme(request, page):
+    """The synonyme of `page` the visitor came through, from the search, or None."""
+    term = get_search_term_name({"request": request}) if request else None
+    specific = term.get_indexed_instance() if term else None
+    if isinstance(specific, SearchTag) and specific.page == page:
+        return specific
+    return None
 
 
 def generate_iframe_script(request, page=None) -> str:
@@ -17,9 +28,12 @@ def generate_iframe_script(request, page=None) -> str:
     Detects the current product page either by Django view name
     (qfdmd:synonyme-detail) or by Wagtail page context (ProduitPage),
     and includes a data-objet attribute with the product slug when applicable.
+    `data-synonyme` names the synonyme the visitor searched for: `data-objet`
+    keeps the fiche, so a synonyme removed later never breaks the embed.
     """
     script_parts = ["<script"]
     produit_slug = None
+    synonyme = None
 
     if (
         request
@@ -29,9 +43,12 @@ def generate_iframe_script(request, page=None) -> str:
         produit_slug = request.resolver_match.kwargs.get("slug")
     elif isinstance(page, ProduitPage):
         produit_slug = page.slug
+        synonyme = searched_synonyme(request, page)
 
     if produit_slug:
         script_parts.append(f'data-objet="{produit_slug}"')
+    if synonyme:
+        script_parts.append(f'data-synonyme="{synonyme.slug}"')
 
     script_parts.append(f'src="{settings.BASE_URL}{reverse("qfdmd:script")}"></script>')
     return " ".join(script_parts)
@@ -51,6 +68,9 @@ def assistant_iframe_script(context: dict) -> str:
 def page_formatted_for_script(context: dict) -> str:
     page = context.get("page", "")
     if page and isinstance(page, ProduitPage):
+        if synonyme := searched_synonyme(context.get("request"), page):
+            nom = capfirst(synonyme.get_title())
+            return f"Page “{nom} - {page.title}”"
         return f"Page “{page.title}”"
 
     return ""

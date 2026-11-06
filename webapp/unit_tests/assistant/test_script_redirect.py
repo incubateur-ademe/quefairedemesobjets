@@ -67,6 +67,18 @@ class TestScriptRedirect:
             f"https://qfdmo.fr/assistant/objet/{page.slug}/?"
         )
 
+    def test_data_synonyme_travels_to_the_fiche(self, client):
+        """`iframe.js` forwards `data-synonyme` as is."""
+        page = ProduitPageFactory(parent=None)
+        response = client.get(
+            f"/dechet/{page.slug}/",
+            {"synonyme": "mixeur", "ref": ref("https://beta.example.fr/")},
+        )
+        assert response.url.startswith(
+            f"https://qfdmo.fr/assistant/objet/{page.slug}/?"
+        )
+        assert "synonyme=mixeur" in response.url
+
     def test_legacy_synonyme_opens_its_fiche(self, client):
         """Embedders pass synonyme slugs (`montre-connectee`): follow them to
         their fiche, as the legacy assistant does."""
