@@ -49,7 +49,7 @@ chosen.
            data-assistant-combobox-target="hidden" data-key="synonyme" data-optional>
 
     {% if erreur %}
-        <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ base_id }}-erreur">
+        <p class="qfa-combobox__erreur{% if not objet.strip %} qfa-combobox__erreur--bloquante{% endif %}" data-assistant-combobox-target="erreur" id="{{ base_id }}-erreur">
             {{ erreur }}
         </p>
     {% endif %}
