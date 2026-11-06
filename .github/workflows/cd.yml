@@ -10,9 +10,10 @@ permissions:
   pull-requests: write
 
 # A new commit replaces the run in progress: only the last one gets deployed.
+# A re-run waits instead: it could be an older commit cancelling a newer one.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.run_attempt == '1' }}
 
 # Deployments do not wait for CI: a failed check must not stop preprod. The release
 # waits for all of it.
