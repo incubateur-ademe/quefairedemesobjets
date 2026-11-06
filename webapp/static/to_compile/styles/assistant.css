@@ -63,6 +63,7 @@ body {
   --qfa-texte-titre: #161616;
   --qfa-texte-courant: #3a3a3a;
   --qfa-accent: #37635f;
+  --qfa-erreur: #ce0500;
   --qfa-bordure: #dddddd;
   --qfa-cadre: #4f9d91;
   --qfa-fond-survol: #f6f6f6;
@@ -364,6 +365,10 @@ body {
   border: 2px solid var(--qfa-accent);
   border-radius: var(--qfa-rayon-sm);
   background: var(--qfa-blanc);
+}
+
+.qfa-combobox__cadre:has(~ .qfa-combobox__erreur--bloquante) {
+  border-color: var(--qfa-erreur);
 }
 
 .qfa-combobox__cadre:focus-within {
@@ -1115,4 +1120,8 @@ turbo-frame {
   color: var(--qfa-texte-titre);
   font-size: var(--qfa-taille-texte-md);
   line-height: var(--qfa-interligne);
+}
+
+.qfa-combobox__erreur--bloquante {
+  color: var(--qfa-erreur);
 }

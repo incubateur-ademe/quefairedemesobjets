@@ -152,6 +152,14 @@ class TestSearchView:
             "Veuillez d'abord saisir un objet ou un déchet"
         )
 
+    def test_only_a_missing_objet_is_shown_as_an_error(self, client):
+        """ "Aucun résultat" is information, not a mistake: it stays neutral."""
+        missing = html_of(search(client, objet="", **AURAY))
+        unknown = html_of(search(client, objet="zzz inexistant", **AURAY))
+
+        assert missing.select_one(".qfa-combobox__erreur--bloquante")
+        assert not unknown.select_one(".qfa-combobox__erreur--bloquante")
+
     def test_the_input_is_kept_when_refused(self, client):
         page = html_of(search(client, objet="zzz inexistant", **AURAY))
 
