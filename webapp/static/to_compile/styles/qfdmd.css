@@ -13,6 +13,10 @@
   code {
     @apply qf-text-blue-france-sun-113-625 qf-font-bold;
   }
+
+  iframe {
+    max-width: 100%;
+  }
 }
 
 @layer components {
