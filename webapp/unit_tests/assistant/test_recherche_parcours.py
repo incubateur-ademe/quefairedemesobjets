@@ -118,8 +118,8 @@ class TestSearchView:
         )
 
         assert response.status_code == 200
-        assert error_of(html_of(response), "adresse").startswith(
-            "Nous ne connaissons pas cette adresse"
+        assert error_of(html_of(response), "adresse") == (
+            "Aucun résultat pour «\xa0zzz nulle part\xa0»"
         )
 
     def test_the_parcours_follows_to_the_fiche(self, client, fiche):
@@ -139,7 +139,9 @@ class TestSearchView:
 
         assert response.status_code == 200
         page = html_of(response)
-        assert error_of(page, "objet")
+        assert error_of(page, "objet") == (
+            "Aucun résultat pour «\xa0zzz inexistant\xa0»"
+        )
         assert field(page, "objet")["aria-invalid"] == "true"
 
     def test_a_missing_objet_shows_its_own_message(self, client):
@@ -149,6 +151,14 @@ class TestSearchView:
         assert error_of(page, "objet") == (
             "Veuillez d'abord saisir un objet ou un déchet"
         )
+
+    def test_only_a_missing_objet_is_shown_as_an_error(self, client):
+        """ "Aucun résultat" is information, not a mistake: it stays neutral."""
+        missing = html_of(search(client, objet="", **AURAY))
+        unknown = html_of(search(client, objet="zzz inexistant", **AURAY))
+
+        assert missing.select_one(".qfa-combobox__erreur--bloquante")
+        assert not unknown.select_one(".qfa-combobox__erreur--bloquante")
 
     def test_the_input_is_kept_when_refused(self, client):
         page = html_of(search(client, objet="zzz inexistant", **AURAY))

@@ -12,7 +12,7 @@
         {{ label|default:"Où souhaitez-vous trouver des solutions ?" }}
     </label>
 
-    <span class="qfa-combobox__cadre" data-assistant-combobox-target="cadre" data-erreur="{{ erreur|yesno:'true,false' }}">
+    <span class="qfa-combobox__cadre">
         <span class="qfa-combobox__loupe" aria-hidden="true"></span>
         <input type="text"
                id="{{ base_id }}-champ"
@@ -55,9 +55,7 @@
     {% endif %}
 
     <p class="qfa-combobox__erreur" id="{{ base_id }}-aucun-resultat"
-       data-assistant-combobox-target="aucunResultat" hidden>
-        Nous ne connaissons pas cette adresse. Choisissez une suggestion dans la liste.
-    </p>
+       data-assistant-combobox-target="aucunResultat" hidden></p>
 
     <p class="qfa-sr-only" role="status"
        data-assistant-combobox-target="status"></p>
