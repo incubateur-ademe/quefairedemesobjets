@@ -58,7 +58,7 @@ When a Pull Request is merged into the `main` branch, the **🌚 Main to preprod
 
 Deployment to `preprod` does not wait for CI, and a CI failure does not stop it. CI runs in parallel, as on a pull request. The draft release is only updated when CI and both deployments succeeded.
 
-A new commit on `main` cancels the run in progress, so only the last commit gets deployed.
+A new commit on `main` cancels the run in progress, so only the last commit gets deployed. A re-run waits for the run in progress instead of cancelling it, as it could be an older commit.
 
 ### CD workflow flow
 
