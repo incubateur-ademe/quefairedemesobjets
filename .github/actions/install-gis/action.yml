@@ -9,5 +9,14 @@ runs:
       run: |
         # Azure mirrors can stall for minutes: give up on a slow connection and retry.
         APT_OPTIONS="-o Acquire::http::Timeout=10 -o Acquire::Retries=3"
+        INSTALL="sudo apt-get $APT_OPTIONS install -y --no-install-recommends gdal-bin"
         sudo apt-get $APT_OPTIONS update
-        sudo apt-get $APT_OPTIONS install -y --no-install-recommends gdal-bin
+
+        # A crawling mirror never trips that timeout, so apt never moves to the next one.
+        # Removing it also covers the later apt calls of the job, like Playwright's.
+        # https://github.com/actions/runner-images/issues/14823
+        if ! timeout 90 $INSTALL --download-only; then
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          $INSTALL --download-only
+        fi
+        $INSTALL
