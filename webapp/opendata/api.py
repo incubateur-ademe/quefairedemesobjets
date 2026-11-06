@@ -12,7 +12,7 @@ from io import StringIO
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.vary import vary_on_headers
-from ninja import Router, Schema
+from ninja import Query, Router, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import paginate
 
@@ -25,6 +25,7 @@ from opendata.fiches import (
     write_csv,
 )
 from opendata.lieux import GesteSchema, LieuSchema, for_the_api, open_data
+from qfdmo.lieux_query import LieuxQuery
 from qfdmo.models.acteur import DisplayedActeur
 from qfdmo.models.action import GroupeAction
 
@@ -97,6 +98,21 @@ def _csv_openapi(columns) -> dict:
 
 
 router = Router()
+
+
+@router.get(
+    "/lieux",
+    response=list[LieuSchema],
+    url_name="lieux",
+    summary="Lieux proposant un geste, du plus proche au plus lointain",
+)
+@decorate_view(CACHE_FIVE_MINUTES)
+@paginate
+def lieux(request, query: Query[LieuxQuery]):
+    """Les lieux sous licence ouverte, le périmètre du jeu de données publié
+    sur data.ademe.fr, triés par proximité du point donné ou du centre de la
+    zone `bbox`."""
+    return for_the_api(open_data(query.queryset()))
 
 
 @router.get(

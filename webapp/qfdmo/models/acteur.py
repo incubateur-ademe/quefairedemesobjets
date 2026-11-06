@@ -17,7 +17,7 @@ from core.validators import EmptyEmailValidator
 from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
-from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.db.models.functions import Distance, GeometryDistance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.measure import D
@@ -304,6 +304,41 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+OFFERS_CACHE_TTL = 60 * 60 * 12
+
+GEOGRAPHIC_SCAN_THRESHOLD = 1_000
+
+_MISSING = object()
+
+
+def acteur_ids_offering(groupe_action_codes, sous_categorie_ids) -> list[str] | None:
+    """Ids of the acteurs offering one of these gestes for this objet, France-wide,
+    or `None` when they are too many to be worth listing.
+
+    A rare geste/objet pair would otherwise make the geographic scan walk every
+    acteur looking for almost no result; a common one finds its places nearby.
+    """
+    codes = ",".join(sorted(groupe_action_codes))
+    key = (
+        f"acteur_ids_offering:{codes}:{','.join(map(str, sorted(sous_categorie_ids)))}"
+    )
+    # `None` is a cached answer ("too many"): a miss needs its own sentinel.
+    ids = cache.get(key, _MISSING)
+    if ids is _MISSING:
+        propositions = DisplayedPropositionService.objects.filter(
+            action__groupe_action__code__in=groupe_action_codes,
+            sous_categories__in=sous_categorie_ids,
+        )
+        found = list(
+            propositions.values_list("acteur_id", flat=True).distinct()[
+                : GEOGRAPHIC_SCAN_THRESHOLD + 1
+            ]
+        )
+        ids = None if len(found) > GEOGRAPHIC_SCAN_THRESHOLD else found
+        cache.set(key, ids, OFFERS_CACHE_TTL)
+    return ids
+
+
 class DisplayedActeurQuerySet(models.QuerySet):
     def with_reparer(self):
         proposition_service_reparer = DisplayedPropositionService.objects.filter(
@@ -394,6 +429,59 @@ class DisplayedActeurQuerySet(models.QuerySet):
             )
             .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
+        )
+
+    def proposing(self, groupe_action_codes, sous_categorie_ids=None):
+        """Acteurs offering one of these gestes (GroupeAction codes), optionally
+        for a given objet.
+
+        The geste and the objet are matched on the same proposition: a bike
+        repairer that also takes furniture donations is not a furniture
+        repairer. EXISTS rather than a join, so an acteur with several matching
+        propositions is listed once.
+        """
+        codes = (
+            [groupe_action_codes]
+            if isinstance(groupe_action_codes, str)
+            else list(groupe_action_codes)
+        )
+        if sous_categorie_ids:
+            ids = acteur_ids_offering(codes, sous_categorie_ids)
+            if ids is not None:
+                return self.filter(identifiant_unique__in=ids)
+
+        propositions = DisplayedPropositionService.objects.filter(
+            acteur=OuterRef("pk"),
+            action__groupe_action__code__in=codes,
+        )
+        if sous_categorie_ids:
+            propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
+        return self.filter(Exists(propositions))
+
+    def nearest_to(self, longitude, latitude):
+        """Physical acteurs sorted from nearest to farthest.
+
+        `GeometryDistance` (KNN operator `<->`) walks the GiST index in distance
+        order and stops at the LIMIT; `Distance` would compute every distance
+        then sort. Its value is for sorting only: annotate `Distance` to show
+        one. No `ST_DWithin` bound: it would prevent the ordered index scan.
+        """
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        return self.physical().order_by(GeometryDistance("location", reference_point))
+
+    def within(self, bbox):
+        """Acteurs of the visible area, from nearest to its center to farthest.
+
+        `bboverlaps` (`&&`) rather than `within`, which ignores the GiST index on
+        a geography column; for points the result is the same.
+        """
+        area = Polygon.from_bbox(bbox)
+        area.srid = 4326
+        center = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
+        return (
+            self.physical()
+            .filter(location__bboverlaps=area)
+            .order_by(GeometryDistance("location", center))
         )
 
     def for_the_detail(self):
