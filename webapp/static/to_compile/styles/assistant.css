@@ -1,5 +1,8 @@
 @import "npm:@fontsource-variable/public-sans/wght.css";
 
+/* MapLibre's styles, including the `overflow: hidden` that keeps the pins inside the map. */
+@import "npm:maplibre-gl/dist/maplibre-gl.css";
+
 *,
 *::before,
 *::after {
@@ -84,15 +87,265 @@ body {
   --qfa-rayon: var(--qfa-rayon-md);
 }
 
+.qfa-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 450px;
+}
+
+.qfa-carte[data-geste="reparer"] {
+  --qfa-geste-color: var(--qfa-geste-reparation);
+}
+.qfa-carte[data-geste="donner_echanger_rapporter"] {
+  --qfa-geste-color: var(--qfa-geste-don);
+}
+.qfa-carte[data-geste="vendre_acheter"] {
+  --qfa-geste-color: var(--qfa-geste-vente);
+}
+.qfa-carte[data-geste="emprunter_preter_louer"] {
+  --qfa-geste-color: var(--qfa-geste-loc);
+}
+.qfa-carte[data-geste="trier"] {
+  --qfa-geste-color: var(--qfa-geste-tri);
+}
+
+.qfa-carte__canvas {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.qfa-carte .maplibregl-ctrl-top-left .maplibregl-ctrl {
+  margin: 12px 0 0 12px;
+}
+
+.qfa-carte .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0 12px 12px 0;
+}
+
+/* Over the map, never in the flow: resizing the canvas would make MapLibre redraw. */
+.qfa-carte__message {
+  position: absolute;
+  top: var(--qfa-espace-3v);
+  right: var(--qfa-espace-3v);
+  left: 47px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.qfa-carte__message[hidden] {
+  display: none;
+}
+
+@keyframes qfa-pinpoint-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.qfa-pinpoint:not(.qfa-pinpoint--address) {
+  animation: qfa-pinpoint-in 200ms ease-out;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 0s;
+}
+
+.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address),
+.qfa-pinpoint--leaving {
+  opacity: 0 !important;
+  visibility: hidden;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 200ms;
+}
+
+.qfa-pinpoint {
+  /* MapLibre positions markers with `transform`, which needs `position: absolute`. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35px;
+  height: 47px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: none;
+  color: var(--qfa-pinpoint-color);
+}
+
+/* Three layers: a white body, a ring in the geste colour, the geste icon. The tip, not the centre, points at the place. SVGs are used as masks so the colour comes from `--qfa-pinpoint-color`. */
+.qfa-pinpoint::before,
+.qfa-pinpoint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* `url()` written in `mask` directly: Parcel resolves a relative URL in a custom property where `var()` is used, not where it is defined. */
+.qfa-pinpoint::before {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  background: #fff;
+}
+
+.qfa-pinpoint::after {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  background: currentColor;
+}
+
+.qfa-pinpoint__icon {
+  position: absolute;
+  top: 7.78px;
+  left: 7.77px;
+  width: 19.47px;
+  height: 19.5px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  top: 5.48px;
+  left: 6.99px;
+  width: 21.92px;
+  height: 21.96px;
+}
+
+.qfa-pinpoint[data-geste="reparer"]::before {
+  background: currentColor;
+}
+
+.qfa-pinpoint[data-geste="reparer"]::after {
+  background: var(--qfa-accent);
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icon {
+  background: #fff;
+}
+.qfa-pinpoint[data-geste="vendre_acheter"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+}
+.qfa-pinpoint[data-geste="emprunter_preter_louer"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+  background: var(--qfa-geste-loc-icone);
+}
+.qfa-pinpoint[data-geste="trier"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+}
+
+/* The donner icon is exported with its white body: its glyph lives in `icone-don.svg`, framed like the whole pin. */
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"] .qfa-pinpoint__icon {
+  top: 0;
+  left: 0;
+  width: 35px;
+  height: 46px;
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-don.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-don.svg");
+}
+
+.qfa-pinpoint__bonus {
+  position: absolute;
+  /* Above the ring: `::after` paints after the pinpoint's children. */
+  z-index: 1;
+  top: -5px;
+  left: 23px;
+  width: 20px;
+  height: 20px;
+  background:
+    url("../images/assistant/pinpoints/bonus-pourcent.svg") center / 20px no-repeat,
+    url("../images/assistant/pinpoints/bonus-ellipse.svg") center / 10px no-repeat;
+}
+
+.qfa-pinpoint:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+.qfa-carte__accessible-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.qfa-skiplink {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.qfa-skiplink:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  clip: auto;
+  color: var(--qfa-accent);
+}
+
 .qfa-preview {
   margin: 0;
   padding: 2rem;
+}
+
+.qfa-chrono {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--qfa-rayon);
+  background: rgb(0 0 0 / 0.75);
+  color: var(--qfa-blanc);
+  font:
+    500 0.75rem/1.4 ui-monospace,
+    monospace;
+  pointer-events: none;
+}
+
+.qfa-chrono[data-over-budget="true"] {
+  background: var(--qfa-user-address);
+}
+
+.qfa-chrono span {
+  opacity: 0.75;
+}
+
+/* On the red background, the muted text would fall below 4.5:1. */
+.qfa-chrono[data-over-budget="true"] span {
+  opacity: 1;
 }
 
 /* `view-transition-name` makes each field and the banner a stacking context: the list's z-index only counts inside it, so the field itself is raised. */
 .qfa-combobox {
   position: relative;
   z-index: 1;
+}
+
+#recherche-objet {
+  z-index: 2;
 }
 
 .qfa-combobox__label {
@@ -392,7 +645,8 @@ body {
   color: var(--qfa-accent);
 }
 
-.qfa-bouton:focus-visible {
+.qfa-bouton:focus-visible,
+.qfa-changer-geste:focus-visible {
   outline: 2px solid var(--qfa-focus);
   outline-offset: 2px;
 }
@@ -420,6 +674,98 @@ body {
   mask-image: url("../images/assistant/ui/lien-externe.svg");
 }
 
+.qfa-bloc-geste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-bloc-geste__badges {
+  display: flex;
+  gap: var(--qfa-espace-1v);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.qfa-bloc-geste__titre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-md);
+  font-weight: 700;
+  line-height: var(--qfa-interligne-serre);
+}
+
+.qfa-bloc-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
+.qfa-bloc-geste__consigne {
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-bloc-geste__consigne > * {
+  margin: 0;
+}
+
+.qfa-bloc-geste__consigne > * + * {
+  margin-top: var(--qfa-espace-2v);
+}
+
+.qfa-bloc-geste .qfa-bouton {
+  width: 100%;
+  max-width: 300px;
+}
+
+.qfa-bloc-gestes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--qfa-espace-3v);
+  list-style: none;
+}
+
+.qfa-changer-geste {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  min-height: 40px;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border-radius: var(--qfa-rayon-md);
+  background: var(--qfa-accent);
+  color: var(--qfa-blanc);
+  font-size: var(--qfa-taille-texte-sm);
+  font-weight: 600;
+  line-height: var(--qfa-interligne-serre);
+  text-decoration: none;
+}
+
+.qfa-changer-geste__retour {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+
+  transform: rotate(180deg);
+  -webkit-mask: url("../images/assistant/ui/chevron-droite.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/chevron-droite.svg") center / contain no-repeat;
+}
+
+.qfa-changer-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
 .qfa-footer {
   display: flex;
   flex-direction: column;
@@ -436,6 +782,140 @@ body {
 
 .qfa-combobox__detail {
   color: var(--qfa-texte-courant);
+}
+
+.qfa-ecran {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  align-items: center;
+  width: 100%;
+  padding-bottom: var(--qfa-espace-4v);
+}
+
+.qfa-panneau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
+  background: var(--qfa-fond-vert-eau);
+
+  view-transition-name: entete;
+
+  position: relative;
+  z-index: 2;
+}
+
+#recherche-adresse {
+  view-transition-name: champ-adresse;
+}
+
+#recherche-objet {
+  view-transition-name: champ-objet;
+}
+
+.qfa-changer-geste {
+  view-transition-name: bouton-geste;
+}
+
+.qfa-changer-geste__icones {
+  view-transition-name: bouton-geste-icones;
+}
+
+.qfa-changer-geste__libelle {
+  view-transition-name: bouton-geste-libelle;
+}
+
+::view-transition-old(bouton-geste) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(bouton-geste) {
+  animation: none;
+}
+
+/* The label changes width: without this, the old snapshot is stretched during the cross-fade. */
+::view-transition-old(bouton-geste-libelle),
+::view-transition-new(bouton-geste-libelle) {
+  width: auto;
+  height: 100%;
+}
+
+::view-transition-old(champ-adresse) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(champ-adresse) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  .qfa-pinpoint {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.qfa-ecran > form {
+  width: 100%;
+}
+
+/* Parked off the solutions screen, the map canvas is hidden but alive: Turbo keeps the permanent node, and with it the map. */
+body > #assistant-carte-canvas {
+  display: none;
+}
+
+.qfa-haut-de-page {
+  width: 100%;
+}
+
+.qfa-panneau--solutions {
+  gap: var(--qfa-espace-2v);
+}
+
+/* `turbo-frame` is an unknown element, inline by default. */
+turbo-frame {
+  display: block;
+}
+
+.qfa-bouton--pleine-largeur {
+  width: 100%;
+}
+
+.qfa-bouton__loupe {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain no-repeat;
+}
+
+.qfa-pinpoint--address {
+  width: 50px;
+  height: 50px;
+}
+
+.qfa-pinpoint--address::before,
+.qfa-pinpoint--address::after {
+  -webkit-mask: none;
+  mask: none;
+}
+
+.qfa-pinpoint--address::before {
+  background: url("../images/assistant/ui/adresse-cercle.svg") center / contain
+    no-repeat;
+}
+
+.qfa-pinpoint--address::after {
+  inset: 9px;
+  background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
 }
 
 .qfa-combobox__cadre[data-erreur="true"] {

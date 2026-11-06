@@ -1,0 +1,19 @@
+{% extends base_template %}
+
+{% block title %}{{ produit.title }}{% endblock %}
+
+{% block main %}
+    <turbo-frame id="assistant-fiche" class="qfa-ecran">
+        <form action="{% url 'assistant:recherche' %}"
+              method="get"
+              data-turbo-action="advance"
+              data-controller="assistant-submit"
+              data-action="assistant-combobox:chosen->assistant-submit#submit">
+            {% include "ui/components/assistant/panneau_recherche.html" %}
+        </form>
+
+        {% include "ui/components/assistant/bloc_gestes.html" with blocs=consignes %}
+
+        {% include "ui/components/assistant/footer.html" %}
+    </turbo-frame>
+{% endblock main %}
