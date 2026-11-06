@@ -114,13 +114,24 @@ class TestFicheObjet:
             article["data-gestes"] for article in page.select("article.qfa-bloc-geste")
         ] == [" ".join(block["gestes"]) for block in BLOCKS]
 
-    def test_the_buttons_lead_to_the_solutions(self, client, fiche):
+    def test_without_address_the_buttons_offer_geolocation(self, client, fiche):
         url = reverse("assistant:produit", args=[fiche.slug])
-        page = html_of(client.get(url, {"objet": "Chaise"}))
+        without = html_of(client.get(url, {"objet": "Chaise"}))
+        located = html_of(
+            client.get(
+                url, {"objet": "Chaise", "longitude": "-0.56", "latitude": "47.47"}
+            )
+        )
 
-        assert bloc_buttons(page)
-        for button in bloc_buttons(page):
-            assert button["href"].startswith(reverse("assistant:solutions"))
+        assert bloc_buttons(without)
+        for button in bloc_buttons(without):
+            assert button["data-controller"] == "assistant-geolocalisation"
+            assert button.get_text(strip=True) == (
+                "Je découvre les solutions près de moi"
+            )
+        assert bloc_buttons(located)
+        for button in bloc_buttons(located):
+            assert button["data-controller"] != "assistant-geolocalisation"
             assert button.get_text(strip=True) == "Je découvre les solutions"
 
     def test_without_any_geste_the_fiche_says_so(self, client, fiche):

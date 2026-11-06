@@ -1,6 +1,11 @@
 import { AxeBuilder } from "@axe-core/playwright"
 import { expect, test, type Page } from "@playwright/test"
-import { dragAssistantMap, mockAssistantAddressServices, navigateTo } from "./helpers"
+import {
+  AURAY,
+  dragAssistantMap,
+  mockAssistantAddressServices,
+  navigateTo,
+} from "./helpers"
 
 // Out at sea: no place within reach, in the sample database as in production.
 const OPEN_SEA = "longitude=-5.5&latitude=46"
@@ -71,6 +76,15 @@ test.describe("♿ Accessibilité de l'assistant", () => {
       const explored = page.waitForResponse((r) => r.url().includes("bbox="))
       await dragAssistantMap(page, 40, 40)
       await explored
+    })
+
+    await test.step("Lieu", async () => {
+      const response = await page.request.get("/api/v1/lieux.geojson", {
+        params: { geste: "reparer", ...AURAY },
+      })
+      const [lieu] = (await response.json()).features
+      await navigateTo(page, `/assistant/lieu/${lieu.properties.uuid}/`)
+      await expectNoViolations(page)
     })
   })
 })
