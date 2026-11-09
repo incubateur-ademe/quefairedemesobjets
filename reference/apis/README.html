@@ -285,6 +285,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../webapp/django.html">Django</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/internationalization.html">Internationalisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/revue-suggestions.html">Review screen of the SOURCE suggestions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/assistant.html">Assistant</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -366,7 +367,7 @@ instance defined in <code class="docutils literal notranslate"><span class="pre"
 <li><p><code class="docutils literal notranslate"><span class="pre">api</span></code>, the historical one, mounted at <code class="docutils literal notranslate"><span class="pre">/api/</span></code> (docs at <code class="docutils literal notranslate"><span class="pre">/api/docs</span></code>):
 <code class="docutils literal notranslate"><span class="pre">qfdmo.api</span></code> at <code class="docutils literal notranslate"><span class="pre">/api/qfdmo/</span></code>, <code class="docutils literal notranslate"><span class="pre">stats.api</span></code> at <code class="docutils literal notranslate"><span class="pre">/api/stats</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">api_v1</span></code>, the public versioned one, mounted at <code class="docutils literal notranslate"><span class="pre">/api/v1/</span></code> (docs at
-<code class="docutils literal notranslate"><span class="pre">/api/v1/docs</span></code>): <code class="docutils literal notranslate"><span class="pre">opendata.api</span></code>, see <a class="reference internal" href="v1.html"><span class="std std-doc">v1.md</span></a></p></li>
+<code class="docutils literal notranslate"><span class="pre">/api/v1/docs</span></code>): <code class="docutils literal notranslate"><span class="pre">opendata.api</span></code> and <code class="docutils literal notranslate"><span class="pre">assistant.api</span></code>, see <a class="reference internal" href="v1.html"><span class="std std-doc">v1.md</span></a></p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">webapp/core/urls.py</span></code> mounts both; <code class="docutils literal notranslate"><span class="pre">api/v1/</span></code> comes first, or Django would
@@ -416,6 +417,7 @@ look for <code class="docutils literal notranslate"><span class="pre">v1/…</sp
 <li class="toctree-l2"><a class="reference internal" href="v1.html#principle">Principle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="v1.html#scope-the-open-dataset">Scope: the open dataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="v1.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="v1.html#lieux-parameters">Lieux parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="v1.html#tests">Tests</a></li>
 </ul>
 </li>

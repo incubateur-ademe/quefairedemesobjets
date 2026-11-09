@@ -285,6 +285,7 @@
 <li class="toctree-l3"><a class="reference internal" href="django.html">Django</a></li>
 <li class="toctree-l3"><a class="reference internal" href="internationalization.html">Internationalisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="revue-suggestions.html">Review screen of the SOURCE suggestions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="assistant.html">Assistant</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -374,6 +375,7 @@
 <li><p><strong>qfdmo</strong> — Core business (models, views, forms of the main tool)</p></li>
 <li><p><strong>qfdmd</strong> — CMS and content (pages, middleware, multi‑site integration)</p></li>
 <li><p><strong>infotri</strong> — Infotri module (configurator, dedicated forms)</p></li>
+<li><p><strong>assistant</strong> — Assistant V2 (see <a class="reference internal" href="assistant.html"><span class="std std-doc">assistant.md</span></a>)</p></li>
 <li><p><strong>search</strong> — Search</p></li>
 <li><p><strong>stats</strong> — Statistics</p></li>
 <li><p><strong>data</strong> — Data management and suggestions (admin, import/export)</p></li>
@@ -393,7 +395,7 @@
 <li><p><strong>Sources to collect</strong>: <code class="docutils literal notranslate"><span class="pre">static/to_collect/</span></code> additionnal assets</p></li>
 <li><p><strong>Output</strong>: <code class="docutils literal notranslate"><span class="pre">static/compiled/</span></code> (files served by Django via <code class="docutils literal notranslate"><span class="pre">STATICFILES_DIRS</span></code>)</p></li>
 </ul>
-<p>Main entry points: <code class="docutils literal notranslate"><span class="pre">qfdmo.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">qfdmd.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">admin.ts</span></code>, and the embed bundles (<code class="docutils literal notranslate"><span class="pre">embed/assistant.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/carte.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/formulaire.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/infotri.ts</span></code>, etc.).</p>
+<p>Main entry points: <code class="docutils literal notranslate"><span class="pre">qfdmo.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">quefaire.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">admin.ts</span></code>, and the embed bundles (<code class="docutils literal notranslate"><span class="pre">embed/assistant.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/carte.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/formulaire.ts</span></code>, <code class="docutils literal notranslate"><span class="pre">embed/infotri.ts</span></code>, etc.).</p>
 <p>The frontend stack uses <strong>Stimulus</strong> for controllers and <strong>Turbo</strong> for navigation. Scripts are loaded in layouts (e.g. <code class="docutils literal notranslate"><span class="pre">base.html</span></code>) via <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">static</span> <span class="pre">'qfdmo.js'</span> <span class="pre">%}</span></code> tags.</p>
 <p>for more details about js/parcel configuration, read the <a class="reference download internal" download="" href="../../_downloads/4340ad243ec8d978d0d45b263ac9521d/package.json"><span class="xref download myst">webapp <code class="docutils literal notranslate"><span class="pre">package.json</span></code></span></a> file. The frontend uses an <strong>npm workspace</strong>: <code class="docutils literal notranslate"><span class="pre">webapp/</span></code> is declared in the <a class="reference download internal" download="" href="../../_downloads/107ae6f6a70591a8435722bf4be2e286/package.json"><span class="xref download myst">root <code class="docutils literal notranslate"><span class="pre">package.json</span></code></span></a> and there is a single <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code> at the repo root.</p>
 <section id="postcss">
@@ -508,6 +510,15 @@ for the full pipeline and how to trigger the DAG from the Airflow UI.</p>
 <li class="toctree-l2"><a class="reference internal" href="revue-suggestions.html#build-and-deployment">Build and deployment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revue-suggestions.html#api-types">API types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="revue-suggestions.html#tests">Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="assistant.html">Assistant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="assistant.html#purpose">Purpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="assistant.html#internal-dependencies">Internal dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="assistant.html#external-dependencies">External dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="assistant.html#structure">Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="assistant.html#routes">Routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="assistant.html#tests">Tests</a></li>
 </ul>
 </li>
 </ul>

@@ -285,6 +285,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../webapp/django.html">Django</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/internationalization.html">Internationalisation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../webapp/revue-suggestions.html">Review screen of the SOURCE suggestions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../webapp/assistant.html">Assistant</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../opendata/README.html">Open Data</a><input aria-label="Toggle navigation of Open Data" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -362,13 +363,19 @@
 the same parameters: the assistant is the first client of its own API. The
 map, the search fields and the lieu pages call these endpoints, so there is no
 second code path to maintain.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">webapp/opendata/api.py</span></code> router serves the open data of lieux, gestes,
-objets and déchets there, a public contract for reusers.</p>
+<p>A single selection chain, <code class="docutils literal notranslate"><span class="pre">DisplayedActeurQuerySet</span></code> (<code class="docutils literal notranslate"><span class="pre">proposing</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nearest_to</span></code>, <code class="docutils literal notranslate"><span class="pre">within</span></code>), serves the screens and the API with the same
+parameters (<code class="docutils literal notranslate"><span class="pre">webapp/qfdmo/lieux_query.py</span></code>). Two routers are mounted on <code class="docutils literal notranslate"><span class="pre">/api/v1/</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">webapp/opendata/api.py</span></code>: the open data of lieux, gestes, objets and
+déchets, a public contract for reusers;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">webapp/assistant/api.py</span></code>: the suggestions of the assistant’s search fields.</p></li>
+</ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">NinjaAPI</span></code> instances live in <code class="docutils literal notranslate"><span class="pre">webapp/core/api.py</span></code>.</p>
 </section>
 <section id="scope-the-open-dataset">
 <h2>Scope: the open dataset<a class="headerlink" href="#scope-the-open-dataset" title="Lien vers cette rubrique">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">/lieux/{identifiant}</span></code> returns the lieux of the
+<p><code class="docutils literal notranslate"><span class="pre">/lieux</span></code> and <code class="docutils literal notranslate"><span class="pre">/lieux/{identifiant}</span></code> return the lieux of the
 <a class="reference external" href="https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire">Acteurs de l’économie circulaire</a>
 dataset published on data.ademe.fr: active acteurs with at least one source
 under an open licence (<code class="docutils literal notranslate"><span class="pre">open_data()</span></code>, <code class="docutils literal notranslate"><span class="pre">webapp/opendata/lieux.py</span></code>). Columns
@@ -401,24 +408,34 @@ in the data-platform, not here.</p></li>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/lieux/{identifiant}</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/lieux</span></code></p></td>
+<td><p>open licence lieux, paginated (<code class="docutils literal notranslate"><span class="pre">limit</span></code>, <code class="docutils literal notranslate"><span class="pre">offset</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/lieux/{identifiant}</span></code></p></td>
 <td><p>one lieu, by its public identifier (<code class="docutils literal notranslate"><span class="pre">uuid</span></code>)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/gestes</span></code></p></td>
-<td><p>the gestes: codes of the action groups, colours</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/gestes</span></code></p></td>
+<td><p>the gestes: values of the <code class="docutils literal notranslate"><span class="pre">geste</span></code> parameter, colours</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/produits</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/objets?q=</span></code></p></td>
+<td><p>objet suggestions, <code class="docutils literal notranslate"><span class="pre">slug</span></code> = value of <code class="docutils literal notranslate"><span class="pre">fiche</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/adresses?q=</span></code></p></td>
+<td><p>address suggestions (BAN), <code class="docutils literal notranslate"><span class="pre">precise</span></code> address/town</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/produits</span></code></p></td>
 <td><p>objets and déchets</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/consignes</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/consignes</span></code></p></td>
 <td><p>consignes of each objet or déchet</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Each one answers paginated JSON (<code class="docutils literal notranslate"><span class="pre">limit</span></code>, <code class="docutils literal notranslate"><span class="pre">offset</span></code>) by default, and returns
-the whole table as CSV with the <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">text/csv</span></code> header: <code class="docutils literal notranslate"><span class="pre">limit</span></code> and
-<code class="docutils literal notranslate"><span class="pre">offset</span></code> do not apply to the CSV. Responses carry <code class="docutils literal notranslate"><span class="pre">Vary:</span> <span class="pre">Accept</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">/produits</span></code> and <code class="docutils literal notranslate"><span class="pre">/consignes</span></code> answer paginated JSON (<code class="docutils literal notranslate"><span class="pre">limit</span></code>, <code class="docutils literal notranslate"><span class="pre">offset</span></code>) by
+default, and return the whole table as CSV with the <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">text/csv</span></code> header:
+<code class="docutils literal notranslate"><span class="pre">limit</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> do not apply to the CSV. Responses carry <code class="docutils literal notranslate"><span class="pre">Vary:</span> <span class="pre">Accept</span></code>.
+The other endpoints only serve JSON.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Accept: text/csv&quot;</span><span class="w"> </span>https://quefairedemesdechets.ademe.fr/api/v1/consignes
 </pre></div>
 </div>
@@ -428,9 +445,44 @@ the whole table as CSV with the <code class="docutils literal notranslate"><span
 same columns as the CSV files, which the export DAG downloads here
 (<code class="docutils literal notranslate"><span class="pre">webapp/opendata/api.py</span></code>).</p>
 </section>
+<section id="lieux-parameters">
+<h2>Lieux parameters<a class="headerlink" href="#lieux-parameters" title="Lien vers cette rubrique">¶</a></h2>
+<p>The vocabulary is the one of the screens” URLs (<code class="docutils literal notranslate"><span class="pre">assistant/parcours.py</span></code>): a
+screen’s query string can be passed as is.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">geste</span></code></p></td>
+<td><p>✅ repeatable</p></td>
+<td><p>code of a <code class="docutils literal notranslate"><span class="pre">GroupeAction</span></code>, see <code class="docutils literal notranslate"><span class="pre">/gestes</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fiche</span></code></p></td>
+<td><p>⚪️</p></td>
+<td><p>slug of an objet fiche; unknown: <code class="docutils literal notranslate"><span class="pre">404</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">longitude</span></code>, <code class="docutils literal notranslate"><span class="pre">latitude</span></code></p></td>
+<td><p>✅ without <code class="docutils literal notranslate"><span class="pre">bbox</span></code></p></td>
+<td><p>search point, sorted by distance</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bbox</span></code></p></td>
+<td><p>✅ without point</p></td>
+<td><p>visible area (Leaflet shape), wins over the point</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Invalid input returns <code class="docutils literal notranslate"><span class="pre">422</span></code> (django-ninja’s convention), never a silent
+fallback: an unreadable bbox is not replaced by the point.</p>
+</section>
 <section id="tests">
 <h2>Tests<a class="headerlink" href="#tests" title="Lien vers cette rubrique">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>unit_tests/opendata
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>unit_tests/opendata<span class="w"> </span>unit_tests/qfdmo/test_lieux_query.py<span class="w"> </span>unit_tests/assistant/test_api.py<span class="w"> </span>unit_tests/assistant/test_adresse.py
 </pre></div>
 </div>
 </section>
@@ -495,6 +547,7 @@ same columns as the CSV files, which the export DAG downloads here
 <li><a class="reference internal" href="#principle">Principle</a></li>
 <li><a class="reference internal" href="#scope-the-open-dataset">Scope: the open dataset</a></li>
 <li><a class="reference internal" href="#endpoints">Endpoints</a></li>
+<li><a class="reference internal" href="#lieux-parameters">Lieux parameters</a></li>
 <li><a class="reference internal" href="#tests">Tests</a></li>
 </ul>
 </li>
