@@ -9,7 +9,14 @@ import {
 const PARIS: Area = { west: 2.2, south: 48.8, east: 2.4, north: 48.9 }
 
 function place(uuid: string, longitude = 2.3, latitude = 48.85): Place {
-  return { uuid, nom: `Lieu ${uuid}`, bonus: false, longitude, latitude }
+  return {
+    uuid,
+    nom: `Lieu ${uuid}`,
+    bonus: false,
+    geste: "reparer",
+    longitude,
+    latitude,
+  }
 }
 
 describe("placesFromGeoJSON", () => {
@@ -18,13 +25,20 @@ describe("placesFromGeoJSON", () => {
       features: [
         {
           geometry: { coordinates: [2.35, 48.86] as [number, number] },
-          properties: { uuid: "a", nom: "Atelier", bonus: true },
+          properties: { uuid: "a", nom: "Atelier", bonus: true, geste: "reparer" },
         },
       ],
     }
 
     expect(placesFromGeoJSON(collection)).toEqual([
-      { uuid: "a", nom: "Atelier", bonus: true, longitude: 2.35, latitude: 48.86 },
+      {
+        uuid: "a",
+        nom: "Atelier",
+        bonus: true,
+        geste: "reparer",
+        longitude: 2.35,
+        latitude: 48.86,
+      },
     ])
   })
 })

@@ -347,7 +347,8 @@ export default class extends Controller<HTMLElement> {
     for (const place of state.places) {
       if (state.markers.has(place.uuid)) continue
 
-      const element = pinpointElement(place, colors, this.#gestes()[0] ?? "", lieuUrl)
+      const geste = place.geste || (this.#gestes()[0] ?? "")
+      const element = pinpointElement(place, colors, geste, lieuUrl)
       const marker = new state.Marker({
         element,
         anchor: "bottom",
@@ -399,7 +400,6 @@ export default class extends Controller<HTMLElement> {
   #colors(): PinpointColors {
     const style = getComputedStyle(this.element)
     return {
-      geste: style.getPropertyValue("--qfa-geste-color").trim(),
       bonus: style.getPropertyValue("--qfa-bonus-color").trim(),
       address: style.getPropertyValue("--qfa-user-address").trim(),
     }

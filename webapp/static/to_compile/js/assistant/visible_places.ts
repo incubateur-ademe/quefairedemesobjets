@@ -7,6 +7,7 @@ export type Place = {
   uuid: string
   nom: string
   bonus: boolean
+  geste: string
   longitude: number
   latitude: number
 }
@@ -20,7 +21,7 @@ export type Area = {
 
 type Feature = {
   geometry: { coordinates: [number, number] }
-  properties: { uuid: string; nom: string; bonus: boolean }
+  properties: { uuid: string; nom: string; bonus: boolean; geste?: string | null }
 }
 
 export function placesFromGeoJSON(collection: { features: Feature[] }): Place[] {
@@ -28,6 +29,7 @@ export function placesFromGeoJSON(collection: { features: Feature[] }): Place[] 
     uuid: properties.uuid,
     nom: properties.nom,
     bonus: properties.bonus,
+    geste: properties.geste ?? "",
     longitude: geometry.coordinates[0],
     latitude: geometry.coordinates[1],
   }))

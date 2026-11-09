@@ -51,10 +51,11 @@ class SuggestionsAdresses(Schema):
 def lieux_geojson(request, response: HttpResponse, query: Query[LieuxQuery]):
     """Au plus 20 lieux, toutes sources confondues : ce que la carte de
     l'assistant dessine. Autour d'un point, les plus proches à moins de 20 km.
-    Le détail d'un lieu est sur `/lieux/{identifiant}`.
+    `geste` est le premier des gestes demandés que le lieu propose, pour l'objet
+    de la fiche s'il y en a une. Le détail d'un lieu est sur `/lieux/{identifiant}`.
     """
     start = perf_counter()
-    acteurs = query.queryset()
+    acteurs = query.queryset().with_geste(query.geste, query.sous_categorie_ids)
     if query.bbox is None:
         position = Point(query.longitude, query.latitude, srid=4326)
         acteurs = acteurs.annotate(distance=Distance("location", position))
