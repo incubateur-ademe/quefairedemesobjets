@@ -35,6 +35,7 @@ jobs:
     uses: ./.github/workflows/_scaleway-container-deploy.yml
     needs: [nginx_docker, get_container_id]
     with:
+      component: nginx gateway
       container_id: ${{ needs.get_container_id.outputs.nginx_id }}
       registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway', inputs.tag_name) }}
 
