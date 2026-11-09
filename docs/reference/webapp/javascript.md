@@ -9,6 +9,11 @@
 ## [Stimulus](https://stimulus.hotwired.dev/)
 
 - Controllers are in `webapp/static/to_compile/controllers/`
+- Two Stimulus applications, never on the same document: the site's
+  (`qfdmo.ts`, `quefaire.ts`…) and the assistant V2's
+  (`js/assistant/application.ts`, loaded by `assistant.ts`). Assistant
+  controllers are registered as `assistant-*`. In the lookbook, a preview picks
+  its stack with its `assets` attribute.
 - Use Stimulus targets and values
 - Export as `export default class extends Controller`
 - Structure example:
@@ -35,3 +40,10 @@ Make sure the server response contains a `<turbo-frame>` with the same `id` so T
 ## Map
 
 We use `Maplibre` js technologie with `Carte Facile` vectorial layers in application and OpenStreetMap layers for the backoffice
+
+### Assistant combobox
+
+`assistant-combobox` copies each chosen suggestion into the hidden fields by
+their `data-key`. With `require-choice`, Enter refuses typed text left without
+a suggestion; a hidden field marked `data-optional` (e.g. `synonyme`) does not
+count as missing.

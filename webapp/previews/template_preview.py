@@ -10,6 +10,8 @@ from django.core.paginator import Paginator
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
@@ -34,7 +36,7 @@ from qfdmo.models.acteur import (
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.models.action import Action
+from qfdmo.models.action import Action, GroupeAction
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
@@ -1503,3 +1505,78 @@ class TestsPreview(LookbookPreview):
                 ),
             },
         )
+
+
+class AssistantPreview(LookbookPreview):
+    """Assistant V2 components."""
+
+    # Serves assistant.js/css alone: the legacy stack starts its own Stimulus
+    # application and would load the DSFR, which the assistant does not use.
+    assets = "assistant"
+
+    @component_docs("ui/components/assistant/recherche_objet.md")
+    def recherche_objet(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_objet.html", {})
+
+    @component_docs("ui/components/assistant/recherche_adresse.md")
+    def recherche_adresse(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_adresse.html", {})
+
+    @component_docs("ui/components/assistant/etiquette_geste.md")
+    def etiquette_geste(self, **kwargs):
+        """Every geste in one preview."""
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/etiquette_geste.html",
+                {"geste": groupe.code, "libelle": groupe.libelle_court},
+            )
+            for groupe in GroupeAction.objects.order_by("order")
+        )
+
+    @component_docs("ui/components/assistant/badge.md")
+    def badge(self, **kwargs):
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/badge.html",
+                {"condition": condition, "libelle": libelle},
+            )
+            for condition, libelle in CONDITIONS
+        )
+
+    @component_docs("ui/components/assistant/icone_geste.md")
+    def icone_geste(self, **kwargs):
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/icone_geste.html",
+                {"geste": groupe.code, "titre": groupe.libelle_court},
+            )
+            for groupe in GroupeAction.objects.order_by("order")
+        )
+
+    @component_docs("ui/components/assistant/alerte.md")
+    def alerte(
+        self, message="Cet objet ne se jette pas avec les ordures ménagères.", **kwargs
+    ):
+        return render_to_string(
+            "ui/components/assistant/alerte.html", {"message": message}
+        )
+
+    @component_docs("ui/components/assistant/footer.md")
+    def footer(self, **kwargs):
+        return render_to_string("ui/components/assistant/footer.html", {})
+
+
+CONDITIONS = [
+    ("reparable", "Réparable"),
+    ("bon_etat", "Bon état"),
+    ("mauvais_etat", "Mauvais état"),
+    ("bonus", "Bonus Réparation"),
+]
+
+
+def _side_by_side(renders):
+    """Lines up several variants to compare them at a glance."""
+    return format_html(
+        '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">{}</div>',
+        mark_safe("".join(renders)),
+    )
