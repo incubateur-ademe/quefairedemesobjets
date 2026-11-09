@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.contrib.staticfiles import finders
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.template import Context, Template
@@ -46,6 +47,17 @@ from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
 
 base_url = settings.BASE_URL
+PRODUCTION_URL = "https://quefairedemesdechets.ademe.fr"
+
+
+def iframe_js_opening_this_server() -> str:
+    """`iframe.js` opens the URL it was built with, production in the Docker
+    images: rewritten to open this server, a preview included. Empty when the
+    front end is not built."""
+    path = finders.find("embed/assistant.js")
+    if not path:
+        return ""
+    return Path(path).read_text().replace(PRODUCTION_URL, base_url)
 
 
 class ContextAwareLookbookPreview(LookbookPreview):
@@ -1521,6 +1533,7 @@ class TestsPreview(LookbookPreview):
                 "base_url": base_url,
                 "host": host,
                 "host_is_beta": host in settings.ASSISTANT["V2_HOSTS"],
+                "iframe_js": iframe_js_opening_this_server(),
             },
         )
 

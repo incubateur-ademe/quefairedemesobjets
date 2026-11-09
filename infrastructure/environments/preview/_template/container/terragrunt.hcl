@@ -50,6 +50,7 @@ locals {
   # preview:isoprod label: a preview meant to be used like production
   # (beta tests), see the database unit for its data.
   isoprod = get_env("ISOPROD", "false") == "true"
+  host    = format("qfdmodpreview6b0061c2-lvao-pr-%s-webapp.functions.fnc.fr-par.scw.cloud", local.pr_number)
 }
 
 inputs = {
@@ -73,7 +74,13 @@ inputs = {
   # The actual probe uses a dynamic internal IP (e.g. 100.96.x.x:8000) which
   # varies per deployment — "*" allows any host for ephemeral previews.
   ALLOWED_HOSTS = "*"
-  BASE_URL      = format("https://qfdmodpreview6b0061c2-lvao-pr-%s-webapp.functions.fnc.fr-par.scw.cloud", local.pr_number)
+  BASE_URL      = "https://${local.host}"
+
+  # The lookbook's embed cases load iframe.js on a page of the preview itself:
+  # the preview is its own beta tester, so they open the assistant V2.
+  extra_environment_variables = {
+    ASSISTANT_V2_BETA_TESTERS_HOSTS = local.host
+  }
 
   DATABASE_URL                    = dependency.preview_database.outputs.database_url
   SECRET_KEY                      = get_env("PREVIEW_SECRET_KEY")

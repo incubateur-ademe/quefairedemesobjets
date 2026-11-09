@@ -61,7 +61,7 @@ page scrolls up.
   <h1>{% lorem 4 w %}</h1>
   {% lorem 3 p %}
 
-  <script src="{{ base_url }}/iframe.js"></script>
+  <script>{{ iframe_js|safe }}</script>
 </div>
 
 <div class="t21-pied">{% lorem 2 p %}</div>
