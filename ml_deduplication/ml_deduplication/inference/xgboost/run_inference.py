@@ -313,12 +313,11 @@ def main():
         threshold=args.model_threshold,
         n_jobs=-1,
     )
-    model._should_be_different_fields = tuple(
-        [
-            *model._should_be_different_fields,
-            "parent_id",
-        ]
+    model._should_be_different_fields = (
+        *model._should_be_different_fields,
+        "parent_id",
     )
+
     with (model_path / "calibrator.pkl").open("rb") as f:
         calibrator: LogisticRegression = load(f)
 
@@ -369,10 +368,10 @@ def main():
                 ),
                 desc="Scoring candidate pairs",
             ):
-                n_pairs_total += len(batch)
                 df_predictions_tmp = model.predict(batch, slim=True)
                 df_calibrated_tmp = apply_calibrator(calibrator, df_predictions_tmp)
                 df_positive_tmp = keep_positive(df_calibrated_tmp, threshold)
+                n_pairs_total += len(df_positive_tmp)
                 if len(df_positive_tmp) > 0:
                     positive_frames.append(df_positive_tmp)
     else:
@@ -390,10 +389,10 @@ def main():
         if (X is None) or (len(X) == 0):
             n_pairs_total = 0
         else:
-            n_pairs_total = len(X)
             df_predictions = model.predict(X, slim=True)
             df_calibrated = apply_calibrator(calibrator, df_predictions)
             df_positive = keep_positive(df_calibrated, threshold)
+            n_pairs_total = len(df_positive)
             if len(df_positive) > 0:
                 positive_frames.append(df_positive)
 
