@@ -1,4 +1,6 @@
 {% load l10n static %}
+{% comment %}The style's vector tiles: the connection opens while MapLibre loads.{% endcomment %}
+<link rel="preconnect" href="https://data.geopf.fr" crossorigin>
 <div
     class="qfa-carte"
     data-controller="assistant-carte"
@@ -6,6 +8,19 @@
     data-assistant-carte-url-value="{% url 'api_v1:lieux-geojson' %}"
     data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
     data-assistant-carte-style-url-value="{% static 'assistant/carte-style.json' %}"
+    {% comment %}
+    The Latin glyph ranges of the style's fonts, by the end of the URL MapLibre
+    asks for: served with our static files, they are cached for good. Other
+    ranges still come from the style's `glyphs` server.
+    {% endcomment %}
+    data-assistant-carte-glyphs-value='{
+        "Noto Sans Regular/0-255.pbf": "{% static 'assistant/glyphs/Noto Sans Regular/0-255.pbf' %}",
+        "Noto Sans Regular/256-511.pbf": "{% static 'assistant/glyphs/Noto Sans Regular/256-511.pbf' %}",
+        "Noto Sans Italic/0-255.pbf": "{% static 'assistant/glyphs/Noto Sans Italic/0-255.pbf' %}",
+        "Noto Sans Italic/256-511.pbf": "{% static 'assistant/glyphs/Noto Sans Italic/256-511.pbf' %}",
+        "Noto Sans Bold/0-255.pbf": "{% static 'assistant/glyphs/Noto Sans Bold/0-255.pbf' %}",
+        "Noto Sans Bold/256-511.pbf": "{% static 'assistant/glyphs/Noto Sans Bold/256-511.pbf' %}"
+    }'
     {% comment %}Comma separated: the controller sends one `geste` per code.{% endcomment %}
     data-assistant-carte-geste-value="{{ gestes|join:',' }}"
     data-assistant-carte-fiche-value="{{ fiche|default:'' }}"

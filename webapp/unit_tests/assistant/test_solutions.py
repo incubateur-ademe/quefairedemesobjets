@@ -1,5 +1,9 @@
+import json
+from urllib.parse import unquote
+
 import pytest
 from django.contrib.gis.geos import Point
+from django.contrib.staticfiles.finders import find
 from django.urls import reverse
 
 from unit_tests.assistant.helpers import (
@@ -42,6 +46,15 @@ class TestSolutionsScreen:
 
         assert carte(page)["data-assistant-carte-geste-value"] == "reparer"
         assert carte(page)["data-assistant-carte-longitude-value"] == "2.36"
+
+    def test_the_map_gets_glyphs_from_our_static_files(self, client):
+        page = solutions(client, geste="reparer", longitude="2.36", latitude="48.85")
+
+        glyphs = json.loads(carte(page)["data-assistant-carte-glyphs-value"])
+
+        assert "Noto Sans Regular/0-255.pbf" in glyphs
+        for url in glyphs.values():
+            assert find(unquote(url.removeprefix("/static/"))), url
 
     @pytest.mark.parametrize(
         "params,precise",

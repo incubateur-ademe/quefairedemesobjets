@@ -123,14 +123,7 @@ body {
   display: none;
 }
 
-@keyframes qfa-pinpoint-in {
-  from {
-    opacity: 0;
-  }
-}
-
 .qfa-pinpoint:not(.qfa-pinpoint--address) {
-  animation: qfa-pinpoint-in 200ms ease-out;
   transition:
     opacity 200ms ease,
     visibility 0s linear 0s;
