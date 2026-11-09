@@ -1,2 +1,6 @@
-{% block content %}
-{% endblock content %}
+{% comment %}
+Responses to a Turbo Frame: Turbo only extracts the frame. The legacy views define
+`content`, the assistant `main`: both blocks must stay.
+{% endcomment %}
+{% block content %}{% endblock content %}
+{% block main %}{% endblock main %}

@@ -1,0 +1,14 @@
+{% extends base_template %}
+
+{% block title %}Que faire de mes objets et déchets ?{% endblock %}
+
+{% block main %}
+    {% comment %}
+    `novalidate`: the browser bubble would hide the server's message; the fields
+    keep `required` for screen readers.
+    {% endcomment %}
+    <form class="qfa-ecran" action="{% url 'assistant:recherche' %}" method="get" novalidate>
+        {% include "ui/components/assistant/panneau_recherche.html" with bouton=True %}
+        {% include "ui/components/assistant/footer.html" %}
+    </form>
+{% endblock main %}

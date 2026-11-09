@@ -927,3 +927,85 @@ export async function waitForResults(locator: Locator | Page | FrameLocator) {
   await expect(results.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
   return results
 }
+
+// The e2e sample database only has places around Auray and Montbéliard.
+export const AURAY = { latitude: 47.668099, longitude: -2.990838 }
+export const MONTBELIARD = { latitude: 47.509724, longitude: 6.798538 }
+
+/** The assistant's address services, which would otherwise reach the BAN. */
+export async function mockAssistantAddressServices(page: Page): Promise<void> {
+  await page.route(/\/qfdmo\/autocomplete\/reverse\?/, (route) =>
+    route.fulfill({ json: { adresse: "Auray", ...AURAY } }),
+  )
+  await page.route(/\/api\/v1\/adresses\?/, (route) =>
+    route.fulfill({
+      json: {
+        results: [
+          {
+            label: "Montbéliard",
+            detail: "25, Doubs, Bourgogne-Franche-Comté",
+            ...MONTBELIARD,
+            precise: false,
+          },
+        ],
+      },
+    }),
+  )
+}
+
+/** Types in an assistant combobox (`recherche-objet`, `recherche-adresse`)
+ * and clicks the suggestion. */
+export async function chooseSuggestion(
+  context: Page | FrameLocator,
+  field: string,
+  text: string,
+  option: string,
+): Promise<void> {
+  await context.locator(`#${field}-champ`).fill(text)
+  await context
+    .locator(`#${field}-liste [role=option]`, { hasText: option })
+    .first()
+    .click()
+}
+
+export async function pinpointUuids(context: Page | FrameLocator): Promise<string[]> {
+  const pinpoints = context.locator(".qfa-pinpoint:not(.qfa-pinpoint--address)")
+  await pinpoints.first().waitFor({ state: "attached" })
+  return pinpoints.evaluateAll<string[], HTMLElement>((nodes) =>
+    nodes.map((node) => node.dataset.uuid ?? ""),
+  )
+}
+
+/** The uuids of the next `lieux.geojson` response whose URL matches. */
+export async function waitForLieux(page: Page, matches: (url: string) => boolean) {
+  const response = await page.waitForResponse(
+    (r) => r.url().includes("lieux.geojson") && matches(r.url()),
+  )
+  const { features } = (await response.json()) as {
+    features: { properties: { uuid: string } }[]
+  }
+  return features.map((feature) => feature.properties.uuid)
+}
+
+export async function dragAssistantMap(
+  page: Page,
+  dx: number,
+  dy: number,
+): Promise<void> {
+  // The map only listens to its moves once loaded.
+  await page.waitForFunction(() =>
+    (
+      document.getElementById("assistant-carte-canvas") as unknown as {
+        assistantMap?: { map: { loaded(): boolean } }
+      }
+    )?.assistantMap?.map.loaded(),
+  )
+  const box = await page.locator(".qfa-carte__canvas").boundingBox()
+  if (!box) throw new Error("The map canvas is not rendered")
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + dx, y + dy, { steps: 10 })
+  await page.mouse.up()
+}

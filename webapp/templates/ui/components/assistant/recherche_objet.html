@@ -45,6 +45,8 @@ chosen.
     {% comment %}`data-key`: the key of each suggestion in the JSON response.{% endcomment %}
     <input type="hidden" name="fiche" value="{{ fiche|default:'' }}"
            data-assistant-combobox-target="hidden" data-key="slug">
+    <input type="hidden" name="synonyme" value="{{ synonyme|default:'' }}"
+           data-assistant-combobox-target="hidden" data-key="synonyme" data-optional>
 
     {% if erreur %}
         <p class="qfa-combobox__erreur" data-assistant-combobox-target="erreur" id="{{ base_id }}-erreur">
