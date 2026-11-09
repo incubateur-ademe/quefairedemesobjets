@@ -64,9 +64,7 @@ class TestSolutionsScreen:
         default view, the field says why."""
         page = solutions(client, geste="reparer", adresse="trucmuche")
 
-        assert error_of(page, "adresse").startswith(
-            "Nous ne connaissons pas cette adresse"
-        )
+        assert error_of(page, "adresse") == "Aucun résultat pour «\xa0trucmuche\xa0»"
         assert field(page, "adresse")["aria-invalid"] == "true"
 
     def test_without_any_address_the_field_asks_for_one(self, client):

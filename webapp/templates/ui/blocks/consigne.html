@@ -14,7 +14,7 @@ cumulus, Mauvais état glycine, Bonus Réparation tilleul verveine.
       un texte n'a pas de <p>, et un texte nu passait avant le titre dans la
       carte DSFR (flexbox ordonnée, le titre est à order: 2).
       {% endcomment %}
-      <div class="fr-card__desc [&>:last-child]:qf-mb-0">{{ value.contenu }}</div>
+      <div class="fr-card__desc [&>p]:[font-size:inherit] [&>*]:qf-mb-3v [&>:last-child]:qf-mb-0">{{ value.contenu }}</div>
       {% if value.etat or value.lieu_de_depot or value.bonus_reparation %}
         <div class="fr-card__start">
           <ul class="fr-badges-group">
