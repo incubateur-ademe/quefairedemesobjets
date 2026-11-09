@@ -117,7 +117,7 @@ jobs:
     name: 🟠 Nginx gateway
     uses: ./.github/workflows/_deploy-nginx.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
+    needs: [ci_passed]
     with:
       environment: preprod
       tag_name: pr-${{ github.event.pull_request.number }}
