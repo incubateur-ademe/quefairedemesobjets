@@ -58,6 +58,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
 
 # Assistant settings
 # ------------------
@@ -77,6 +78,13 @@ ASSISTANT = {
     # URL of the preview environment used to deploy the assistant
     # during the beta program.
     "V2_BASE_URL": decouple.config("ASSISTANT_V2_BASE_URL", default="", cast=str),
+    # A page of the assistant opened outside an iframe redirects to its fiche on
+    # the site. Production only by default, so that previews stay testable.
+    "V2_STANDALONE_REDIRECT": decouple.config(
+        "ASSISTANT_V2_STANDALONE_REDIRECT",
+        default=ENVIRONMENT == "production",
+        cast=bool,
+    ),
 }
 
 # Carte settings
@@ -134,7 +142,6 @@ BYPASS_ACTEUR_READONLY_FIELDS = decouple.config(
     "BYPASS_ACTEUR_READONLY_FIELDS", default=False, cast=bool
 )
 BLOCK_ROBOTS = decouple.config("BLOCK_ROBOTS", default=False, cast=bool)
-ENVIRONMENT = decouple.config("ENVIRONMENT", default="development", cast=str)
 VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
 BASE_URL = decouple.config(
@@ -216,6 +223,7 @@ MIDDLEWARE = [
     "qfdmd.middleware.BetaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "assistant.middleware.IframeOnlyMiddleware",
 ]
 
 CACHES = {
