@@ -53,7 +53,6 @@ jobs:
     name: 🟠 Nginx gateway
     uses: ./.github/workflows/_deploy-nginx.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: preprod
       tag_name: ${{ github.sha }}
@@ -67,7 +66,15 @@ jobs:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
-    needs: [ci_webapp, ci_data_platform, ci_revue, ci_infrastructure, webapp, airflow]
+    needs:
+      [
+        ci_webapp,
+        ci_data_platform,
+        ci_revue,
+        ci_infrastructure,
+        webapp,
+        airflow,
+      ]
     permissions:
       contents: write
     runs-on: ubuntu-slim
