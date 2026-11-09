@@ -362,9 +362,34 @@
 the same parameters: the assistant is the first client of its own API. The
 map, the search fields and the lieu pages call these endpoints, so there is no
 second code path to maintain.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">webapp/opendata/api.py</span></code> router serves the open data of objets and
-déchets there, a public contract for reusers.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">webapp/opendata/api.py</span></code> router serves the open data of lieux, gestes,
+objets and déchets there, a public contract for reusers.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">NinjaAPI</span></code> instances live in <code class="docutils literal notranslate"><span class="pre">webapp/core/api.py</span></code>.</p>
+</section>
+<section id="scope-the-open-dataset">
+<h2>Scope: the open dataset<a class="headerlink" href="#scope-the-open-dataset" title="Lien vers cette rubrique">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">/lieux/{identifiant}</span></code> returns the lieux of the
+<a class="reference external" href="https://data.ademe.fr/datasets/longue-vie-aux-objets-acteurs-de-leconomie-circulaire">Acteurs de l’économie circulaire</a>
+dataset published on data.ademe.fr: active acteurs with at least one source
+under an open licence (<code class="docutils literal notranslate"><span class="pre">open_data()</span></code>, <code class="docutils literal notranslate"><span class="pre">webapp/opendata/lieux.py</span></code>). Columns
+carry the same names as the CSV, to go from one to the other without a mapping
+table.</p>
+<p>Known, accepted differences with the CSV:</p>
+<ul class="simple">
+<li><p>columns computed by data.ademe.fr after the export (<code class="docutils literal notranslate"><span class="pre">nom_region</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nom_departement</span></code>, <code class="docutils literal notranslate"><span class="pre">_siret_infos…</span></code>) are not served;</p></li>
+<li><p>neither are the per-action columns (<code class="docutils literal notranslate"><span class="pre">reparer</span></code>, <code class="docutils literal notranslate"><span class="pre">donner</span></code>…):
+<code class="docutils literal notranslate"><span class="pre">propositions_de_services</span></code> carries the same information;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">identifiants_des_contributeurs</span></code> is not served;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">paternite</span></code> is a list of objects (<code class="docutils literal notranslate"><span class="pre">code</span></code>, <code class="docutils literal notranslate"><span class="pre">nom</span></code>, <code class="docutils literal notranslate"><span class="pre">url</span></code>, <code class="docutils literal notranslate"><span class="pre">logo</span></code>) where the
+CSV joins the names with <code class="docutils literal notranslate"><span class="pre">|</span></code>; the site and ADEME come first, without a
+<code class="docutils literal notranslate"><span class="pre">code</span></code>, then the open licence sources by name:
+<code class="docutils literal notranslate"><span class="pre">[{&quot;code&quot;:</span> <span class="pre">null,</span> <span class="pre">&quot;nom&quot;:</span> <span class="pre">&quot;ADEME&quot;,</span> <span class="pre">&quot;url&quot;:</span> <span class="pre">&quot;https://www.ademe.fr&quot;,</span> <span class="pre">&quot;logo&quot;:</span> <span class="pre">null},</span> <span class="pre">…]</span></code>;</p></li>
+<li><p>acteurs working only at home (<code class="docutils literal notranslate"><span class="pre">lieu_prestation</span> <span class="pre">=</span> <span class="pre">A_DOMICILE</span></code>) are missing
+from the map’s table, hence from the API;</p></li>
+<li><p>the masking of phone numbers in the CSV (mobiles, Carteco source) is applied
+in the data-platform, not here.</p></li>
+</ul>
 </section>
 <section id="endpoints">
 <h2>Endpoints<a class="headerlink" href="#endpoints" title="Lien vers cette rubrique">¶</a></h2>
@@ -376,6 +401,12 @@ déchets there, a public contract for reusers.</p>
 </tr>
 </thead>
 <tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/lieux/{identifiant}</span></code></p></td>
+<td><p>one lieu, by its public identifier (<code class="docutils literal notranslate"><span class="pre">uuid</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/gestes</span></code></p></td>
+<td><p>the gestes: codes of the action groups, colours</p></td>
+</tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/produits</span></code></p></td>
 <td><p>objets and déchets</p></td>
 </tr>
@@ -462,6 +493,7 @@ same columns as the CSV files, which the export DAG downloads here
             <ul>
 <li><a class="reference internal" href="#">Public API v1</a><ul>
 <li><a class="reference internal" href="#principle">Principle</a></li>
+<li><a class="reference internal" href="#scope-the-open-dataset">Scope: the open dataset</a></li>
 <li><a class="reference internal" href="#endpoints">Endpoints</a></li>
 <li><a class="reference internal" href="#tests">Tests</a></li>
 </ul>
