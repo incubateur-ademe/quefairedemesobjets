@@ -38,6 +38,8 @@ export const config: PlaywrightTestConfig = {
       // tester's host distinct from the iframe's.
       ALLOWED_HOSTS: "localhost,127.0.0.1",
       ASSISTANT_V2_BETA_TESTERS_HOSTS: "127.0.0.1",
+      // The tests open the assistant's screens directly, outside any iframe.
+      ASSISTANT_V2_STANDALONE_REDIRECT: "False",
     },
     cwd: path.resolve(__dirname),
   },
