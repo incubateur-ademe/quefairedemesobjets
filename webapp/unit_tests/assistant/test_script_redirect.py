@@ -31,7 +31,7 @@ def redirect_for(path, params):
 class TestScriptRedirect:
     @pytest.fixture(autouse=True)
     def beta(self, settings):
-        settings.ASSISTANT = BETA
+        settings.ASSISTANT = {**settings.ASSISTANT, **BETA}
         settings.BASE_URL = "https://qfdmo.fr"
 
     def test_whitelisted_host_opens_assistant_v2(self, client):
@@ -45,7 +45,10 @@ class TestScriptRedirect:
         assert response.headers["Cache-Control"].startswith("max-age=0, no-cache")
 
     def test_assistant_v2_can_live_on_its_own_domain(self, client, settings):
-        settings.ASSISTANT = {**BETA, "V2_BASE_URL": "https://betatest.qfdmo.fr/"}
+        settings.ASSISTANT = {
+            **settings.ASSISTANT,
+            "V2_BASE_URL": "https://betatest.qfdmo.fr/",
+        }
         response = client.get("/", {"ref": ref("https://beta.example.fr/")})
         assert response.url.startswith("https://betatest.qfdmo.fr/assistant/?")
 

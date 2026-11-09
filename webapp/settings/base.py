@@ -77,6 +77,11 @@ ASSISTANT = {
     # URL of the preview environment used to deploy the assistant
     # during the beta program.
     "V2_BASE_URL": decouple.config("ASSISTANT_V2_BASE_URL", default="", cast=str),
+    # A page of the assistant opened outside an iframe redirects to its fiche on
+    # the site. Off in tests, or when this variable turns it off explicitly.
+    "V2_STANDALONE_REDIRECT": decouple.config(
+        "ASSISTANT_V2_STANDALONE_REDIRECT", default=True, cast=bool
+    ),
 }
 
 # Carte settings
@@ -216,6 +221,7 @@ MIDDLEWARE = [
     "qfdmd.middleware.BetaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "assistant.middleware.IframeOnlyMiddleware",
 ]
 
 CACHES = {

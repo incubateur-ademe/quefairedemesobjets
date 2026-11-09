@@ -9,3 +9,8 @@ class TestRobotsTxt:
         assert response.status_code == 200
         infotri_url = reverse("infotri:configurator")
         assert f"Disallow: {infotri_url}" in response.text
+
+    def test_assistant_is_disallowed(self, client):
+        response = client.get("/robots.txt")
+
+        assert f"Disallow: {reverse('assistant:home')}" in response.text
