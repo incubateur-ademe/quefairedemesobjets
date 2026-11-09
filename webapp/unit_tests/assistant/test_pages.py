@@ -3,6 +3,7 @@ from django.urls import reverse
 
 from assistant.urls import urlpatterns
 from unit_tests.assistant.helpers import html_of
+from unit_tests.qfdmo.acteur_factory import DisplayedActeurFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -12,7 +13,7 @@ FRAGMENT = {"Turbo-Frame": "assistant-fiche"}
 class TestRoutes:
     def test_every_screen_url_ends_with_a_slash(self):
         """One shape for the screens: Django's APPEND_SLASH then never redirects."""
-        screens = {"home", "recherche", "produit", "solutions"}
+        screens = {"home", "recherche", "produit", "solutions", "lieu"}
         for pattern in urlpatterns:
             route = str(pattern.pattern)
             if pattern.name in screens:
@@ -29,8 +30,16 @@ class TestRoutes:
 
         assert response.status_code == 200
 
-    def test_unknown_produit_returns_404(self, client):
-        response = client.get(reverse("assistant:produit", args=["inconnu"]))
+    def test_lieu_responds(self, client):
+        acteur = DisplayedActeurFactory()
+
+        response = client.get(reverse("assistant:lieu", args=[acteur.uuid]))
+
+        assert response.status_code == 200
+
+    @pytest.mark.parametrize("screen", ["produit", "lieu"])
+    def test_an_unknown_page_returns_404(self, client, screen):
+        response = client.get(reverse(f"assistant:{screen}", args=["inconnu"]))
 
         assert response.status_code == 404
 

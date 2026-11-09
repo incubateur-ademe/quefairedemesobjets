@@ -31,6 +31,7 @@ class Consigne(TypedDict, total=False):
     consigne: str
     badges: list[Badge]
     url: str
+    localise: bool
     sans_carte: bool
 
 
@@ -109,16 +110,17 @@ def consignes_for(
     base = parcours.as_params() if parcours else {}
     if produit_page is not None and getattr(produit_page, "slug", None):
         base = {**base, "fiche": produit_page.slug}
+    localise = bool(parcours and parcours.is_located)
 
     sans_carte = produit_page is not None and not _shows_map(produit_page)
 
     cms = produit_page.consignes if produit_page is not None else []
     if cms:
         groupes = _groupes_by_action(cms)
-        blocks = (_from_cms(child, groupes, base) for child in cms)
+        blocks = (_from_cms(child, groupes, base, localise) for child in cms)
     else:
         known = set(GroupeAction.objects.values_list("code", flat=True))
-        blocks = (_from_static(static, known, base) for static in BLOCKS)
+        blocks = (_from_static(static, known, base, localise) for static in BLOCKS)
     return [{**block, "sans_carte": sans_carte} for block in blocks if block]
 
 
@@ -131,7 +133,7 @@ def _solutions_url(gestes, base) -> str:
     return f"{reverse('assistant:solutions')}?{params}"
 
 
-def _from_static(block, known, base) -> Consigne | None:
+def _from_static(block, known, base, localise) -> Consigne | None:
     gestes = [code for code in block["gestes"] if code in known]
     if not gestes:
         return None
@@ -147,10 +149,11 @@ def _from_static(block, known, base) -> Consigne | None:
         "consigne": block["consigne"],
         "badges": badges,
         "url": _solutions_url(gestes, base),
+        "localise": localise,
     }
 
 
-def _from_cms(child, groupes, base) -> Consigne | None:
+def _from_cms(child, groupes, base, localise) -> Consigne | None:
     """A consigne of the grid, in the shape of the static blocks: its Action
     codes become GroupeAction codes, once each, in the order of the actions."""
     value = child.value
@@ -179,6 +182,7 @@ def _from_cms(child, groupes, base) -> Consigne | None:
         "consigne": _consigne_html(value["contenu"].source, base),
         "badges": badges,
         "url": _solutions_url(gestes, base),
+        "localise": localise,
     }
 
 
