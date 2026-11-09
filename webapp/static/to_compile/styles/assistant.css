@@ -95,22 +95,6 @@ body {
   height: 450px;
 }
 
-.qfa-carte[data-geste="reparer"] {
-  --qfa-geste-color: var(--qfa-geste-reparation);
-}
-.qfa-carte[data-geste="donner_echanger_rapporter"] {
-  --qfa-geste-color: var(--qfa-geste-don);
-}
-.qfa-carte[data-geste="vendre_acheter"] {
-  --qfa-geste-color: var(--qfa-geste-vente);
-}
-.qfa-carte[data-geste="emprunter_preter_louer"] {
-  --qfa-geste-color: var(--qfa-geste-loc);
-}
-.qfa-carte[data-geste="trier"] {
-  --qfa-geste-color: var(--qfa-geste-tri);
-}
-
 .qfa-carte__canvas {
   flex: 1 1 auto;
   min-height: 0;
@@ -173,6 +157,22 @@ body {
   cursor: pointer;
   background: none;
   color: var(--qfa-pinpoint-color);
+}
+
+.qfa-pinpoint[data-geste="reparer"] {
+  --qfa-pinpoint-color: var(--qfa-geste-reparation);
+}
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"] {
+  --qfa-pinpoint-color: var(--qfa-geste-don);
+}
+.qfa-pinpoint[data-geste="vendre_acheter"] {
+  --qfa-pinpoint-color: var(--qfa-geste-vente);
+}
+.qfa-pinpoint[data-geste="emprunter_preter_louer"] {
+  --qfa-pinpoint-color: var(--qfa-geste-loc);
+}
+.qfa-pinpoint[data-geste="trier"] {
+  --qfa-pinpoint-color: var(--qfa-geste-tri);
 }
 
 /* Three layers: a white body, a ring in the geste colour, the geste icon. The tip, not the centre, points at the place. SVGs are used as masks so the colour comes from `--qfa-pinpoint-color`. */

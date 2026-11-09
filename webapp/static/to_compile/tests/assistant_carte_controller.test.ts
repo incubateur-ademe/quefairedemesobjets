@@ -50,17 +50,24 @@ async function mountWith(
   return canvas
 }
 
-function fakeMarker() {
+function fakeMarker(options?: { element?: HTMLElement }) {
   const marker = {
     remove: jest.fn(),
-    getElement: () => document.createElement("a"),
+    getElement: () => options?.element ?? document.createElement("a"),
     setLngLat: () => marker,
     addTo: () => marker,
   }
   return marker
 }
 
-const PLACE = { uuid: "a", nom: "A", longitude: 2.35, latitude: 48.85, bonus: false }
+const PLACE = {
+  uuid: "a",
+  nom: "A",
+  longitude: 2.35,
+  latitude: 48.85,
+  bonus: false,
+  geste: "reparer",
+}
 
 function persisted(map = fakeMap(), { withPlace = true } = {}) {
   const marker = fakeMarker()
@@ -142,6 +149,29 @@ describe("assistant map persisted across screens", () => {
 
     expect(state.marker.remove).not.toHaveBeenCalled()
     expect(state.markers.has("a")).toBe(true)
+  })
+
+  it("draws each pin with the geste its place offers", async () => {
+    respond({
+      ok: true,
+      features: [
+        {
+          geometry: { coordinates: [2.35, 48.85] },
+          properties: {
+            uuid: "b",
+            nom: "Dépôt-vente",
+            bonus: false,
+            geste: "vendre_acheter",
+          },
+        },
+      ],
+    })
+    const state = persisted(fakeMap(), { withPlace: false })
+
+    await mountWith(state, { geste: "donner_echanger_rapporter,vendre_acheter" })
+    await settle()
+
+    expect(state.Marker.mock.calls[0][0]?.element?.dataset.geste).toBe("vendre_acheter")
   })
 
   it.each([

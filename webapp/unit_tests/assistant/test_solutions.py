@@ -217,8 +217,3 @@ class TestSolutionsScreen:
         assert carte(page).select_one(
             "#assistant-carte-canvas.qfa-carte__canvas[data-turbo-permanent]"
         )
-
-    def test_the_map_carries_the_first_geste_for_its_colour(self, client):
-        page = solutions(client, geste=["reparer", "trier"])
-
-        assert carte(page)["data-geste"] == "reparer"

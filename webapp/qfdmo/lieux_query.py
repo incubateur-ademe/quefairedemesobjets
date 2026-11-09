@@ -2,6 +2,7 @@
 
 import json
 import math
+from functools import cached_property
 
 from django.http import Http404
 from ninja import Field, Schema
@@ -92,10 +93,15 @@ class LieuxQuery(Schema):
             raise ValueError("bbox or longitude/latitude required")
         return self
 
+    @cached_property
+    def sous_categorie_ids(self) -> list[int]:
+        return sous_categorie_ids_for(self.fiche) if self.fiche else []
+
     def queryset(self):
         """The places, through the same manager as every screen."""
-        ids = sous_categorie_ids_for(self.fiche) if self.fiche else []
-        acteurs = DisplayedActeur.objects.all().proposing(self.geste, ids)
+        acteurs = DisplayedActeur.objects.all().proposing(
+            self.geste, self.sous_categorie_ids
+        )
         if self.bbox is not None:
             return acteurs.within(self.bbox)
         return acteurs.nearest_to(self.longitude, self.latitude)

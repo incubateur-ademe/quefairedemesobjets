@@ -1,14 +1,13 @@
 import type { Place } from "./visible_places"
 
 export type PinpointColors = {
-  geste: string
   bonus: string
   address: string
 }
 
 /**
- * DOM element of a pinpoint, in the colour of the geste chosen; the Bonus
- * Réparation colour overrides it on the "réparer" map only.
+ * DOM element of a pinpoint, in the colour of its geste (CSS, from
+ * `data-geste`); the Bonus Réparation colour overrides it on réparer pins.
  */
 export function pinpointElement(
   place: Place,
@@ -26,11 +25,10 @@ export function pinpointElement(
   element.dataset.geste = geste
   element.setAttribute("aria-label", place.nom)
   const hasBonus = place.bonus && geste === "reparer"
-  element.style.setProperty(
-    "--qfa-pinpoint-color",
-    hasBonus ? colors.bonus : colors.geste,
-  )
-  if (hasBonus) element.dataset.bonus = "true"
+  if (hasBonus) {
+    element.dataset.bonus = "true"
+    element.style.setProperty("--qfa-pinpoint-color", colors.bonus)
+  }
 
   const icon = document.createElement("span")
   icon.className = "qfa-pinpoint__icon"

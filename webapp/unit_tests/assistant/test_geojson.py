@@ -110,6 +110,51 @@ class TestReponse:
 
         assert len(lieux) == 2
 
+    def test_a_single_geste_is_the_geste_of_every_place(self, client, reparer):
+        place_offering(reparer)
+
+        assert features(client, geste="reparer")[0]["properties"]["geste"] == "reparer"
+
+    def test_draws_a_place_with_the_geste_it_offers(self, client):
+        """On « donner ou revendre », a place that only sells is a vendre pin."""
+        place_offering(action_of("vendre_acheter", "revendre"))
+
+        lieux = features(client, geste=["donner_echanger_rapporter", "vendre_acheter"])
+
+        assert lieux[0]["properties"]["geste"] == "vendre_acheter"
+
+    def test_a_place_offering_both_gestes_takes_the_first_in_display_order(
+        self, client
+    ):
+        acteur = place_offering(action_of("vendre_acheter", "revendre", order=4))
+        DisplayedPropositionServiceFactory(
+            acteur=acteur,
+            action=action_of("donner_echanger_rapporter", "donner", order=2),
+        )
+
+        lieux = features(client, geste=["vendre_acheter", "donner_echanger_rapporter"])
+
+        assert lieux[0]["properties"]["geste"] == "donner_echanger_rapporter"
+
+    def test_the_geste_is_the_one_offered_for_the_object_of_the_fiche(self, client):
+        """Giving bikes away does not make a phone reseller a donner pin."""
+        telephone, velo = SousCategorieObjetFactory(), SousCategorieObjetFactory()
+        acteur = place_offering(
+            action_of("donner_echanger_rapporter", "donner"), sous_categories=[velo]
+        )
+        revente = DisplayedPropositionServiceFactory(
+            acteur=acteur, action=action_of("vendre_acheter", "revendre")
+        )
+        revente.sous_categories.add(telephone)
+
+        lieux = features(
+            client,
+            geste=["donner_echanger_rapporter", "vendre_acheter"],
+            fiche=fiche_for([telephone]).slug,
+        )
+
+        assert lieux[0]["properties"]["geste"] == "vendre_acheter"
+
     def test_ignores_places_offering_another_geste(self, client, reparer):
         place_offering(action_of("trier"))
 
@@ -129,7 +174,7 @@ class TestReponse:
 
         lieux = features(client, geste="reparer")
 
-        assert set(lieux[0]["properties"]) == {"uuid", "nom", "bonus"}
+        assert set(lieux[0]["properties"]) == {"uuid", "nom", "bonus", "geste"}
 
     def test_excludes_digital_acteurs(self, client, reparer):
         place_offering(reparer, acteur_type=ActeurTypeFactory(code=DIGITAL_ACTEUR_CODE))
@@ -180,3 +225,11 @@ class TestRequetes:
 
         with django_assert_num_queries(1):
             get_lieux(client, geste="reparer")
+
+    def test_finds_the_geste_of_each_place_in_the_same_query(
+        self, client, django_assert_num_queries
+    ):
+        place_offering(action_of("vendre_acheter", "revendre"))
+
+        with django_assert_num_queries(1):
+            get_lieux(client, geste=["donner_echanger_rapporter", "vendre_acheter"])

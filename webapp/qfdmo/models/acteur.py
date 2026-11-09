@@ -32,6 +32,7 @@ from django.db.models import (
     Min,
     OuterRef,
     Q,
+    Subquery,
     Value,
     When,
 )
@@ -341,6 +342,18 @@ def acteur_ids_offering(groupe_action_codes, sous_categorie_ids) -> list[str] | 
     return ids
 
 
+def _offers(groupe_action_codes, sous_categorie_ids):
+    """Propositions of the outer acteur for one of these gestes, for the objet
+    when given: the geste and the objet on the same proposition."""
+    propositions = DisplayedPropositionService.objects.filter(
+        acteur=OuterRef("pk"),
+        action__groupe_action__code__in=groupe_action_codes,
+    )
+    if sous_categorie_ids:
+        propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
+    return propositions
+
+
 class DisplayedActeurQuerySet(models.QuerySet):
     def with_reparer(self):
         proposition_service_reparer = DisplayedPropositionService.objects.filter(
@@ -353,6 +366,23 @@ class DisplayedActeurQuerySet(models.QuerySet):
             displayedacteur=OuterRef("pk"), bonus=True
         )
         return self.annotate(bonus=Exists(bonus_label_qualite))
+
+    def with_geste(self, groupe_action_codes, sous_categorie_ids=None):
+        """`geste`: the first of these gestes, in display order, the acteur
+        offers, for the objet when given, matched as in `proposing`.
+
+        A correlated subquery in the same query, which Postgres evaluates for the
+        rows kept by the LIMIT only; none for a single geste, which every acteur
+        `proposing` it offers.
+        """
+        if len(groupe_action_codes) == 1:
+            return self.annotate(geste=Value(groupe_action_codes[0]))
+        first_offered = (
+            _offers(groupe_action_codes, sous_categorie_ids)
+            .order_by("action__groupe_action__order")
+            .values("action__groupe_action__code")[:1]
+        )
+        return self.annotate(geste=Subquery(first_offered))
 
     def with_displayable_labels(self):
         """
@@ -452,13 +482,7 @@ class DisplayedActeurQuerySet(models.QuerySet):
             if ids is not None:
                 return self.filter(identifiant_unique__in=ids)
 
-        propositions = DisplayedPropositionService.objects.filter(
-            acteur=OuterRef("pk"),
-            action__groupe_action__code__in=codes,
-        )
-        if sous_categorie_ids:
-            propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
-        return self.filter(Exists(propositions))
+        return self.filter(Exists(_offers(codes, sous_categorie_ids)))
 
     def nearest_to(self, longitude, latitude):
         """Physical acteurs sorted from nearest to farthest.
@@ -1646,6 +1670,7 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
                 "uuid": self.uuid,
                 "nom": self.nom_commercial or self.nom,
                 "bonus": getattr(self, "bonus", False),
+                "geste": getattr(self, "geste", None),
             },
         }
 
