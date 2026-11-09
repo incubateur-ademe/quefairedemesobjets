@@ -1510,6 +1510,20 @@ class TestsPreview(LookbookPreview):
             },
         )
 
+    def t_21_assistant_sticky_header(self, **kwargs):
+        """The host's header hides when the page scrolls down and comes back,
+        fixed, when it scrolls up: each new screen of the assistant must land
+        just below it"""
+        host = urlparse(base_url).hostname
+        return render_to_string(
+            "ui/tests/t_21_assistant_sticky_header.html",
+            {
+                "base_url": base_url,
+                "host": host,
+                "host_is_beta": host in settings.ASSISTANT["V2_HOSTS"],
+            },
+        )
+
 
 def geste_choices():
     """Read at each form instantiation, not at import: the table is empty

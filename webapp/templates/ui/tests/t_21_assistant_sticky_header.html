@@ -1,0 +1,86 @@
+{% load dsfr_tags %}
+{% comment %}
+Behaves like the header of paris-saclay.com: in the flow at first; once scrolled
+past, fixed and hidden above the viewport; back in view, in 200 ms, while the
+page scrolls up.
+{% endcomment %}
+<style>
+  .t21-entete-place {
+    height: 84px;
+  }
+
+  .t21-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 84px;
+    padding: 0 2rem;
+    background: #fff;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
+    z-index: 1000;
+  }
+
+  .t21-entete.is-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(-115%);
+    transition: transform 200ms ease;
+  }
+
+  .t21-entete.is-fixed.is-visible {
+    transform: translateY(0);
+  }
+
+  .t21-pied {
+    min-height: 150vh;
+    padding: 2rem;
+    background: #f6f6f6;
+  }
+</style>
+
+<div class="t21-entete-place">
+  <header class="t21-entete">
+    <strong>Lorem ipsum</strong>
+    <nav aria-label="Menu du site hôte fictif">Lorem · Ipsum · Dolor · Sit amet</nav>
+  </header>
+</div>
+
+<div class="fr-container fr-py-4w">
+  {% dsfr_callout title="En-tête fixe du site hôte" text="L'en-tête se comporte comme celui de paris-saclay.com : caché quand la page descend, il réapparaît, fixé en haut, quand elle remonte." icon_class="fr-icon-flask-line" %}
+
+  {% include "ui/tests/_assistant_v2_host.html" %}
+
+  <p class="fr-mb-3w" data-testid="attendu">
+    Attendu : faire défiler la page jusqu'au bas de l'assistant, puis changer d'écran (choisir un objet, un geste).
+    La page remonte et le haut de l'iframe s'arrête 16 px sous l'en-tête, qui réapparaît pendant la remontée.
+    L'en-tête ne recouvre jamais le haut de l'iframe.
+  </p>
+
+  <h1>{% lorem 4 w %}</h1>
+  {% lorem 3 p %}
+
+  <script src="{{ base_url }}/iframe.js"></script>
+</div>
+
+<div class="t21-pied">{% lorem 2 p %}</div>
+
+<script>
+  (() => {
+    const entete = document.querySelector(".t21-entete")
+    const place = entete.parentElement
+    let lastY = window.scrollY
+    addEventListener(
+      "scroll",
+      () => {
+        const y = window.scrollY
+        const scrolledPast = y > place.offsetTop + place.offsetHeight
+        entete.classList.toggle("is-fixed", scrolledPast)
+        entete.classList.toggle("is-visible", scrolledPast && y < lastY)
+        lastY = y
+      },
+      { passive: true },
+    )
+  })()
+</script>
