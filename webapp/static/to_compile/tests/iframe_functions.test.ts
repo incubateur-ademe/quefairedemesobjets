@@ -1,5 +1,34 @@
 import { generateBackLink } from "../embed/helpers"
-import { getIframeAttributesAndExtra } from "../js/iframe_functions"
+import {
+  buildAndInsertIframeFrom,
+  getIframeAttributesAndExtra,
+} from "../js/iframe_functions"
+
+describe("buildAndInsertIframeFrom", () => {
+  const { fetch, IntersectionObserver } = global
+
+  afterEach(() => {
+    Object.assign(global, { fetch, IntersectionObserver })
+    document.body.innerHTML = ""
+  })
+
+  it("starts iframe-resizer without waiting for the backlink", () => {
+    // The backlink request is still pending when the iframe may finish loading.
+    global.fetch = jest.fn(() => new Promise<Response>(() => {}))
+    global.IntersectionObserver = jest.fn(() => ({
+      observe: jest.fn(),
+      disconnect: jest.fn(),
+    })) as unknown as typeof IntersectionObserver
+    const script = document.createElement("script")
+    document.body.append(script)
+
+    void buildAndInsertIframeFrom({}, {}, script, "assistant", {
+      useIframeResizer: true,
+    })
+
+    expect(document.querySelector("iframe")?.onload).toEqual(expect.any(Function))
+  })
+})
 
 describe("generateBackLink", () => {
   let iframeMock: HTMLIFrameElement

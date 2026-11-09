@@ -300,13 +300,13 @@ export async function buildAndInsertIframeFrom(
   )
   observer.observe(iframe)
 
-  // Generate and insert backlink
-  await generateBackLink(iframe, backlinkKey, baseUrl)
-
-  // Initialize iframe-resizer if requested
+  // Before the backlink request: iframe-resizer starts on the iframe's load
+  // event, which may fire while the request is pending.
   if (options?.useIframeResizer) {
     initializeIframeResizer(iframe, options.resizerOptions)
   }
+
+  await generateBackLink(iframe, backlinkKey, baseUrl)
 }
 
 /**
