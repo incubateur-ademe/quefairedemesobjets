@@ -40,6 +40,7 @@ export default class extends Controller<HTMLElement> {
     lieuUrl: String,
     workerUrl: String,
     styleUrl: String,
+    glyphs: Object,
     longitude: Number,
     latitude: Number,
     preciseAddress: Boolean,
@@ -56,6 +57,7 @@ export default class extends Controller<HTMLElement> {
   declare lieuUrlValue: string
   declare workerUrlValue: string
   declare styleUrlValue: string
+  declare glyphsValue: Record<string, string>
   declare longitudeValue: number
   declare latitudeValue: number
   declare preciseAddressValue: boolean
@@ -112,9 +114,16 @@ export default class extends Controller<HTMLElement> {
     // stays grey (`maplibre-worker.ts`).
     setWorkerUrl(this.workerUrlValue)
 
+    // Read now: the map outlives this controller.
+    const glyphs = this.glyphsValue
     const map = new MapLibre({
       container: canvas,
       style: this.styleUrlValue,
+      // Keyed by `{fontstack}/{range}.pbf`, the end of a glyphs URL.
+      transformRequest: (url) => {
+        const glyph = glyphs[decodeURIComponent(url).split("/").slice(-2).join("/")]
+        return glyph ? { url: glyph } : undefined
+      },
       center: [this.longitudeValue, this.latitudeValue],
       zoom: INITIAL_ZOOM,
       attributionControl: { compact: true },
