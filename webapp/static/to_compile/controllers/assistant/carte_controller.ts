@@ -30,6 +30,8 @@ const FIT_PADDING = { top: 64, bottom: 32, left: 32, right: 32 }
 /** Matches the fade of `.qfa-pinpoint--leaving` in the stylesheet. */
 const LEAVE_MS = 200
 const CANVAS_WAIT_MS = 2000
+/** The style's tiles, gzipped by our nginx under `/tuiles/plan-ign/`. */
+const IGN_TILES = "https://data.geopf.fr/tms/1.0.0/PLAN.IGN/"
 
 export default class extends Controller<HTMLElement> {
   static targets = ["message", "messageText"]
@@ -119,8 +121,13 @@ export default class extends Controller<HTMLElement> {
     const map = new MapLibre({
       container: canvas,
       style: this.styleUrlValue,
-      // Keyed by `{fontstack}/{range}.pbf`, the end of a glyphs URL.
       transformRequest: (url) => {
+        if (url.startsWith(IGN_TILES)) {
+          return {
+            url: `${location.origin}/tuiles/plan-ign/${url.slice(IGN_TILES.length)}`,
+          }
+        }
+        // Keyed by `{fontstack}/{range}.pbf`, the end of a glyphs URL.
         const glyph = glyphs[decodeURIComponent(url).split("/").slice(-2).join("/")]
         return glyph ? { url: glyph } : undefined
       },

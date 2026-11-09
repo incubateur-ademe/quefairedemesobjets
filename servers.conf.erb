@@ -119,6 +119,7 @@ server {
     resolver_timeout 5s;
     set $posthog_api_host eu.i.posthog.com;
     set $posthog_assets_host eu-assets.i.posthog.com;
+    set $ign_host data.geopf.fr;
     # proxy_pass with a variable passes its URI verbatim, so each location
     # strips the /ph prefix with a rewrite instead of in proxy_pass.
     # proxy_ssl_verify_depth: nginx defaults to 1, too short for Let's Encrypt YE2,
@@ -169,6 +170,23 @@ server {
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 3;
         proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+    }
+
+    # IGN vector tiles of the assistant map: data.geopf.fr serves them
+    # uncompressed (up to 350 KB at zoom 13), gzip halves them.
+    location /tuiles/plan-ign/ {
+        rewrite ^/tuiles/plan-ign(/.*)$ /tms/1.0.0/PLAN.IGN$1 break;
+        proxy_pass https://$ign_host;
+        proxy_set_header Host $ign_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
+        proxy_hide_header Set-Cookie;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $ign_host;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        gzip_types application/x-protobuf;
     }
 
     location /admin {
