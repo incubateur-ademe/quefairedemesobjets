@@ -399,9 +399,16 @@ its stack with its <code class="docutils literal notranslate"><span class="pre">
 <h2>Map<a class="headerlink" href="#map" title="Lien vers cette rubrique">¶</a></h2>
 <p>We use <code class="docutils literal notranslate"><span class="pre">Maplibre</span></code> js technologie with <code class="docutils literal notranslate"><span class="pre">Carte</span> <span class="pre">Facile</span></code> vectorial layers in application and OpenStreetMap layers for the backoffice</p>
 <p>The assistant V2 does not import <code class="docutils literal notranslate"><span class="pre">carte-facile</span></code>: its desaturated style is a
-static copy, <code class="docutils literal notranslate"><span class="pre">static/to_collect/assistant/carte-style.json</span></code> (the package would
-pull its own copy of maplibre-gl). To refresh it after a <code class="docutils literal notranslate"><span class="pre">carte-facile</span></code>
-upgrade, copy the package’s desaturated style JSON over that file.</p>
+static copy, <code class="docutils literal notranslate"><span class="pre">static/to_collect/assistant/carte-style.json</span></code>. The package is a
+single module bundling its four styles and its controls (80 KB gzipped); the
+copy weighs 10 KB. To refresh it after a <code class="docutils literal notranslate"><span class="pre">carte-facile</span></code> upgrade, copy the
+package’s desaturated style JSON over that file.</p>
+<p>The Latin glyph ranges of the style’s fonts are static files too
+(<code class="docutils literal notranslate"><span class="pre">static/to_collect/assistant/glyphs/</span></code>): their server answers without
+<code class="docutils literal notranslate"><span class="pre">Cache-Control</span></code>, so every map load asked for them again. A font added to the
+style needs its ranges there, and in the <code class="docutils literal notranslate"><span class="pre">glyphs</span></code> value of
+<code class="docutils literal notranslate"><span class="pre">ui/components/assistant/carte.html</span></code>; until then it comes from the style’s
+<code class="docutils literal notranslate"><span class="pre">glyphs</span></code> server.</p>
 <section id="assistant-combobox">
 <h3>Assistant combobox<a class="headerlink" href="#assistant-combobox" title="Lien vers cette rubrique">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">assistant-combobox</span></code> copies each chosen suggestion into the hidden fields by

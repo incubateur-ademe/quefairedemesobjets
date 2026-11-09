@@ -42,9 +42,17 @@ Make sure the server response contains a `<turbo-frame>` with the same `id` so T
 We use `Maplibre` js technologie with `Carte Facile` vectorial layers in application and OpenStreetMap layers for the backoffice
 
 The assistant V2 does not import `carte-facile`: its desaturated style is a
-static copy, `static/to_collect/assistant/carte-style.json` (the package would
-pull its own copy of maplibre-gl). To refresh it after a `carte-facile`
-upgrade, copy the package's desaturated style JSON over that file.
+static copy, `static/to_collect/assistant/carte-style.json`. The package is a
+single module bundling its four styles and its controls (80 KB gzipped); the
+copy weighs 10 KB. To refresh it after a `carte-facile` upgrade, copy the
+package's desaturated style JSON over that file.
+
+The Latin glyph ranges of the style's fonts are static files too
+(`static/to_collect/assistant/glyphs/`): their server answers without
+`Cache-Control`, so every map load asked for them again. A font added to the
+style needs its ranges there, and in the `glyphs` value of
+`ui/components/assistant/carte.html`; until then it comes from the style's
+`glyphs` server.
 
 ### Assistant combobox
 
