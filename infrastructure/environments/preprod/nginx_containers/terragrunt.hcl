@@ -38,7 +38,7 @@ include {
 }
 
 inputs = {
-  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:pr-3446"
+  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:<TAG>"
   nginx_cpu_limit      = 500
   nginx_memory_limit   = 512
   nginx_min_scale      = 1
