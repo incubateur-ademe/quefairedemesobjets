@@ -1,11 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { InteractionType as PosthogUIInteractionType } from "../../js/types"
 import posthog, { PostHogConfig } from "posthog-js"
-import {
-  URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
-  clearSearchTermCookie,
-  setSearchTermCookie,
-} from "../../js/helpers"
+import { clearSearchTermCookie, setSearchTermCookie } from "../../js/helpers"
 import { initSentry } from "../../js/sentry"
 
 const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
@@ -207,9 +203,8 @@ export default class extends Controller<HTMLElement> {
     }
 
     const url = new URL(window.location.href)
-    this.personProperties.iframeFromScript = url.searchParams.has(
-      URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE,
-    )
+    // Every embed script adds `ref`; a bare <iframe> has none.
+    this.personProperties.iframeFromScript = url.searchParams.has("ref")
   }
 
   #areWeInAnIframe(): boolean {

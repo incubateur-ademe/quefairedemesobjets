@@ -1,7 +1,6 @@
 import iframeResize from "@iframe-resizer/parent"
 import { BacklinkKey, generateBackLink } from "../embed/helpers"
 import { scrollIframeIntoView } from "./iframe_scroll"
-import { URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE } from "./helpers"
 import { getBaseUrlFromEnv } from "./url_utils"
 
 // Constants
@@ -13,11 +12,14 @@ const IFRAME_ID = "lvao_iframe"
 // disambiguate per-iframe via the `data-title` attribute on the script tag.
 const IFRAME_TITLE_CARTE_FORMULAIRE =
   "Carte des solutions - Que Faire de mes Objets et Déchets"
+const IFRAME_TITLE_ASSISTANT = "L'assistant au tri, à la réparation et au réemploi"
 const IFRAME_TITLES: Record<string, string> = {
   carte: IFRAME_TITLE_CARTE_FORMULAIRE,
   formulaire: IFRAME_TITLE_CARTE_FORMULAIRE,
   infotri: "Info-tri",
-  assistant: "L'assistant au tri, à la réparation et au réemploi",
+  assistant: IFRAME_TITLE_ASSISTANT,
+  // The route the assistant script opens.
+  dechet: IFRAME_TITLE_ASSISTANT,
 }
 const IFRAME_TITLE_FALLBACK = IFRAME_TITLE_CARTE_FORMULAIRE
 
@@ -42,7 +44,6 @@ interface IframeSetupOptions {
   maxWidth?: string
   height?: string
   useAutoHeight?: boolean
-  addScriptModeParam?: boolean
   iframeId?: string
 }
 
@@ -148,11 +149,6 @@ function processDatasetAttributes(
   const urlParams = new URLSearchParams()
   const iframeExtraAttributes: Record<string, string> = {}
 
-  // Add standard query parameters based on options
-  if (options.addScriptModeParam) {
-    urlParams.set(URL_PARAM_NAME_FOR_IFRAME_SCRIPT_MODE, "1")
-  }
-
   // Capture the full referrer URL and pass it as a URL parameter (base64 encoded)
   // This allows the analytics controller to track the parent page URL including query params
   const fullReferrer = captureFullReferrer()
@@ -177,7 +173,8 @@ function processDatasetAttributes(
       // Route extensions (slug or objet)
       case SPECIAL_ATTRIBUTES.slug:
       case SPECIAL_ATTRIBUTES.objet:
-        route += `/${value}`
+        // With its slash, the URL matches the route: no redirect to add it.
+        route += `/${value}/`
         break
 
       // Dimension overrides
