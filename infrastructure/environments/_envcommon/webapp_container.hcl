@@ -54,7 +54,7 @@ inputs = {
   # X-Forwarded-Host of their choice. Domains declared in env.hcl. The probes
   # go through HealthzMiddleware, whatever the host.
   ALLOWED_HOSTS = join(",", concat(
-    [local.env.webapp_base_domain],
+    [local.env.webapp_base_domain, local.env.webapp_gateway_domain],
     local.env.webapp_alias_domains,
     [".functions.fnc.fr-par.scw.cloud"],
   ))
