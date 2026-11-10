@@ -34,7 +34,8 @@ render local PORT=80 NGINX_DISABLE_CACHE=0 \
   BASE_DOMAIN=quefairedemesdechets.ademe.local \
   UPSTREAM_HOST=host.docker.internal:8000 \
   SSL_CERT_PATH=/etc/nginx/ssl/cert.pem SSL_CERT_KEY_PATH=/etc/nginx/ssl/key.pem
-# webapp/Dockerfile, stage 2
+# All hosts allowed, as the preview gateway will need (the webapp image
+# rendered it this way until it dropped nginx)
 render preview NGINX_ALLOW_ALL_HOSTS=1 NGINX_DISABLE_CACHE=0 PORT=8000 \
   ENVIRONMENT=preview UPSTREAM_HOST=127.0.0.1:8001 BASE_DOMAIN=
 # Defined but empty must behave as absent: compared with scalingo-production
