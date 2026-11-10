@@ -84,6 +84,12 @@ inputs = {
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
   AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
 
+  # No nginx in front of a preview until its gateway: noindex by meta tag
+  # instead of X-Robots-Tag.
+  extra_environment_variables = {
+    BLOCK_ROBOTS = "true"
+  }
+
   worker_enabled = false
   # Persistent connections would add up across previews on the shared
   # preprod instance.

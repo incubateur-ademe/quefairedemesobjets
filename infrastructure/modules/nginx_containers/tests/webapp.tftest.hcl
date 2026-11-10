@@ -47,10 +47,6 @@ run "without_webapp_the_gateway_serves_only_the_routes" {
     error_message = "No key sent without a webapp"
   }
   assert {
-    condition     = output.serves_webapp == false
-    error_message = "serves_webapp without a webapp"
-  }
-  assert {
     condition     = length([for k in keys(scaleway_container.nginx.environment_variables) : k if startswith(k, "WEBAPP_")]) == 0
     error_message = "No WEBAPP_* variable without a webapp"
   }
@@ -73,10 +69,6 @@ run "the_webapp_variables_reach_the_container" {
       && scaleway_container.nginx.environment_variables["ROUTE_AIRFLOW_HOST"] == "airflow.preprod.example.fr"
     )
     error_message = "WEBAPP_* and ROUTE_* variables"
-  }
-  assert {
-    condition     = output.serves_webapp == true
-    error_message = "serves_webapp with a webapp"
   }
   assert {
     condition     = keys(scaleway_container_domain.webapp) == ["webapp.preprod.example.fr"]

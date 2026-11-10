@@ -16,11 +16,6 @@ output "hostnames" {
   )
 }
 
-output "serves_webapp" {
-  description = "Whether the gateway serves the webapp: a webapp deploy only redeploys it, to empty its cache, when it does"
-  value       = var.webapp != null
-}
-
 output "public_endpoints" {
   description = "URL publiques routées par le gateway"
   value = {

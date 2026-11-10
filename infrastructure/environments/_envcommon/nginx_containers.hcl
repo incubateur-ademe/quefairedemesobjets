@@ -4,8 +4,7 @@ locals {
   env              = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   metabase_enabled = local.env.locals.metabase_enabled
   webapp_enabled   = local.env.locals.webapp_enabled
-  # Under the existing wildcard CNAME, until the DNS switch.
-  webapp_domain = "webapp.${local.env.locals.domain}"
+  webapp_domain    = local.env.locals.webapp_gateway_domain
 }
 
 terraform {

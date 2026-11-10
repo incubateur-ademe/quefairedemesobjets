@@ -17,9 +17,11 @@ locals {
   webapp_environment = "staging"
 
   # Host names of the webapp, the only ones Django accepts (ALLOWED_HOSTS).
-  # base: canonical domain (BASE_URL). aliases: other domains still pointing
-  # at the webapp.
-  webapp_base_domain = "quefairedemesdechets.incubateur.ademe.dev"
+  # base: canonical domain (BASE_URL). gateway: served by the gateway until
+  # the DNS switch, under the existing wildcard CNAME. aliases: other domains
+  # still pointing at the webapp.
+  webapp_base_domain    = "quefairedemesdechets.incubateur.ademe.dev"
+  webapp_gateway_domain = "webapp.${local.domain}"
   webapp_alias_domains = [
     "lvao.incubateur.ademe.dev",
     "quefairedemesobjets.incubateur.ademe.dev",
