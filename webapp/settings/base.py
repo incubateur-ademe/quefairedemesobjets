@@ -55,6 +55,7 @@ import sentry_sdk
 from import_export.formats.base_formats import CSV, XLS, XLSX
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.scrubber import DEFAULT_DENYLIST, EventScrubber
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -529,6 +530,11 @@ sentry_sdk.init(
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
     send_default_pii=False,
+    # The Scaleway gateway authenticates to the private container with this
+    # header, which the default denylist misses (HTTP_ form: WSGI environ).
+    event_scrubber=EventScrubber(
+        denylist=[*DEFAULT_DENYLIST, "x-auth-token", "http_x_auth_token"]
+    ),
     # trace only 1% of requests to get performance statistics
     traces_sample_rate=0.01,
     # By default the SDK will try to use the SENTRY_RELEASE
