@@ -24,6 +24,16 @@ variable "registry_image" {
   }
 }
 
+variable "privacy" {
+  description = "public until the gateway holds the IAM key that calls a private container (X-Auth-Token). Apply the gateway with the key first."
+  type        = string
+  default     = "public"
+  validation {
+    condition     = contains(["public", "private"], var.privacy)
+    error_message = "privacy must be public or private."
+  }
+}
+
 variable "extra_tags" {
   description = "Tags additionnels (ex: preview, preview-pr-123)"
   type        = list(string)

@@ -30,6 +30,7 @@ variables {
     environment  = "staging"
     server_names = ["webapp.preprod.example.fr", "alias.preprod.example.fr"]
     domains      = ["webapp.preprod.example.fr"]
+    privacy      = "public"
   }
 }
 
@@ -145,6 +146,7 @@ run "a_base_domain_outside_server_names_fails_the_plan" {
       environment  = "staging"
       server_names = ["alias.preprod.example.fr"]
       domains      = []
+      privacy      = "public"
     }
   }
 
@@ -162,6 +164,7 @@ run "a_release_without_tag_fails_the_plan" {
       environment  = "staging"
       server_names = ["webapp.preprod.example.fr"]
       domains      = ["webapp.preprod.example.fr"]
+      privacy      = "public"
     }
   }
 
@@ -179,6 +182,7 @@ run "a_webapp_domain_already_routed_fails_the_plan" {
       environment  = "staging"
       server_names = ["webapp.preprod.example.fr", "airflow.preprod.example.fr"]
       domains      = ["webapp.preprod.example.fr", "airflow.preprod.example.fr"]
+      privacy      = "public"
     }
   }
 
@@ -196,6 +200,7 @@ run "an_http_upstream_fails_the_plan" {
       environment  = "staging"
       server_names = ["webapp.preprod.example.fr"]
       domains      = ["webapp.preprod.example.fr"]
+      privacy      = "public"
     }
   }
 
@@ -213,6 +218,7 @@ run "the_gateway_environment_name_fails_the_plan" {
       environment  = "preprod"
       server_names = ["webapp.preprod.example.fr"]
       domains      = ["webapp.preprod.example.fr"]
+      privacy      = "public"
     }
   }
 
@@ -230,9 +236,103 @@ run "a_domain_outside_server_names_fails_the_plan" {
       environment  = "staging"
       server_names = ["webapp.preprod.example.fr"]
       domains      = ["other.preprod.example.fr"]
+      privacy      = "public"
     }
   }
 
   expect_failures = [var.webapp]
 }
 
+run "a_private_webapp_without_key_fails_the_plan" {
+  command = plan
+
+  variables {
+    webapp = {
+      upstream     = "https://webapp.functions.fnc.fr-par.scw.cloud"
+      release      = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:preprod-abc123"
+      base_domain  = "webapp.preprod.example.fr"
+      environment  = "staging"
+      server_names = ["webapp.preprod.example.fr"]
+      domains      = ["webapp.preprod.example.fr"]
+      privacy      = "private"
+    }
+  }
+
+  expect_failures = [scaleway_container.nginx]
+}
+
+run "a_private_webapp_with_its_key_plans" {
+  command = plan
+
+  variables {
+    webapp_auth_token = "0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0"
+    webapp = {
+      upstream     = "https://webapp.functions.fnc.fr-par.scw.cloud"
+      release      = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:preprod-abc123"
+      base_domain  = "webapp.preprod.example.fr"
+      environment  = "staging"
+      server_names = ["webapp.preprod.example.fr"]
+      domains      = ["webapp.preprod.example.fr"]
+      privacy      = "private"
+    }
+  }
+
+  assert {
+    condition     = nonsensitive(scaleway_container.nginx.secret_environment_variables["WEBAPP_AUTH_TOKEN"]) == "0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0"
+    error_message = "The key reaches the gateway"
+  }
+}
+
+run "an_unknown_privacy_fails_the_plan" {
+  command = plan
+
+  variables {
+    webapp = {
+      upstream     = "https://webapp.functions.fnc.fr-par.scw.cloud"
+      release      = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:preprod-abc123"
+      base_domain  = "webapp.preprod.example.fr"
+      environment  = "staging"
+      server_names = ["webapp.preprod.example.fr"]
+      domains      = ["webapp.preprod.example.fr"]
+      privacy      = "Private"
+    }
+  }
+
+  expect_failures = [var.webapp]
+}
+
+run "the_gateway_tells_whether_it_holds_the_key" {
+  command = plan
+
+  variables {
+    webapp_auth_token = "0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0"
+  }
+
+  assert {
+    condition     = output.webapp_auth_token_set == true
+    error_message = "webapp_auth_token_set with a key"
+  }
+}
+
+run "the_gateway_tells_it_has_no_key" {
+  command = plan
+
+  assert {
+    condition     = output.webapp_auth_token_set == false
+    error_message = "webapp_auth_token_set without a key"
+  }
+}
+
+run "the_key_is_not_set_without_a_webapp" {
+  command = plan
+
+  variables {
+    webapp            = null
+    webapp_auth_token = "0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0"
+  }
+
+  assert {
+    condition     = output.webapp_auth_token_set == false
+    error_message = "webapp_auth_token_set while the key is not sent"
+  }
+}

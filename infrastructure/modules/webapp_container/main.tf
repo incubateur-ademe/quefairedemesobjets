@@ -49,7 +49,7 @@ resource "scaleway_container" "webapp" {
   min_scale      = var.min_scale
   max_scale      = var.max_scale
   timeout        = var.timeout
-  privacy        = "public"
+  privacy        = var.privacy
   protocol       = "http1"
 
   # Each instance serves workers x threads requests at once: scale out at

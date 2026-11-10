@@ -33,3 +33,8 @@ output "registry_image" {
   description = "Image running now: pass its tag as IMAGE_TAG to apply by hand without redeploying"
   value       = scaleway_container.nginx.registry_image
 }
+
+output "webapp_auth_token_set" {
+  description = "Whether the gateway sends the IAM key to the webapp: the webapp deploy refuses to make the webapp private otherwise"
+  value       = nonsensitive(var.webapp != null && var.webapp_auth_token != "")
+}

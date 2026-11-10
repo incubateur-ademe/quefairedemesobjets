@@ -65,6 +65,21 @@ jobs:
           fi
           echo "IMAGE_TAG=$TAG" >>"$GITHUB_ENV"
 
+      # The gateway stack depends on the webapp one, so the webapp cannot
+      # read the gateway through a dependency: it reads its state here.
+      - name: Private webapp only once the gateway holds the IAM key
+        if: inputs.stack == 'webapp_container'
+        run: |
+          set -euo pipefail
+          PRIVACY=$(terragrunt render --json | jq -r '.inputs.privacy // "public"')
+          [[ "$PRIVACY" == "private" ]] || exit 0
+          cd ../nginx_containers
+          terragrunt init -input=false >/dev/null
+          if [[ "$(terragrunt output -json | jq -r '.webapp_auth_token_set.value // false')" != "true" ]]; then
+            echo "::error title=Gateway without the IAM key::the webapp would become private while the gateway has no WEBAPP_AUTH_TOKEN. Set webapp_auth_token in the secret of nginx_containers and apply the gateway first."
+            exit 1
+          fi
+
       - name: Terragrunt plan
         run: terragrunt plan -out="$RUNNER_TEMP/tfplan"
 
