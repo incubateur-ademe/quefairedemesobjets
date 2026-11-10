@@ -106,18 +106,21 @@ The `sync_databases.yml` workflow synchronizes production data to preproduction.
 - Create the remote database server between webapp and warehouse
 - Synchronize S3 buckets (copy from prod to preprod)
 
-### Dependabot
+### Renovate
 
-The `dependabot.yml` file configures automatic dependency updates.
+The `renovate.json` file configures automatic dependency updates, opened by the
+[beta.gouv Renovate](https://github.com/apps/beta-gouv-renovate) GitHub App.
 
-**Schedule**: Every Tuesday at 06:00 UTC
+**Schedule**: Every Tuesday before 09:00 UTC, for releases at least 7 days old
 
-**Ecosystems monitored**:
+**Managers**:
 
-- **uv**: Python dependencies (weekly)
-- **npm**: JavaScript dependencies (weekly, grouped by categories: parcel, jest, eslint)
-- **GitHub Actions**: Actions used in the workflows (weekly)
-- **Terraform**: Terraform modules in `/infrastructure` (weekly)
+- **pep621**: Python dependencies of the uv workspace
+- **npm**: JavaScript dependencies (grouped by categories: parcel, jest, eslint…)
+- **GitHub Actions**: Actions used in the workflows
+- **Terraform**: Terraform providers and modules in `/infrastructure`
+
+Pending and ignored updates are listed in the "Dependency Dashboard" issue.
 
 ### Documentation publication
 
