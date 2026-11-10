@@ -10,7 +10,7 @@ terraform {
 dependency "airflow_containers" {
   config_path = "../airflow_containers"
 
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate"]
   mock_outputs = {
     domain_name = "mock-airflow-webserver.functions.fnc.fr-par.scw.cloud"
   }
@@ -20,7 +20,7 @@ dependency "metabase_containers" {
   config_path = "../metabase_containers"
   enabled     = local.metabase_enabled
 
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate"]
   mock_outputs = {
     domain_name = "mock-metabase.functions.fnc.fr-par.scw.cloud"
   }
@@ -38,7 +38,7 @@ include {
 }
 
 inputs = {
-  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:<TAG>"
+  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:${get_env("IMAGE_TAG", "")}"
   nginx_cpu_limit      = 500
   nginx_memory_limit   = 512
   nginx_min_scale      = 1
