@@ -68,15 +68,6 @@ ASSISTANT = {
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
         cast=str,
     ),
-    # Hosts whose embedded script opens the assistant V2 rather than the
-    # legacy one: beta testers switch case by case, with no change to the
-    # script they previously used.
-    "V2_HOSTS": decouple.config(
-        "ASSISTANT_V2_BETA_TESTERS_HOSTS", default="", cast=decouple.Csv()
-    ),
-    # URL of the preview environment used to deploy the assistant
-    # during the beta program.
-    "V2_BASE_URL": decouple.config("ASSISTANT_V2_BASE_URL", default="", cast=str),
     # A page of the assistant opened outside an iframe redirects to its fiche on
     # the site. Off in tests, or when this variable turns it off explicitly.
     "V2_STANDALONE_REDIRECT": decouple.config(
@@ -150,7 +141,6 @@ BASE_URL = decouple.config(
 BASE_HOST = urlparse(BASE_URL).hostname
 ALLOWED_HOSTS = [
     BASE_HOST,
-    *filter(None, [urlparse(ASSISTANT["V2_BASE_URL"]).hostname]),
     *decouple.config("ALLOWED_HOSTS", default="", cast=str).split(","),
 ]
 

@@ -7,8 +7,7 @@ import {
   waitForIframeResize,
 } from "./helpers"
 
-// A beta tester's page: another origin than the iframe (`localhost`), and a
-// host listed in ASSISTANT_V2_BETA_TESTERS_HOSTS (playwright.config.ts).
+// A reuser's page: another origin than the iframe (`localhost`).
 const HOST_PAGE =
   "http://127.0.0.1:8888/lookbook/preview/tests/t_20_assistant_v2_redirect/?objet=velo"
 
