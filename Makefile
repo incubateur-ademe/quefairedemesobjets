@@ -334,6 +334,11 @@ fmt-infra:
 nginx-check:
 	./scripts/nginx_check.sh
 
+# Build the gateway image and test it against a fake Scaleway edge, offline
+.PHONY: nginx-gateway-test
+nginx-gateway-test:
+	./nginx/tests/gateway_test.sh
+
 .PHONY: dbt-generate-docs
 dbt-generate-docs:
 	make -C data-platform/dbt generate-docs

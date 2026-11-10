@@ -45,7 +45,8 @@ jobs:
       - name: "[🟣 Scaleway] Build and push nginx gateway Docker image"
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
-          context: nginx
+          # Root: the image also takes servers.conf.erb
+          context: .
           file: nginx/nginx.Dockerfile
           platforms: linux/amd64
           cache-from: type=gha,scope=nginx-gateway
