@@ -1,0 +1,30 @@
+# Applies the gateway stack as main defines it, with the image running now:
+# after a change of its secret or of its HCL, without a new release.
+name: 🧱 Apply the gateway
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [preprod, prod]
+        required: true
+
+jobs:
+  apply:
+    name: 🧱 ${{ inputs.environment }}
+    # Never the HCL of a branch
+    if: github.ref == 'refs/heads/main'
+    concurrency:
+      group: deploy-nginx-${{ inputs.environment }}
+      cancel-in-progress: false
+      queue: max
+    uses: ./.github/workflows/_terragrunt-apply-stack.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      environment: ${{ inputs.environment }}
+      stack: nginx_containers
+
+permissions:
+  contents: read

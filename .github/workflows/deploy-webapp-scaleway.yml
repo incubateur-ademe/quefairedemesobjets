@@ -1,6 +1,7 @@
 # Deploys the webapp + worker containers to Scaleway: build the image, run
 # its bin/post_deploy against the environment's databases, then apply the
 # <environment>/webapp_container stack, which rolls the new image out.
+# Then apply the gateway: its new instances start with an empty cache.
 # Manual, until cd.yml and deploy.yml are switched over from Scalingo.
 name: 🟣 Deploy webapp to Scaleway
 
@@ -40,6 +41,29 @@ jobs:
       stack: webapp_container
       image_tag: ${{ inputs.environment }}-${{ github.sha }}
       post_deploy: true
+
+  # The gateway carries the webapp's image as WEBAPP_RELEASE: applying it
+  # with the image it runs starts new instances, whose cache is empty. Even
+  # when apply fails: the webapp may be rolled out with the wait timing out,
+  # and cached pages would then point to static files the new image no longer
+  # has. A gateway that does not serve the webapp has nothing to change.
+  #
+  # Same group as _deploy-nginx.yml, for the state has no locking. queue: max
+  # keeps every pending run, where the default keeps only the newest: this
+  # apply must not replace a pending new gateway image.
+  gateway:
+    name: 🧹 Purge the gateway cache
+    needs: [build, apply]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    concurrency:
+      group: deploy-nginx-${{ inputs.environment }}
+      cancel-in-progress: false
+      queue: max
+    uses: ./.github/workflows/_terragrunt-apply-stack.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      environment: ${{ inputs.environment }}
+      stack: nginx_containers
 
 permissions:
   contents: read
