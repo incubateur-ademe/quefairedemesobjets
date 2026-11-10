@@ -76,12 +76,6 @@ inputs = {
   ALLOWED_HOSTS = "*"
   BASE_URL      = "https://${local.host}"
 
-  # The lookbook's embed cases load iframe.js on a page of the preview itself:
-  # the preview is its own beta tester, so they open the assistant V2.
-  extra_environment_variables = {
-    ASSISTANT_V2_BETA_TESTERS_HOSTS = local.host
-  }
-
   DATABASE_URL                    = dependency.preview_database.outputs.database_url
   SECRET_KEY                      = get_env("PREVIEW_SECRET_KEY")
   NOTION_TOKEN                    = get_env("NOTION_TOKEN")
