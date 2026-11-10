@@ -29,9 +29,9 @@
   "dependencies": {
     "@awesome.me/webawesome": "^3.14.0",
     "@socialgouv/codes-naf": "^1.1.1",
-    "@tanstack/react-query": "^5.105.0",
+    "@tanstack/react-query": "^5.105.3",
     "@tanstack/react-table": "^9.3.1",
-    "@tanstack/react-virtual": "^3.14.23",
+    "@tanstack/react-virtual": "^3.14.25",
     "diff-match-patch": "^1.0.5",
     "maplibre-gl": "^6.16.0",
     "openapi-fetch": "^0.17.0",
@@ -44,7 +44,7 @@
     "@playwright/test": "^1.64.1",
     "@types/lodash": "^4.17.27",
     "bowser": "^2.15.0",
-    "posthog-js": "^1.438.24"
+    "posthog-js": "^1.444.4"
   },
   "devDependencies": {
     "@parcel/optimizer-data-url": "^2.16.4",
@@ -54,7 +54,7 @@
     "@testing-library/user-event": "^14.6.8",
     "@types/diff-match-patch": "^1.0.36",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^10.14.0",
