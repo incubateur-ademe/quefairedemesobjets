@@ -32,6 +32,7 @@ jobs:
       data-platform: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.data-platform }}
       revue: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.revue }}
       infrastructure: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.infrastructure }}
+      dependencies: ${{ steps.areas.outputs.other == 'true' && 'true' || steps.areas.outputs.dependencies }}
       ci: ${{ steps.areas.outputs.ci }}
     steps:
       # An empty output runs everything: outside a pull request, or if this step fails.
@@ -100,11 +101,30 @@ jobs:
       contents: read
     uses: ./.github/workflows/ci-infrastructure.yml
 
+  trivy:
+    name: 🔍 Trivy lockfiles
+    needs: scope
+    if: ${{ needs.scope.outputs.skip != 'true' && needs.scope.outputs.dependencies != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
   # The only required check: a skipped job counts as passed, so requiring the jobs
   # themselves would let a pull request merge when a job they depend on failed.
   ci_passed:
     name: ✅ CI
-    needs: [scope, ci_webapp, ci_data_platform, ci_revue, ci_infrastructure]
+    needs: [scope, ci_webapp, ci_data_platform, ci_revue, ci_infrastructure, trivy]
     if: ${{ always() }}
     runs-on: ubuntu-slim
     timeout-minutes: 5
