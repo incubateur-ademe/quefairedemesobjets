@@ -41,6 +41,7 @@ class RequestEnhancementMiddleware:
 
     def __call__(self, request):
         # Prepare request
+        self._prepare_request_if_iframe(request)
         if url_to_redirect := self._check_redirect_from_legacy_domains(request):
             return redirect(url_to_redirect, permanent=True)
         if url_to_redirect := self._redirect_embeds_to_assistant_v2(request):
@@ -50,7 +51,6 @@ class RequestEnhancementMiddleware:
             add_never_cache_headers(response)
             return response
 
-        self._prepare_request_if_iframe(request)
         response = self.get_response(request)
 
         # Prepare response
@@ -87,14 +87,15 @@ class RequestEnhancementMiddleware:
     }
 
     def _redirect_embeds_to_assistant_v2(self, request) -> str | None:
-        """Send `iframe.js` embeds to the assistant V2, script unchanged.
+        """Send embeds to the assistant V2, whatever code the embedder copied.
 
-        `iframe.js` always adds `ref`, which tells an embed from a visit to the
-        site. `data-objet` is a fiche or a legacy synonyme slug, resolved to its
-        fiche as the legacy assistant does; a fiche that does not exist in V2
-        stays on the legacy assistant rather than 404ing.
+        `iframe.js` always adds `ref`; a bare `<iframe>` has none, but its
+        browser sends `Sec-Fetch-Dest: iframe`. Either tells an embed from a
+        visit to the site. `data-objet` is a fiche or a legacy synonyme slug,
+        resolved to its fiche as the legacy assistant does; a fiche that does not
+        exist in V2 stays on the legacy assistant rather than 404ing.
         """
-        if "ref" not in request.GET:
+        if "ref" not in request.GET and not request.iframe:
             return None
         try:
             match = resolve(request.path)

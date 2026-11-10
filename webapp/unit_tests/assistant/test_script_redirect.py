@@ -1,5 +1,5 @@
 """`iframe.js` is unchanged: it still opens the legacy `/dechet` routes. The
-switch to the assistant V2 happens server side."""
+switch to the assistant V2 happens server side, for bare `<iframe>` embeds too."""
 
 import base64
 
@@ -16,11 +16,13 @@ def ref(url):
     return base64.b64encode(url.encode()).decode()
 
 
-def redirect_for(path, params):
+def redirect_for(path, params, headers=None):
     """The legacy home needs a Wagtail homepage to render: ask the middleware
     directly whether it would leave the request alone."""
-    request = RequestFactory().get(path, params)
-    return RequestEnhancementMiddleware(None)._redirect_embeds_to_assistant_v2(request)
+    request = RequestFactory().get(path, params, headers=headers)
+    middleware = RequestEnhancementMiddleware(None)
+    middleware._prepare_request_if_iframe(request)
+    return middleware._redirect_embeds_to_assistant_v2(request)
 
 
 @pytest.mark.django_db
@@ -38,6 +40,19 @@ class TestScriptRedirect:
         assert query_of(response.url)["s"] == ["1"]
         assert "ref" in query_of(response.url)
         assert response.headers["Cache-Control"].startswith("max-age=0, no-cache")
+
+    def test_bare_iframe_opens_assistant_v2(self, client, fiche):
+        """No `iframe.js`, so no `ref`: the browser still says it is an iframe."""
+        response = client.get("/", {"s": "1"}, headers={"Sec-Fetch-Dest": "iframe"})
+        assert response.status_code == 302
+        assert response.url == "https://qfdmo.fr/assistant/?s=1"
+        response = client.get(
+            f"/dechet/{fiche.slug}/", headers={"Sec-Fetch-Dest": "iframe"}
+        )
+        assert response.url == f"https://qfdmo.fr/assistant/objet/{fiche.slug}/"
+
+    def test_a_visit_to_the_site_stays_on_legacy(self):
+        assert redirect_for("/", {}, headers={"Sec-Fetch-Dest": "document"}) is None
 
     def test_the_script_route_reaches_assistant_v2(self, client):
         """`iframe.js` opens `/dechet`, which the legacy app already sends home."""
