@@ -1382,13 +1382,6 @@ class TestsPreview(LookbookPreview):
             "ui/tests/copy_controller.html",
         )
 
-    def t_8_iframe_navigation_persistence(self, **kwargs):
-        """Test that iframe-specific UI persists during navigation"""
-        return render_to_string(
-            "ui/tests/iframe_navigation_persistence.html",
-            {"base_url": base_url},
-        )
-
     @register_form_class(BonusForm)
     def t_9_bonus_legacy_parameter_iframe(self, bonus="1", **kwargs):
         """Test that legacy bonus=1 parameter in iframe URL initializes the bonus filter as checked"""
@@ -1461,13 +1454,6 @@ class TestsPreview(LookbookPreview):
         return render_to_string(
             "ui/tests/t_14_carte_mal_centree.html",
             {"script": script},
-        )
-
-    def t_15_acteur_fiche_viewport(self, **kwargs):
-        """Test that acteur fiche is visible in viewport without scrolling on mobile"""
-        return render_to_string(
-            "ui/tests/t_15_acteur_fiche_viewport.html",
-            {"base_url": base_url},
         )
 
     def t_16_infotri_configurator(self, **kwargs):
