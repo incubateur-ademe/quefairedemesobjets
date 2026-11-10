@@ -37,7 +37,8 @@ COPY ml_deduplication ./ml_deduplication
 
 # Install python deps (cached as long as lockfiles unchanged)
 COPY pyproject.toml README.md uv.lock ./
-RUN /root/.local/bin/uv sync --frozen --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    /root/.local/bin/uv sync --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
 ENV VIRTUAL_ENV="/app/.venv" \
