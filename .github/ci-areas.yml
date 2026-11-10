@@ -48,6 +48,12 @@ revue:
 infrastructure:
   - "infrastructure/**"
   - "!infrastructure/**/*.md"
+  # Checked by make nginx-check and make nginx-gateway-test
+  - "servers.conf.erb"
+  - "nginx/**"
+  - "webapp/nginx/nginx.conf"
+  - "scripts/nginx_check.sh"
+  - "scripts/nginx_check/**"
 
 other:
   - "**"
