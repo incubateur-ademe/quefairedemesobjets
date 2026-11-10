@@ -1,0 +1,28 @@
+[project]
+name = "osm-ds"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Luis Ventura", email = "30115537+Lawiss@users.noreply.github.com" },
+]
+requires-python = ">=3.14"
+dependencies = [
+    "jupyterlab>=4.6.6",
+    "jupyterlab-code-formatter>=3.1.0",
+    "jupyterlab-execute-time>=3.3.0",
+    "jupyterlab-lsp>=5.3.0",
+    "python-lsp-server[all]>=1.15.0",
+    "ipywidgets>=8.1.9",
+    "duckdb>=2.0.0",
+    "osmpythontools>=0.3.6",
+    "polars>=2.1.0",
+    "polars-st>=0.11.0",
+]
+
+[project.scripts]
+osm-ds = "osm_ds:main"
+
+[build-system]
+requires = ["uv_build>=0.13.4,<0.14.0"]
+build-backend = "uv_build"
