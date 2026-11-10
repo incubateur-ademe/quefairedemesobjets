@@ -54,15 +54,22 @@ class TestScriptRedirect:
     def test_a_visit_to_the_site_stays_on_legacy(self):
         assert redirect_for("/", {}, headers={"Sec-Fetch-Dest": "document"}) is None
 
-    def test_the_script_route_reaches_assistant_v2(self, client):
-        """`iframe.js` opens `/dechet`, which the legacy app already sends home."""
+    def test_the_script_route_reaches_assistant_v2_in_one_hop(self, client):
+        """Older `iframe.js` and bare iframes open `/dechet`, not the home page."""
         response = client.get(
             "/dechet", {"s": "1", "ref": ref("https://reutilisateur.example.fr/")}
         )
-        assert response.status_code == 301
-        response = client.get(response.url)
         assert response.status_code == 302
         assert response.url.startswith("https://qfdmo.fr/assistant/?")
+        response = client.get("/dechet", headers={"Sec-Fetch-Dest": "iframe"})
+        assert response.url == "https://qfdmo.fr/assistant/"
+
+    def test_legacy_carte_param_still_opens_the_carte(self, client):
+        response = client.get(
+            "/dechet", {"carte": "", "ref": ref("https://reutilisateur.example.fr/")}
+        )
+        assert response.status_code == 301
+        assert response.url.startswith("https://qfdmo.fr/carte?")
 
     def test_data_objet_preselects_the_fiche(self, client, fiche):
         response = client.get(
@@ -111,8 +118,8 @@ class TestScriptRedirect:
     def test_without_the_script_nothing_changes(self):
         assert redirect_for("/", {}) is None
 
-    def test_other_routes_are_never_redirected(self):
-        assert (
-            redirect_for("/carte", {"ref": ref("https://reutilisateur.example.fr/")})
-            is None
-        )
+    @pytest.mark.parametrize("path", ["/carte", "/formulaire", "/infotri/embed"])
+    def test_other_tools_are_never_redirected(self, path):
+        params = {"ref": ref("https://reutilisateur.example.fr/"), "direction": "jai"}
+        headers = {"Sec-Fetch-Dest": "iframe"}
+        assert redirect_for(path, params, headers=headers) is None
