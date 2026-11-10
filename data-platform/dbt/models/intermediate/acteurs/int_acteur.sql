@@ -1,5 +1,4 @@
-WITH carteco AS (
-    -- Acteurs dont la source est Carteco, avec leur parent éventuel
+WITH carteco_acteur AS (
     SELECT
         ra.parent_id,
         COALESCE(ra.identifiant_unique, a.identifiant_unique)
@@ -10,6 +9,14 @@ WITH carteco AS (
     INNER JOIN {{ ref('base_source') }} AS src
         ON COALESCE(ra.source_id, a.source_id) = src.id
     WHERE src.code = 'carteco'
+),
+
+carteco AS (
+    -- Acteurs Carteco et parents d'un acteur Carteco
+    SELECT identifiant_unique FROM carteco_acteur
+    UNION
+    SELECT parent_id FROM carteco_acteur
+    WHERE parent_id IS NOT NULL
 )
 
 SELECT
@@ -53,15 +60,7 @@ SELECT
     CASE
         WHEN {{ coalesce_empty('ra.telephone', 'a.telephone') }} ~ '^0[67]'
             THEN ''
-        WHEN EXISTS (
-            SELECT 1
-            FROM carteco
-            WHERE
-                carteco.identifiant_unique
-                = COALESCE(ra.identifiant_unique, a.identifiant_unique)
-                OR carteco.parent_id
-                = COALESCE(ra.identifiant_unique, a.identifiant_unique)
-        ) THEN ''
+        WHEN carteco.identifiant_unique IS NOT NULL THEN ''
         ELSE {{ coalesce_empty('ra.telephone', 'a.telephone') }}
     END
         AS telephone,
@@ -117,3 +116,7 @@ SELECT
 FROM {{ ref('base_acteur') }} AS a
 FULL JOIN {{ ref('base_revisionacteur') }} AS ra
     ON a.identifiant_unique = ra.identifiant_unique
+LEFT JOIN carteco
+    ON
+        COALESCE(ra.identifiant_unique, a.identifiant_unique)
+        = carteco.identifiant_unique
