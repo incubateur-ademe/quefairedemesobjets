@@ -49,6 +49,14 @@ jobs:
       environment: preprod
       tag_name: ${{ github.sha }}
 
+  nginx:
+    name: 🟠 Deploy Nginx gateway
+    uses: ./.github/workflows/_deploy-nginx.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: preprod
+      tag_name: ${{ github.sha }}
+
   e2e:
     name: 🪤 E2E
     uses: ./.github/workflows/e2e.yml
@@ -58,7 +66,16 @@ jobs:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
-    needs: [ci_webapp, ci_data_platform, ci_revue, ci_infrastructure, webapp, airflow]
+    needs:
+      [
+        ci_webapp,
+        ci_data_platform,
+        ci_revue,
+        ci_infrastructure,
+        webapp,
+        airflow,
+        nginx,
+      ]
     permissions:
       contents: write
     runs-on: ubuntu-slim
