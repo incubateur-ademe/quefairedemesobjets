@@ -22,6 +22,16 @@ jobs:
       - name: Run Terragrunt format check
         run: terragrunt hcl fmt -check infrastructure
 
+  nginx:
+    name: 🧩 nginx templates
+    # Needs docker and ruby, both on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Render servers.conf.erb and run nginx -t
+        run: make nginx-check
+
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:

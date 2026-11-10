@@ -1,9 +1,50 @@
+<%
+  # A variable set but empty counts as unset
+  env = lambda { |name, default = nil| ENV[name].to_s.empty? ? default : ENV[name] }
+
+  # Upstream: a unix socket or host:port next to nginx (Scalingo, local), or
+  # https://<host> when the webapp runs in another container (Scaleway gateway).
+  upstream = env.call("UPSTREAM_HOST", "unix:/tmp/gunicorn.sock")
+  upstream_tls = upstream.start_with?("https://")
+  upstream_name = upstream.sub(%r{\Ahttps://}, "").chomp("/")
+  upstream_token = env.call("UPSTREAM_AUTH_TOKEN")
+
+  nameservers = File.read("/etc/resolv.conf").scan(/^nameserver\s+(\d+\.\d+\.\d+\.\d+)/).flatten rescue []
+  nameservers = ["8.8.8.8", "8.8.4.4"] if nameservers.empty?
+
+  # Every location that proxies to the webapp includes this block and sets no
+  # other proxy_set_header, so none can miss the Host the platform routes on.
+  # The token never goes to PostHog or IGN: their locations do not include it
+  # and clear the one a client may send.
+  webapp_proxy = [
+    "proxy_pass #{upstream_tls ? "https" : "http"}://gunicorn;",
+    # HTTP/1.1 + empty Connection header required for upstream keepalive
+    "proxy_http_version 1.1;",
+    'proxy_set_header Connection "";',
+    "proxy_set_header X-Forwarded-Proto $forwarded_proto;",
+    "proxy_set_header X-Forwarded-Host $host;",
+  ]
+  if upstream_tls
+    webapp_proxy += [
+      "proxy_set_header Host #{upstream_name};",
+      "proxy_ssl_server_name on;",
+      "proxy_ssl_name #{upstream_name};",
+      "proxy_ssl_verify on;",
+      "proxy_ssl_verify_depth 3;",
+      "proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;",
+    ]
+    webapp_proxy << "proxy_set_header X-Auth-Token \"#{upstream_token}\";" if upstream_token
+  else
+    webapp_proxy << "proxy_set_header Host $http_host;"
+  end
+  webapp_proxy = webapp_proxy.join("\n        ")
+%>
 open_file_cache max=1000 inactive=20s;
 open_file_cache_valid 30s;
 open_file_cache_min_uses 2;
 open_file_cache_errors on;
 
-proxy_cache_path /tmp/nginx_assistant_cache levels=1:2 keys_zone=assistant:50m max_size=1g inactive=60m use_temp_path=off;
+proxy_cache_path <%= env.call("NGINX_CACHE_PATH", "/tmp/nginx_assistant_cache") %> levels=1:2 keys_zone=assistant:50m max_size=<%= env.call("NGINX_CACHE_MAX_SIZE", "1g") %> inactive=60m use_temp_path=off;
 
 # Disable cache when the user is logged in (session cookie present)
 map $http_cookie $cookie_no_cache {
@@ -22,9 +63,9 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
 # iframe.js appends ref=<base64 parent URL> to every embed URL. On the routes
 # below it is only read client-side (analytics controller), so drop it from the
 # cache key: otherwise every embedding page is a cache miss.
-# Everywhere else ref stays in the key: RequestEnhancementMiddleware redirects
-# ASSISTANT_V2_BETA_TESTERS_HOSTS to the V2 based on it, and legacy redirects
-# echo it, so one embedder's cached response must not reach another.
+# Everywhere else ref stays in the key: RequestEnhancementMiddleware's redirects
+# (to the assistant V2, legacy routes) echo it, so one embedder's cached
+# response must not reach another.
 # A route added here must never read ref server-side.
 map "$uri?$args" $cache_args {
     default $args;
@@ -54,7 +95,16 @@ map $http_x_forwarded_proto $forwarded_proto {
 }
 
 upstream gunicorn {
-    server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;
+<% if upstream_tls %>
+    # resolve: follow the platform's IP changes without dropping the
+    # keepalive pool (open source since nginx 1.27.3).
+    zone gunicorn 64k;
+    resolver <%= nameservers.join(" ") %> valid=30s ipv6=off;
+    server <%= upstream_name %>:443 resolve;
+    keepalive_timeout 30s;
+<% else %>
+    server <%= upstream %>;
+<% end %>
     # keepalive: maintain persistent connections to gunicorn to avoid
     # TCP handshake overhead on every request
     keepalive 32;
@@ -69,7 +119,17 @@ server {
 <% else %>
     listen <%= ENV["PORT"] %>;
 <% end %>
-    server_name _;
+    server_name <%= env.call("NGINX_SERVER_NAMES", "_") %>;
+<% if env.call("NGINX_GZIP") == "1" %>
+
+    # Requests come through the Scaleway proxy, hence `gzip_proxied any`.
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_min_length 1024;
+    gzip_types text/css text/plain application/javascript application/json
+        application/geo+json image/svg+xml;
+<% end %>
 
 <% if ENV["ENVIRONMENT"] != "production" %>
     add_header X-Robots-Tag "noindex, nofollow" always;
@@ -81,7 +141,23 @@ server {
     }
 
 
-<% unless ENV["DEBUG"] == "true" || ENV["DEBUG"] == "True" || ENV["DEBUG"] == "1" %>
+<% if env.call("NGINX_PROXY_STATIC") == "1" %>
+    # Static files come from whitenoise in the webapp container.
+    location /static/ {
+        <%= webapp_proxy %>
+
+        proxy_cache assistant;
+        proxy_cache_key $scheme$host$request_uri;
+        # Only 200s, whatever the upstream says: during a rolling deploy an
+        # old instance answers 404 for the new hashed files.
+        proxy_ignore_headers Cache-Control Expires X-Accel-Expires;
+        proxy_cache_valid 200 1d;
+        add_header X-Cache-Status $upstream_cache_status always;
+<% if ENV["ENVIRONMENT"] != "production" %>
+        add_header X-Robots-Tag "noindex, nofollow" always;
+<% end %>
+    }
+<% elsif !(ENV["DEBUG"] == "true" || ENV["DEBUG"] == "True" || ENV["DEBUG"] == "1") %>
     location /static/ {
         expires max;
         alias /app/webapp/staticfiles/;
@@ -90,13 +166,10 @@ server {
     # Cache embeddable JS assets (iframe.js, carte.js) - these are served to
     # third-party sites and must not vary by session
     location ~ ^/(static/)?(iframe|carte)\.js$ {
-        # HTTP/1.1 + empty Connection header required for upstream keepalive
-        proxy_pass http://gunicorn;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        <%= webapp_proxy %>
 
         proxy_cache assistant;
+        proxy_cache_key $scheme$host$request_uri;
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
         add_header X-Cache-Status $upstream_cache_status always;
@@ -111,14 +184,11 @@ server {
     # of caching the IP forever at startup. Use the system nameservers (Docker's
     # 127.0.0.11, Scalingo's resolver) - public DNS may be blocked from the
     # container. ipv6=off: PostHog answers AAAA first and containers are IPv4 only.
-<%
-  nameservers = File.read("/etc/resolv.conf").scan(/^nameserver\s+(\d+\.\d+\.\d+\.\d+)/).flatten rescue []
-  nameservers = ["8.8.8.8", "8.8.4.4"] if nameservers.empty?
-%>
     resolver <%= nameservers.join(" ") %> valid=300s ipv6=off;
     resolver_timeout 5s;
     set $posthog_api_host eu.i.posthog.com;
     set $posthog_assets_host eu-assets.i.posthog.com;
+    set $ign_host data.geopf.fr;
     # proxy_pass with a variable passes its URI verbatim, so each location
     # strips the /ph prefix with a rewrite instead of in proxy_pass.
     # proxy_ssl_verify_depth: nginx defaults to 1, too short for Let's Encrypt YE2,
@@ -131,6 +201,7 @@ server {
         proxy_set_header Host $posthog_assets_host;
         proxy_set_header Cookie "";
         proxy_set_header Authorization "";
+        proxy_set_header X-Auth-Token "";
         proxy_ssl_server_name on;
         proxy_ssl_name $posthog_assets_host;
         proxy_ssl_verify on;
@@ -145,6 +216,7 @@ server {
         proxy_set_header Host $posthog_assets_host;
         proxy_set_header Cookie "";
         proxy_set_header Authorization "";
+        proxy_set_header X-Auth-Token "";
         proxy_ssl_server_name on;
         proxy_ssl_name $posthog_assets_host;
         proxy_ssl_verify on;
@@ -159,6 +231,7 @@ server {
         proxy_set_header Host $posthog_api_host;
         proxy_set_header Cookie "";
         proxy_set_header Authorization $posthog_authorization;
+        proxy_set_header X-Auth-Token "";
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;
         # Strip Origin/Referer so PostHog doesn't reject requests from local/unknown domains
@@ -171,12 +244,31 @@ server {
         proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
+    # IGN vector tiles of the assistant map: data.geopf.fr serves them
+    # uncompressed (up to 350 KB at zoom 13), gzip halves them.
+    location /tuiles/plan-ign/ {
+        rewrite ^/tuiles/plan-ign(/.*)$ /tms/1.0.0/PLAN.IGN$1 break;
+        proxy_pass https://$ign_host;
+        proxy_set_header Host $ign_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
+        proxy_set_header X-Auth-Token "";
+        proxy_hide_header Set-Cookie;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $ign_host;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        gzip_types application/x-protobuf;
+    }
+
     location /admin {
+        <%= webapp_proxy %>
+<% if env.call("NGINX_ADMIN_MAX_BODY_SIZE") %>
+        # Imports
+        client_max_body_size <%= env.call("NGINX_ADMIN_MAX_BODY_SIZE") %>;
+<% end %>
         # Longer timeout for admin operations (imports, exports, Wagtail)
-        proxy_pass http://gunicorn;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 120s;
         # Should not exceed 75s per the documentation
         # https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_connect_timeout
@@ -185,17 +277,12 @@ server {
         proxy_cache_bypass 1;
         proxy_no_cache 1;
 
-        proxy_set_header Host $http_host;
         add_header X-Cache-Status $upstream_cache_status always;
         add_header X-Robots-Tag "noindex, nofollow" always;
     }
 
     location / {
-        # HTTP/1.1 + empty Connection header required for upstream keepalive
-        proxy_pass http://gunicorn;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        <%= webapp_proxy %>
         proxy_read_timeout 30s;
         proxy_connect_timeout 15s;
 
@@ -204,7 +291,6 @@ server {
         proxy_no_cache $no_cache;
 
         proxy_cache assistant;
-        proxy_set_header Host $http_host;
         # Include $http_sec_fetch_dest in cache key to serve different cached
         # versions for standalone page loads vs iframe embeds
         proxy_cache_key $request_method$scheme$host$uri?$cache_args$http_sec_fetch_dest;
