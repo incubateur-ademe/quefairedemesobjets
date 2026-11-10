@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
-# Container entrypoint for preview environments.
+# Container entrypoint, shared by the webapp and worker containers.
 #
-# Nginx listens on the Scaleway container port (8000) and proxies to
-# gunicorn on 127.0.0.1:8001, matching production's two-tier setup.
+# CONTAINER_ROLE=worker  → django-tasks worker, next to an HTTP listener
+#                          (Scaleway needs one on the port for its probe)
+# anything else (default) → nginx :8000 proxying to gunicorn :8001
 set -euo pipefail
 
+if [[ "${CONTAINER_ROLE:-web}" == "worker" ]]; then
+  # db_worker stays in the foreground so that if it dies the container exits
+  # and Scaleway restarts it. The listener answers 200 with an empty listing;
+  # stderr kept, so that a failed bind shows in the logs.
+  python -m http.server "${PORT:-8000}" --bind 0.0.0.0 \
+    --directory "$(mktemp -d)" >/dev/null &
+  exec python manage.py db_worker
+fi
 
+# Previews only: preprod and prod run bin/post_deploy as a CI step before the
+# image is rolled out (RUN_MIGRATIONS_ON_START=false).
 if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
   echo "Applying database migrations..."
   python manage.py migrate --noinput
@@ -23,9 +34,13 @@ fi
 # restarts the container.
 nginx -g 'daemon off;' &
 
+# Same settings as bin/start on Scalingo.
 exec gunicorn core.wsgi \
   --bind "127.0.0.1:8001" \
+  --worker-class gthread \
+  --preload \
   --timeout 120 \
   --workers "${GUNICORN_WORKERS:-2}" \
-  --max-requests 1000 \
-  --max-requests-jitter 100
+  --threads "${GUNICORN_THREADS:-4}" \
+  --max-requests 10000 \
+  --max-requests-jitter 2500

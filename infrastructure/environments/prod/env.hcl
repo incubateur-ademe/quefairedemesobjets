@@ -3,4 +3,20 @@ locals {
   domain = "quefairedemesobjets.ademe.fr"
 
   metabase_enabled = true
+
+  # ENVIRONMENT of the webapp, the exact value templates/admin/base.html and
+  # servers.conf.erb test.
+  webapp_environment = "production"
+
+  # Host names of the webapp, the only ones Django accepts (ALLOWED_HOSTS).
+  # base: canonical domain (BASE_URL). aliases: other domains still pointing
+  # at the webapp.
+  webapp_base_domain = "quefairedemesdechets.ademe.fr"
+  webapp_alias_domains = [
+    "lvao.ademe.fr",
+    "quefairedemesobjets.ademe.fr",
+    "longuevieauxobjets.ademe.fr",
+    "quefairedemesobjets.fr",
+    "quefairedemesdechets.fr",
+  ]
 }
