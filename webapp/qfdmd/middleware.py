@@ -1,4 +1,3 @@
-import base64
 import logging
 from urllib.parse import urlparse, urlunparse
 
@@ -44,10 +43,10 @@ class RequestEnhancementMiddleware:
         # Prepare request
         if url_to_redirect := self._check_redirect_from_legacy_domains(request):
             return redirect(url_to_redirect, permanent=True)
-        if url_to_redirect := self._redirect_beta_hosts_to_assistant_v2(request):
+        if url_to_redirect := self._redirect_embeds_to_assistant_v2(request):
             response = redirect(url_to_redirect)
-            # ASSISTANT_V2_BETA_TESTERS_HOSTS can change at any time: a cached
-            # redirect would keep a host on the wrong assistant.
+            # Publishing a fiche moves its embeds to the V2: a cached redirect
+            # would keep them on the wrong assistant.
             add_never_cache_headers(response)
             return response
 
@@ -87,15 +86,13 @@ class RequestEnhancementMiddleware:
         "qfdmd:synonyme-detail": "assistant:produit",
     }
 
-    def _redirect_beta_hosts_to_assistant_v2(self, request) -> str | None:
-        """Send whitelisted embedders to the assistant V2, script unchanged.
+    def _redirect_embeds_to_assistant_v2(self, request) -> str | None:
+        """Send `iframe.js` embeds to the assistant V2, script unchanged.
 
-        `iframe.js` carries the host page URL in `ref` (base64): it is the only
-        thing that tells one embedder from another, so the switch is decided
-        here rather than in the script. `data-objet` is a fiche or a legacy
-        synonyme slug, resolved to its fiche as the legacy assistant does; a
-        fiche that does not exist in V2 stays on the legacy assistant rather
-        than 404ing.
+        `iframe.js` always adds `ref`, which tells an embed from a visit to the
+        site. `data-objet` is a fiche or a legacy synonyme slug, resolved to its
+        fiche as the legacy assistant does; a fiche that does not exist in V2
+        stays on the legacy assistant rather than 404ing.
         """
         if "ref" not in request.GET:
             return None
@@ -104,8 +101,6 @@ class RequestEnhancementMiddleware:
         except Resolver404:
             return None
         if not (target := self.ASSISTANT_V2_ROUTES.get(match.view_name)):
-            return None
-        if self._referrer_host(request) not in settings.ASSISTANT["V2_HOSTS"]:
             return None
         url_kwargs = match.kwargs
         if slug := match.kwargs.get("slug"):
@@ -116,7 +111,6 @@ class RequestEnhancementMiddleware:
             target,
             request.GET,
             [],
-            base_url=settings.ASSISTANT["V2_BASE_URL"] or settings.BASE_URL,
             **url_kwargs,
         )
 
@@ -132,13 +126,6 @@ class RequestEnhancementMiddleware:
         if page and fiches.filter(pk=page.pk).exists():
             return page.slug
         return None
-
-    @staticmethod
-    def _referrer_host(request) -> str | None:
-        try:
-            return urlparse(base64.b64decode(request.GET["ref"]).decode()).hostname
-        except (KeyError, ValueError, UnicodeDecodeError):
-            return None
 
     def _handle_special_query_params(self, request) -> str | None:
         try:
@@ -168,7 +155,6 @@ class RequestEnhancementMiddleware:
         view_name: str,
         get_params,
         params_to_remove: list,
-        base_url: str | None = None,
         **url_kwargs,
     ) -> str:
         from urllib.parse import urljoin
@@ -181,7 +167,7 @@ class RequestEnhancementMiddleware:
         query_string = get_params_copy.urlencode()
         relative_url = reverse(view_name, kwargs=url_kwargs)
 
-        base_url = (base_url or settings.BASE_URL).rstrip("/")
+        base_url = settings.BASE_URL.rstrip("/")
         absolute_url = urljoin(base_url, relative_url.lstrip("/"))
         return f"{absolute_url}?{query_string}" if query_string else absolute_url
 

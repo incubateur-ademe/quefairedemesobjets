@@ -1,7 +1,6 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
 from pathlib import Path
-from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
@@ -1506,16 +1505,12 @@ class TestsPreview(LookbookPreview):
 
     @register_form_class(AssistantV2RedirectForm)
     def t_20_assistant_v2_redirect(self, objet="", **kwargs):
-        """Test which assistant `iframe.js` opens for a whitelisted host,
-        depending on `data-objet`"""
-        host = urlparse(base_url).hostname
+        """Test which assistant `iframe.js` opens, depending on `data-objet`"""
         return render_to_string(
             "ui/tests/t_20_assistant_v2_redirect.html",
             {
                 "base_url": base_url,
                 "objet": objet,
-                "host": host,
-                "host_is_beta": host in settings.ASSISTANT["V2_HOSTS"],
                 "fiche_slug": (
                     RequestEnhancementMiddleware._fiche_slug(objet) if objet else ""
                 ),
@@ -1526,13 +1521,10 @@ class TestsPreview(LookbookPreview):
         """The host's header hides when the page scrolls down and comes back,
         fixed, when it scrolls up: each new screen of the assistant must land
         just below it"""
-        host = urlparse(base_url).hostname
         return render_to_string(
             "ui/tests/t_21_assistant_sticky_header.html",
             {
                 "base_url": base_url,
-                "host": host,
-                "host_is_beta": host in settings.ASSISTANT["V2_HOSTS"],
                 "iframe_js": iframe_js_opening_this_server(),
             },
         )
