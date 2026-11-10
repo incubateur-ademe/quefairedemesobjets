@@ -70,6 +70,7 @@ variable "webapp" {
     environment: production or staging, the values servers.conf.erb tests.
     server_names: base_domain and the aliases redirected to it. domains: host names
     attached to this container, whose CNAME must already resolve (ACME HTTP-01).
+    privacy: the privacy output of the webapp stack.
   EOT
   type = object({
     upstream     = string
@@ -78,6 +79,7 @@ variable "webapp" {
     environment  = string
     server_names = list(string)
     domains      = list(string)
+    privacy      = string
   })
   default = null
 
@@ -87,8 +89,9 @@ variable "webapp" {
       && can(regex(":[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$", var.webapp.release))
       && can(regex("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$", var.webapp.base_domain))
       && contains(["production", "staging"], var.webapp.environment)
+      && contains(["public", "private"], var.webapp.privacy)
     )
-    error_message = "webapp: upstream must be https://<host>, release an image with its tag, base_domain a host name, environment production or staging."
+    error_message = "webapp: upstream must be https://<host>, release an image with its tag, base_domain a host name, environment production or staging, privacy public or private."
   }
 
   validation {

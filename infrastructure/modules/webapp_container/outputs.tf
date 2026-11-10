@@ -7,6 +7,11 @@ output "public_endpoint" {
   value       = scaleway_container.webapp.public_endpoint
 }
 
+output "privacy" {
+  description = "Read by the gateway, which needs the IAM key to call a private webapp"
+  value       = scaleway_container.webapp.privacy
+}
+
 output "worker_container_id" {
   value = one(scaleway_container.worker[*].id)
 }
