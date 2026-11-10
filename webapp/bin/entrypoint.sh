@@ -3,7 +3,7 @@
 #
 # CONTAINER_ROLE=worker  → django-tasks worker, next to an HTTP listener
 #                          (Scaleway needs one on the port for its probe)
-# anything else (default) → nginx :8000 proxying to gunicorn :8001
+# anything else (default) → gunicorn on :$PORT, behind the nginx gateway
 set -euo pipefail
 
 if [[ "${CONTAINER_ROLE:-web}" == "worker" ]]; then
@@ -29,18 +29,15 @@ if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
   python manage.py generate_consignes || echo "generate_consignes failed, starting anyway" >&2
 fi
 
-# Start nginx in the background (proxies :8000 → :8001).
-# If nginx dies, the liveness probe on :8000 will fail and Scaleway
-# restarts the container.
-nginx -g 'daemon off;' &
-
-# Same settings as bin/start on Scalingo.
+# Same settings as bin/start on Scalingo. Keep-alive: 75 s, the default of
+# the nginx that faced the Scaleway edge before (gunicorn's is 2 s).
 exec gunicorn core.wsgi \
-  --bind "127.0.0.1:8001" \
+  --bind "0.0.0.0:${PORT:-8000}" \
   --worker-class gthread \
   --preload \
-  --timeout 120 \
+  --timeout "${GUNICORN_TIMEOUT:-120}" \
   --workers "${GUNICORN_WORKERS:-2}" \
   --threads "${GUNICORN_THREADS:-4}" \
   --max-requests 10000 \
-  --max-requests-jitter 2500
+  --max-requests-jitter 2500 \
+  --keep-alive "${GUNICORN_KEEPALIVE:-75}"
