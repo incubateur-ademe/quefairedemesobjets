@@ -155,7 +155,6 @@ class RequestEnhancementMiddleware:
         view_name: str,
         get_params,
         params_to_remove: list,
-        base_url: str | None = None,
         **url_kwargs,
     ) -> str:
         from urllib.parse import urljoin
@@ -168,7 +167,7 @@ class RequestEnhancementMiddleware:
         query_string = get_params_copy.urlencode()
         relative_url = reverse(view_name, kwargs=url_kwargs)
 
-        base_url = (base_url or settings.BASE_URL).rstrip("/")
+        base_url = settings.BASE_URL.rstrip("/")
         absolute_url = urljoin(base_url, relative_url.lstrip("/"))
         return f"{absolute_url}?{query_string}" if query_string else absolute_url
 
