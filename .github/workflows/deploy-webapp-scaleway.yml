@@ -1,0 +1,25 @@
+# Manual trigger for the Scaleway webapp deploy, until cd.yml / deploy.yml
+# are switched over from Scalingo.
+name: 🟣 Deploy webapp to Scaleway
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [preprod, prod]
+        required: true
+
+jobs:
+  deploy:
+    name: 🟣 ${{ inputs.environment }}
+    uses: ./.github/workflows/_deploy-webapp-scaleway.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      environment: ${{ inputs.environment }}
+      image_tag: ${{ inputs.environment }}-${{ github.sha }}
+      ref: ${{ github.sha }}
+
+permissions:
+  contents: read

@@ -1,0 +1,153 @@
+# Rolls an image out by applying its Terragrunt stack: the image tag is a
+# stack input (get_env("IMAGE_TAG")), so what is merged is what runs, and a
+# manual apply without IMAGE_TAG fails instead of deploying a placeholder.
+#
+# The stack is planned first, so its validations (tag, required secrets) run
+# before anything else. post_deploy_image: then run bin/post_deploy from the
+# new image, with the environment the container gets. The saved plan is
+# applied last: if post_deploy fails, the live version is untouched.
+#
+# Callers own the concurrency group, around build and apply: the S3 state
+# backend has no locking.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "GitHub environment holding the secrets (preprod or prod)"
+        type: string
+        required: true
+      stack:
+        description: "Stack directory under infrastructure/environments/<environment>/"
+        type: string
+        required: true
+      image_tag:
+        type: string
+        required: true
+      ref:
+        description: "Git ref to checkout (defaults to the event's ref)"
+        type: string
+        required: false
+        default: ""
+      post_deploy_image:
+        description: "Image to run bin/post_deploy from before the apply (webapp only)"
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  apply:
+    name: 🧱 Apply ${{ inputs.stack }}
+    runs-on: ubuntu-latest
+    # Callers group build and apply per app; this one guards the state when
+    # two callers apply the same stack (e.g. the gateway from cd.yml and from
+    # a webapp deploy).
+    concurrency:
+      group: terragrunt-${{ inputs.environment }}-${{ inputs.stack }}
+      cancel-in-progress: false
+    environment: ${{ inputs.environment }}
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      SCW_DEFAULT_REGION: fr-par
+
+      TF_VAR_access_key: ${{ secrets.SCW_ACCESS_KEY }}
+      TF_VAR_secret_key: ${{ secrets.SCW_SECRET_KEY }}
+      TF_VAR_project_id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      TF_VAR_organization_id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+
+      # Read by the stacks through get_env. Only true secrets travel this
+      # way; config is committed in the HCL.
+      IMAGE_TAG: ${{ inputs.image_tag }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+      # Bucket key of the webapp. Not AWS_ACCESS_KEY_ID: the S3 state backend
+      # reads that name too.
+      WEBAPP_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      WEBAPP_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      STACK: infrastructure/environments/${{ inputs.environment }}/${{ inputs.stack }}
+      TG_NON_INTERACTIVE: "true"
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: "1.10.0"
+          tofu_wrapper: false
+
+      - name: Install Terragrunt
+        run: |
+          TG_VERSION="1.1.0"
+          curl -fsSL -o /usr/local/bin/terragrunt \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          chmod +x /usr/local/bin/terragrunt
+          terragrunt --version
+
+      - name: Setup Scaleway CLI
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+        with:
+          version: v2.56.0
+
+      - name: Terragrunt plan
+        working-directory: ${{ env.STACK }}
+        run: terragrunt plan -out="$RUNNER_TEMP/tfplan"
+
+      # The env is the stack's inputs as rendered for this apply, so it
+      # matches what the container gets, except module defaults that are not
+      # inputs (GUNICORN_*).
+      - name: Run bin/post_deploy in the new image
+        if: inputs.post_deploy_image != ''
+        working-directory: ${{ env.STACK }}
+        env:
+          IMAGE: ${{ inputs.post_deploy_image }}
+          ENV_FILE: ${{ runner.temp }}/post_deploy.env
+        run: |
+          set -euo pipefail
+          trap 'rm -f "$ENV_FILE"' EXIT
+          # Captured, never printed: it holds the secrets.
+          INPUTS=$(terragrunt render --json | jq '.inputs')
+          # Masks go to the job log before any value is used.
+          jq -r '
+            ((.extra_secret_environment_variables // {}) | to_entries[] | .value),
+            (.DATABASE_URL, .SECRET_KEY, .NOTION_TOKEN, .AWS_ACCESS_KEY_ID,
+             .AWS_SECRET_ACCESS_KEY, .SENTRY_DSN)
+            | select(. != null and . != "") | "::add-mask::\(.)"' <<<"$INPUTS"
+          jq -r '.DATABASE_URL, .extra_secret_environment_variables.DB_WAREHOUSE
+            | select(. != null) | capture("//[^:]+:(?<pw>[^@]+)@")?.pw
+            | "::add-mask::\(.)"' <<<"$INPUTS"
+          (umask 077 && jq -r '
+            with_entries(select(.key | test("^[A-Z][A-Z0-9_]*$")))
+            + (.extra_environment_variables // {})
+            + (.extra_secret_environment_variables // {})
+            | to_entries[] | "\(.key)=\(.value | tostring)"' <<<"$INPUTS" >"$ENV_FILE")
+          echo "$SCW_SECRET_KEY" | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
+          docker run --rm --env-file "$ENV_FILE" "$IMAGE" bash /app/bin/post_deploy
+
+      - name: Terragrunt apply
+        working-directory: ${{ env.STACK }}
+        run: |
+          terragrunt apply "$RUNNER_TEMP/tfplan"
+
+      - name: Wait for the containers to be ready
+        working-directory: ${{ env.STACK }}
+        run: |
+          set -euo pipefail
+          OUT=$(terragrunt output -json)
+          mapfile -t IDS < <(jq -r 'to_entries[] | select(.key | endswith("container_id")) | .value.value // empty' <<<"$OUT")
+          "$GITHUB_WORKSPACE/scripts/infrastructure/wait_container_ready.sh" "${IDS[@]}"
+
+      # The plan holds the secrets in clear, and the apply step is skipped
+      # when post_deploy fails.
+      - name: Remove the plan and the env file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/tfplan" "$RUNNER_TEMP/post_deploy.env"
+
+permissions:
+  contents: read

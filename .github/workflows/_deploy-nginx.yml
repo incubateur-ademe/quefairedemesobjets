@@ -8,6 +8,14 @@ on:
         type: string
         required: true
 
+# The S3 state backend has no locking: two applies of the same stack must
+# never overlap. Build included, so an older run cannot apply after a newer
+# one. Queue rather than cancel, so an apply in flight finishes (a caller
+# that cancels its own run still cancels this one).
+concurrency:
+  group: deploy-nginx-${{ inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   nginx_docker:
     name: 🐳 Nginx gateway Docker
@@ -17,27 +25,15 @@ jobs:
       image_tag: ${{ inputs.tag_name }}
       environment: ${{ inputs.environment }}
 
-  get_container_id:
-    name: 🔑 Get nginx container ID
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    outputs:
-      nginx_id: ${{ steps.get_id.outputs.nginx_id }}
-    steps:
-      - name: Get container ID from environment
-        id: get_id
-        run: |
-          echo "nginx_id=${{ vars.SCALEWAY_NGINX_CONTAINER_ID }}" >> $GITHUB_OUTPUT
-
   deploy_scaleway_nginx:
     name: 🟣⏳ Scaleway nginx gateway
+    needs: [nginx_docker]
+    uses: ./.github/workflows/_terragrunt-apply-stack.yml
     secrets: inherit # pragma: allowlist secret`
-    uses: ./.github/workflows/_scaleway-container-deploy.yml
-    needs: [nginx_docker, get_container_id]
     with:
-      component: nginx gateway
-      container_id: ${{ needs.get_container_id.outputs.nginx_id }}
-      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway', inputs.tag_name) }}
+      environment: ${{ inputs.environment }}
+      stack: nginx_containers
+      image_tag: ${{ inputs.tag_name }}
 
 permissions:
   contents: read

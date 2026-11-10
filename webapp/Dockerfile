@@ -104,6 +104,8 @@ FROM runtime_base
 # Kept apart, so a code change does not push all the dependencies again
 COPY --from=python_build /app/.venv /app/.venv
 COPY --from=python_build /app/webapp /app/webapp
+# Run by CI before a preprod/prod rollout, as Scalingo's postdeploy does
+COPY bin/post_deploy /app/bin/post_deploy
 
 WORKDIR /app/webapp
 

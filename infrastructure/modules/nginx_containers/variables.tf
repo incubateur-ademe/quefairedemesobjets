@@ -11,6 +11,11 @@ variable "prefix" {
 variable "nginx_registry_image" {
   description = "Image Docker du reverse-proxy nginx (registre:tag)"
   type        = string
+  validation {
+    # An empty tag is what get_env("IMAGE_TAG", "") gives without IMAGE_TAG.
+    condition     = can(regex(":[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$", var.nginx_registry_image))
+    error_message = "Set IMAGE_TAG to the tag to deploy. To apply without redeploying, use the tag of the registry_image output."
+  }
 }
 
 variable "nginx_cpu_limit" {

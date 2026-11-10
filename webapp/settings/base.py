@@ -204,6 +204,7 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 DSFR_MARK_OPTIONAL_FIELDS = True
 
 MIDDLEWARE = [
+    "core.middleware.HealthzMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

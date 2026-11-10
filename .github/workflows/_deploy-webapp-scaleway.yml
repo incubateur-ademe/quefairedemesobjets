@@ -1,0 +1,51 @@
+# Deploys the webapp + worker containers to Scaleway: build the image, run
+# its bin/post_deploy against the environment's databases, then apply the
+# <environment>/webapp_container stack, which rolls the new image out.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "GitHub environment holding the secrets (preprod or prod)"
+        type: string
+        required: true
+      image_tag:
+        type: string
+        required: true
+      ref:
+        description: "Git ref to checkout (defaults to the event's ref)"
+        type: string
+        required: false
+        default: ""
+
+# The S3 state backend has no locking: two applies of the same stack must
+# never overlap. Build included, so an older run cannot apply after a newer
+# one. Queue rather than cancel, so an apply in flight finishes (a caller
+# that cancels its own run still cancels this one).
+concurrency:
+  group: deploy-webapp-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 🐳 Build webapp image
+    uses: ./.github/workflows/_webapp-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      image_tag: ${{ inputs.image_tag }}
+      environment: ${{ inputs.environment }}
+      ref: ${{ inputs.ref }}
+
+  apply:
+    name: 🚀 Post-deploy and apply
+    needs: [build]
+    uses: ./.github/workflows/_terragrunt-apply-stack.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      environment: ${{ inputs.environment }}
+      stack: webapp_container
+      image_tag: ${{ inputs.image_tag }}
+      ref: ${{ inputs.ref }}
+      post_deploy_image: rg.fr-par.scw.cloud/ns-qfdmo/webapp:${{ inputs.image_tag }}
+
+permissions:
+  contents: read
