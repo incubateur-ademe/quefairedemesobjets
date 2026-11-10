@@ -7,6 +7,11 @@ locals {
   # has been applied. Nginx then exposes metabase.<domain>.
   metabase_enabled = false
 
+  # The gateway serves the webapp from servers.conf.erb. Set this to true only
+  # once webapp_container has been applied: the gateway stack reads its
+  # outputs, and every push to main applies the gateway.
+  webapp_enabled = false
+
   # ENVIRONMENT of the webapp: "staging" and not "preprod", templates/admin/base.html
   # and servers.conf.erb test this exact value.
   webapp_environment = "staging"

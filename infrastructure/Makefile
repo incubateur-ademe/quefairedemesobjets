@@ -99,3 +99,15 @@ secrets-push: check-stack
 	  id=$$(scw secret secret list project-id=$$project path=/terraform/$(ENV) name=$(STACK) -o json | jq -r --arg n "$(STACK)" '[.[] | select(.name == $$n)][0].id // empty'); \
 	  [ -n "$$id" ] || id=$$(scw secret secret create path=/terraform/$(ENV) name=$(STACK) -o json | jq -er '.id'); \
 	  scw secret version create "$$id" data=@$(FILE) disable-previous=true -o json | jq -r '"/terraform/$(ENV)/$(STACK): revision \(.revision)"'
+
+# tofu test of a module, with a mocked provider. root.hcl generates the
+# required_providers block, so the test runs on a copy of the module that
+# gets one. Usage: make module-test MODULE=nginx_containers
+.PHONY: module-test
+module-test:
+	@[ -n "$(MODULE)" ] || { echo "usage: make module-test MODULE=<module>"; exit 1; }
+	@tmp=$$(mktemp -d) && trap 'rm -rf "$$tmp"' EXIT \
+	  && cp -R modules/$(MODULE)/. "$$tmp" \
+	  && printf 'terraform {\n  required_providers {\n    scaleway = { source = "scaleway/scaleway" }\n  }\n}\n' > "$$tmp/provider.tf" \
+	  && tofu -chdir="$$tmp" init -backend=false -input=false >/dev/null \
+	  && tofu -chdir="$$tmp" test
