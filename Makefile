@@ -327,6 +327,13 @@ fmt-infra:
 	tofu fmt -recursive infrastructure
 	terragrunt hcl fmt infrastructure
 
+# Render servers.conf.erb in each mode (Scalingo, local, preview, gateway), run
+# nginx -t on each rendering in docker without network, and compare them with
+# scripts/nginx_check/. After a wanted change: NGINX_CHECK_UPDATE=1 make nginx-check
+.PHONY: nginx-check
+nginx-check:
+	./scripts/nginx_check.sh
+
 .PHONY: dbt-generate-docs
 dbt-generate-docs:
 	make -C data-platform/dbt generate-docs
