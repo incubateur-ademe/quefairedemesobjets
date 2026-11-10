@@ -75,6 +75,11 @@ jobs:
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
 
+      - name: 🔍 Trivy scan (airflow-scheduler)
+        uses: ./.github/actions/trivy-scan
+        with:
+          image-ref: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-scheduler@${{ steps.build-and-push-scheduler.outputs.digest }}
+
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_webserver_meta_scaleway
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
@@ -94,6 +99,11 @@ jobs:
           file: data-platform/airflow-webserver.Dockerfile
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan (airflow-webserver)
+        uses: ./.github/actions/trivy-scan
+        with:
+          image-ref: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver@${{ steps.build-and-push-webserver.outputs.digest }}
 
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
@@ -116,3 +126,8 @@ jobs:
           file: data-platform/airflow-dag-processor.Dockerfile
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan (airflow-dag-processor)
+        uses: ./.github/actions/trivy-scan
+        with:
+          image-ref: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-dag-processor@${{ steps.build-and-push-dag-processor.outputs.digest }}
