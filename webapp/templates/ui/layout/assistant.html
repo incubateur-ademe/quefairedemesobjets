@@ -1,6 +1,12 @@
-{% load static %}
+{% load analytics_tags static %}
 <!DOCTYPE html>
-<html lang="fr">
+{% comment %}
+Analytics live on <html>: Turbo Drive swaps <body> on every visit.
+{% endcomment %}
+<html lang="fr"
+      data-controller="analytics"
+      {% posthog_data_attributes assistant.POSTHOG_KEY %}
+      {% sentry_data_attributes %}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
