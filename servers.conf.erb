@@ -22,9 +22,9 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
 # iframe.js appends ref=<base64 parent URL> to every embed URL. On the routes
 # below it is only read client-side (analytics controller), so drop it from the
 # cache key: otherwise every embedding page is a cache miss.
-# Everywhere else ref stays in the key: RequestEnhancementMiddleware redirects
-# ASSISTANT_V2_BETA_TESTERS_HOSTS to the V2 based on it, and legacy redirects
-# echo it, so one embedder's cached response must not reach another.
+# Everywhere else ref stays in the key: RequestEnhancementMiddleware's redirects
+# (to the assistant V2, legacy routes) echo it, so one embedder's cached
+# response must not reach another.
 # A route added here must never read ref server-side.
 map "$uri?$args" $cache_args {
     default $args;

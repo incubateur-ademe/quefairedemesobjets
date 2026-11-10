@@ -50,8 +50,6 @@ page scrolls up.
 <div class="fr-container fr-py-4w">
   {% dsfr_callout title="En-tête fixe du site hôte" text="L'en-tête se comporte comme celui de paris-saclay.com : caché quand la page descend, il réapparaît, fixé en haut, quand elle remonte." icon_class="fr-icon-flask-line" %}
 
-  {% include "ui/tests/_assistant_v2_host.html" %}
-
   <p class="fr-mb-3w" data-testid="attendu">
     Attendu : faire défiler la page jusqu'au bas de l'assistant, puis changer d'écran (choisir un objet, un geste).
     La page remonte et le haut de l'iframe s'arrête 16 px sous l'en-tête, qui réapparaît pendant la remontée.
