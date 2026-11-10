@@ -25,6 +25,9 @@ RUN apt-get update \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# uv installs everything; pip only ships vulnerable vendored libs (msgpack, urllib3, setuptools)
+RUN pip uninstall -y pip
+
 # Install uv (official installer)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --no-modify-path
 
