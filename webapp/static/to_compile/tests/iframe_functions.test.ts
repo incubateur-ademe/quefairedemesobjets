@@ -161,14 +161,13 @@ describe("getIframeAttributesAndExtra function tests", () => {
 
     const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "dechet", {
       useAutoHeight: true,
-      addScriptModeParam: true,
     })
 
     expect(iframeAttributes.style).toBe(
       "overflow: hidden; max-width: 100%; width: 100%; height: 100vh;",
     )
     expect(iframeAttributes.src).toBe(
-      `${process.env.BASE_URL}/dechet/test-objet?s=1&ref=aHR0cDovL2xvY2FsaG9zdC8%3D`,
+      `${process.env.BASE_URL}/dechet/test-objet/?ref=aHR0cDovL2xvY2FsaG9zdC8%3D`,
     )
   })
 
@@ -206,13 +205,14 @@ describe("getIframeAttributesAndExtra function tests", () => {
       ["formulaire", "Carte des solutions - Que Faire de mes Objets et Déchets"],
       ["infotri", "Info-tri"],
       ["assistant", "L'assistant au tri, à la réparation et au réemploi"],
+      ["dechet", "L'assistant au tri, à la réparation et au réemploi"],
     ])("should set the default title for route %s", (route, expectedTitle) => {
       const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, route)
       expect(iframeAttributes.title).toBe(expectedTitle)
     })
 
     test("should fall back to the carte/formulaire title for unknown routes", () => {
-      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "dechet")
+      const [iframeAttributes] = getIframeAttributesAndExtra(scriptTag, "inconnu")
       expect(iframeAttributes.title).toBe(
         "Carte des solutions - Que Faire de mes Objets et Déchets",
       )
@@ -231,7 +231,7 @@ describe("getIframeAttributesAndExtra function tests", () => {
       expect(iframeAttributes.title).toBe(
         "Carte des solutions - Que Faire de mes Objets et Déchets",
       )
-      expect(iframeAttributes.src).toContain("/carte/cyclevia")
+      expect(iframeAttributes.src).toContain("/carte/cyclevia/?")
     })
   })
 })
