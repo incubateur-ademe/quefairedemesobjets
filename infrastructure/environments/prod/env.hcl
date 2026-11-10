@@ -4,6 +4,11 @@ locals {
 
   metabase_enabled = true
 
+  # The gateway serves the webapp from servers.conf.erb. Set this to true only
+  # once webapp_container has been applied: the gateway stack reads its
+  # outputs, and every release applies the gateway.
+  webapp_enabled = false
+
   # ENVIRONMENT of the webapp, the exact value templates/admin/base.html and
   # servers.conf.erb test.
   webapp_environment = "production"

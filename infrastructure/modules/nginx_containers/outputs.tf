@@ -10,7 +10,15 @@ output "domain_name" {
 
 output "hostnames" {
   description = "Hostnames publics attachés au gateway"
-  value       = [for route in var.routes : route.hostname]
+  value = concat(
+    [for route in var.routes : route.hostname],
+    var.webapp == null ? [] : var.webapp.domains,
+  )
+}
+
+output "serves_webapp" {
+  description = "Whether the gateway serves the webapp: a webapp deploy only redeploys it, to empty its cache, when it does"
+  value       = var.webapp != null
 }
 
 output "public_endpoints" {
