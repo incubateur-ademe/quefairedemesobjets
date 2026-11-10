@@ -5,15 +5,14 @@ import re
 from typing import TypedDict
 from urllib.parse import urlencode
 
+from assistant.parcours import Parcours
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from wagtail.rich_text import expand_db_html
-
-from assistant.parcours import Parcours
 from qfdmd.blocks import ETAT_CHOICES
 from qfdmd.models import ProduitPage
 from qfdmo.models.action import Action, GroupeAction
+from wagtail.rich_text import expand_db_html
 
 
 class Badge(TypedDict):
@@ -44,6 +43,10 @@ PAGE_ID = re.compile(r"\bid=\"(\d+)\"")
 # Anchors Wagtail expanded, still bound to the fiche frame.
 FRAMED_LINK = re.compile(r"<a\b(?![^>]*data-turbo-frame)")
 
+#### Assistant V2 : parcours (accueil, fiche, solutions, carte) #3576
+# FIXME : dommage qu'on ne puisse pas utilisé le champ order dans GroupeAction
+# à voir si on peut changer l'ordre pour tout le monde et se baser sur
+# le champ order de GroupeAction
 GESTES_ORDER = (
     "reparer",
     "donner_echanger_rapporter",
@@ -52,6 +55,9 @@ GESTES_ORDER = (
     "trier",
 )
 
+#### Assistant V2 : parcours (accueil, fiche, solutions, carte) #3576
+# FIXME : ça ressemble quand même pas mal à une structure à conserver en DB ?
+# gestes = list[GroupeAction.code] -> du coup, est-ce bie nommé
 BLOCKS = (
     {
         "code": "reparer",
@@ -142,6 +148,16 @@ def _from_static(block, known, base, localise) -> Consigne | None:
     if block["bonus"]:
         badges.append({"condition": "bonus", "libelle": "Bonus Réparation"})
 
+    #### Assistant V2 : parcours (accueil, fiche, solutions, carte) #3576
+    # FIXME : pb de linter ?
+    #   For the code present, we get this error:
+    #   ```
+    #   Expression of type "dict[str, Unknown | list[Unknown] | list[dict[str, Unknown]] | str]" is incompatible with return type "Consigne | None"
+    #     Type "dict[str, Unknown | list[Unknown] | list[dict[str, Unknown]] | str]" is incompatible with type "Consigne | None"
+    #       "dict[str, Unknown | list[Unknown] | list[dict[str, Unknown]] | str]" is incompatible with "Consigne"
+    #       "dict[str, Unknown | list[Unknown] | list[dict[str, Unknown]] | str]" is incompatible with "None"
+    #   ```
+    #   Fix it, verify, and then give a concise explanation. @webapp/assistant/consignes.py:151-154
     return {
         "code": block["code"],
         "gestes": gestes,

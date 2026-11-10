@@ -4,7 +4,6 @@ dataset published on data.ademe.fr."""
 from django.conf import settings
 from django.db.models import Exists, OuterRef
 from ninja import Field, Schema
-
 from qfdmo.models.acteur import DataLicense, Source
 
 
@@ -80,6 +79,8 @@ class LieuSchema(Schema):
     complement_dadresse: str | None = Field(None, alias="adresse_complement")
     code_postal: str | None = None
     ville: str | None = None
+    #### Open data : les lieux du jeu de données ouvert sur l'API v1 - #3517⁠
+    # FIXME: tous les codes INSEE devraient être des entiers ?
     code_commune: str | None = Field(None, alias="code_commune_insee")
     code_epci: str | None = Field(None, alias="epci.code")
     nom_epci: str | None = Field(None, alias="epci.nom")
@@ -113,6 +114,8 @@ class LieuSchema(Schema):
             key=lambda source: source.libelle,
         )
         return [
+            #### Open data : les lieux du jeu de données ouvert sur l'API v1 - #3517⁠
+            # FIXME : j'aurais quand même mis un code et un logo :)
             {"nom": "Que faire de mes objets et déchets", "url": settings.BASE_URL},
             {"nom": "ADEME", "url": "https://www.ademe.fr"},
             *(
@@ -136,6 +139,8 @@ class LieuSchema(Schema):
 
     @staticmethod
     def resolve_qualites_et_labels(obj) -> str:
+        #### Open data : les lieux du jeu de données ouvert sur l'API v1 - #3517⁠
+        # FIXME : ici je ferais une structure plutôt qu'un string
         return "|".join(sorted({label.code for label in obj.labels.all()}))
 
     @staticmethod
@@ -145,6 +150,8 @@ class LieuSchema(Schema):
 
     @staticmethod
     def resolve_type_de_services(obj) -> str:
+        #### Open data : les lieux du jeu de données ouvert sur l'API v1 - #3517⁠
+        # FIXME : ici je ferais une structure plutôt qu'un string
         return "|".join(sorted({service.code for service in obj.acteur_services.all()}))
 
     @staticmethod
