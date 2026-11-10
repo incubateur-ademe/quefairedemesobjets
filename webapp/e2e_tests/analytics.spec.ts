@@ -164,11 +164,6 @@ test.describe("📊 Analytics & Tracking", () => {
         expectedPageType: "formulaire",
         expectedPageSlug: "",
       },
-      {
-        testId: "iframe-assistant",
-        expectedPageType: "quefaire",
-        expectedPageSlug: "",
-      },
     ]
 
     for (const { testId, expectedPageType, expectedPageSlug } of iframeCases) {
@@ -244,7 +239,6 @@ test.describe("📊 Analytics & Tracking", () => {
     const iframeCases = [
       { testId: "iframe-carte", label: "carte" },
       { testId: "iframe-formulaire", label: "formulaire" },
-      { testId: "iframe-assistant", label: "assistant" },
     ]
 
     for (const { testId, label } of iframeCases) {

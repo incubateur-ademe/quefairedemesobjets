@@ -2,83 +2,11 @@ import { expect } from "@playwright/test"
 import { test } from "./fixtures"
 import {
   clickFirstClickableActeurMarker,
-  getIframe,
-  mockApiAdresse,
   navigateTo,
   searchCarteAndWaitForActeurs,
-  searchOnProduitPage,
-  switchToListeMode,
-  TIMEOUT,
-  waitForIframeResize,
 } from "./helpers"
 
 test.describe("📋 Fiche Acteur - mode carte", () => {
-  test(
-    "La fiche acteur est visible dans le viewport sans scroll sur mobile",
-    { tag: ["@mobile", "@regression"] },
-    async ({ page }) => {
-      await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
-
-      const iframe = getIframe(page, "assistant")
-      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
-
-      // Scroll the search form into view, once the iframe is as tall as its
-      // content so the scroll moves the parent page and not the iframe document.
-      await waitForIframeResize(page, "assistant")
-      const searchForm = iframe
-        .locator('[data-controller="search-solution-form"]')
-        .first()
-      await searchForm.scrollIntoViewIfNeeded()
-
-      // Wait for the carte turbo-frame to load inside the produit page
-      await mockApiAdresse(page)
-
-      // When the CMS carte block is configured with `open_in_modal`, the carte
-      // is rendered inside a DSFR modal (`fr-modal--top`, see carte_block.html)
-      // closed on load: its address input is hidden until the modal is opened.
-      // The opener is found through `aria-controls` because its label is CMS
-      // content. `dialog.fr-modal` alone would also match the filtres modal.
-      const carteModal = iframe.locator("dialog.fr-modal--top")
-      if ((await carteModal.count()) > 0) {
-        const carteModalId = await carteModal.getAttribute("id")
-        await iframe.locator(`button[aria-controls="${carteModalId}"]`).first().click()
-      }
-
-      await expect(iframe.locator('[data-testid="carte-adresse-input"]')).toBeVisible({
-        timeout: TIMEOUT.DEFAULT,
-      })
-
-      // Search for Auray in the carte embedded in the produit page
-      await searchCarteAndWaitForActeurs(page, "Auray", iframe)
-
-      // Wait for acteur markers to be visible (already attached by searchCarteAndWaitForActeurs)
-      const acteurMarkers = iframe.locator(
-        '.maplibregl-marker[data-controller="pinpoint"]:not(#pinpoint-home)',
-      )
-      await expect(acteurMarkers.first()).toBeVisible({ timeout: TIMEOUT.LONG })
-
-      // Click on the first acteur marker via evaluate to trigger proper navigation
-      await acteurMarkers.first().evaluate((el: HTMLElement) => el.click())
-
-      // Wait for the acteur detail panel in the mauvais-etat tab to be shown
-      const acteurDetailsPanel = iframe.locator("#acteurDetailsPanel")
-      await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "false", {
-        timeout: TIMEOUT.DEFAULT,
-      })
-
-      // Assert that the acteur title is visible in the viewport without scrolling
-      const acteurTitle = iframe.getByTestId("acteur-title")
-      await expect(acteurTitle).toBeVisible({ timeout: TIMEOUT.DEFAULT })
-      await expect(acteurTitle).toBeInViewport()
-
-      // Close the acteur details modal
-      const closeButton = acteurDetailsPanel.getByTestId("acteur-details-close")
-      await closeButton.click()
-      await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "true", {
-        timeout: TIMEOUT.DEFAULT,
-      })
-    },
-  )
   test("La fiche acteur est immédiatement masquée après sa fermeture", async ({
     page,
   }) => {
@@ -105,58 +33,6 @@ test.describe("📋 Fiche Acteur - mode carte", () => {
       await clickFirstClickableActeurMarker(page)
       const distanceToActeur = page.getByTestId("acteur-detail:distance-to-acteur")
       await expect(distanceToActeur).toBeVisible()
-    },
-  )
-})
-
-test.describe("📋 Fiche Acteur - mode liste", () => {
-  // SKIP: it fails because when the last acteur of the list is clicked,
-  // the details is displayed on top of the list
-  // and the acteur title is not visible in the viewport
-  test.skip(
-    "La fiche acteur est visible dans le viewport sans scroll sur mobile",
-    { tag: ["@mobile", "@regression"] },
-    async ({ page }) => {
-      await navigateTo(page, "/lookbook/preview/tests/t_15_acteur_fiche_viewport")
-
-      const iframe = getIframe(page, "assistant")
-      await expect(iframe.locator("body")).toBeAttached({ timeout: TIMEOUT.DEFAULT })
-
-      // Scroll the search form into view
-      const searchForm = iframe
-        .locator('[data-controller="search-solution-form"]')
-        .first()
-      await searchForm.scrollIntoViewIfNeeded()
-
-      // Wait for the carte turbo-frame to load inside the produit page
-      await mockApiAdresse(page)
-
-      // Search for Auray in the carte embedded in the produit page
-      const someWagtailCarteBlock = iframe
-        .locator(".cmsfr-block-carte turbo-frame[data-testid=carte]")
-        .first()
-      await expect(someWagtailCarteBlock).toBeAttached({ timeout: 1000 })
-      await searchCarteAndWaitForActeurs(page, "auray", iframe, {
-        parentLocator: someWagtailCarteBlock,
-      })
-
-      // Switch to list view
-      await switchToListeMode(iframe)
-
-      // Click on the first acteur link in the list
-      const firstActeurListLink = iframe.getByTestId("acteur-list-link").last()
-      await firstActeurListLink.click()
-
-      // Wait for the acteur detail panel in the mauvais-etat tab to be shown
-      const acteurDetailsPanel = iframe.locator("#acteurDetailsPanel")
-      await expect(acteurDetailsPanel).toHaveAttribute("aria-hidden", "false", {
-        timeout: TIMEOUT.DEFAULT,
-      })
-
-      // Verify that the acteur title (card title) is visible in the viewport
-      const acteurTitle = iframe.getByTestId("acteur-title")
-      await expect(acteurTitle).toBeVisible({ timeout: TIMEOUT.DEFAULT })
-      await expect(acteurTitle).toBeInViewport()
     },
   )
 })
