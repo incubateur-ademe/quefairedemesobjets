@@ -49,6 +49,10 @@ infrastructure:
   - "infrastructure/**"
   - "!infrastructure/**/*.md"
 
+dependencies:
+  - "**/uv.lock"
+  - "**/package-lock.json"
+
 other:
   - "**"
   - "!**/*.md"
