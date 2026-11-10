@@ -57,6 +57,13 @@ resource "scaleway_container" "nginx" {
     timeout           = "10s"
   }
 
+  lifecycle {
+    precondition {
+      condition     = var.webapp == null ? true : (var.webapp.privacy == "public" || var.webapp_auth_token != "")
+      error_message = "The webapp is private but webapp_auth_token is empty: set webapp_auth_token in the secret of the stack and apply the gateway before making the webapp private."
+    }
+  }
+
   environment_variables = merge(
     local.route_environment_variables,
     local.webapp_environment_variables,

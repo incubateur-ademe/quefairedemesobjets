@@ -40,6 +40,7 @@ dependency "webapp_container" {
   mock_outputs = {
     public_endpoint = "https://mock-webapp.functions.fnc.fr-par.scw.cloud"
     registry_image  = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:mock"
+    privacy         = "public"
   }
 }
 
@@ -88,5 +89,6 @@ inputs = {
     environment  = local.env.locals.webapp_environment
     server_names = [local.webapp_domain]
     domains      = [local.webapp_domain]
+    privacy      = dependency.webapp_container.outputs.privacy
   } : null
 }
