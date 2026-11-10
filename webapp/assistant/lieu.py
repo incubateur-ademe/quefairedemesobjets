@@ -16,6 +16,11 @@ class Geste(TypedDict):
     libelle: str
 
 
+#### Assistant V2 : fiche d'un lieu et géolocalisation - #3577⁠
+# FIXME : pourquoi ne pas utiliser le champ bonus de LabelQualité
+# et pouurquoi ce n'est pas la même liste ?
+# en base on a la liste : bonusrepar, BonusRepar_ASL, bonusrepar_ABJ_TH
+#                         ecomaison, refashion, qualirepar
 def offers_bonus(lieu: DisplayedActeur) -> bool:
     return any(label.code in BONUS_REPARATION_CODES for label in lieu.labels.all())
 
@@ -25,6 +30,9 @@ def practical_info_of(lieu: DisplayedActeur) -> list[str]:
     first."""
     infos = []
 
+    #### Assistant V2 : fiche d'un lieu et géolocalisation - #3577⁠
+    # FIXME : On a beaucoup de texte répartit dans les fichiers, est-ce qu'on a pas intérêt
+    # à ce,traliser tous les textes de l'assistant v2 dans un même fichier ?
     if lieu.lieu_prestation == HOME_SERVICE_PRESTATION:
         infos.append("Sur place ou à domicile")
     if lieu.uniquement_sur_rdv:
