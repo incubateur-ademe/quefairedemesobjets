@@ -10,7 +10,7 @@ from django.db import connection
 from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import ListView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
@@ -46,6 +46,7 @@ def backlink(request):
     return response
 
 
+@never_cache
 def healthz(request):
     """Health check probe for container platforms (e.g. Scaleway).
 

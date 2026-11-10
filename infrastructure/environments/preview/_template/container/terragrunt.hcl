@@ -87,6 +87,11 @@ inputs = {
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
   AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
 
+  worker_enabled = false
+  # Persistent connections would add up across previews on the shared
+  # preprod instance.
+  CONN_MAX_AGE = 0
+
   # Keep the container warm for 1h after the last request to avoid cold starts.
   timeout = 3600
 }
