@@ -16,7 +16,7 @@ The following bots are configured in CI to inspect the code:
 
 - CodeQL: code quality checks
 - GitGuardian: secret and password detection
-- Dependabot: dependency updates (once a week)
+- Renovate: dependency updates (once a week)
 - ruff: enforcement of Python code standards
 - prettier, black: code formatting
 

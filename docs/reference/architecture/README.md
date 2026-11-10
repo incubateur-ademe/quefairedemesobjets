@@ -154,17 +154,17 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 
 ### CI/CD & déploiement
 
-| Composant                                                                               | Référence                                                             |
-| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Workflows GitHub Actions (review, cd, deploy, sync_databases, dependabot, publish-docs) | [`infrastructure/ci-cd.md`](../infrastructure/ci-cd.md)               |
-| Provisioning OpenTofu / Terragrunt                                                      | [`infrastructure/provisioning.md`](../infrastructure/provisioning.md) |
+| Composant                                                                   | Référence                                                             |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Workflows GitHub Actions (review, cd, deploy, sync_databases, publish-docs) | [`infrastructure/ci-cd.md`](../infrastructure/ci-cd.md)               |
+| Provisioning OpenTofu / Terragrunt                                          | [`infrastructure/provisioning.md`](../infrastructure/provisioning.md) |
 
 ### Observabilité
 
 | Composant                                                          | Référence                                                         |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
 | Sentry, PostHog, Matomo, Scaleway Cockpit, Mattermost, healthcheck | [`infrastructure/monitoring.md`](../infrastructure/monitoring.md) |
-| CodeQL, GitGuardian, Dependabot, Dashlord                          | [`security/README.md`](../security/README.md)                     |
+| CodeQL, GitGuardian, Renovate, Dashlord                            | [`security/README.md`](../security/README.md)                     |
 
 ### Sécurité
 
