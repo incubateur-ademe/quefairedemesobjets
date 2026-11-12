@@ -2,6 +2,7 @@ import "./styles/assistant.css"
 
 // Child half of iframe-resizer: the host page's iframe.js runs the parent half.
 import "@iframe-resizer/child"
+import posthog from "posthog-js"
 
 import "./js/assistant/application"
 
@@ -13,6 +14,10 @@ let isFirstLoad = true
 document.addEventListener("turbo:load", () => {
   bodyObserver.disconnect()
   bodyObserver.observe(document.body)
-  if (!isFirstLoad) window.parentIFrame?.scrollToOffset(0, 0)
+  if (!isFirstLoad) {
+    window.parentIFrame?.scrollToOffset(0, 0)
+    // PostHog only captures the pageview of the initial load.
+    posthog.capture("$pageview")
+  }
   isFirstLoad = false
 })
