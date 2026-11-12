@@ -21,6 +21,7 @@ body {
   border: 3px solid var(--qfa-cadre);
   border-radius: var(--qfa-rayon-sm);
   overflow: clip;
+  background: var(--qfa-blanc);
   color: var(--qfa-texte-titre);
   font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 }
