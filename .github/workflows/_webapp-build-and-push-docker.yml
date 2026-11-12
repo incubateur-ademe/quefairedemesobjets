@@ -58,8 +58,13 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha,scope=webapp
           cache-to: type=gha,scope=webapp,mode=max
-          push: true
+          load: true
           tags: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/webapp:${{ inputs.image_tag }}
+
+      - name: 🔍 Trivy scan and push (webapp)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/webapp
 
 permissions:
   contents: read

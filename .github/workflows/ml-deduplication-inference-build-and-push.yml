@@ -62,7 +62,7 @@ jobs:
           context: ml_deduplication
           file: ml_deduplication/Dockerfile
           platforms: linux/amd64
-          push: true
+          load: true
           tags: |
             ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME_PREPROD }}:${{ github.sha }}-preprod
             ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME_PREPROD }}:preprod-latest
@@ -70,6 +70,11 @@ jobs:
             MODEL_DIR=models/xgboost
           cache-from: type=gha,scope=ml-deduplication-inference
           cache-to: type=gha,scope=ml-deduplication-inference,mode=max
+
+      - name: 🔍 Trivy scan and push (${{ env.IMAGE_NAME_PREPROD }})
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME_PREPROD }}
 
   build-and-push-prod:
     name: 🚀 Build and push (prod - main)
@@ -99,7 +104,7 @@ jobs:
           context: ml_deduplication
           file: ml_deduplication/Dockerfile
           platforms: linux/amd64
-          push: true
+          load: true
           tags: |
             ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-prod
             ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:prod-latest
@@ -107,6 +112,11 @@ jobs:
             MODEL_DIR=models/xgboost
           cache-from: type=gha,scope=ml-deduplication-inference
           cache-to: type=gha,scope=ml-deduplication-inference,mode=max
+
+      - name: 🔍 Trivy scan and push (${{ env.IMAGE_NAME }})
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}
 
   build-and-push-prod-release:
     name: 🎯 Build and push (prod - release)
@@ -136,7 +146,7 @@ jobs:
           context: ml_deduplication
           file: ml_deduplication/Dockerfile
           platforms: linux/amd64
-          push: true
+          load: true
           tags: |
             ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }}-prod
             ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}:prod-latest
@@ -144,3 +154,8 @@ jobs:
             MODEL_DIR=models/xgboost
           cache-from: type=gha,scope=ml-deduplication-inference
           cache-to: type=gha,scope=ml-deduplication-inference,mode=max
+
+      - name: 🔍 Trivy scan and push (${{ env.IMAGE_NAME }})
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/${{ env.IMAGE_NAME }}
