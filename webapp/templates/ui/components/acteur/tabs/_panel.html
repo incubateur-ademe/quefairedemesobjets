@@ -1,5 +1,5 @@
 <div id="{{ map_container_id }}:{% block id %}{% endblock %}"
-    class="fr-tabs__panel"
+    class="fr-tabs__panel {% block panel_classes %}{% endblock %}"
     role="tabpanel"
     aria-labelledby="{{ map_container_id }}:{% block aria_labelledby %}{% endblock %}"
     tabindex="{% block tabindex %}0{% endblock %}"

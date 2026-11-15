@@ -2,9 +2,11 @@
     <ul
         class="fr-tabs__list qfdmo"
         role="tablist"
+        data-controller="tabs-focus"
+        data-action="keydown->tabs-focus#followSelection"
         aria-label="Informations détaillées de la solution {{ adresse }}"
     >
-        {% include "ui/components/acteur/tabs/_tab.html" with text="Présentation" target="aboutPanel" %}
+        {% include "ui/components/acteur/tabs/_tab.html" with text="Présentation" target="aboutPanel" selected=True %}
 
         {% if object.labels_without_enseigne_display %}
             {% include "ui/components/acteur/tabs/_tab.html" with text="Labels" target="labelsPanel" %}
@@ -14,6 +16,8 @@
     </ul>
 
     {% include "ui/components/acteur/tabs/about_panel.html" %}
-    {% include "ui/components/acteur/tabs/labels_panel.html" %}
+    {% if object.labels_without_enseigne_display %}
+        {% include "ui/components/acteur/tabs/labels_panel.html" %}
+    {% endif %}
     {% include "ui/components/acteur/tabs/sources_panel.html" %}
 </div>

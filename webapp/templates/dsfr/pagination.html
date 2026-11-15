@@ -11,6 +11,7 @@
               {% if page_obj.has_previous %}
               data-controller="frame-link"
               data-frame-link-url-value="{% url_remplace_params page=1 %}"
+              data-frame-link-focus-selector-value="#liste-solutions"
               data-action="frame-link#visit"
               {% else %}
               disabled
@@ -22,6 +23,7 @@
               {% if page_obj.has_previous %}
               data-controller="frame-link"
               data-frame-link-url-value="{% url_remplace_params page=page_obj.previous_page_number %}"
+              data-frame-link-focus-selector-value="#liste-solutions"
               data-action="frame-link#visit"
               {% else %}
               disabled
@@ -44,7 +46,8 @@
                     title="{{ page_label }} {{ item }}"
                     data-controller="frame-link"
                     data-frame-link-url-value="{% url_remplace_params page=item %}"
-                    data-action="frame-link#visit">{{ item }}</button>
+                    data-frame-link-focus-selector-value="#liste-solutions"
+              data-action="frame-link#visit">{{ item }}</button>
           </li>
         {% endif %}
       {% endfor %}
@@ -56,7 +59,8 @@
                 title="{{ page_label }} {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}"
                 data-controller="frame-link"
                 data-frame-link-url-value="{% url_remplace_params page=page_obj.number %}"
-                data-action="frame-link#visit">
+                data-frame-link-focus-selector-value="#liste-solutions"
+              data-action="frame-link#visit">
           {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
         </button>
       </li>
@@ -67,6 +71,7 @@
               {% if page_obj.has_next %}
               data-controller="frame-link"
               data-frame-link-url-value="{% url_remplace_params page=page_obj.next_page_number %}"
+              data-frame-link-focus-selector-value="#liste-solutions"
               data-action="frame-link#visit"
               {% else %}
               disabled
@@ -80,6 +85,7 @@
               {% if page_obj.has_next %}
               data-controller="frame-link"
               data-frame-link-url-value="{% url_remplace_params page=page_obj.paginator.num_pages %}"
+              data-frame-link-focus-selector-value="#liste-solutions"
               data-action="frame-link#visit"
               {% else %}
               disabled

@@ -17,6 +17,7 @@ import {
   type CanvasWithMap,
   type PersistedMap,
 } from "../../js/assistant/persisted_map"
+import { MAPLIBRE_LOCALE_FR } from "../../js/maplibre_locale"
 import { serverDuration, type Timing } from "./chrono_controller"
 
 const UUID_PLACEHOLDER = "__uuid__"
@@ -120,6 +121,7 @@ export default class extends Controller<HTMLElement> {
     const glyphs = this.glyphsValue
     const map = new MapLibre({
       container: canvas,
+      locale: MAPLIBRE_LOCALE_FR,
       style: this.styleUrlValue,
       transformRequest: (url) => {
         if (url.startsWith(IGN_TILES)) {

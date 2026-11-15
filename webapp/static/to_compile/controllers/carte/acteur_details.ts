@@ -34,7 +34,17 @@ class ActeurController extends Controller<HTMLDialogElement> {
     }
   }
 
-  hide() {
+  hide(event?: Event) {
+    const shareToggle = this.element.querySelector<HTMLElement>(
+      '[aria-controls$="sharePanel"][aria-expanded="true"]',
+    )
+    if (event instanceof KeyboardEvent && shareToggle) {
+      // Escape closes the share panel first, not the whole panel.
+      event.preventDefault()
+      shareToggle.click()
+      shareToggle.focus()
+      return
+    }
     this.element.close()
     PinpointController.clearActivePinpoints()
   }
@@ -85,11 +95,15 @@ class ActeurController extends Controller<HTMLDialogElement> {
     )
   }
 
+  readonly #onTurboFrameLoad = (event: Event) =>
+    this.#showPanelWhenTurboFrameLoad(event as CustomEvent)
+
   connect() {
-    document.addEventListener(
-      "turbo:frame-load",
-      this.#showPanelWhenTurboFrameLoad.bind(this),
-    )
+    document.addEventListener("turbo:frame-load", this.#onTurboFrameLoad)
+  }
+
+  disconnect() {
+    document.removeEventListener("turbo:frame-load", this.#onTurboFrameLoad)
   }
 }
 

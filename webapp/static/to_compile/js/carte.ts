@@ -14,6 +14,7 @@ import SearchSolutionFormController from "../controllers/carte/search_solution_f
 import SsCatObjectAutocompleteController from "../controllers/formulaire/ss_cat_object_autocomplete_controller"
 import ActeurDetailsController from "../controllers/carte/acteur_details"
 import FrameLinkController from "../controllers/carte/frame_link_controller"
+import TabsFocusController from "../controllers/carte/tabs_focus_controller"
 import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
 import ResponsiveController from "../controllers/carte/responsive_controller"
 import PinpointController from "../controllers/carte/pinpoint_controller"
@@ -37,6 +38,7 @@ stimulus.register("copy", CopyController)
 stimulus.register("scroll", ScrollController)
 stimulus.register("acteur-details", ActeurDetailsController)
 stimulus.register("frame-link", FrameLinkController)
+stimulus.register("tabs-focus", TabsFocusController)
 stimulus.register("next-autocomplete", NextAutocompleteController)
 stimulus.register("pinpoint", PinpointController)
 
