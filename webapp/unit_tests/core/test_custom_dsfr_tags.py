@@ -2,7 +2,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from core.templatetags.custom_dsfr_tags import accordions_heading_tag, shift_headings
+from core.templatetags.custom_dsfr_tags import (
+    accordions_heading_tag,
+    only_tiles,
+    shift_headings,
+)
 
 
 class TestShiftHeadings:
@@ -37,3 +41,14 @@ class TestAccordionsHeadingTag:
         blocks = [SimpleNamespace(block_type="accordion")]
 
         assert accordions_heading_tag(blocks) == "h2"
+
+
+class TestOnlyTiles:
+    def test_true_when_every_block_is_a_tile(self):
+        blocks = [SimpleNamespace(block_type="tile")] * 2
+
+        assert only_tiles(blocks) is True
+
+    def test_false_when_mixed_or_empty(self):
+        assert only_tiles([SimpleNamespace(block_type="text")]) is False
+        assert only_tiles([]) is False

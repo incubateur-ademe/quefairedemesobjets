@@ -14,8 +14,20 @@ const tagName = (page: Page, selector: string) =>
   page.locator(selector).evaluate((element) => element.tagName)
 
 test.describe("♿ RGAA 9.1 — Structuration de l'information par des titres", () => {
-  test("Accueil : « Plan du site » est un titre de niveau 2", async ({ page }) => {
+  test("Accueil : les tuiles sont des éléments de liste et « Plan du site » est un titre de niveau 2", async ({
+    page,
+  }) => {
     await navigateTo(page, "/")
+
+    for (const text of [
+      "Accéder aux recommandations de tri adaptées à chaque situation",
+      "Trouver des lieux proches de chez vous grâce à une carte interactive",
+      "S'informer sur le devenir de votre déchet ou de votre objet",
+      "Limiter votre impact grâce à une consommation plus responsable",
+    ]) {
+      await expect(page.getByRole("listitem").filter({ hasText: text })).toHaveCount(1)
+      await expect(page.getByRole("heading", { name: text })).toHaveCount(0)
+    }
 
     await expect(page.locator("footer h2", { hasText: "Plan du site" })).toHaveCount(1)
     await expect(page.locator("footer h3", { hasText: "Plan du site" })).toHaveCount(0)

@@ -47,3 +47,9 @@ def shift_headings(html: str, tag: str) -> str:
         return f"<{match.group('slash')}h{level}"
 
     return mark_safe(HEADING_PATTERN.sub(shift, str(html)))  # noqa: S308
+
+
+@register.simple_tag
+def only_tiles(blocks) -> bool:
+    """True when a stream holds tiles only: they are a list, not headings."""
+    return len(blocks) > 0 and all(block.block_type == "tile" for block in blocks)
