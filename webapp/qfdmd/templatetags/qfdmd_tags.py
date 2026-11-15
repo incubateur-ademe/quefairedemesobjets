@@ -162,7 +162,7 @@ def footnotes(parser, token):
     return FootnotesNode(nodelist)
 
 
-BLOCK_TAGS = re.compile(r"<(p|ul|ol|div)\b", re.IGNORECASE)
+BLOCK_TAGS = re.compile(r"<(p|ul|ol|div|h[1-6]|table|blockquote)\b", re.IGNORECASE)
 LINE_BREAKS = re.compile(r"(?:\s*<br\s*/?>\s*){2,}", re.IGNORECASE)
 
 

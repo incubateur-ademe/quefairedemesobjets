@@ -12,6 +12,9 @@ class TestAsParagraphs:
             ("Un<br>Deux", "<p>Un<br>Deux</p>"),
             ("<p>Déjà</p>", "<p>Déjà</p>"),
             ("<ul><li>a</li></ul>", "<ul><li>a</li></ul>"),
+            ("<h3>Titre</h3>Texte", "<h3>Titre</h3>Texte"),
+            ("<table></table>", "<table></table>"),
+            ("<blockquote>Cité</blockquote>", "<blockquote>Cité</blockquote>"),
             ("", ""),
         ],
     )
