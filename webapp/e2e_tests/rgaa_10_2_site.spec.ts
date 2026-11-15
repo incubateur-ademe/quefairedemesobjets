@@ -14,6 +14,7 @@ async function linksOpeningInNewWindowWithoutMention(page: Page) {
       document.querySelectorAll<HTMLAnchorElement>('a[target="_blank"]'),
     )
       .filter((link) => {
+        if (link.closest("turbo-frame")) return false
         const visibleText = collapse(
           Array.from(link.childNodes)
             .map((node) =>

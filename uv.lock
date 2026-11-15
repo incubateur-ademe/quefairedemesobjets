@@ -4914,6 +4914,7 @@ name = "webapp-quefairedemesobjetsetdechets"
 version = "9.5.0"
 source = { editable = "webapp" }
 dependencies = [
+    { name = "beautifulsoup4" },
     { name = "boto3" },
     { name = "detect-secrets" },
     { name = "diff-match-patch" },
@@ -4957,6 +4958,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "boto3", specifier = "<1.44" },
     { name = "detect-secrets", specifier = ">=1.5.0" },
     { name = "diff-match-patch", specifier = ">=20241021,<20241022" },

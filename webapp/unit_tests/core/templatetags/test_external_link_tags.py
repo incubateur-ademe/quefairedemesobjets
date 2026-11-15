@@ -26,3 +26,9 @@ def test_ignores_links_in_same_tab():
     html = '<a href="/page">Interne</a>'
 
     assert announce_new_window(html) == html
+
+
+def test_appends_mention_to_existing_title_without_replacing_it():
+    html = '<a href="https://a.fr" target="_blank" title="Détail">Un lien</a>'
+
+    assert 'title="Détail - nouvelle fenêtre"' in announce_new_window(html)

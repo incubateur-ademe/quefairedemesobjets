@@ -20,7 +20,8 @@ def announce_new_window(html: str) -> str:
         text = " ".join(link.get_text(" ").split())
         if not text or NEW_WINDOW_MENTION in text.lower():
             continue
-        if NEW_WINDOW_MENTION in link.get("title", "").lower():
+        title = link.get("title", "").strip()
+        if NEW_WINDOW_MENTION in title.lower():
             continue
-        link["title"] = f"{text} - {NEW_WINDOW_MENTION}"
+        link["title"] = f"{title or text} - {NEW_WINDOW_MENTION}"
     return mark_safe(str(soup))
