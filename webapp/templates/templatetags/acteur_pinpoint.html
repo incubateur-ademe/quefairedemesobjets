@@ -6,6 +6,7 @@
     data-longitude="{{ longitude }}"
     data-map-target="acteur"
     href="{{ href }}"
+    {% if libelle %}aria-label="{{ libelle|title }}"{% endif %}
     data-turbo-frame="{% acteur_frame_id %}"
     data-controller="pinpoint"
     data-action="analytics#captureInteractionWithMap pinpoint#setActive"

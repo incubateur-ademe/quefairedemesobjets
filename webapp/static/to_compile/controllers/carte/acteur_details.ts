@@ -1,6 +1,8 @@
 import PinpointController from "./pinpoint_controller"
 import { Controller } from "@hotwired/stimulus"
 
+type DsfrApi = (element: Element) => { collapse: { conceal: () => void } }
+
 const TABBABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea, summary, [tabindex]:not([tabindex="-1"])'
 
@@ -38,10 +40,14 @@ class ActeurController extends Controller<HTMLDialogElement> {
     const shareToggle = this.element.querySelector<HTMLElement>(
       '[aria-controls$="sharePanel"][aria-expanded="true"]',
     )
-    if (event instanceof KeyboardEvent && shareToggle) {
+    const sharePanel = document.getElementById(
+      shareToggle?.getAttribute("aria-controls") ?? "",
+    )
+    const dsfr = (window as unknown as { dsfr?: DsfrApi }).dsfr
+    if (event instanceof KeyboardEvent && shareToggle && sharePanel && dsfr) {
       // Escape closes the share panel first, not the whole panel.
       event.preventDefault()
-      shareToggle.click()
+      dsfr(sharePanel).collapse.conceal()
       shareToggle.focus()
       return
     }

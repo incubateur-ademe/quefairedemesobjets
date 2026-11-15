@@ -1,3 +1,4 @@
+import { AxeBuilder } from "@axe-core/playwright"
 import { expect, Locator, Page } from "@playwright/test"
 import { test } from "./fixtures"
 import {
@@ -166,7 +167,9 @@ test.describe("♿ RGAA 7.2 — Carte, alternative en mode liste", () => {
     )
     const hasLabelsTab = await Promise.all(
       urls.map(async (url) =>
-        (await (await page.request.get(url)).text()).includes("labelsPanelTab"),
+        /role="tab"[^>]*>\s*Labels\s*</.test(
+          await (await page.request.get(url)).text(),
+        ),
       ),
     )
     const withLabels = hasLabelsTab.indexOf(true)
@@ -208,6 +211,14 @@ test.describe("♿ RGAA 7.2 — Carte, alternative en mode liste", () => {
     const canvas = fiche.locator("canvas.maplibregl-canvas")
     await expect(canvas).toBeVisible({ timeout: TIMEOUT.LONG })
     await expect(canvas).toHaveAttribute("aria-label", /^(?!Map$).+/)
+    await expect(
+      fiche.locator('.maplibregl-marker[data-controller="pinpoint"]').first(),
+    ).toBeVisible({ timeout: TIMEOUT.LONG })
+    const linkNames = await new AxeBuilder({ page })
+      .include("#acteurDetailsPanel")
+      .withRules(["link-name"])
+      .analyze()
+    expect(linkNames.violations).toEqual([])
     const attribution = fiche.locator(".maplibregl-ctrl-attrib-button")
     await expect(attribution).not.toHaveAttribute("aria-label", "Toggle attribution")
     const attributionLabel = (await attribution.getAttribute("aria-label")) ?? ""

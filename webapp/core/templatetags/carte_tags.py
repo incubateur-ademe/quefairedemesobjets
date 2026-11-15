@@ -144,6 +144,7 @@ def acteur_pinpoint_tag(
         "latitude": acteur.latitude,
         "longitude": acteur.longitude,
         "href": acteur_url(context, acteur, with_map=False),
+        "libelle": getattr(acteur, "libelle", ""),
         "request": context.get("request"),
         MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
         "mask_id": mask_id,

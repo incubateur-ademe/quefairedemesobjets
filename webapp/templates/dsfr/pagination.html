@@ -47,7 +47,7 @@
                     data-controller="frame-link"
                     data-frame-link-url-value="{% url_remplace_params page=item %}"
                     data-frame-link-focus-selector-value="#liste-solutions"
-              data-action="frame-link#visit">{{ item }}</button>
+                    data-action="frame-link#visit">{{ item }}</button>
           </li>
         {% endif %}
       {% endfor %}
@@ -60,7 +60,7 @@
                 data-controller="frame-link"
                 data-frame-link-url-value="{% url_remplace_params page=page_obj.number %}"
                 data-frame-link-focus-selector-value="#liste-solutions"
-              data-action="frame-link#visit">
+                data-action="frame-link#visit">
           {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
         </button>
       </li>

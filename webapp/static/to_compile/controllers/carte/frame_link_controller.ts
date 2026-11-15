@@ -27,11 +27,12 @@ export default class extends Controller<HTMLElement> {
     if (!frame) return
     if (this.focusSelectorValue) {
       const selector = this.focusSelectorValue
-      frame.addEventListener(
-        "turbo:frame-load",
-        () => frame.querySelector<HTMLElement>(selector)?.focus(),
-        { once: true },
-      )
+      const focusWhenLoaded = (event: Event) => {
+        if (event.target !== frame) return
+        frame.removeEventListener("turbo:frame-load", focusWhenLoaded)
+        frame.querySelector<HTMLElement>(selector)?.focus()
+      }
+      frame.addEventListener("turbo:frame-load", focusWhenLoaded)
     }
     if (frame.getAttribute("src") === this.urlValue) {
       void frame.reload()
