@@ -1,0 +1,30 @@
+{% extends "sites_conformes_core/base.html" %}
+
+{% load static dsfr_tags wagtailcore_tags wagtail_dsfr_tags i18n %}
+
+{% block title %}
+  <title>{{ title }} — {{ settings.sites_conformes_content_manager.CmsDsfrConfig.site_title }}</title>
+{% endblock title %}
+
+{% block description %}
+  <meta name="description" content="{{ home_page.search_description }}" />
+{% endblock description %}
+
+{% block content %}
+  <div class="fr-container fr-mt-6w">
+    {% dsfr_breadcrumb breadcrumb %}
+    <h1>{% translate "Sitemap" %}</h1>
+    {% include "sites_conformes_content_manager/blocks/messages.html" %}
+  </div>
+
+  <div class="fr-container fr-mt-6w">
+    <div class="fr-grid-row fr-grid-row--gutters fr-mb-3w">
+      <ul>
+        <li>
+          <a href="{% pageurl home_page %}">Page d'accueil - Rechercher un objet ou un déchet</a>
+        </li>
+        {% include "sites_conformes_content_manager/blocks/sitemap_entry.html" with entries=sitemap_entries %}
+      </ul>
+    </div>
+  </div>
+{% endblock content %}

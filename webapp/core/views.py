@@ -12,9 +12,19 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_control
 from django.views.generic import ListView
+from sites_conformes.content_manager.views import SiteMapView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
-from qfdmd.models import EmbedSettings, Synonyme
+from qfdmd.models import (
+    EmbedSettings,
+    LegacyProduitIndexPage,
+    ProduitIndexPage,
+    ProduitPage,
+    Synonyme,
+)
+
+SITEMAP_MAX_DEPTH = 2
+SITEMAP_EXCLUDED_PAGE_TYPES = (LegacyProduitIndexPage, ProduitIndexPage, ProduitPage)
 
 
 def backlink(request):
@@ -123,4 +133,38 @@ class AutocompleteSynonyme(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["turbo_frame_id"] = self.request.GET.get("turbo_frame_id")
+        return context
+
+
+def _sitemap_entries(page, depth, is_authenticated):
+    if depth == 0:
+        return []
+    entries = []
+    for child in page.get_children().live().specific():
+        if isinstance(child, SITEMAP_EXCLUDED_PAGE_TYPES):
+            continue
+        if getattr(child, "exclude_from_sitemap", False):
+            continue
+        is_restricted = bool(child.get_view_restrictions())
+        if is_restricted and not is_authenticated:
+            continue
+        entries.append(
+            {
+                "page": child,
+                "restricted": is_restricted,
+                "children": _sitemap_entries(child, depth - 1, is_authenticated),
+            }
+        )
+    return entries
+
+
+class ReadableSitemapView(SiteMapView):
+    @override
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["sitemap_entries"] = _sitemap_entries(
+            context["home_page"],
+            SITEMAP_MAX_DEPTH,
+            self.request.user.is_authenticated,
+        )
         return context
