@@ -38,3 +38,27 @@ def test_uses_the_given_mention():
     html = '<a href="https://a.fr" target="_blank">Un lien</a>'
 
     assert 'title="Un lien - new tab"' in announce_new_window(html, "new tab")
+
+
+def test_does_not_escape_the_link_text_twice():
+    html = '<a href="https://a.fr" target="_blank">Tom &amp; Jerry</a>'
+
+    assert 'title="Tom &amp; Jerry - nouvelle fenêtre"' in announce_new_window(html)
+
+
+def test_data_title_is_not_an_existing_title():
+    html = '<a data-title="a" href="https://a.fr" target="_blank">Un lien</a>'
+
+    assert 'title="Un lien - nouvelle fenêtre"' in announce_new_window(html)
+
+
+def test_uses_image_alt_when_link_has_no_text():
+    html = '<a href="https://a.fr" target="_blank"><img src="l.png" alt="Logo"></a>'
+
+    assert 'title="Logo - nouvelle fenêtre"' in announce_new_window(html)
+
+
+def test_leaves_link_without_text_nor_alt_untouched():
+    html = '<a href="https://a.fr" target="_blank"><img src="l.png" alt=""></a>'
+
+    assert "title=" not in announce_new_window(html)

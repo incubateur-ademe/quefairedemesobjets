@@ -8,7 +8,7 @@
     {% endif %}
     "
     href="{% block href %}{{ url }}{% if utm_source %}?utm_source={{ utm_source }}{% endif %}{% endblock %}"
-    {% if title %}title="{{ title }}"{% endif %}
+    title="{% if title %}{{ title }}{% else %}{{ text }} - nouvelle fenêtre{% endif %}"
     target="_blank"
     rel="noreferrer"
     {% block data_action %}data-action="click -> analytics#captureInteractionWithSolutionDetails"{% endblock %}

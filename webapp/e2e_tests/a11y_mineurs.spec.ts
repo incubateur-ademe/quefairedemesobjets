@@ -119,7 +119,7 @@ test.describe("♿ RGAA Mineurs", () => {
         'a[href="https://github.com/incubateur-ademe/quefairedemesobjets/"]',
       )
       await expect(link).toHaveAttribute("title", /disponible librement/)
-      await expect(link).toHaveAttribute("title", /Nouvelle fenêtre/)
+      await expect(link).toHaveAttribute("title", /nouvelle fenêtre/)
     })
   })
 })
