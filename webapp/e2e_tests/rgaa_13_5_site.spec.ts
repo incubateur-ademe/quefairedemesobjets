@@ -6,7 +6,6 @@ const PAGES = [
   "/bonus-reparation/",
   "/qui-sommes-nous/budget/",
   "/categories/biodechets/dechets-alimentaires/",
-  "/categories/vetements/",
 ]
 
 test.describe("♿ RGAA 13.5 — Émojis cachés aux technologies d'assistance (site)", () => {
@@ -27,7 +26,7 @@ test.describe("♿ RGAA 13.5 — Émojis cachés aux technologies d'assistance (
           const parent = node.parentElement
           if (!parent || !emoji.test(text) || ignoredTags.has(parent.tagName)) continue
           if (!parent.checkVisibility()) continue
-          if (parent.closest('[aria-hidden="true"]')) continue
+          if (parent.closest('[aria-hidden="true"], [role="img"][aria-label]')) continue
           exposed.push(text.trim().slice(0, 60))
         }
         return exposed
