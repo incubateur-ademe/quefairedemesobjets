@@ -1,4 +1,4 @@
-{% load analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar wagtailcore_tags %}
+{% load a11y_tags analytics_tags dsfr_tags qfdmd_tags static wagtailuserbar wagtailcore_tags %}
 
 {% comment %}
 SEO meta tags are mirrored from Sites Faciles templates:
@@ -106,12 +106,12 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {% endif %}
 
 
-        <main id="content" class="{% if iframe %}[@media(min-height:600px)]:qf-pb-2w qf-pb-3w{% endif %}" role="main">
+        {% bullet_lists %}<main id="content" class="{% if iframe %}[@media(min-height:600px)]:qf-pb-2w qf-pb-3w{% endif %}" role="main">
             {% footnotes %}
             {% block main %}
             {% endblock main %}
             {% endfootnotes %}
-        </main>
+        </main>{% endbullet_lists %}
 
         {% block footer %}
         {% include "ui/components/surfooter/surfooter.html" %}
