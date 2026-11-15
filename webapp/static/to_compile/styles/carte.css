@@ -66,6 +66,7 @@ Style the autocomplete container:
 
   > aside,
   > main,
+  > dialog,
   > section {
     grid-area: map;
   }

@@ -1,5 +1,6 @@
 import { Application } from "@hotwired/stimulus"
 import * as Turbo from "@hotwired/turbo"
+import "./modal_escape"
 
 import AbTestController from "../controllers/shared/ab_test_controller"
 import CopyController from "../controllers/shared/copy_controller"
@@ -12,6 +13,7 @@ import MapController from "../controllers/carte/map_controller"
 import SearchSolutionFormController from "../controllers/carte/search_solution_form_controller"
 import SsCatObjectAutocompleteController from "../controllers/formulaire/ss_cat_object_autocomplete_controller"
 import ActeurDetailsController from "../controllers/carte/acteur_details"
+import FrameLinkController from "../controllers/carte/frame_link_controller"
 import NextAutocompleteController from "../controllers/shared/next_autocomplete_controller"
 import ResponsiveController from "../controllers/carte/responsive_controller"
 import PinpointController from "../controllers/carte/pinpoint_controller"
@@ -34,6 +36,7 @@ stimulus.register("autocomplete", GenericAutocompleteController)
 stimulus.register("copy", CopyController)
 stimulus.register("scroll", ScrollController)
 stimulus.register("acteur-details", ActeurDetailsController)
+stimulus.register("frame-link", FrameLinkController)
 stimulus.register("next-autocomplete", NextAutocompleteController)
 stimulus.register("pinpoint", PinpointController)
 

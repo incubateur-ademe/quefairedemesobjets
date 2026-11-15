@@ -1,5 +1,6 @@
 {% load acteur_tags turbo_tags %}
-<aside class="
+{% namespaced "acteur-title" as title_id %}
+<dialog class="
     {% block classes %}
       {# The classes below are specific to carte and can be overriden in Formulaire #}
       qf-z-20
@@ -8,30 +9,29 @@
     {% endblock classes %}
 
       qf-overflow-auto
-      qf-absolute
+      qf-absolute [&:modal]:qf-fixed
       max-md:bottom-0
 
-     qf-top-0 qf-right-0 qf-bottom-0
-    aria-[hidden=true]:qf-invisible
+     qf-top-0 qf-right-0 qf-bottom-0 qf-left-auto
+     qf-m-0 qf-h-full qf-max-w-none qf-max-h-none
     md:qf-transition-transform
     md:qf-duration-250
      md:qf-w-[400px] md:qf-translate-x-full
-    aria-[hidden=false]:md:qf-translate-x-0
-    qf-px-2w
+    open:md:qf-translate-x-0
+    qf-px-2w qf-pb-0
     qf-border-l qf-border-grey-900 qf-border-solid qf-border-t-0 qf-border-r-0 qf-border-b-0
     qf-bg-white
-    max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0
+    max-md:qf-bottom-0 max-md:qf-left-0 max-md:qf-right-0 max-md:qf-w-full
     max-md:qf-drop-shadow-[0_0_100px_rgba(0,0,0,0.3)]
-    aria-[hidden=true]:max-md:qf-fade-out
-    aria-[hidden=true]:qf-hidden
     "
-tabindex="0"
 id="acteurDetailsPanel"
-aria-hidden="{{ preview|yesno:"false,true" }}"
+aria-labelledby="{{ title_id }}"
+{% if preview %}open{% endif %}
 data-controller="acteur-details"
 data-search-solution-form-target="acteurDetailsPanel"
 data-acteur-details-map-container-id-value="{% main_frame_id %}"
-data-action="keydown.esc@window->acteur-details#hide:stop"
+data-acteur-details-modal-value="{{ mode_liste|yesno:"true,false" }}"
+data-action="keydown.esc@window->acteur-details#hide:stop close->acteur-details#hide keydown->acteur-details#trapFocus"
 >
   {# Content #}
   <div
@@ -59,4 +59,4 @@ data-action="keydown.esc@window->acteur-details#hide:stop"
           id="{% acteur_frame_id %}"
       ></turbo-frame>
   </div>
-</aside>
+</dialog>

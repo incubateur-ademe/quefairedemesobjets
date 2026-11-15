@@ -138,10 +138,7 @@ test.skip("Les acteurs digitaux sont visibles sur le formulaire", async ({ page 
   // Digital acteurs
   await iframe.locator("#id_digital_1").click({ force: true })
   await iframe.locator("[aria-controls=acteurDetailsPanel]").first().click()
-  await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
-    "aria-hidden",
-    "false",
-  )
+  await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute("open")
 })
 test.describe("🗺️ Affichage et Interaction Acteurs", () => {
   test("Les acteurs sont visibles sur la carte du formulaire et fonctionnent", async ({
@@ -182,11 +179,9 @@ test.describe("🗺️ Affichage et Interaction Acteurs", () => {
     // Click on the first acteur marker
     await acteurMarkers.first().click({ force: true })
 
-    // Wait for the panel to be shown (aria-hidden="false")
-    await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute(
-      "aria-hidden",
-      "false",
-      { timeout: TIMEOUT.DEFAULT },
-    )
+    // Wait for the panel to be shown (open dialog)
+    await expect(iframe.locator("#acteurDetailsPanel")).toHaveAttribute("open", {
+      timeout: TIMEOUT.DEFAULT,
+    })
   })
 })

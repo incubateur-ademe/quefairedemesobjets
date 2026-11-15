@@ -537,7 +537,7 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     await expect(fifthVoirLaFiche).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     // Get the href and navigate with the with_map parameter to show the mini map
-    const href = await fifthVoirLaFiche.getAttribute("href")
+    const href = await fifthVoirLaFiche.getAttribute("data-frame-link-url-value")
     expect(href).toBeTruthy()
 
     // Navigate to the acteur page with with_map parameter to display the mini carte
@@ -586,7 +586,7 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
       })
 
       const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
-      const href = await fifthVoirLaFiche.getAttribute("href")
+      const href = await fifthVoirLaFiche.getAttribute("data-frame-link-url-value")
       expect(href).toBeTruthy()
 
       // List mode: with_map=1 is set, mini map must be visible on mobile
@@ -630,7 +630,7 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
       })
 
       const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
-      const href = await fifthVoirLaFiche.getAttribute("href")
+      const href = await fifthVoirLaFiche.getAttribute("data-frame-link-url-value")
       expect(href).toBeTruthy()
 
       // Map mode: simulate a pinpoint click (no with_map param).
@@ -674,7 +674,7 @@ test.describe("🗺️ Mini Carte - Affichage des Pinpoints", () => {
     await expect(voirLaFicheButtons.first()).toBeVisible({ timeout: TIMEOUT.DEFAULT })
 
     const fifthVoirLaFiche = voirLaFicheButtons.nth(4)
-    const href = await fifthVoirLaFiche.getAttribute("href")
+    const href = await fifthVoirLaFiche.getAttribute("data-frame-link-url-value")
     expect(href).toBeTruthy()
 
     // Desktop map mode: simulate a pinpoint click (no with_map param).
