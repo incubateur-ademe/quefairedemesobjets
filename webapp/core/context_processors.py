@@ -58,6 +58,9 @@ def global_context(request) -> dict:
     ) = _get_search_placeholders()
     header_search_form = QfSearchForm(prefix="header-autocomplete")
     header_search_form.fields["search"].widget.attrs["placeholder"] = header_placeholder
+    header_search_form.fields["search"].widget.attrs[
+        "title"
+    ] = DEFAULT_HEADER_SEARCH_PLACEHOLDER
     homepage_search_form = QfSearchForm(prefix="home")
     homepage_search_form.fields["search"].widget.attrs["placeholder"] = home_placeholder
     skiplinks = [
