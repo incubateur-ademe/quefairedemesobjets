@@ -1,6 +1,6 @@
 {% extends "ui/layout/quefaire.html" %}
 
-{% load static wagtail_dsfr_tags wagtailcore_tags %}
+{% load external_link_tags static wagtail_dsfr_tags wagtailcore_tags %}
 
 {% block analytics_action %}produitPageView{% endblock %}
 
@@ -20,12 +20,16 @@
     [&_h2]:qf-mt-4w
     ">
         {# Always show the blocks up to and including the carte #}
-        {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_always_visible page=page %}
+        {% filter announce_new_window %}
+            {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_always_visible page=page %}
+        {% endfilter %}
 
         {# `iframe` is set by RequestEnhancementMiddleware from the Sec-Fetch-Dest header. #}
         {# Blocks after the carte are only rendered on the standalone page, not in the iframe. #}
         {% if not iframe %}
-            {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_to_hide_in_iframe page=page %}
+            {% filter announce_new_window %}
+                {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_to_hide_in_iframe page=page %}
+            {% endfilter %}
         {% endif %}
     </div>
 </div>
