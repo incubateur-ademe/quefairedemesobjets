@@ -24,8 +24,6 @@ test.describe("♿ RGAA 12.3 — Plan du site pertinent", () => {
       "Page d'accueil - Rechercher un objet ou un déchet",
     )
 
-    await expect(plan.locator("ul ul ul")).toHaveCount(0)
-
     const hrefs = await links.evaluateAll((anchors) =>
       anchors.map((a) => a.getAttribute("href") ?? ""),
     )

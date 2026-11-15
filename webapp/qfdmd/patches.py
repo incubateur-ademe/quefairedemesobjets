@@ -1,3 +1,5 @@
+# sites-conformes 3.x queries a non-existent tag relation (FieldError on catalogs).
+# Delete this file when upgrading to 4.x, which fixes it.
 from django.db.models import Count, Q
 from sites_conformes.content_manager.managers import TagManager
 
