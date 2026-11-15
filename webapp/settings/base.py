@@ -212,6 +212,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "assistant.middleware.IframeOnlyMiddleware",
+    "core.middleware.HideEmojisMiddleware",
 ]
 
 CACHES = {
