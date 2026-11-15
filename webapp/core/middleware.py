@@ -4,7 +4,9 @@ from core.emoji_aria import hide_emojis_from_assistive_tech
 
 logger = logging.getLogger(__name__)
 
-SITE_VIEW_NAMES = frozenset({"wagtail_serve", "qfdmd:home", "qfdmd:synonyme-detail"})
+SITE_VIEW_NAMES = frozenset(
+    {"wagtail_serve", "qfdmd:home", "qfdmd:synonyme-detail", "readable_sitemap"}
+)
 
 
 class HideEmojisMiddleware:

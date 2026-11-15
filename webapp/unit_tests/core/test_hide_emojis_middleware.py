@@ -19,7 +19,7 @@ def run(response, path="/qui-sommes-nous/", **headers):
 
 class TestHideEmojisMiddleware:
     @pytest.mark.parametrize(
-        "path", ["/", "/qui-sommes-nous/", "/dechet/pomme/", "/bonus-reparation/"]
+        "path", ["/", "/qui-sommes-nous/", "/dechet/pomme/", "/plan-du-site/"]
     )
     def test_wraps_emojis_of_site_pages(self, path):
         assert run(HttpResponse(HTML), path).content.decode() == WRAPPED

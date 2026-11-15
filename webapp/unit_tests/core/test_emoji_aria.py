@@ -82,12 +82,17 @@ class TestHideEmojisFromAssistiveTech:
         html = f"<p>{text}</p>"
         assert hide_emojis_from_assistive_tech(html) == html
 
-    @pytest.mark.parametrize("count", [1, 3, 5])
+    @pytest.mark.parametrize("count", [2, 3, 5])
     def test_replaces_stars_with_a_labelled_image(self, count):
-        unit = "étoile" if count == 1 else "étoiles"
         stars = STAR * count
         assert hide_emojis_from_assistive_tech(f"<p>{stars}</p>") == (
-            f'<p><span role="img" aria-label="{count} {unit}">{stars}</span></p>'
+            f'<p><span role="img" aria-label="{count} étoiles">{stars}</span></p>'
+        )
+
+    @pytest.mark.parametrize("star", [STAR, STAR + VS16])
+    def test_hides_a_single_star_like_any_emoji(self, star):
+        assert hide_emojis_from_assistive_tech(f"<p>{star}Top</p>") == (
+            f"<p>{hidden(star)}Top</p>"
         )
 
     def test_labels_stars_next_to_other_emojis_separately(self):
