@@ -3,6 +3,9 @@
 
 {% block body_classes %}qf-h-screen{% endblock %}
 
+{% block content_wrapper_open %}<div class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden">{% endblock %}
+{% block content_wrapper_close %}</div>{% endblock %}
+
 {% block content %}
 {% namespaced "search_form" as form_id %}
 <turbo-frame
@@ -55,11 +58,13 @@
         <section class="map-grid qf-relative">
             {% include 'ui/components/carte/header.html' %}
 
-            {% if mode_liste %}
-                {% include "ui/components/carte/mode_liste.html" %}
-            {% else %}
-                {% include "ui/components/carte/mode_carte.html" %}
-            {% endif %}
+            <main id="content" role="main" class="qf-relative qf-h-full">
+                {% if mode_liste %}
+                    {% include "ui/components/carte/mode_liste.html" %}
+                {% else %}
+                    {% include "ui/components/carte/mode_carte.html" %}
+                {% endif %}
+            </main>
 
             {% include "ui/components/acteur/acteur_detail.html" %}
         </section>
