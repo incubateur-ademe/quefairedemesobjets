@@ -1,9 +1,11 @@
 import logging
+import re
 from typing import cast
 
 from django import template
 from django.core.cache import cache
 from django.forms import FileField
+from django.utils.html import format_html_join
 from django.utils.safestring import mark_safe
 from wagtail.models import Page
 
@@ -158,3 +160,16 @@ def footnotes(parser, token):
     nodelist = parser.parse(("endfootnotes",))
     parser.delete_first_token()
     return FootnotesNode(nodelist)
+
+
+BLOCK_TAGS = re.compile(r"<(p|ul|ol|div)\b", re.IGNORECASE)
+LINE_BREAKS = re.compile(r"(?:\s*<br\s*/?>\s*){2,}", re.IGNORECASE)
+
+
+@register.filter
+def as_paragraphs(value: str) -> str:
+    """Wrap legacy text, which has no block element, in <p>."""
+    if not value or BLOCK_TAGS.search(value):
+        return mark_safe(value or "")
+    chunks = [chunk.strip() for chunk in LINE_BREAKS.split(value) if chunk.strip()]
+    return format_html_join("", "<p>{}</p>", ((mark_safe(chunk),) for chunk in chunks))
