@@ -68,12 +68,17 @@ jobs:
           context: .
           cache-from: type=gha,scope=scheduler
           cache-to: type=gha,scope=scheduler,mode=max
-          push: true
+          load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-scheduler.Dockerfile
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan and push (airflow-scheduler)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-scheduler
 
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_webserver_meta_scaleway
@@ -88,12 +93,17 @@ jobs:
           context: .
           cache-from: type=gha,scope=webserver
           cache-to: type=gha,scope=webserver,mode=max
-          push: true
+          load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-webserver.Dockerfile
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan and push (airflow-webserver)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver
 
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
@@ -110,9 +120,14 @@ jobs:
           context: .
           cache-from: type=gha,scope=dag-processor
           cache-to: type=gha,scope=dag-processor,mode=max
-          push: true
+          load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-dag-processor', inputs.image_tag) || steps.airflow_dag-processor_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-dag-processor.Dockerfile
           build-args: |
             AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan and push (airflow-dag-processor)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-dag-processor
