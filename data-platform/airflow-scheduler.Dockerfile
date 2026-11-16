@@ -35,17 +35,26 @@ FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS scheduler
 USER root
 
 # unzip for Airflow DAG
+# upgrade: the base image ships outdated Debian packages and docker CLI (Trivy)
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
     curl gdal-bin jq unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# The base image installs its own Airflow in a venv at /home/airflow/.local.
+# We never run it: our venv (/opt/airflow/.venv) comes first on PATH and holds
+# Airflow and every dependency we use. Its outdated packages (PyJWT, certifi,
+# urllib3, uv…) only fail the Trivy scan, so we drop it. The base /entrypoint
+# only references it when the container runs as root, to extend PYTHONPATH.
+RUN rm -rf /home/airflow/.local
 
 # Scaleway CLI, download a pinned version
 # rather than through the official get.sh installer, because it resolves the latest
 # release through an unauthenticated GitHub API call and fails under rate
 # limiting.
 # It is used by a DAG (purge_log_db)
-ARG SCW_CLI_VERSION=2.62.0
+ARG SCW_CLI_VERSION=2.66.0
 RUN ARCH="$(dpkg --print-architecture)" && \
     curl -fsSL -o /usr/local/bin/scw \
     "https://github.com/scaleway/scaleway-cli/releases/download/v${SCW_CLI_VERSION}/scaleway-cli_${SCW_CLI_VERSION}_linux_${ARCH}" && \
