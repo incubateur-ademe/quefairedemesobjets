@@ -1,4 +1,4 @@
-{% load qfdmd_tags %}
+{% load qfdmd_tags external_link_tags %}
 <div
     class="{% if border %}qf-border qf-border-grey-900 qf-border-solid{% endif %}"
 >
@@ -9,7 +9,7 @@
         href="{{ source_or_label.url|yesno:"#" }}"
         target="_blank"
         rel="noreferrer"
-        title="{{ source_or_label.libelle }} - nouvelle fenêtre"
+        title="{{ source_or_label.libelle }} - {% new_window_mention %}"
     >
         {% if source_or_label.logo_filtre %}
             <span class="qf-h-3w [&>svg]:qf-h-full [&>svg]:qf-w-auto qf-flex">

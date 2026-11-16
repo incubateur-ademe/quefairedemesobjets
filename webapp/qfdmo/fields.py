@@ -4,7 +4,10 @@ from django import forms
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
-from core.templatetags.external_link_tags import announce_new_window_links
+from core.templatetags.external_link_tags import (
+    announce_new_window_links,
+    new_window_mention_setting,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +34,9 @@ class LabelQualiteChoiceField(forms.ModelMultipleChoiceField):
                 {
                     "label_qualite": obj,
                     "texte_d_aide": mark_safe(
-                        announce_new_window_links(obj.filtre_texte_d_aide)
+                        announce_new_window_links(
+                            obj.filtre_texte_d_aide, new_window_mention_setting()
+                        )
                     ),
                 },
             )

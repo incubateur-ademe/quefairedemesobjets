@@ -1,4 +1,13 @@
+from types import SimpleNamespace
+
+import pytest
+from django.template.loader import render_to_string
+
 from core.templatetags.external_link_tags import announce_new_window
+from qfdmd.models import AccessibilitySettings
+from qfdmo.fields import LabelQualiteChoiceField
+from qfdmo.forms import FormulaireForm
+from qfdmo.models.acteur import LabelQualite
 
 
 def test_adds_title_to_blank_link_without_mention():
@@ -62,3 +71,31 @@ def test_leaves_link_without_text_nor_alt_untouched():
     html = '<a href="https://a.fr" target="_blank"><img src="l.png" alt=""></a>'
 
     assert "title=" not in announce_new_window(html)
+
+
+@pytest.fixture
+def custom_mention(db):
+    AccessibilitySettings.objects.create(new_window_mention="nouvel onglet")
+
+
+def test_tag_reads_the_setting_without_request(custom_mention):
+    html = render_to_string("ui/forms/widgets/epci_codes_additionnal_info.html")
+
+    assert "INSEE - nouvel onglet" in html
+
+
+def test_form_label_is_rendered_lazily_with_the_setting(custom_mention):
+    label = FormulaireForm().fields["label_reparacteur"].label
+
+    assert "Artisanat - nouvel onglet" in str(label)
+
+
+def test_label_qualite_help_text_uses_the_setting(custom_mention):
+    field = LabelQualiteChoiceField(queryset=LabelQualite.objects.none())
+    label = SimpleNamespace(
+        logo_filtre=None,
+        filtre_label="Label",
+        filtre_texte_d_aide='<a href="https://a.fr" target="_blank">Aide</a>',
+    )
+
+    assert "Aide - nouvel onglet" in field.label_from_instance(label)

@@ -1,3 +1,4 @@
+{% load external_link_tags %}
 <footer
     class="max-md:qf-fixed
     qf-bottom-0 qf-left-0 qf-right-0"
@@ -10,7 +11,7 @@
             href="{% url 'qfdmo:address-suggestion-form' %}"
             target="_blank"
             rel="noreferrer"
-            title="Proposer une adresse - nouvelle fenêtre"
+            title="Proposer une adresse - {% new_window_mention %}"
             data-testid="formulaire-proposer-une-adresse"
         >
             Proposer une adresse

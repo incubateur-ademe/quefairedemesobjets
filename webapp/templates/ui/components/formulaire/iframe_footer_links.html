@@ -1,10 +1,11 @@
+{% load external_link_tags %}
 {# Liens de pieds de page pour iframe #}
 {% if is_embedded %}
     <div class="fr-container fr-mb-1w fr-text--xs qf-text-center fr-pt-1w">
         <a href="https://longuevieauxobjets.ademe.fr/reutiliser-nos-outils/?mtm_campaign=widget"
            target="_blank"
            rel="noopener"
-           title="Réutiliser cette carte sur mon site - nouvelle fenêtre"
+           title="Réutiliser cette carte sur mon site - {% new_window_mention %}"
         >
             Réutiliser cette carte sur mon site
         </a>
@@ -14,7 +15,7 @@
             target="_blank"
             rel="noreferrer"
             class="qf-text-nowrap"
-            title="Participer à son amélioration - nouvelle fenêtre"
+            title="Participer à son amélioration - {% new_window_mention %}"
         >
             Participer à son amélioration
         </a>

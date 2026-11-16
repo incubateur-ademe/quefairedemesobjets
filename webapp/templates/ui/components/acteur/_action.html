@@ -1,3 +1,4 @@
+{% load external_link_tags %}
 <a
     class="
     qf-flex qf-flex-col qf-items-center
@@ -8,7 +9,7 @@
     {% endif %}
     "
     href="{% block href %}{{ url }}{% if utm_source %}?utm_source={{ utm_source }}{% endif %}{% endblock %}"
-    title="{% if title %}{{ title }}{% else %}{{ text }} - nouvelle fenêtre{% endif %}"
+    title="{% if title %}{{ title }}{% else %}{{ text }} - {% new_window_mention %}{% endif %}"
     target="_blank"
     rel="noreferrer"
     {% block data_action %}data-action="click -> analytics#captureInteractionWithSolutionDetails"{% endblock %}
