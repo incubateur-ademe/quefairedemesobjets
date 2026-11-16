@@ -3,6 +3,8 @@ import { navigateTo } from "./helpers"
 
 const MAX_TAB_STOPS = 80
 const SHARE_BUTTON_TESTID = "modal-button-partager-le-site"
+// Inline elements on the same line (superscript, icons) can sit a few pixels apart.
+const SAME_LINE_TOLERANCE = 8
 
 const pages = [
   {
@@ -25,6 +27,14 @@ async function focusLastBreadcrumbLink(page: Page) {
   if (await toggle.isVisible()) {
     await toggle.click()
     await expect(page.locator("#page-breadcrumb")).toHaveClass(/fr-collapse--expanded/)
+    // DSFR moves focus to the first link on expand and checks it on the next frames.
+    await expect(page.locator(".fr-breadcrumb__link").first()).toBeFocused()
+    await page.evaluate(
+      () =>
+        new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve)),
+        ),
+    )
   }
   await page.locator(".fr-breadcrumb__link").last().focus()
 }
@@ -60,7 +70,7 @@ test.describe("♿ RGAA 12.8 — Ordre de tabulation cohérent (site)", () => {
           expect(
             current.top,
             `${viewport.width}px, arrêt ${stop} : retour en arrière visuel`,
-          ).toBeGreaterThanOrEqual(previousTop)
+          ).toBeGreaterThanOrEqual(previousTop - SAME_LINE_TOLERANCE)
           previousTop = current.top
           if (current.testId === SHARE_BUTTON_TESTID) {
             reachedShare = true
