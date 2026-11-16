@@ -31,6 +31,5 @@ locals {
   # with webapp_enabled only. Set it once the wildcard CNAME
   # *.<preview_domain> points at the gateway (output domain_name of
   # nginx_containers). Empty: previews only on their Scaleway address.
-  # Candidate, not decided yet: preview.quefairedemesdechets.fr
-  preview_domain = ""
+  preview_domain = local.webapp_enabled ? "incubateur.ademe.dev" : ""
 }
