@@ -7,20 +7,22 @@ secret_key      = "secret-key" # pragma: allowlist secret
 # DB_WAREHOUSE, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT sont fournis
 # par la dépendance Terragrunt sur le module ../database (cf. terragrunt.hcl).
 
+_AIRFLOW_WWW_USER_PASSWORD                            = "" # pragma: allowlist secret
+_AIRFLOW_WWW_USER_USERNAME                            = ""
+AIRFLOW__API_AUTH__JWT_SECRET                         = "" # pragma: allowlist secret
+AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = ""
+AIRFLOW_CONN_SCALEWAYLOGS                             = ""
 DB_WEBAPP_SAMPLE                                      = ""
 ENVIRONMENT                                           = ""
+ML_DEDUPLICATION_SSH_KEY_B64                          = "" # pragma: allowlist secret
+ML_DEDUPLICATION_SSH_PUB_KEY                          = ""
 POSTGRES_DB                                           = ""
 POSTGRES_SCHEMA                                       = ""
 POSTGRES_USER                                         = ""
 SCW_ACCESS_KEY                                        = ""
+SCW_ACCESS_KEY_INFRA                                  = ""
 SCW_DEFAULT_ORGANIZATION_ID                           = ""
 SCW_DEFAULT_PROJECT_ID                                = ""
 SCW_SECRET_KEY                                        = "" # pragma: allowlist secret
-ML_DEDUPLICATION_SSH_KEY_B64                          = "" # pragma: allowlist secret
-ML_DEDUPLICATION_SSH_PUB_KEY                          = ""
+SCW_SECRET_KEY_INFRA                                  = "" # pragma: allowlist secret
 SECRET_KEY                                            = "" # pragma: allowlist secret
-_AIRFLOW_WWW_USER_USERNAME                            = ""
-_AIRFLOW_WWW_USER_PASSWORD                            = "" # pragma: allowlist secret
-AIRFLOW__API_AUTH__JWT_SECRET                         = "" # pragma: allowlist secret
-AIRFLOW_CONN_SCALEWAYLOGS                             = ""
-AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = ""
