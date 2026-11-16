@@ -1,9 +1,12 @@
+import json
+
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.template.loader import render_to_string
 from django.test import RequestFactory
 
 from core.context_processors import global_context
+from core.templatetags.carte_tags import maplibre_locale
 from qfdmd.models import AccessibilitySettings
 
 
@@ -107,3 +110,18 @@ def test_carte_view_mode_nav_label_comes_from_settings():
     )
 
     assert 'aria-label="Choisir l&#x27;affichage"' in html
+
+
+@pytest.mark.django_db
+def test_maplibre_locale_comes_from_settings():
+    AccessibilitySettings.objects.create(
+        map_title="Plan", map_zoom_in="Agrandir", map_popup_close="Fermer"
+    )
+    request = RequestFactory().get("/")
+
+    locale = json.loads(maplibre_locale({"request": request}))
+
+    assert locale["Map.Title"] == "Plan"
+    assert locale["NavigationControl.ZoomIn"] == "Agrandir"
+    assert locale["Popup.Close"] == "Fermer"
+    assert locale["NavigationControl.ZoomOut"] == "Dézoomer"

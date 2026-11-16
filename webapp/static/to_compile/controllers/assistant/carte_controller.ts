@@ -44,6 +44,7 @@ export default class extends Controller<HTMLElement> {
     workerUrl: String,
     styleUrl: String,
     glyphs: Object,
+    locale: Object,
     longitude: Number,
     latitude: Number,
     preciseAddress: Boolean,
@@ -61,6 +62,7 @@ export default class extends Controller<HTMLElement> {
   declare workerUrlValue: string
   declare styleUrlValue: string
   declare glyphsValue: Record<string, string>
+  declare localeValue: Record<string, string>
   declare longitudeValue: number
   declare latitudeValue: number
   declare preciseAddressValue: boolean
@@ -121,7 +123,7 @@ export default class extends Controller<HTMLElement> {
     const glyphs = this.glyphsValue
     const map = new MapLibre({
       container: canvas,
-      locale: MAPLIBRE_LOCALE_FR,
+      locale: { ...MAPLIBRE_LOCALE_FR, ...this.localeValue },
       style: this.styleUrlValue,
       transformRequest: (url) => {
         if (url.startsWith(IGN_TILES)) {
