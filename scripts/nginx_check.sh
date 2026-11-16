@@ -48,7 +48,7 @@ render gateway PORT=8080 ENVIRONMENT=production \
   NGINX_PROXY_STATIC=1 NGINX_GZIP=1 NGINX_ADMIN_MAX_BODY_SIZE=100m \
   NGINX_CACHE_PATH=/var/cache/nginx/assistant NGINX_CACHE_MAX_SIZE=256m
 # The previews of the preprod gateway, next to its webapp rendering
-render gateway-previews PORT=8080 ENVIRONMENT=preview NGINX_SERVER_ONLY=1 \
+render gateway-previews PORT=8080 ENVIRONMENT=preview NGINX_SERVER_ONLY=1 NGINX_DISABLE_CACHE=1 \
   NGINX_SERVER_NAMES='~^pr-(?<pr>[1-9][0-9]*)\.preview\.quefairedemesdechets\.fr$' \
   UPSTREAM_HOST='https://qfdmodpreview6b0061c2-lvao-pr-${pr}-webapp.functions.fnc.fr-par.scw.cloud' \
   UPSTREAM_AUTH_TOKEN=00000000-0000-4000-8000-000000000000 \
