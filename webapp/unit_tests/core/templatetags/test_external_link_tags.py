@@ -32,3 +32,9 @@ def test_appends_mention_to_existing_title_without_replacing_it():
     html = '<a href="https://a.fr" target="_blank" title="Détail">Un lien</a>'
 
     assert 'title="Détail - nouvelle fenêtre"' in announce_new_window(html)
+
+
+def test_uses_the_given_mention():
+    html = '<a href="https://a.fr" target="_blank">Un lien</a>'
+
+    assert 'title="Un lien - new tab"' in announce_new_window(html, "new tab")

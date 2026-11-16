@@ -20,14 +20,14 @@
     [&_h2]:qf-mt-4w
     ">
         {# Always show the blocks up to and including the carte #}
-        {% filter announce_new_window %}
+        {% filter announce_new_window:settings.qfdmd.AccessibilitySettings.new_window_mention %}
             {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_always_visible page=page %}
         {% endfilter %}
 
         {# `iframe` is set by RequestEnhancementMiddleware from the Sec-Fetch-Dest header. #}
         {# Blocks after the carte are only rendered on the standalone page, not in the iframe. #}
         {% if not iframe %}
-            {% filter announce_new_window %}
+            {% filter announce_new_window:settings.qfdmd.AccessibilitySettings.new_window_mention %}
                 {% include "sites_conformes_content_manager/blocks/blocks_stream.html" with stream=page.body_to_hide_in_iframe page=page %}
             {% endfilter %}
         {% endif %}

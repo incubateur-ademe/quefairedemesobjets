@@ -8,9 +8,9 @@ NEW_WINDOW_MENTION = "nouvelle fenêtre"
 
 
 @register.filter
-def announce_new_window(html: str) -> str:
+def announce_new_window(html: str, mention: str = NEW_WINDOW_MENTION) -> str:
     """Give every ``target="_blank"`` link without a mention of the new window a
-    ``title`` made of its text and « nouvelle fenêtre » (RGAA 10.2: the DSFR
+    ``title`` made of its text and the mention (RGAA 10.2: the DSFR
     external icon is CSS only, so it vanishes when stylesheets are disabled)."""
     if 'target="_blank"' not in html:
         return html
@@ -18,10 +18,10 @@ def announce_new_window(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
     for link in soup.find_all("a", target="_blank"):
         text = " ".join(link.get_text(" ").split())
-        if not text or NEW_WINDOW_MENTION in text.lower():
+        if not text or mention.lower() in text.lower():
             continue
         title = link.get("title", "").strip()
-        if NEW_WINDOW_MENTION in title.lower():
+        if mention.lower() in title.lower():
             continue
-        link["title"] = f"{title or text} - {NEW_WINDOW_MENTION}"
+        link["title"] = f"{title or text} - {mention}"
     return mark_safe(str(soup))
