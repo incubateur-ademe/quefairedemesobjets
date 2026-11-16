@@ -485,7 +485,7 @@
 <p>Toutes les ressources suivent la nomenclature <code class="docutils literal notranslate"><span class="pre">lvao-{env}-{nom}</span></code> où <code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">∈</span> <span class="pre">{prod,</span> <span class="pre">preprod,</span> <span class="pre">preview}</span></code>.</p>
 <section id="container-as-a-service-caas">
 <h4>Container as a Service (CaaS)<a class="headerlink" href="#container-as-a-service-caas" title="Lien vers cette rubrique">¶</a></h4>
-<p>Trois Serverless Containers distincts pour Airflow 3 (<code class="docutils literal notranslate"><span class="pre">apache/airflow:slim-3.1.7-python3.12</span></code>), construits via Dockerfiles dédiés :</p>
+<p>Trois Serverless Containers distincts pour Airflow 3 (<code class="docutils literal notranslate"><span class="pre">apache/airflow:slim-3.1.7-python3.12</span></code>), construits via Dockerfiles dédiés, plus un gateway nginx par environnement :</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -507,6 +507,10 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">airflow-dag-processor.Dockerfile</span></code></p></td>
 <td><p>Parsing isolé des DAGs avec nginx en façade pour le healthcheck.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lvao-nginx</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nginx/nginx.Dockerfile</span></code></p></td>
+<td><p>Reverse-proxy public. Les CNAME wildcard <code class="docutils literal notranslate"><span class="pre">*.quefairedemesobjets.ademe.fr</span></code> (prod) et <code class="docutils literal notranslate"><span class="pre">*.preprod.quefairedemesobjets.ademe.fr</span></code> (preprod) pointent vers ce container, qui route <code class="docutils literal notranslate"><span class="pre">airflow.</span></code> / <code class="docutils literal notranslate"><span class="pre">metabase.</span></code> vers les backends.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -514,7 +518,7 @@
 </section>
 <section id="container-registry">
 <h4>Container Registry<a class="headerlink" href="#container-registry" title="Lien vers cette rubrique">¶</a></h4>
-<p>Namespace privé <code class="docutils literal notranslate"><span class="pre">ns-qfdmo</span></code> — héberge les images Docker des 3 containers Airflow (push par la CI, pull par les Serverless Containers).</p>
+<p>Namespace privé <code class="docutils literal notranslate"><span class="pre">ns-qfdmo</span></code> — héberge les images Docker des containers Airflow, du gateway nginx et de la webapp preview (push par la CI, pull par les Serverless Containers).</p>
 </section>
 <section id="bases-de-donnees-rdb-postgresql-16-ha">
 <h4>Bases de données (RDB PostgreSQL 16 HA)<a class="headerlink" href="#bases-de-donnees-rdb-postgresql-16-ha" title="Lien vers cette rubrique">¶</a></h4>
