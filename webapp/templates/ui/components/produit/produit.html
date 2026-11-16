@@ -1,9 +1,9 @@
-{% load dsfr_tags wagtailcore_tags qfdmd_tags %}
+{% load dsfr_tags wagtailcore_tags qfdmd_tags a11y_settings_tags %}
 
 <div class="qf-flex qf-flex-col qf-gap-2 {{ extra_classes }}">
     {% if bon_etat and mauvais_etat %}
         <div class="fr-tabs fr-tabs--noborder-mobile">
-            <ul class="fr-tabs__list" role="tablist" aria-label="État du produit {{ produit }}">
+            <ul class="fr-tabs__list" role="tablist" aria-label="{% a11y_label "produit_state_tabs_label" %} {{ produit }}">
                 <li role="presentation">
                     <button
                         id="mauvais-etat-tab"
