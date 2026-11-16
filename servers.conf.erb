@@ -12,6 +12,9 @@
   # directives (maps, cache zone) it reuses. No upstream block: proxy_pass
   # goes straight to the host, which may hold server_name captures.
   server_only = env.call("NGINX_SERVER_ONLY") == "1"
+  # The $no_cache map belongs to the main rendering: a server-only one turns
+  # the cache off instead (previews, never purged by a redeploy).
+  cache_zone = server_only && env.call("NGINX_DISABLE_CACHE") == "1" ? "off" : "assistant"
 
   nameservers = File.read("/etc/resolv.conf").scan(/^nameserver\s+(\d+\.\d+\.\d+\.\d+)/).flatten rescue []
   nameservers = ["8.8.8.8", "8.8.4.4"] if nameservers.empty?
@@ -156,7 +159,7 @@ server {
     location /static/ {
         <%= webapp_proxy %>
 
-        proxy_cache assistant;
+        proxy_cache <%= cache_zone %>;
         proxy_cache_key $scheme$host$request_uri;
         # Only 200s, whatever the upstream says: during a rolling deploy an
         # old instance answers 404 for the new hashed files.
@@ -178,7 +181,7 @@ server {
     location ~ ^/(static/)?(iframe|carte)\.js$ {
         <%= webapp_proxy %>
 
-        proxy_cache assistant;
+        proxy_cache <%= cache_zone %>;
         proxy_cache_key $scheme$host$request_uri;
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
@@ -300,7 +303,7 @@ server {
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
 
-        proxy_cache assistant;
+        proxy_cache <%= cache_zone %>;
         # Include $http_sec_fetch_dest in cache key to serve different cached
         # versions for standalone page loads vs iframe embeds
         proxy_cache_key $request_method$scheme$host$uri?$cache_args$http_sec_fetch_dest;

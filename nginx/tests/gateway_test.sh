@@ -169,13 +169,17 @@ check "static: 404 not cached" "status=404 cache=MISS" \
   "$(get gateway site.test /static/missing.css)"
 # After site.test / is cached: the cache key holds the host
 preview="$(get gateway pr-123.preview.site.test /)"
-check "preview: Host and SNI of its container, public X-Forwarded-Host, token" \
-  "host=$PREVIEW sni=$PREVIEW xfh=pr-123.preview.site.test token=[$TOKEN]" "$preview"
-check "preview: not redirected, noindex" "status=200 cache=MISS enc= location= robots=noindex, nofollow" \
-  "$preview"
+check "preview: Host and SNI of its container, public X-Forwarded-Host, no token" \
+  "host=$PREVIEW sni=$PREVIEW xfh=pr-123.preview.site.test token=[]" "$preview"
+check "preview: not redirected, noindex, not cached" \
+  "status=200 cache= enc= location= robots=noindex, nofollow" "$preview"
+check "preview: never cached" "status=200 cache= " "$(get gateway pr-123.preview.site.test /)"
+get gateway pr-123.preview.site.test /static/app.css > /dev/null
+check "preview: static not cached either" "status=200 cache= " \
+  "$(get gateway pr-123.preview.site.test /static/app.css)"
 check "preview: regex location keeps the PR number" "host=$PREVIEW sni=$PREVIEW" \
   "$(get gateway pr-123.preview.site.test /iframe.js)"
-check "preview: admin with token" "host=$PREVIEW sni=$PREVIEW xfh=pr-123.preview.site.test token=[$TOKEN]" \
+check "preview: admin without token" "host=$PREVIEW sni=$PREVIEW xfh=pr-123.preview.site.test token=[]" \
   "$(get gateway pr-123.preview.site.test /admin/)"
 check "preview: PR number not a number" "status=404" "$(get gateway pr-abc.preview.site.test /)"
 check "preview: another zone" "status=404" "$(get gateway pr-123.preview.other.test /)"
