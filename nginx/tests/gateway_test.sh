@@ -11,6 +11,8 @@ IMAGE="qfdmo-gateway-test:$RUN"
 NET="$P"
 NATIVE=lvaotestwebapp-webapp.functions.fnc.fr-par.scw.cloud
 OTHER=lvaotestother-webapp.functions.fnc.fr-par.scw.cloud
+PREVIEW_UPSTREAM='https://lvaotestpreview-lvao-pr-{pr}-webapp.functions.fnc.fr-par.scw.cloud'
+PREVIEW=lvaotestpreview-lvao-pr-123-webapp.functions.fnc.fr-par.scw.cloud
 TOKEN=11111111-2222-4333-8444-555555555555
 TRIES=150 # 30 s
 WORK="$(mktemp -d)"
@@ -49,7 +51,7 @@ cert() { # name, ca, SANs
   openssl x509 -req -in "$1.csr" -CA "$2-ca.pem" -CAkey "$2-ca.key" \
     -CAcreateserial -days 1 -extfile "$1.ext" -out "$1.pem" 2> /dev/null
 }
-cert edge trusted "DNS:$NATIVE,DNS:eu.i.posthog.com,DNS:data.geopf.fr"
+cert edge trusted "DNS:$NATIVE,DNS:$PREVIEW,DNS:eu.i.posthog.com,DNS:data.geopf.fr"
 cert other other "DNS:$OTHER"
 mkdir srv
 # HTML above gzip_min_length, sent uncompressed by the edge
@@ -95,7 +97,7 @@ edge() { # container, cert, alias...
     -v "$WORK/$crt.pem:/certs/cert.pem:ro" -v "$WORK/$crt.key:/certs/key.pem:ro" \
     nginx:1.30-alpine
 }
-edge edge edge "$NATIVE" eu.i.posthog.com data.geopf.fr
+edge edge edge "$NATIVE" "$PREVIEW" eu.i.posthog.com data.geopf.fr
 edge other other "$OTHER"
 edge_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$P-edge")"
 gateway() { # container, upstream host, token, extra docker run arguments
@@ -109,9 +111,12 @@ gateway() { # container, upstream host, token, extra docker run arguments
 # The gateway's own variables below must not reach the template (env -i)
 gateway gateway "$NATIVE" "$TOKEN" \
   -e ROUTE_AIRFLOW_HOST=airflow.test -e ROUTE_AIRFLOW_UPSTREAM="$edge_ip" \
-  -e NGINX_ALLOW_ALL_HOSTS=1 -e NGINX_DISABLE_CACHE=1 -e ENVIRONMENT=prod
+  -e NGINX_ALLOW_ALL_HOSTS=1 -e NGINX_DISABLE_CACHE=1 -e ENVIRONMENT=prod \
+  -e WEBAPP_PREVIEW_DOMAIN=preview.site.test -e WEBAPP_PREVIEW_UPSTREAM="$PREVIEW_UPSTREAM"
 gateway badca "$OTHER" "$TOKEN"
 gateway badkey "$NATIVE" "not-a-uuid"
+gateway badpreview "$NATIVE" "$TOKEN" -e WEBAPP_PREVIEW_DOMAIN=preview.site.test \
+  -e WEBAPP_PREVIEW_UPSTREAM="https://$NATIVE"
 
 wait_for() { # container, url
   i=0
@@ -143,12 +148,13 @@ wait_for other https://127.0.0.1/
 wait_for gateway http://127.0.0.1:8080/healthz
 wait_for badca http://127.0.0.1:8080/healthz
 wait_exited badkey
+wait_exited badpreview
 
 get() { # container, host, path, extra curl arguments
   c="$1" host="$2" path="$3"
   shift 3
   docker exec "$P-$c" curl -s "$@" -H "Host: $host" \
-    -w ' status=%{http_code} cache=%header{x-cache-status} enc=%header{content-encoding} location=%header{location}' \
+    -w ' status=%{http_code} cache=%header{x-cache-status} enc=%header{content-encoding} location=%header{location} robots=%header{x-robots-tag}' \
     "http://127.0.0.1:8080$path"
 }
 check "webapp: native Host, SNI, public X-Forwarded-Host, token" \
@@ -161,6 +167,20 @@ check "static: cached" "status=200 cache=HIT" "$(get gateway site.test /static/a
 get gateway site.test /static/missing.css > /dev/null
 check "static: 404 not cached" "status=404 cache=MISS" \
   "$(get gateway site.test /static/missing.css)"
+# After site.test / is cached: the cache key holds the host
+preview="$(get gateway pr-123.preview.site.test /)"
+check "preview: Host and SNI of its container, public X-Forwarded-Host, token" \
+  "host=$PREVIEW sni=$PREVIEW xfh=pr-123.preview.site.test token=[$TOKEN]" "$preview"
+check "preview: not redirected, noindex" "status=200 cache=MISS enc= location= robots=noindex, nofollow" \
+  "$preview"
+check "preview: regex location keeps the PR number" "host=$PREVIEW sni=$PREVIEW" \
+  "$(get gateway pr-123.preview.site.test /iframe.js)"
+check "preview: admin with token" "host=$PREVIEW sni=$PREVIEW xfh=pr-123.preview.site.test token=[$TOKEN]" \
+  "$(get gateway pr-123.preview.site.test /admin/)"
+check "preview: PR number not a number" "status=404" "$(get gateway pr-abc.preview.site.test /)"
+check "preview: another zone" "status=404" "$(get gateway pr-123.preview.other.test /)"
+check "preview: zone as a prefix only" "status=404" \
+  "$(get gateway pr-123.preview.site.test.other.test /)"
 check "posthog: no token, even the client's" \
   "host=eu.i.posthog.com sni=eu.i.posthog.com xfh= token=[]" \
   "$(get gateway site.test /ph/e/ -H 'X-Auth-Token: from-client')"
@@ -176,15 +196,23 @@ check "unknown host: default server" "status=404" "$(get gateway unknown.test /)
 check "healthz with an IP Host" "status=200" "$(get gateway 100.96.3.4:8080 /healthz)"
 check "rendered config readable by root only" "-rw-------" \
   "$(docker exec "$P-gateway" ls -l /etc/nginx/conf.d/webapp.conf)"
+check "previews rendered readable by root only" "-rw-------" \
+  "$(docker exec "$P-gateway" ls -l /etc/nginx/conf.d/previews.conf)"
+check "no preview domain: no previews rendered" "No such file" \
+  "$(docker exec "$P-badca" ls /etc/nginx/conf.d/previews.conf 2>&1)"
 check "certificate from another CA: 502" "status=502" "$(get badca site.test /)"
 check "malformed key: container stopped" "exited 1" \
   "$(docker inspect -f '{{.State.Status}} {{.State.ExitCode}}' "$P-badkey")"
 check "malformed key: reason logged" "WEBAPP_AUTH_TOKEN is not a UUID" \
   "$(docker logs "$P-badkey" 2>&1)"
+check "preview upstream without {pr}: container stopped" "exited 1" \
+  "$(docker inspect -f '{{.State.Status}} {{.State.ExitCode}}' "$P-badpreview")"
+check "preview upstream without {pr}: reason logged" "WEBAPP_PREVIEW_UPSTREAM must be" \
+  "$(docker logs "$P-badpreview" 2>&1)"
 logs="$(docker logs "$P-gateway" 2>&1)"
 check "log_format: cache status and timings" "cache=HIT" "$logs"
 check "log_format: upstream connect time" "uct=" "$logs"
-case "$logs$(docker logs "$P-badkey" 2>&1)" in
+case "$logs$(docker logs "$P-badkey" 2>&1)$(docker logs "$P-badpreview" 2>&1)" in
   *"$TOKEN"* | *not-a-uuid*) echo "FAILED  logs contain the key"; fail=1 ;;
   *) echo "ok      logs never contain the key" ;;
 esac
