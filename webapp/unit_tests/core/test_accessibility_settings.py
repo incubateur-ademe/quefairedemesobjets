@@ -53,3 +53,21 @@ def test_new_window_mention_comes_from_settings():
     )
 
     assert 'title="Un lien - nouvel onglet"' in html
+
+
+@pytest.mark.django_db
+def test_footer_and_modal_labels_come_from_settings():
+    from django.template.loader import render_to_string
+
+    AccessibilitySettings.objects.create(
+        modal_close_label="Refermer la boite", footer_nav_label="Liens utiles"
+    )
+
+    assert 'title="Refermer la boite"' in render_to_string(
+        "ui/components/modals/base.html",
+        {"id": "x"},
+        request=RequestFactory().get("/"),
+    )
+    assert 'aria-label="Liens utiles"' in render_to_string(
+        "ui/components/footer/base.html", request=RequestFactory().get("/")
+    )

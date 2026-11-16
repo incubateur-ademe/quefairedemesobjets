@@ -1,4 +1,4 @@
-{% load turbo_tags %}
+{% load turbo_tags a11y_settings_tags %}
 {% block modal_wrapper_for_id %}
 {% comment %}
 Reusable DSFR modal component with optional trigger button.
@@ -47,7 +47,7 @@ Requires a unique 'id' per modal for accessibility.
                     <div class="fr-modal__header">
                         {% block modal_header %}
                         {% endblock modal_header %}
-                        <button type="button" class="fr-btn--close fr-btn" title="Fermer la fenêtre modale" aria-controls="fr-modal-{{ namespaced_id }}" data-testid="modal-close-{{ namespaced_id }}">Fermer</button>
+                        <button type="button" class="fr-btn--close fr-btn" title="{% a11y_label "modal_close_label" %}" aria-controls="fr-modal-{{ namespaced_id }}" data-testid="modal-close-{{ namespaced_id }}">Fermer</button>
                     </div>
                     <div class="fr-modal__content">
                         <h1 id="fr-modal-title-{{ namespaced_id }}" class="fr-modal__title">
