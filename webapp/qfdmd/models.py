@@ -1,10 +1,11 @@
+import csv
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import NamedTuple, override
 
-import csv
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -18,6 +19,16 @@ from django_extensions.db.fields import AutoSlugField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalManyToManyField
 from modelsearch import index
+from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS, DecorativeImageBlock
+from qfdmd.utils import see_more_button
+from qfdmo.models.utils import NomAsNaturalKeyManager, NomAsNaturalKeyModel
+from search.constants import SEARCH_TAG_HELP_TEXT
+from search.models import SearchTerm
+
+# Update when migrating to v4
+from sites_conformes.content_manager.abstract import SitesFacilesBasePage
+from sites_conformes.content_manager.blocks.badges_tags import badge_level_choices
+from sites_conformes.content_manager.models import ContentPage
 from taggit.models import ItemBase, TagBase, TaggedItemBase
 from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.admin.panels import (
@@ -36,19 +47,7 @@ from wagtail.images.blocks import ImageBlock
 from wagtail.models import Page, ParentalKey
 from wagtail.snippets.models import register_snippet
 
-# Update when migrating to v4
-from sites_conformes.content_manager.abstract import SitesFacilesBasePage
-from sites_conformes.content_manager.blocks.badges_tags import badge_level_choices
-from sites_conformes.content_manager.models import ContentPage
-from django.conf import settings
-
 from . import forms as qfdmd_forms
-
-from qfdmd.blocks import STREAMFIELD_COMMON_BLOCKS, DecorativeImageBlock
-from qfdmd.utils import see_more_button
-from qfdmo.models.utils import NomAsNaturalKeyManager, NomAsNaturalKeyModel
-from search.constants import SEARCH_TAG_HELP_TEXT
-from search.models import SearchTerm
 
 logger = logging.getLogger(__name__)
 
@@ -1034,6 +1033,7 @@ class ProduitPage(
         Returns a list of messages describing what was synchronised.
         """
         from datetime import date
+
         from qfdmd.legacy_migration import log_without_raising
         from qfdmo.models import CarteConfig
 
@@ -1074,7 +1074,7 @@ class ProduitPage(
         carte_slug = (
             "ass-deposer-uniquement" if self.usage_unique else "tous-les-gestes"
         )
-        if all_sous_categories.filter(afficher_carte=True).exists():
+        if all_sous_categories.exists():
             carte = CarteConfig.objects.filter(slug=carte_slug).first()
             if carte:
                 body.append({"type": "paragraph", "value": "<h2>Où l'apporter ?</h2>"})
@@ -1514,10 +1514,6 @@ class Produit(index.Indexed, AbstractBaseProduit):
         index.RelatedFields("synonymes", [index.SearchField("nom")]),
         index.SearchField("id"),
     ]
-
-    @cached_property
-    def sous_categorie_with_carte_display(self):
-        return self.sous_categories.filter(afficher_carte=True).first()
 
     def get_etats_descriptions(self) -> tuple[str, str] | None:
         # TODO: rename this method

@@ -144,8 +144,7 @@ def sous_categories(request):
     """
     List the possible <i>sub-categories of objects</i> for an actor.
     """
-    qs = SousCategorieObjet.objects.filter(afficher=True)
-    return qs
+    return SousCategorieObjet.objects.all()
 
 
 @router.get(

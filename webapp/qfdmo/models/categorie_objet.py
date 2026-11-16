@@ -42,21 +42,11 @@ class SousCategorieObjet(CodeAsNaturalKeyModel):
         ),
         validators=[CodeValidator()],
     )
-    # FIXME : afficher is deprecated
-    afficher = models.BooleanField(default=True)
     qfdmd_produits = models.ManyToManyField(
         "qfdmd.produit",
         related_name="sous_categories",
         verbose_name="Produits Que Faire De Mes Déchets & Objets",
         blank=True,
-    )
-    # FIXME : afficher_carte is deprecated
-    afficher_carte = models.BooleanField(
-        default=False,
-        verbose_name="Afficher la carte dans l’assistant",
-        help_text="afficher la carte LVAO dans les fiches produits "
-        "“Que faire de mes objets et déchets” avec les identifiants "
-        "indiqués au niveau de la sous-catégorie",
     )
     reemploi_possible = models.BooleanField(
         default=True,

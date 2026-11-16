@@ -217,17 +217,17 @@ def test_get_sources(client):
 @pytest.mark.django_db
 def test_get_sous_categories(client):
     """Test the /sous-categories endpoint"""
-    displayed_sous_categorie = SousCategorieObjetFactory(afficher=True)
-    hidden_sous_categorie = SousCategorieObjetFactory(afficher=False)
+    sous_categorie_a = SousCategorieObjetFactory()
+    sous_categorie_b = SousCategorieObjetFactory()
 
     response = client.get(f"{BASE_URL}/sous-categories")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == SousCategorieObjet.objects.filter(afficher=True).count()
+    assert len(data) == SousCategorieObjet.objects.count()
     data_ids = {sous_categorie["id"] for sous_categorie in data}
-    assert displayed_sous_categorie.id in data_ids
-    assert hidden_sous_categorie.id not in data_ids
+    assert sous_categorie_a.id in data_ids
+    assert sous_categorie_b.id in data_ids
     if data:
         assert "code" in data[0]
         assert "id" in data[0]

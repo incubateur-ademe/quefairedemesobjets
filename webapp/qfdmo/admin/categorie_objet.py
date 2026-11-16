@@ -52,7 +52,6 @@ class SousCategorieAdmin(
         "reemploi_possible",
     )
     resource_classes = [SousCategorieResource]
-    list_filter = ["afficher_carte"]
     autocomplete_fields = ("qfdmd_produits",)
     search_fields = CodeLibelleModelMixin.search_fields + [
         "categorie__libelle",

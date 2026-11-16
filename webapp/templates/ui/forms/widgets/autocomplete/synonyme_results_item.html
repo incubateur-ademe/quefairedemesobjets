@@ -9,6 +9,6 @@
 {% block rendering %}
     {{ object }}
     <small class="qf-mt-auto qf-italic">
-    {{ object.produit.sous_categorie_with_carte_display }}
+    {{ object.produit.sous_categories.first|default:"" }}
     </small>
 {% endblock rendering %}
