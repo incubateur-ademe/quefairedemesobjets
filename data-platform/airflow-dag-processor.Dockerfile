@@ -36,13 +36,18 @@ USER root
 
 # unzip for Airflow DAG
 # upgrade: the base image ships outdated Debian packages and docker CLI (Trivy)
-# ~/.local: the base image's own Airflow install, unused since our venv comes
-# first on PATH, and it carries outdated Python packages and uv (Trivy)
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
     curl gdal-bin jq nginx unzip \
-    && rm -rf /var/lib/apt/lists/* /home/airflow/.local
+    && rm -rf /var/lib/apt/lists/*
+
+# The base image installs its own Airflow in a venv at /home/airflow/.local.
+# We never run it: our venv (/opt/airflow/.venv) comes first on PATH and holds
+# Airflow and every dependency we use. Its outdated packages (PyJWT, certifi,
+# urllib3, uv…) only fail the Trivy scan, so we drop it. The base /entrypoint
+# only references it when the container runs as root, to extend PYTHONPATH.
+RUN rm -rf /home/airflow/.local
 
 # Installation du client Scaleway CLI
 # RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
