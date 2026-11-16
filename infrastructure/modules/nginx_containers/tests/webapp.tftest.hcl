@@ -328,3 +328,85 @@ run "the_key_is_not_set_without_a_webapp" {
     error_message = "webapp_auth_token_set while the key is not sent"
   }
 }
+
+run "without_previews_no_preview_variable" {
+  command = plan
+
+  assert {
+    condition     = length([for k in keys(scaleway_container.nginx.environment_variables) : k if startswith(k, "WEBAPP_PREVIEW_")]) == 0
+    error_message = "No WEBAPP_PREVIEW_* variable without previews"
+  }
+}
+
+run "the_previews_variables_reach_the_container" {
+  command = plan
+
+  variables {
+    previews = {
+      domain   = "preview.example.fr"
+      upstream = "https://nspreview-lvao-pr-{pr}-webapp.functions.fnc.fr-par.scw.cloud"
+    }
+  }
+
+  assert {
+    condition = (
+      scaleway_container.nginx.environment_variables["WEBAPP_PREVIEW_DOMAIN"] == "preview.example.fr"
+      && scaleway_container.nginx.environment_variables["WEBAPP_PREVIEW_UPSTREAM"] == "https://nspreview-lvao-pr-{pr}-webapp.functions.fnc.fr-par.scw.cloud"
+      && scaleway_container.nginx.environment_variables["WEBAPP_UPSTREAM"] == "https://webapp.functions.fnc.fr-par.scw.cloud"
+    )
+    error_message = "WEBAPP_PREVIEW_* variables next to the WEBAPP_* ones"
+  }
+}
+
+run "previews_without_webapp_fail_the_plan" {
+  command = plan
+
+  variables {
+    webapp = null
+    previews = {
+      domain   = "preview.example.fr"
+      upstream = "https://nspreview-lvao-pr-{pr}-webapp.functions.fnc.fr-par.scw.cloud"
+    }
+  }
+
+  expect_failures = [scaleway_container.nginx]
+}
+
+run "a_preview_upstream_without_pr_fails_the_plan" {
+  command = plan
+
+  variables {
+    previews = {
+      domain   = "preview.example.fr"
+      upstream = "https://nspreview-lvao-pr-1-webapp.functions.fnc.fr-par.scw.cloud"
+    }
+  }
+
+  expect_failures = [var.previews]
+}
+
+run "an_http_preview_upstream_fails_the_plan" {
+  command = plan
+
+  variables {
+    previews = {
+      domain   = "preview.example.fr"
+      upstream = "http://nspreview-lvao-pr-{pr}-webapp.functions.fnc.fr-par.scw.cloud"
+    }
+  }
+
+  expect_failures = [var.previews]
+}
+
+run "a_wildcard_preview_domain_fails_the_plan" {
+  command = plan
+
+  variables {
+    previews = {
+      domain   = "*.preview.example.fr"
+      upstream = "https://nspreview-lvao-pr-{pr}-webapp.functions.fnc.fr-par.scw.cloud"
+    }
+  }
+
+  expect_failures = [var.previews]
+}
