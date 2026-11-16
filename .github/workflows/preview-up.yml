@@ -75,9 +75,47 @@ jobs:
           echo "clear_db=$CLEAR_DB"                      >> "$GITHUB_OUTPUT"
           echo "isoprod=$ISOPROD"                        >> "$GITHUB_OUTPUT"
 
+  # At most MAX_PREVIEWS previews at a time: a new one is refused, an existing
+  # one is always updated.
+  # ponytail: counted before the build, two PRs labeled at once can both pass
+  capacity:
+    name: 🚦 Preview capacity
+    needs: [resolve]
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      SCW_DEFAULT_REGION: fr-par
+      MAX_PREVIEWS: 5
+      PR_NUMBER: ${{ needs.resolve.outputs.pr_number }}
+    steps:
+      - name: Setup Scaleway CLI
+        uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+
+      - name: Count running previews
+        run: |
+          set -euo pipefail
+          NAMESPACE_ID=$(scw container namespace list name=qfdmod-preview -o json | jq -r '.[0].id')
+          [[ "$NAMESPACE_ID" != "null" ]] || { echo "::error::preview namespace not found"; exit 1; }
+          prs=$(scw container container list namespace-id="$NAMESPACE_ID" -o json \
+            | jq -r '.[].name' | sed -n 's/^lvao-pr-\([0-9]*\)-webapp$/\1/p' | sort -un)
+          if grep -qx "$PR_NUMBER" <<< "$prs"; then
+            echo "pr-$PR_NUMBER already has a preview: updating it"
+            exit 0
+          fi
+          count=$(grep -c . <<< "$prs" || true)
+          if (( count >= MAX_PREVIEWS )); then
+            echo "::error title=Too many previews::$count previews are running (max $MAX_PREVIEWS): $(echo $prs | sed 's/[0-9]*/#&/g'). Remove the preview label from one of them."
+            exit 1
+          fi
+          echo "$count previews running, max $MAX_PREVIEWS"
+
   build:
     name: 🐳 Build webapp image
-    needs: [resolve]
+    needs: [resolve, capacity]
     uses: ./.github/workflows/_webapp-build-and-push-docker.yml
     secrets: inherit # pragma: allowlist secret
     with:
