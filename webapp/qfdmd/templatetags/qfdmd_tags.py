@@ -140,7 +140,17 @@ class FootnotesNode(template.Node):
         self.nodelist = nodelist
 
     def render(self, context):
-        return mark_safe(make_footnotes_accessible(self.nodelist.render(context)))
+        from qfdmd.models import AccessibilitySettings
+
+        labels = AccessibilitySettings.load(request_or_site=context.get("request"))
+        return mark_safe(
+            make_footnotes_accessible(
+                self.nodelist.render(context),
+                call_label=labels.footnote_label,
+                back_label=labels.footnote_back_label,
+                list_label=labels.footnotes_list_label,
+            )
+        )
 
 
 @register.tag
