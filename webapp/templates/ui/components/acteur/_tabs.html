@@ -1,10 +1,11 @@
+{% load a11y_settings_tags %}
 <div class="fr-tabs fr-tabs--noborder qf-h-full">
     <ul
         class="fr-tabs__list qfdmo"
         role="tablist"
         data-controller="tabs-focus"
         data-action="keydown->tabs-focus#followSelection"
-        aria-label="Informations détaillées de la solution {{ adresse }}"
+        aria-label="{% a11y_label "acteur_tabs_label" %} {{ adresse }}"
     >
         {% include "ui/components/acteur/tabs/_tab.html" with text="Présentation" target="aboutPanel" selected=True %}
 

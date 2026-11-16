@@ -35,6 +35,7 @@ class TestFilArianeProduit:
         assert 'href="/categories/"' in html
 
 
+@pytest.mark.django_db
 class TestShareTooltipActeur:
     """A11Y-9 — tooltip de partage sans tabindex="-1"."""
 

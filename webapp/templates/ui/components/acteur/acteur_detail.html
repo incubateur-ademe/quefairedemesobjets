@@ -1,4 +1,4 @@
-{% load acteur_tags turbo_tags %}
+{% load a11y_settings_tags acteur_tags turbo_tags %}
 {% namespaced "acteur-title" as title_id %}
 <dialog class="
     {% block classes %}
@@ -52,7 +52,7 @@ data-action="keydown.esc@window->acteur-details#hide:stop close->acteur-details#
           qf-border-0"
           data-action="click->acteur-details#hide"
           data-testid="acteur-details-close"
-          aria-label="Fermer"
+          aria-label="{% a11y_label "acteur_close_label" %}"
       >
       </button>
       <turbo-frame
