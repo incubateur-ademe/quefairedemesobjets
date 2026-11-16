@@ -24,6 +24,11 @@ locals {
     WEBAPP_SERVER_NAMES = join(" ", var.webapp.server_names)
   }
 
+  previews_environment_variables = var.previews == null ? {} : {
+    WEBAPP_PREVIEW_DOMAIN   = var.previews.domain
+    WEBAPP_PREVIEW_UPSTREAM = var.previews.upstream
+  }
+
   # null rather than {}: the gateway keeps the configuration it has today.
   webapp_secret_environment_variables = (
     var.webapp != null && var.webapp_auth_token != ""
@@ -62,11 +67,17 @@ resource "scaleway_container" "nginx" {
       condition     = var.webapp == null ? true : (var.webapp.privacy == "public" || var.webapp_auth_token != "")
       error_message = "The webapp is private but webapp_auth_token is empty: set webapp_auth_token in the secret of the stack and apply the gateway before making the webapp private."
     }
+    precondition {
+      # 45-render-webapp.sh renders the previews only next to the webapp
+      condition     = var.previews == null || var.webapp != null
+      error_message = "previews needs webapp: the preview server reuses the webapp rendering."
+    }
   }
 
   environment_variables = merge(
     local.route_environment_variables,
     local.webapp_environment_variables,
+    local.previews_environment_variables,
   )
   secret_environment_variables = local.webapp_secret_environment_variables
 }
