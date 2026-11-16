@@ -1,3 +1,4 @@
+{% load a11y_settings_tags %}
 <div
     data-controller="copy"
     data-copy-copied-value="Copié"
@@ -21,7 +22,7 @@
 
     <button
         class="fr-btn qf-my-auto qf-ml-auto"
-        title="Copier"
+        title="{% a11y_label "copy_label" %}"
         data-action="copy#toClipboard"
         data-copy-target="button"
     >

@@ -1,5 +1,6 @@
+{% load a11y_settings_tags %}
 {% if self.get_ancestors|length > 1 %}
-  <nav role="navigation" class="fr-breadcrumb" aria-label="vous êtes ici :">
+  <nav role="navigation" class="fr-breadcrumb" aria-label="{% a11y_label "breadcrumb_label" %}">
     <button class="fr-breadcrumb__button"
             aria-expanded="false"
             aria-controls="page-breadcrumb">Voir le fil d’Ariane</button>

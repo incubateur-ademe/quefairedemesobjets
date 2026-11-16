@@ -1,3 +1,4 @@
+{% load a11y_settings_tags %}
 <section
     class="
     qf-flex
@@ -10,7 +11,7 @@
     qf-h-full
     "
     tabindex="0"
-    aria-label="Carte des solutions"
+    aria-label="{% a11y_label "map_region_label" %}"
 >
     {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
     {% block form_result %}

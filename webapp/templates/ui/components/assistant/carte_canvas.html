@@ -1,5 +1,6 @@
+{% load a11y_settings_tags %}
 <div id="assistant-carte-canvas"
      class="qfa-carte__canvas"
      data-turbo-permanent
      role="application"
-     aria-label="Carte des lieux proposant ce geste"></div>
+     aria-label="{% a11y_label "assistant_map_region_label" %}"></div>
