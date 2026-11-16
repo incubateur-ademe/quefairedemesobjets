@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_HOME_SEARCH_PLACEHOLDER = "exemple : canapé, téléphone, CD-ROM..."
 DEFAULT_HEADER_SEARCH_PLACEHOLDER = "Rechercher un objet ou un déchet"
 DEFAULT_SEARCH_PLACEHOLDER = DEFAULT_HOME_SEARCH_PLACEHOLDER
+DEFAULT_SEARCH_LABEL = "Entrez un objet ou un déchet"
 
 
 class QfSearchForm(forms.Form):
@@ -26,6 +27,7 @@ class QfSearchForm(forms.Form):
         widget=QfSearchAutocompleteInput(
             attrs={
                 "placeholder": DEFAULT_SEARCH_PLACEHOLDER,
+                "title": DEFAULT_SEARCH_LABEL,
                 "autocomplete": "off",
             },
         ),

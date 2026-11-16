@@ -7,7 +7,11 @@ from qfdmd.forms import (
     DEFAULT_HOME_SEARCH_PLACEHOLDER,
     QfSearchForm,
 )
-from qfdmd.models import SEARCH_SETTINGS_CACHE_KEY, SearchSettings
+from qfdmd.models import (
+    SEARCH_SETTINGS_CACHE_KEY,
+    AccessibilitySettings,
+    SearchSettings,
+)
 
 from . import constants
 
@@ -58,13 +62,13 @@ def global_context(request) -> dict:
     ) = _get_search_placeholders()
     header_search_form = QfSearchForm(prefix="header-autocomplete")
     header_search_form.fields["search"].widget.attrs["placeholder"] = header_placeholder
-    header_search_form.fields["search"].widget.attrs[
-        "title"
-    ] = DEFAULT_HEADER_SEARCH_PLACEHOLDER
+    a11y = AccessibilitySettings.load(request_or_site=request)
+    header_search_form.fields["search"].widget.attrs["title"] = a11y.header_search_label
     homepage_search_form = QfSearchForm(prefix="home")
     homepage_search_form.fields["search"].widget.attrs["placeholder"] = home_placeholder
+    homepage_search_form.fields["search"].widget.attrs["title"] = a11y.home_search_label
     skiplinks = [
-        {"link": "#content", "label": "Contenu"},
+        {"link": "#content", "label": a11y.skiplink_content_label},
     ]
 
     return {

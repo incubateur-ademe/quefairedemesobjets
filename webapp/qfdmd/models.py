@@ -1796,6 +1796,100 @@ def clear_search_settings_cache(**kwargs):
     cache.delete(SEARCH_SETTINGS_CACHE_KEY)
 
 
+def _a11y_label(verbose_name, default, help_text=""):
+    return models.CharField(
+        verbose_name, max_length=255, default=default, help_text=help_text
+    )
+
+
+@register_setting(icon="glasses")
+class AccessibilitySettings(BaseGenericSetting):
+    header_search_label = _a11y_label(
+        "Étiquette du champ de recherche (header)",
+        qfdmd_forms.DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+        "Lue par les lecteurs d'écran et affichée en infobulle.",
+    )
+    home_search_label = _a11y_label(
+        "Étiquette du champ de recherche (page d'accueil)",
+        qfdmd_forms.DEFAULT_SEARCH_LABEL,
+        "Lue par les lecteurs d'écran et affichée en infobulle.",
+    )
+    skiplink_content_label = _a11y_label("Lien d'évitement vers le contenu", "Contenu")
+    view_mode_nav_label = _a11y_label(
+        "Navigation entre les modes d'affichage de la carte", "Mode d'affichage"
+    )
+    new_window_mention = _a11y_label(
+        "Mention des liens ouverts dans une nouvelle fenêtre",
+        "nouvelle fenêtre",
+        "Ajoutée au titre des liens : « <texte du lien> - <mention> ».",
+    )
+    footnote_label = _a11y_label(
+        "Appel de note", "Note de bas de page", "Suivi du numéro de la note."
+    )
+    footnote_back_label = _a11y_label(
+        "Retour depuis une note", "retour au texte", "Précédé du numéro de la note."
+    )
+    footnotes_list_label = _a11y_label(
+        "Liste des notes de bas de page", "Notes de bas de page"
+    )
+    rating_label_singular = _a11y_label(
+        "Note en étoiles (singulier)", "étoile", "Lu après le nombre : « 1 étoile »."
+    )
+    rating_label_plural = _a11y_label(
+        "Note en étoiles (pluriel)", "étoiles", "Lu après le nombre : « 3 étoiles »."
+    )
+    map_title = _a11y_label("Carte : nom de la carte", "Carte")
+    map_zoom_in = _a11y_label("Carte : bouton zoomer", "Zoomer")
+    map_zoom_out = _a11y_label("Carte : bouton dézoomer", "Dézoomer")
+    map_attribution_toggle = _a11y_label(
+        "Carte : bouton des crédits", "Crédits de la carte"
+    )
+    map_feedback = _a11y_label(
+        "Carte : lien de signalement", "Signaler un problème sur la carte"
+    )
+    map_popup_close = _a11y_label(
+        "Carte : fermeture d'une infobulle", "Fermer la fenêtre"
+    )
+
+    panels = [
+        MultiFieldPanel(
+            [FieldPanel("header_search_label"), FieldPanel("home_search_label")],
+            heading="Recherche",
+        ),
+        MultiFieldPanel(
+            [FieldPanel("skiplink_content_label"), FieldPanel("view_mode_nav_label")],
+            heading="Navigation",
+        ),
+        MultiFieldPanel([FieldPanel("new_window_mention")], heading="Liens"),
+        MultiFieldPanel(
+            [
+                FieldPanel("footnote_label"),
+                FieldPanel("footnote_back_label"),
+                FieldPanel("footnotes_list_label"),
+            ],
+            heading="Notes de bas de page",
+        ),
+        MultiFieldPanel(
+            [FieldPanel("rating_label_singular"), FieldPanel("rating_label_plural")],
+            heading="Notes en étoiles",
+        ),
+        MultiFieldPanel(
+            [
+                FieldPanel("map_title"),
+                FieldPanel("map_zoom_in"),
+                FieldPanel("map_zoom_out"),
+                FieldPanel("map_attribution_toggle"),
+                FieldPanel("map_feedback"),
+                FieldPanel("map_popup_close"),
+            ],
+            heading="Carte",
+        ),
+    ]
+
+    class Meta:
+        verbose_name = "Accessibilité"
+
+
 @register_setting
 class FormPageValidationSettings(BaseGenericSetting):
     form_page = models.ForeignKey(

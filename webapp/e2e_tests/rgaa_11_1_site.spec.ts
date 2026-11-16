@@ -2,9 +2,10 @@ import { test, expect } from "@playwright/test"
 import { navigateTo } from "./helpers"
 
 const SEARCH_LABEL = "Rechercher un objet ou un déchet"
+const HOME_SEARCH_LABEL = "Entrez un objet ou un déchet"
 
 test.describe("♿ RGAA 11.1 — Étiquette du champ de recherche de l'en-tête", () => {
-  test("Le champ de recherche de l'en-tête a un label et un title identiques", async ({
+  test("Les champs de recherche de l'en-tête et de l'accueil ont un label et un title identiques", async ({
     page,
   }) => {
     await navigateTo(page, "/")
@@ -19,5 +20,10 @@ test.describe("♿ RGAA 11.1 — Étiquette du champ de recherche de l'en-tête"
     await expect(
       page.locator("#search-bar").getByRole("combobox", { name: SEARCH_LABEL }),
     ).toBeAttached()
+
+    const homeInput = page.locator("#id_home-search")
+    const homeLabel = page.locator('label[for="id_home-search"]')
+    await expect(homeLabel).toHaveText(HOME_SEARCH_LABEL)
+    await expect(homeInput).toHaveAttribute("title", HOME_SEARCH_LABEL)
   })
 })
