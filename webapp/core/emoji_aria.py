@@ -79,17 +79,17 @@ RATING = '<span role="img" aria-label="{count} {unit}"{style}>{}</span>'
 KEEP_SPACE_STYLE = ' style="white-space: pre-wrap"'
 
 
-def _wrap_match(match: re.Match) -> str:
+def _wrap_match(match: re.Match, rating_labels: tuple[str, str]) -> str:
     style = KEEP_SPACE_STYLE if match.group("space") else ""
     if match.group("stars"):
         count = len(match.group("stars").replace(_VARIATION_SELECTOR, ""))
-        unit = "étoile" if count == 1 else "étoiles"
+        unit = rating_labels[0] if count == 1 else rating_labels[1]
         return RATING.format(match.group(0), count=count, unit=unit, style=style)
     return HIDDEN.format(match.group(0), style=style)
 
 
-def _wrap_text(text: str) -> str:
-    return EMOJI_RE.sub(_wrap_match, text)
+def _wrap_text(text: str, rating_labels: tuple[str, str]) -> str:
+    return EMOJI_RE.sub(lambda match: _wrap_match(match, rating_labels), text)
 
 
 def _hides_content(name: str, attrs: str) -> bool:
@@ -100,12 +100,18 @@ def _hides_content(name: str, attrs: str) -> bool:
     )
 
 
-def hide_emojis_from_assistive_tech(html: str) -> str:
+def hide_emojis_from_assistive_tech(
+    html: str,
+    rating_label_singular: str = "étoile",
+    rating_label_plural: str = "étoiles",
+) -> str:
     """Wrap emojis found in text nodes in <span aria-hidden="true">.
 
     Attributes, comments, raw text elements (script, style, textarea, title) and
     content already hidden from assistive technologies are left untouched.
+    Runs of stars are labelled with the given singular and plural unit.
     """
+    rating_labels = (rating_label_singular, rating_label_plural)
     if not EMOJI_RE.search(html):
         return html
 
@@ -115,7 +121,7 @@ def hide_emojis_from_assistive_tech(html: str) -> str:
     position = 0
 
     def emit_text(text: str) -> None:
-        parts.append(text if hidden_depth else _wrap_text(text))
+        parts.append(text if hidden_depth else _wrap_text(text, rating_labels))
 
     for token in _TOKEN_RE.finditer(html):
         if token.start() < position:

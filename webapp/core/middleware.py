@@ -1,6 +1,7 @@
 import logging
 
 from core.emoji_aria import hide_emojis_from_assistive_tech
+from qfdmd.models import AccessibilitySettings
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +27,11 @@ class HideEmojisMiddleware:
 
         try:
             charset = response.charset or "utf-8"
+            labels = AccessibilitySettings.load(request_or_site=request)
             content = hide_emojis_from_assistive_tech(
-                response.content.decode(charset)
+                response.content.decode(charset),
+                labels.rating_label_singular,
+                labels.rating_label_plural,
             ).encode(charset)
         except Exception:
             logger.warning(

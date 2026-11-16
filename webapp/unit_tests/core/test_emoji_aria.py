@@ -148,3 +148,8 @@ class TestHideEmojisFromAssistiveTech:
         assert hide_emojis_from_assistive_tech(html) == (
             f"<p>{hidden(CHECK_MARK_BUTTON)} <b>x</b></p>"
         )
+
+
+def test_rating_labels_are_configurable():
+    html = hide_emojis_from_assistive_tech("<p>⭐⭐</p>", "star", "stars")
+    assert 'aria-label="2 stars"' in html

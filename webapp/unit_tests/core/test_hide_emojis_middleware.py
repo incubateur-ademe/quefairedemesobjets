@@ -6,6 +6,7 @@ from django.test import RequestFactory
 from django.urls import resolve
 
 from core.middleware import HideEmojisMiddleware
+from qfdmd.models import AccessibilitySettings
 
 HTML = "<p>✅ ok</p>"
 WRAPPED = '<p><span aria-hidden="true" style="white-space: pre-wrap">✅ </span>ok</p>'
@@ -17,6 +18,7 @@ def run(response, path="/qui-sommes-nous/", **headers):
     return HideEmojisMiddleware(lambda _request: response)(request)
 
 
+@pytest.mark.django_db
 class TestHideEmojisMiddleware:
     @pytest.mark.parametrize(
         "path", ["/", "/qui-sommes-nous/", "/dechet/pomme/", "/plan-du-site/"]
@@ -82,3 +84,19 @@ class TestHideEmojisMiddleware:
     def test_returns_original_response_when_body_cannot_be_decoded(self):
         response = HttpResponse(b"\xff\xfe<p>x</p>")
         assert run(response).content == b"\xff\xfe<p>x</p>"
+
+    def test_rating_labels_come_from_settings(self):
+        AccessibilitySettings.objects.create(
+            rating_label_singular="star", rating_label_plural="stars"
+        )
+        response = run(HttpResponse("<p>⭐⭐⭐</p>"))
+        assert 'aria-label="3 stars"' in response.content.decode()
+
+    def test_returns_original_response_when_settings_cannot_be_loaded(
+        self, monkeypatch
+    ):
+        def fail(**_kwargs):
+            raise RuntimeError("db down")
+
+        monkeypatch.setattr(AccessibilitySettings, "load", fail)
+        assert run(HttpResponse(HTML)).content.decode() == HTML
