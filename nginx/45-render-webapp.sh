@@ -80,9 +80,12 @@ render "$CONF" \
   NGINX_CACHE_PATH=/var/cache/nginx/assistant \
   NGINX_CACHE_MAX_SIZE=256m
 if [ -n "${WEBAPP_PREVIEW_DOMAIN:-}" ]; then
-  # Reuses the cache zone and maps of $CONF; its key holds the host
+  # Reuses the maps of $CONF. No cache: nothing purges it when a PR is pushed.
+  # No IAM key: previews run unreviewed code and are public.
   render "$PREVIEWS_CONF" \
     NGINX_SERVER_ONLY=1 \
+    NGINX_DISABLE_CACHE=1 \
+    UPSTREAM_AUTH_TOKEN= \
     ENVIRONMENT=preview \
     NGINX_SERVER_NAMES="~^pr-(?<pr>[1-9][0-9]*)\\.$(printf '%s' "$WEBAPP_PREVIEW_DOMAIN" | sed 's/\./\\./g')\$" \
     UPSTREAM_HOST="$(printf '%s' "$WEBAPP_PREVIEW_UPSTREAM" | sed 's/{pr}/${pr}/')"
