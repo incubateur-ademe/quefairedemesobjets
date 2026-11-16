@@ -32,6 +32,12 @@ RUN uv sync --project data-platform --frozen --no-editable --no-install-workspac
 ARG AIRFLOW_VERSION
 FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS webserver
 
+# Same as the scheduler: outdated Debian packages and unused ~/.local (Trivy)
+USER root
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* /home/airflow/.local
+
 USER ${AIRFLOW_UID:-50000}
 
 ENV VIRTUAL_ENV=/opt/airflow/.venv \

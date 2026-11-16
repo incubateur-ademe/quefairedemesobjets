@@ -35,10 +35,14 @@ FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS dag-processor
 USER root
 
 # unzip for Airflow DAG
+# upgrade: the base image ships outdated Debian packages and docker CLI (Trivy)
+# ~/.local: the base image's own Airflow install, unused since our venv comes
+# first on PATH, and it carries outdated Python packages and uv (Trivy)
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
     curl gdal-bin jq nginx unzip \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /home/airflow/.local
 
 # Installation du client Scaleway CLI
 # RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
