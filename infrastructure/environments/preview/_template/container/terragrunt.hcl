@@ -51,6 +51,9 @@ locals {
   # (beta tests), see the database unit for its data.
   isoprod = get_env("ISOPROD", "false") == "true"
   host    = format("qfdmodpreview6b0061c2-lvao-pr-%s-webapp.functions.fnc.fr-par.scw.cloud", local.pr_number)
+  # Served by the preprod gateway at pr-<n>.<preview_domain> when set
+  preview_domain = read_terragrunt_config("${get_terragrunt_dir()}/../../../preprod/env.hcl").locals.preview_domain
+  gateway_host   = local.preview_domain == "" ? "" : "pr-${local.pr_number}.${local.preview_domain}"
 }
 
 inputs = {
@@ -69,8 +72,8 @@ inputs = {
   cpu_limit = local.isoprod ? 2000 : 1000
 
   # The probes go through HealthzMiddleware, whatever the host.
-  ALLOWED_HOSTS = local.host
-  BASE_URL      = "https://${local.host}"
+  ALLOWED_HOSTS = join(",", compact([local.host, local.gateway_host]))
+  BASE_URL      = "https://${coalesce(local.gateway_host, local.host)}"
 
   DATABASE_URL                    = dependency.preview_database.outputs.database_url
   SECRET_KEY                      = get_env("PREVIEW_SECRET_KEY")
@@ -84,8 +87,8 @@ inputs = {
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
   AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
 
-  # No nginx in front of a preview until its gateway: noindex by meta tag
-  # instead of X-Robots-Tag.
+  # Its Scaleway address has no nginx in front: noindex by meta tag, the
+  # gateway adds X-Robots-Tag.
   extra_environment_variables = {
     BLOCK_ROBOTS = "true"
   }
