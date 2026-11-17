@@ -15,17 +15,29 @@ OpenTofu/Terragrunt from CI.
    whose PR has been closed for more than 24 hours, or is open without the
    `preview` label.
 
+Two optional labels change how the environment is built:
+
+| Label             | Effect                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `preview:cleardb` | Re-seeds the database on every push instead of keeping it.                                                                                 |
+| `preview:isoprod` | Replicates production, for beta tests: database seeded from the latest production backup, container always on (`min_scale=1`) with 2 vCPU. |
+
+`preview:isoprod` can be added with `preview` or later: the database is
+re-seeded from the other source whenever the label is added or removed
+(on the next push when removed).
+
 ## Decisions
 
-| Topic               | Decision                                 | Rationale                                                                                                                                                           |
-| ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Env keying          | **PR number** (`pr-<n>`)                 | Stable URL across pushes, one env per PR, destroyed on close.                                                                                                       |
-| Trigger             | **Label-gated** (`preview` label)        | Each up run builds a Docker image and seeds a DB: real cost, several minutes. Labeling opts a PR in.                                                                |
-| Hostname            | **Scaleway generated domain**            | No DNS to manage. The hostname is unknown before apply, so the container runs with `ALLOWED_HOSTS` relaxed to `.functions.fnc.fr-par.scw.cloud`.                    |
-| Container namespace | **Dedicated `qfdmod-preview` namespace** | Isolation from preprod; the cleanup cron can list it exhaustively.                                                                                                  |
-| DB seeding          | **`pg_dump` sample DB → `pg_restore`**   | Realistic data on the carte from the preprod sample database.                                                                                                       |
-| Teardown            | **Scaleway CLI by naming convention**    | No terraform state needed to destroy, so a failed or partial apply can always be cleaned up. `preview_destroy.sh` is shared by destroy-on-close and the nightly GC. |
-| GC rule             | **PR state, not resource age**           | A preview is wanted iff its PR is open and labeled `preview`. Closed PRs get a 24h grace so a reopened PR keeps its environment.                                    |
+| Topic               | Decision                                 | Rationale                                                                                                                                                                                                                      |
+| ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Env keying          | **PR number** (`pr-<n>`)                 | Stable URL across pushes, one env per PR, destroyed on close.                                                                                                                                                                  |
+| Trigger             | **Label-gated** (`preview` label)        | Each up run builds a Docker image and seeds a DB: real cost, several minutes. Labeling opts a PR in.                                                                                                                           |
+| Hostname            | **Scaleway generated domain**            | No DNS to manage. The hostname is unknown before apply, so the container runs with `ALLOWED_HOSTS` relaxed to `.functions.fnc.fr-par.scw.cloud`.                                                                               |
+| Container namespace | **Dedicated `qfdmod-preview` namespace** | Isolation from preprod; the cleanup cron can list it exhaustively.                                                                                                                                                             |
+| DB seeding          | **`pg_dump` sample DB → `pg_restore`**   | Realistic data on the carte from the preprod sample database.                                                                                                                                                                  |
+| Isoprod seeding     | **Latest Scaleway backup of prod**       | With `preview:isoprod`, the seed downloads the most recent ready backup of the `webapp` database of `lvao-prod-webapp` (one is taken every 24 h) instead of creating one: no extra load on production, data at most a day old. |
+| Teardown            | **Scaleway CLI by naming convention**    | No terraform state needed to destroy, so a failed or partial apply can always be cleaned up. `preview_destroy.sh` is shared by destroy-on-close and the nightly GC.                                                            |
+| GC rule             | **PR state, not resource age**           | A preview is wanted iff its PR is open and labeled `preview`. Closed PRs get a 24h grace so a reopened PR keeps its environment.                                                                                               |
 
 ## Architecture
 
@@ -53,6 +65,8 @@ Per-PR resources (state: lvao-terraform-state/preview/pr-<n>/…):
 └── container       serverless container in the shared
                     qfdmod-preview namespace, min_scale=0,
                     tagged preview / preview-pr-<n>
+                    (isoprod: min_scale=1, 2 vCPU, extra tag
+                    preview-isoprod)
 
 Shared (one-time):
 └── qfdmod-preview container namespace
@@ -108,7 +122,8 @@ This runs three idempotent steps, also callable individually:
    set in your shell).
 2. `preview-namespace` — `terragrunt apply` of the shared `qfdmod-preview`
    container namespace (interactive: review the plan before approving).
-3. `preview-label` — creates the `preview` label on the repository.
+3. `preview-label` — creates the `preview` and `preview:isoprod` labels
+   on the repository.
 
 ## Validation checklist
 
@@ -121,8 +136,17 @@ On a test PR:
 - [ ] State objects gone from `lvao-terraform-state/preview/pr-<n>/`
 - [ ] GC dry-run (`preview-cleanup.yml` with `dry_run=true`) lists the
       previews of closed PRs and keeps open labeled ones
+- [ ] With `preview:isoprod`: the seed log names a production backup and
+      shows production-sized row counts, and the container reports
+      `min_scale=1` and 2 vCPU
 
 ## Limitations / out of scope
+
+- An isoprod preview holds a full copy of production, personal data
+  included (accounts and sessions at least), behind a public URL. Nothing is scrubbed after the restore.
+- Each isoprod database is a full production copy on the preprod RDB
+  instance (20 GB volume, shared with the preprod and sample databases):
+  check the free space before labeling a second one.
 
 - Webapp only: no Airflow/data-platform previews, no warehouse database
   (the entrypoint skips `create_remote_db_server` when `DB_WAREHOUSE` is

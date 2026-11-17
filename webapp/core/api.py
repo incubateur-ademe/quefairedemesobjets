@@ -1,3 +1,4 @@
+from assistant.api import router as assistant_router
 from data.revue.api import router as revue_router
 from data.revue.errors import RevueApiError, revue_api_error_handler
 from ninja import NinjaAPI
@@ -23,4 +24,5 @@ api_v1 = NinjaAPI(
         " les lieux sont ceux du jeu de données ouvert publié sur data.ademe.fr."
     ),
 )
+api_v1.add_router("/", assistant_router, tags=["Assistant"])
 api_v1.add_router("/", opendata_router, tags=["Open data"])

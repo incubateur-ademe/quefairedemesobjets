@@ -22,9 +22,9 @@ map "$cookie_no_cache:<%= ENV["NGINX_DISABLE_CACHE"] || "0" %>" $no_cache {
 # iframe.js appends ref=<base64 parent URL> to every embed URL. On the routes
 # below it is only read client-side (analytics controller), so drop it from the
 # cache key: otherwise every embedding page is a cache miss.
-# Everywhere else ref stays in the key: RequestEnhancementMiddleware redirects
-# ASSISTANT_V2_BETA_TESTERS_HOSTS to the V2 based on it, and legacy redirects
-# echo it, so one embedder's cached response must not reach another.
+# Everywhere else ref stays in the key: RequestEnhancementMiddleware's redirects
+# (to the assistant V2, legacy routes) echo it, so one embedder's cached
+# response must not reach another.
 # A route added here must never read ref server-side.
 map "$uri?$args" $cache_args {
     default $args;
@@ -47,6 +47,12 @@ map $host $is_valid_host {
     "<%= ENV["BASE_DOMAIN"] %>"                      1;
 <% end %>
 }
+# Keep the router's X-Forwarded-Proto; locally nginx terminates TLS itself.
+map $http_x_forwarded_proto $forwarded_proto {
+    default $http_x_forwarded_proto;
+    ""      $scheme;
+}
+
 upstream gunicorn {
     server <%= ENV["UPSTREAM_HOST"] || "unix:/tmp/gunicorn.sock" %>;
     # keepalive: maintain persistent connections to gunicorn to avoid
@@ -88,6 +94,7 @@ server {
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
 
         proxy_cache assistant;
         proxy_cache_valid 200 301 302 10m;
@@ -112,6 +119,7 @@ server {
     resolver_timeout 5s;
     set $posthog_api_host eu.i.posthog.com;
     set $posthog_assets_host eu-assets.i.posthog.com;
+    set $ign_host data.geopf.fr;
     # proxy_pass with a variable passes its URI verbatim, so each location
     # strips the /ph prefix with a rewrite instead of in proxy_pass.
     # proxy_ssl_verify_depth: nginx defaults to 1, too short for Let's Encrypt YE2,
@@ -164,11 +172,29 @@ server {
         proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
     }
 
+    # IGN vector tiles of the assistant map: data.geopf.fr serves them
+    # uncompressed (up to 350 KB at zoom 13), gzip halves them.
+    location /tuiles/plan-ign/ {
+        rewrite ^/tuiles/plan-ign(/.*)$ /tms/1.0.0/PLAN.IGN$1 break;
+        proxy_pass https://$ign_host;
+        proxy_set_header Host $ign_host;
+        proxy_set_header Cookie "";
+        proxy_set_header Authorization "";
+        proxy_hide_header Set-Cookie;
+        proxy_ssl_server_name on;
+        proxy_ssl_name $ign_host;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 3;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        gzip_types application/x-protobuf;
+    }
+
     location /admin {
         # Longer timeout for admin operations (imports, exports, Wagtail)
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 120s;
         # Should not exceed 75s per the documentation
         # https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_connect_timeout
@@ -187,6 +213,7 @@ server {
         proxy_pass http://gunicorn;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 30s;
         proxy_connect_timeout 15s;
 

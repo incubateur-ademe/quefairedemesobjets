@@ -1,0 +1,10 @@
+<input type="text"
+       name="{{ widget.name }}"
+       {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
+       list="{{ widget.datalist_id }}"
+       {% for name, value in widget.attrs.items %}{% if value is not False %}{{ name }}{% if value is not True %}="{{ value|stringformat:'s' }}"{% endif %}{% endif %} {% endfor %}>
+<datalist id="{{ widget.datalist_id }}">
+    {% for suggestion in widget.suggestions %}
+        <option value="{{ suggestion }}"></option>
+    {% endfor %}
+</datalist>

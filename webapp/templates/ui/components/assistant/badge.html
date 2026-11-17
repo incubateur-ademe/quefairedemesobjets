@@ -1,0 +1,7 @@
+{% comment %}`condition`: reparable, bon_etat, mauvais_etat or bonus.{% endcomment %}
+<span class="qfa-badge" data-condition="{{ condition }}">
+    {% if condition == "bonus" %}
+        <span class="qfa-badge__icone" aria-hidden="true"></span>
+    {% endif %}
+    {{ libelle }}
+</span>

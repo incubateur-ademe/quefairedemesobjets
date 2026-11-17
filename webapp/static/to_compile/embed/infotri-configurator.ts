@@ -8,7 +8,7 @@ const setupIframe = () => {
   const scriptTag = document.currentScript as HTMLScriptElement
   const [iframeAttributes, iframeExtraAttributes] = getIframeAttributesAndExtra(
     scriptTag,
-    "infotri",
+    "infotri/",
     { useAutoHeight: true, iframeId: "infotri-configurator" },
   )
   buildAndInsertIframeFrom(

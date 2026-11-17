@@ -36,6 +36,7 @@ from modelsearch.query import Fuzzy
 from wagtail.models import Page
 
 from core.constants import SEARCH_TERM_ID_QUERY_PARAM
+from core.http_cache import CACHE_ONE_HOUR
 from core.views import static_file_content_from
 from qfdmd.consignes_migration import apply_plan, plan_conversion
 from qfdmd.legacy_migration import (
@@ -586,7 +587,7 @@ class ProduitsViewSetGroup(ViewSetGroup):
 # Frontend views
 
 
-@cache_control(max_age=31536000)
+@CACHE_ONE_HOUR
 def get_assistant_script(request):
     return static_file_content_from("embed/assistant.js")
 

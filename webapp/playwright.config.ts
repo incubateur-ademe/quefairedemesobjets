@@ -34,6 +34,11 @@ export const config: PlaywrightTestConfig = {
       // layout-sensitive tests (e.g. the autocomplete dropdown clamp at narrow
       // heights). Keep it off for the e2e server regardless of local .env.
       WITH_DJANGO_DEBUG_TOOLBAR: "False",
+      // assistant_iframe.spec.ts embeds the assistant from 127.0.0.1, a host
+      // distinct from the iframe's.
+      ALLOWED_HOSTS: "localhost,127.0.0.1",
+      // The tests open the assistant's screens directly, outside any iframe.
+      ASSISTANT_V2_STANDALONE_REDIRECT: "False",
     },
     cwd: path.resolve(__dirname),
   },

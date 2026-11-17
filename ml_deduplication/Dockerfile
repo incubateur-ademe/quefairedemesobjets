@@ -25,6 +25,9 @@ RUN apt-get update \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# uv installs everything; pip only ships vulnerable vendored libs (msgpack, urllib3, setuptools)
+RUN pip uninstall -y pip
+
 # Install uv (official installer)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --no-modify-path
 
@@ -34,7 +37,8 @@ COPY ml_deduplication ./ml_deduplication
 
 # Install python deps (cached as long as lockfiles unchanged)
 COPY pyproject.toml README.md uv.lock ./
-RUN /root/.local/bin/uv sync --frozen --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    /root/.local/bin/uv sync --frozen --no-dev
 
 # Use the venv for subsequent RUN/CMD
 ENV VIRTUAL_ENV="/app/.venv" \

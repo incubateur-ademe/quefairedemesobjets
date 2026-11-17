@@ -1,25 +1,30 @@
 # Ignore line length recommandations from flake8
 # flake8: noqa: E501
 from pathlib import Path
-from urllib.parse import urlparse
 
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.contrib.staticfiles import finders
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import RequestFactory
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django_lookbook.preview import LookbookPreview
 from django_lookbook.utils import register_form_class
 from dsfr.forms import DsfrBaseForm
 
+from assistant.adresses import suggest_adresses
 from core.constants import DEFAULT_MAP_CONTAINER_ID
 from core.context_processors import content, environment, global_context
 from core.widgets import (
     SearchAutocompleteInput,
 )
 from infotri.forms import InfotriForm
+from previews.widgets import AdresseDatalistInput
 from qfdmd.forms import QfSearchForm
 from qfdmd.middleware import RequestEnhancementMiddleware
 from qfdmd.models import ProduitPage, Synonyme
@@ -28,18 +33,30 @@ from qfdmo.forms import (
     LegendeForm,
     ViewModeForm,
 )
+from qfdmo.lieux_query import sous_categorie_ids_for
 from qfdmo.models.acteur import (
     ActeurType,
     DisplayedActeur,
     DisplayedPropositionService,
     LabelQualite,
 )
-from qfdmo.models.action import Action
+from qfdmo.models.action import Action, GroupeAction
 from qfdmo.models.config import CarteConfig
 from search.models import SearchTerm
 from qfdmo.widgets import SynonymeAutocompleteInput
 
 base_url = settings.BASE_URL
+PRODUCTION_URL = "https://quefairedemesdechets.ademe.fr"
+
+
+def iframe_js_opening_this_server() -> str:
+    """`iframe.js` opens the URL it was built with, production in the Docker
+    images: rewritten to open this server, a preview included. Empty when the
+    front end is not built."""
+    path = finders.find("embed/assistant.js")
+    if not path:
+        return ""
+    return Path(path).read_text().replace(PRODUCTION_URL, base_url)
 
 
 class ContextAwareLookbookPreview(LookbookPreview):
@@ -1365,13 +1382,6 @@ class TestsPreview(LookbookPreview):
             "ui/tests/copy_controller.html",
         )
 
-    def t_8_iframe_navigation_persistence(self, **kwargs):
-        """Test that iframe-specific UI persists during navigation"""
-        return render_to_string(
-            "ui/tests/iframe_navigation_persistence.html",
-            {"base_url": base_url},
-        )
-
     @register_form_class(BonusForm)
     def t_9_bonus_legacy_parameter_iframe(self, bonus="1", **kwargs):
         """Test that legacy bonus=1 parameter in iframe URL initializes the bonus filter as checked"""
@@ -1446,13 +1456,6 @@ class TestsPreview(LookbookPreview):
             {"script": script},
         )
 
-    def t_15_acteur_fiche_viewport(self, **kwargs):
-        """Test that acteur fiche is visible in viewport without scrolling on mobile"""
-        return render_to_string(
-            "ui/tests/t_15_acteur_fiche_viewport.html",
-            {"base_url": base_url},
-        )
-
     def t_16_infotri_configurator(self, **kwargs):
         """Test that the infotri configurator generates a script tag with a valid src URL"""
         return render_to_string(
@@ -1488,18 +1491,238 @@ class TestsPreview(LookbookPreview):
 
     @register_form_class(AssistantV2RedirectForm)
     def t_20_assistant_v2_redirect(self, objet="", **kwargs):
-        """Test which assistant `iframe.js` opens for a whitelisted host,
-        depending on `data-objet`"""
-        host = urlparse(base_url).hostname
+        """Test which assistant `iframe.js` opens, depending on `data-objet`"""
         return render_to_string(
             "ui/tests/t_20_assistant_v2_redirect.html",
             {
                 "base_url": base_url,
                 "objet": objet,
-                "host": host,
-                "host_is_beta": host in settings.ASSISTANT["V2_HOSTS"],
                 "fiche_slug": (
                     RequestEnhancementMiddleware._fiche_slug(objet) if objet else ""
                 ),
             },
         )
+
+    def t_21_assistant_sticky_header(self, **kwargs):
+        """The host's header hides when the page scrolls down and comes back,
+        fixed, when it scrolls up: each new screen of the assistant must land
+        just below it"""
+        return render_to_string(
+            "ui/tests/t_21_assistant_sticky_header.html",
+            {
+                "base_url": base_url,
+                "iframe_js": iframe_js_opening_this_server(),
+            },
+        )
+
+
+def geste_choices():
+    """Read at each form instantiation, not at import: the table is empty
+    during migrations and tests."""
+    groupes = (
+        GroupeAction.objects.filter(afficher=True)
+        .order_by("order")
+        .prefetch_related("actions")
+    )
+    return [(groupe.code, groupe.libelle) for groupe in groupes]
+
+
+class GesteForm(DsfrBaseForm):
+    geste = forms.ChoiceField(label="Geste", choices=geste_choices)
+    objet = forms.CharField(
+        label="Slug d'une fiche produit (facultatif)", required=False
+    )
+    adresse = forms.CharField(
+        label="Adresse ou commune",
+        required=False,
+        initial="Paris",
+        widget=AdresseDatalistInput(
+            attrs={"placeholder": "Paris, Lyon, 12 rue de la Paix…"}
+        ),
+        help_text="Centre de la carte. Les suggestions viennent de la BAN.",
+    )
+
+
+class AssistantPreview(LookbookPreview):
+    """Assistant V2 components."""
+
+    # Serves assistant.js/css alone: the legacy stack starts its own Stimulus
+    # application and would load the DSFR, which the assistant does not use.
+    assets = "assistant"
+
+    @register_form_class(GesteForm)
+    @component_docs("ui/components/assistant/carte.md")
+    def carte(self, geste="reparer", objet="", adresse="Paris", **kwargs):
+        longitude, latitude, precise = _coordinates_of(adresse)
+        acteurs = (
+            DisplayedActeur.objects.all()
+            .proposing(geste, _sous_categorie_ids(objet))
+            .nearest_to(longitude, latitude)
+            .for_the_map()
+        )
+        return render_to_string(
+            "ui/components/assistant/carte.html",
+            {
+                "gestes": [geste],
+                "fiche": objet,
+                "longitude": longitude,
+                "latitude": latitude,
+                "adresse_precise": precise,
+                "lieux": acteurs,
+                "debug": True,
+            },
+        )
+
+    @component_docs("ui/components/assistant/recherche_objet.md")
+    def recherche_objet(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_objet.html", {})
+
+    @component_docs("ui/components/assistant/recherche_adresse.md")
+    def recherche_adresse(self, **kwargs):
+        return render_to_string("ui/components/assistant/recherche_adresse.html", {})
+
+    @component_docs("ui/components/assistant/etiquette_geste.md")
+    def etiquette_geste(self, **kwargs):
+        """Every geste in one preview."""
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/etiquette_geste.html",
+                {"geste": groupe.code, "libelle": groupe.libelle_court},
+            )
+            for groupe in GroupeAction.objects.order_by("order")
+        )
+
+    @component_docs("ui/components/assistant/badge.md")
+    def badge(self, **kwargs):
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/badge.html",
+                {"condition": condition, "libelle": libelle},
+            )
+            for condition, libelle in CONDITIONS
+        )
+
+    @component_docs("ui/components/assistant/icone_geste.md")
+    def icone_geste(self, **kwargs):
+        return _side_by_side(
+            render_to_string(
+                "ui/components/assistant/icone_geste.html",
+                {"geste": groupe.code, "titre": groupe.libelle_court},
+            )
+            for groupe in GroupeAction.objects.order_by("order")
+        )
+
+    @component_docs("ui/components/assistant/alerte.md")
+    def alerte(
+        self, message="Cet objet ne se jette pas avec les ordures ménagères.", **kwargs
+    ):
+        return render_to_string(
+            "ui/components/assistant/alerte.html", {"message": message}
+        )
+
+    @component_docs("ui/components/assistant/bloc_geste.md")
+    def bloc_geste(self, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bloc_geste.html", REPARER_BLOCK
+        )
+
+    @component_docs("ui/components/assistant/bloc_gestes.md")
+    def bloc_gestes(self, **kwargs):
+        """The blocks in display order: repairable, good condition, worn out."""
+        return render_to_string(
+            "ui/components/assistant/bloc_gestes.html",
+            {"blocs": [REPARER_BLOCK, DONNER_BLOCK, TRIER_BLOCK]},
+        )
+
+    @component_docs("ui/components/assistant/bouton_changer_geste.md")
+    def bouton_changer_geste(self, libelle="Réparer", **kwargs):
+        return render_to_string(
+            "ui/components/assistant/bouton_changer_geste.html",
+            {"libelle": libelle, "gestes": ["reparer"], "url": "#"},
+        )
+
+    @component_docs("ui/components/assistant/accordeon.md")
+    def accordeon(self, ouvert=False, **kwargs):
+        return render_to_string(
+            "ui/components/assistant/accordeon.html",
+            {
+                "intitule": "Horaires d'ouverture",
+                "apercu": "Ouvert du lundi au samedi",
+                "contenu": "Lundi au vendredi : 9h-18h. Samedi : 9h-12h.",
+                "ouvert": ouvert,
+            },
+        )
+
+    @component_docs("ui/components/assistant/footer.md")
+    def footer(self, **kwargs):
+        return render_to_string("ui/components/assistant/footer.html", {})
+
+
+CONDITIONS = [
+    ("reparable", "Réparable"),
+    ("bon_etat", "Bon état"),
+    ("mauvais_etat", "Mauvais état"),
+    ("bonus", "Bonus Réparation"),
+]
+
+REPARER_BLOCK = {
+    "gestes": ["reparer"],
+    "libelle": "Réparer",
+    "consigne": (
+        "Vous pensez que votre téléphone mobile peut être réparé ? Pensez au "
+        "Bonus Réparation ! Grâce à la réparation, vous prolongez la durée de "
+        "vie de votre téléphone, tout en économisant de l'argent."
+    ),
+    "badges": [
+        {"condition": "reparable", "libelle": "Réparable"},
+        {"condition": "bonus", "libelle": "Bonus Réparation"},
+    ],
+    "url": "#",
+}
+
+DONNER_BLOCK = {
+    "gestes": ["donner_echanger_rapporter", "vendre_acheter"],
+    "libelle": "Donner ou revendre",
+    "consigne": "Votre objet fonctionne encore ? Donnez-lui une seconde vie.",
+    "badges": [{"condition": "bon_etat", "libelle": "Bon état"}],
+    "url": "#",
+}
+
+TRIER_BLOCK = {
+    "gestes": ["trier"],
+    "libelle": "Déposer",
+    "consigne": "Hors d'usage, votre objet se dépose en point de collecte.",
+    "badges": [{"condition": "mauvais_etat", "libelle": "Mauvais état"}],
+    "url": "#",
+}
+
+
+def _side_by_side(renders):
+    """Lines up several variants to compare them at a glance."""
+    return format_html(
+        '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">{}</div>',
+        mark_safe("".join(renders)),
+    )
+
+
+# Longitude, latitude, and whether the address is precise.
+PARIS = (2.3488, 48.8534, False)
+
+
+def _coordinates_of(adresse):
+    """The first BAN suggestion, through the assistant's own proxy and cache,
+    falling back on Paris."""
+    suggestions = suggest_adresses(adresse)
+    if not suggestions:
+        return PARIS
+    first = suggestions[0]
+    return (first["longitude"], first["latitude"], first["precise"])
+
+
+def _sous_categorie_ids(slug):
+    if not slug:
+        return []
+    try:
+        return sous_categorie_ids_for(slug)
+    except Http404:
+        return []

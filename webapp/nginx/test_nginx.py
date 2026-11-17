@@ -176,6 +176,18 @@ class TestXCacheStatusHeader:
         assert "X-Cache-Status" in resp.headers
 
 
+class TestIgnTilesProxy:
+    def test_tiles_are_gzipped(self):
+        resp = get(
+            "/tuiles/plan-ign/13/4071/2878.pbf",
+            headers={"Host": BASE_DOMAIN, "Accept-Encoding": "gzip"},
+            timeout=15,
+        )
+
+        assert resp.status_code == 200, resp.text[:200]
+        assert resp.headers.get("Content-Encoding") == "gzip"
+
+
 class TestPostHogProxy:
     # https://posthog.com/docs/advanced/proxy/nginx : /static/, /array/ and /
     # must all reach PostHog EU through our /ph/ prefix.

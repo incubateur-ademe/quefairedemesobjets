@@ -9,7 +9,7 @@ instance defined in `webapp/core/api.py` and mounted in `webapp/core/urls.py`.
   - `api`, the historical one, mounted at `/api/` (docs at `/api/docs`):
     `qfdmo.api` at `/api/qfdmo/`, `stats.api` at `/api/stats`
   - `api_v1`, the public versioned one, mounted at `/api/v1/` (docs at
-    `/api/v1/docs`): `opendata.api`, see [v1.md](v1.md)
+    `/api/v1/docs`): `opendata.api` and `assistant.api`, see [v1.md](v1.md)
 - `webapp/core/urls.py` mounts both; `api/v1/` comes first, or Django would
   look for `v1/…` inside the historical API.
 

@@ -22,7 +22,11 @@ urlpatterns = [
         ),
         name="assistant-survey-form",
     ),
-    path("dechet", RedirectView.as_view(url="/", query_string=True, permanent=True)),
+    path(
+        "dechet",
+        RedirectView.as_view(url="/", query_string=True, permanent=True),
+        name="dechet",
+    ),
     # The URL here needs to be kept as is because it was used in the previous
     # Gatsby website. If changed, a redirect need to be created to keep the
     # legacy behaviour.

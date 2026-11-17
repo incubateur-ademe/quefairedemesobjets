@@ -22,7 +22,7 @@ from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 from sites_conformes.content_manager.urls import urlpatterns as sites_conformes_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap
@@ -97,6 +97,14 @@ urlpatterns = (
         path(
             "assistant/",
             include(("assistant.urls", "assistant"), namespace="assistant"),
+        ),
+        # nginx proxies these tiles (servers.conf.erb); without it (runserver,
+        # e2e) they come straight from IGN.
+        path(
+            "tuiles/plan-ign/<path:tuile>",
+            RedirectView.as_view(
+                url="https://data.geopf.fr/tms/1.0.0/PLAN.IGN/%(tuile)s"
+            ),
         ),
         path(
             "docs/",

@@ -26,6 +26,15 @@ jobs:
     with:
       environment: prod
       tag_name: ${{ github.event.release.tag_name }}
+      # The images built for preprod on this commit, if they exist
+      source_tag: ${{ github.sha }}
+  nginx:
+    name: 🔴 Nginx gateway
+    uses: ./.github/workflows/_deploy-nginx.yml
+    secrets: inherit # pragma: allowlist secret`
+    with:
+      environment: prod
+      tag_name: ${{ github.event.release.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts

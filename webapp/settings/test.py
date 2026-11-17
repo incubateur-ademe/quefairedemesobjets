@@ -14,6 +14,9 @@ ALLOWED_HOSTS = ALLOWED_HOSTS + [
     "quefairedemesdechets.ademe.fr",
 ]
 
+# Tests open the assistant's screens directly, outside any iframe.
+ASSISTANT = {**ASSISTANT, "V2_STANDALONE_REDIRECT": False}
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.dummy.DummyCache",

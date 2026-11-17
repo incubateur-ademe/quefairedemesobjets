@@ -32,6 +32,20 @@ RUN uv sync --project data-platform --frozen --no-editable --no-install-workspac
 ARG AIRFLOW_VERSION
 FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS webserver
 
+USER root
+
+# The base image ships outdated Debian packages (Trivy)
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# The base image installs its own Airflow in a venv at /home/airflow/.local.
+# We never run it: our venv (/opt/airflow/.venv) comes first on PATH and holds
+# Airflow and every dependency we use. Its outdated packages (PyJWT, certifi,
+# urllib3, uv…) only fail the Trivy scan, so we drop it. The base /entrypoint
+# only references it when the container runs as root, to extend PYTHONPATH.
+RUN rm -rf /home/airflow/.local
+
 USER ${AIRFLOW_UID:-50000}
 
 ENV VIRTUAL_ENV=/opt/airflow/.venv \

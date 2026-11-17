@@ -1,17 +1,16 @@
-from django.http import Http404
+"""Screens of the assistant. The JSON endpoints live in `assistant/api.py`,
+mounted at `/api/v1/`."""
+
 from django.urls import path
+
+from assistant import views
 
 app_name = "assistant"
 
-
-def not_yet(request, **kwargs):
-    # The routes exist so the middleware can reverse them; the screens come
-    # with the assistant V2 stack. Until then, keep
-    # ASSISTANT_V2_BETA_TESTERS_HOSTS empty.
-    raise Http404("Assistant V2 not released yet")
-
-
 urlpatterns = [
-    path("", not_yet, name="home"),
-    path("objet/<slug:slug>/", not_yet, name="produit"),
+    path("", views.HomeView.as_view(), name="home"),
+    path("recherche/", views.SearchView.as_view(), name="recherche"),
+    path("objet/<slug:slug>/", views.ProduitView.as_view(), name="produit"),
+    path("solutions/", views.SolutionsView.as_view(), name="solutions"),
+    path("lieu/<str:uuid>/", views.LieuView.as_view(), name="lieu"),
 ]

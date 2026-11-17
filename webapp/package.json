@@ -2,40 +2,41 @@
   "name": "webapp",
   "type": "module",
   "scripts": {
-    "build": "parcel build --target prod",
+    "build": "parcel build --target prod --target worker",
     "lint": "eslint . --fix",
     "format:check": "prettier --check static/to_compile",
     "format": "prettier static/to_compile --write",
     "test": "jest ./static/to_compile",
-    "watch": "parcel watch --target dev --no-hmr",
+    "watch": "parcel watch --target dev --target worker --no-hmr",
     "e2e_test": " npx playwright test --update-snapshots"
   },
   "dependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@fontsource-variable/public-sans": "^5.3.0",
     "@gouvfr/dsfr": "1.14",
     "@hotwired/stimulus": "^3.2.2",
     "@hotwired/turbo": "^8.0.23",
     "@iframe-resizer/child": "^5.5.9",
     "@iframe-resizer/parent": "^5.5.9",
-    "@sentry/browser": "^11.9.0",
+    "@sentry/browser": "^11.11.0",
     "bowser": "^2.15.0",
     "carte-facile": "^0.10.2",
     "eslint-config-prettier": "^10.1.8",
-    "maplibre-gl": "^6.16.0",
-    "posthog-js": "^1.438.24",
+    "maplibre-gl": "^6.17.0",
+    "posthog-js": "^1.447.7",
     "stimulus-use": "^0.53.1",
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
     "@parcel/optimizer-svgo": "^2.16.4",
     "@parcel/transformer-inline-string": "^2.16.4",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.27",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "buffer": "^6.0.3",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-plugin-prettier": "^5.5.7",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
@@ -48,7 +49,7 @@
     "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.1"
+    "typescript-eslint": "^8.72.2"
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "^2.6.0"
@@ -63,7 +64,8 @@
     "static/to_compile/embed/infotri-configurator.ts",
     "static/to_compile/embed/infotri.ts",
     "static/to_compile/infotri-child.ts",
-    "static/to_compile/qfdmd.ts",
+    "static/to_compile/quefaire.ts",
+    "static/to_compile/assistant.ts",
     "static/to_compile/qfdmo.ts"
   ],
   "targets": {
@@ -73,6 +75,13 @@
     },
     "dev": {
       "distDir": "./static/compiled"
+    },
+    "worker": {
+      "distDir": "./static/compiled",
+      "sourceMap": false,
+      "context": "web-worker",
+      "source": "static/to_compile/maplibre-worker.ts",
+      "scopeHoist": false
     }
   },
   "browserslist": [

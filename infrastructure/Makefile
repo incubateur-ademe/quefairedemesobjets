@@ -60,6 +60,11 @@ preview-label: check-gh
 	  --description "Deploy a preview environment for this PR" \
 	  --color 0E8A16 \
 	  --force
+	gh label create preview:isoprod \
+	  --repo "$(REPO)" \
+	  --description "Preview seeded from the production database, always on" \
+	  --color 0E8A16 \
+	  --force
 
 # Full one-time bootstrap of the preview environments feature
 .PHONY: preview-bootstrap
