@@ -142,7 +142,9 @@ PARAMS = {
         # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
         examples=dropdown_sources,
         description_md="""**➕ INCLUSION ACTEURS**: seuls ceux qui proviennent
-                de ces sources (opérateur **OU/OR**)
+                de ces sources (opérateur **OU/OR**) seront considérés comme candidats.
+                Attention, les candidats ainsi considérés seront comparés
+                avec toutes les sources.
 
                 ℹ️ Si aucune valeur spécifiée =  tous les acteurs sont inclus
                 """,
@@ -154,11 +156,11 @@ PARAMS = {
         # mais "examples" est bien la façon de faire des dropdowns
         # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
         examples=dropdown_sources,
-        description_md="""**➕ EXCLUSION ACTEURS**: exclusion de ceux qui proviennent
-                de ces sources (opérateur **OU/OR**)
+        description_md="""**➕ EXCLUSION ACTEURS**: Exclut les acteurs de l'ensemble des
+        acteurs qui seront considérés pour le clustering.
 
-                ℹ️ Si aucune valeur spécifiée, aucun filtrage n'est effectué
-                """,
+        ℹ️ Si aucune valeur spécifiée, aucun filtrage n'est effectué
+        """,
     ),
     "include_acteur_types": Param(
         [],
@@ -351,7 +353,7 @@ def ml_deduplication_inference():
         ),
         "ML_DEDUPLICATION_IMAGE": "{{ params.image_ref }}",
         "ML_DEDUPLICATION_MODEL_THRESHOLD": "{{ params.model_threshold or '' }}",
-        "ML_DEDUPLICATION_LINKAGE_COLUMN": "{{ params.linkage_column or '' }}",
+        "ML_DEDUPLICATION_LINKAGE_COLUMN": "{{ params.linkage_column or '_linkage' }}",
         # Local mode: when "1"/"true", create/wait/destroy become no-ops and
         # run_inference runs the image locally with docker instead of on a
         # Scaleway instance.
