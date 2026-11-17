@@ -138,9 +138,9 @@ export default class extends Controller<HTMLElement> {
         acteurUuid,
         acteurType,
         sources,
-        searchAddress: sessionStorage.getItem("adresse") ?? undefined,
-        searchLatitude: sessionStorage.getItem("latitude") ?? undefined,
-        searchLongitude: sessionStorage.getItem("longitude") ?? undefined,
+        searchAddress: localStorage.getItem("adresse") ?? undefined,
+        searchLatitude: localStorage.getItem("latitude") ?? undefined,
+        searchLongitude: localStorage.getItem("longitude") ?? undefined,
       })
     })
   }
