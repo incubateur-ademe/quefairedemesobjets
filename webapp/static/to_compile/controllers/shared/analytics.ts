@@ -5,6 +5,8 @@ import { clearSearchTermCookie, setSearchTermCookie } from "../../js/helpers"
 import { initSentry } from "../../js/sentry"
 
 const IFRAME_REFERRER_SESSION_KEY = "qf_ifr"
+const CONSENT_DURATION_IN_DAYS = 183
+const CONSENT_SERVICE = "posthogqf"
 
 type PersonProperties = {
   iframe: boolean
@@ -64,7 +66,11 @@ export default class extends Controller<HTMLElement> {
     capture_pageview: true,
     capture_pageleave: true,
     person_profiles: "always",
-    persistence: "sessionStorage",
+    persistence: "localStorage+cookie",
+    cookie_expiration: CONSENT_DURATION_IN_DAYS,
+    // Until the visitor accepts, events are sent without any storage on the device.
+    cookieless_mode: "on_reject",
+    opt_out_capturing_by_default: true,
   }
 
   // The user conversion score is computed from several actions : page views,
@@ -85,9 +91,14 @@ export default class extends Controller<HTMLElement> {
 
   initialize(): void {
     initSentry(this.sentryDsnValue, this.sentryEnvironmentValue)
-    posthog.init(this.posthogKeyValue, this.posthogConfig)
-    this.#identifyAuthenticatedUser()
+    // No consent banner inside an iframe: nothing is ever stored there.
+    posthog.init(this.posthogKeyValue, {
+      ...this.posthogConfig,
+      cookieless_mode: this.#areWeInAnIframe() ? "always" : "on_reject",
+    })
     this.#initialiseIframeRelatedPersonProperties()
+    this.#setupConsent()
+    this.#identifyAuthenticatedUser()
     this.#registerSuperProperties()
     this.#syncSessionStorageWithLocalConversionScore()
     this.#setupIframeTracking()
@@ -166,6 +177,30 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  // The consent banner (tarteaucitron) stores the visitor's choice in its own
+  // cookie and dispatches an event on document each time the choice changes.
+  #setupConsent() {
+    if (this.personProperties.iframe) return
+    const hasConsent = () => document.cookie.includes(`${CONSENT_SERVICE}=true`)
+    const applyConsent = (isGranted: boolean) => {
+      const wasGranted = posthog.get_explicit_consent_status() === "granted"
+      if (isGranted === wasGranted) return
+      // Both calls reset the PostHog instance, which drops what was registered.
+      if (isGranted) {
+        posthog.opt_in_capturing({ captureEventName: false })
+      } else {
+        posthog.opt_out_capturing()
+      }
+      this.#identifyAuthenticatedUser()
+      this.#registerSuperProperties()
+    }
+    applyConsent(hasConsent())
+    document.addEventListener(`${CONSENT_SERVICE}_allowed`, () => applyConsent(true))
+    document.addEventListener(`${CONSENT_SERVICE}_disallowed`, () =>
+      applyConsent(false),
+    )
+  }
+
   // This is used to discriminate authenticated users (LVAO Team)
   // from anonymous users.
   // In PostHog, authenticated users are excluded from insights.
@@ -185,6 +220,8 @@ export default class extends Controller<HTMLElement> {
       outil: pageType,
       pageSlug,
       ref: this.personProperties.iframeReferrer ?? null,
+      // identify() has no effect without consent: this flags the team's events.
+      internal: !!this.userUsernameValue,
     })
   }
 

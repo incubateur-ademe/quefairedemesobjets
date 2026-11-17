@@ -62,6 +62,8 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
         {# Sites Conformes css #}
         <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css" />
 
+        {% include "ui/analytics/consent.html" %}
+
         {% block extra_css %}
         {% endblock extra_css %}
 
