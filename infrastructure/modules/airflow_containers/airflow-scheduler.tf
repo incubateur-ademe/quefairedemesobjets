@@ -21,6 +21,7 @@ resource "scaleway_container" "airflow_scheduler" {
     failure_threshold = 5
     interval          = "30s"
   }
+
   startup_probe {
     http {
       path = "/health"

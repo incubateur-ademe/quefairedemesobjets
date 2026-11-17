@@ -24,6 +24,7 @@ resource "scaleway_container" "airflow_webserver" {
     failure_threshold = 5
     interval          = "30s"
   }
+
   startup_probe {
     http {
       path = "/api/v2/version"
