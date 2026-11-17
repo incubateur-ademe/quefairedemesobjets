@@ -152,7 +152,8 @@ if urlparse(BASE_URL).scheme == "https":
 # Application definition
 # ----------------------
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    # django.contrib.admin with a custom default site (see core/admin_site.py)
+    "core.admin_site.QfdmoAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
