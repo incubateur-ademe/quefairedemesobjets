@@ -41,7 +41,7 @@
     "@sentry/browser": "^11.11.0",
     "postcss": "^8.5.32",
     "@axe-core/playwright": "^4.14.0",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "@types/lodash": "^4.17.27",
     "bowser": "^2.15.0",
     "posthog-js": "^1.447.7"
