@@ -33,7 +33,7 @@
     "@tanstack/react-table": "^9.3.1",
     "@tanstack/react-virtual": "^3.14.26",
     "diff-match-patch": "^1.0.5",
-    "maplibre-gl": "^6.16.0",
+    "maplibre-gl": "^6.17.0",
     "openapi-fetch": "^0.17.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
