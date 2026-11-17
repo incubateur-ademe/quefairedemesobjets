@@ -137,8 +137,6 @@ with DAG(
         normalization_rules=SINOE_NORMALIZATION_RULES,
         dechet_mapping=source_sinoe_dechet_mapping_get(),
         product_mapping=get_mapping_config("sous_categories_sinoe"),
-        validate_address_with_ban=False,
-        use_legacy_suggestions=False,
     ).to_airflow_params(),
 ) as dag:
     eo_task_chain(dag)

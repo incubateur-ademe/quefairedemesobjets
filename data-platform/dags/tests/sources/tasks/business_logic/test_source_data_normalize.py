@@ -70,6 +70,19 @@ class TestSourceDataNormalizeSinoe:
 
         assert list(result["code_service"]) == ["OPEN"]
 
+    def test_remove_closed_services_treats_string_none_as_open(self):
+        df = pd.DataFrame(
+            {
+                "code_service": ["OPEN_NONE", "OPEN_STR", "CLOSED"],
+                "annee": [2025, 2025, 2025],
+                "date_fermeture_service": [None, "None", "2026-01-01"],
+            },
+        )
+
+        result = df_normalize_sinoe(df=df)
+
+        assert list(result["code_service"]) == ["OPEN_NONE"]
+
 
 NORMALIZATION_RULES = [
     {

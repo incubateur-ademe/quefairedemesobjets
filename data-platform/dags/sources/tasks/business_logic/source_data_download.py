@@ -9,6 +9,10 @@ import numpy as np
 import pandas as pd
 import requests
 from shared.config.airflow import TMP_FOLDER
+from sources.tasks.business_logic.source_dataframe import (
+    coerce_source_dataframe_to_str,
+    normalize_source_nulls,
+)
 from utils import logging_utils as log
 from utils.db_tmp_tables import infer_postgresql_array_dtypes
 from utils.django import django_setup_full
@@ -72,10 +76,7 @@ def _align_columns_with_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
 
 def _coerce_legacy_download_dtypes(df: pd.DataFrame) -> pd.DataFrame:
     """Cast non-string/bool/list columns to str (legacy XCom path)."""
-    for column in df.columns:
-        if df[column].dtype not in [str, bool, list]:
-            df[column] = df[column].astype(str)
-    return df
+    return coerce_source_dataframe_to_str(df)
 
 
 def download_source_dataframe(
@@ -106,11 +107,12 @@ def download_source_dataframe(
         schema = metadata.json()
         df = _align_columns_with_schema(df, schema)
 
-    return df
+    return normalize_source_nulls(df)
 
 
 def save_source_dataframe_in_warehouse_db(df: pd.DataFrame, dag_id: str) -> None:
     """Persist downloaded data in the warehouse and point `{dag_id}_in_use` at it."""
+    df = normalize_source_nulls(df)
     django_setup_full()
     from django.db import connections
     from utils.django import DJANGO_WH_CONNECTION_NAME, django_conn_to_sqlalchemy_engine

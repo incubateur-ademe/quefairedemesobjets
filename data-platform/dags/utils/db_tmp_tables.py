@@ -5,7 +5,8 @@ import logging
 
 import pandas as pd
 from sources.tasks.transform.sequence_utils import convert_numpy_to_jsonify
-from sqlalchemy import text
+from sqlalchemy import VARCHAR, text
+from sqlalchemy.dialects.postgresql import ARRAY
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +19,6 @@ def column_contains_lists(series: pd.Series) -> bool:
 
 def infer_postgresql_array_dtypes(df: pd.DataFrame) -> dict:
     """Map columns whose cells are lists to PostgreSQL ARRAY(VARCHAR) for to_sql."""
-    from sqlalchemy import VARCHAR
-    from sqlalchemy.dialects.postgresql import ARRAY
 
     return {col: ARRAY(VARCHAR) for col in df.columns if column_contains_lists(df[col])}
 

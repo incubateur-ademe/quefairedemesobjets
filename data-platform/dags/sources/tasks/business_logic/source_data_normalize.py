@@ -20,6 +20,10 @@ from sources.config.models import (
     NormalizationDFTransform,
     SourceConfig,
 )
+from sources.tasks.business_logic.source_dataframe import (
+    REPLACE_NULL_MAPPING,
+    coerce_source_dataframe_to_str,
+)
 from sources.tasks.transform.exceptions import (
     ImportSourceException,
     ImportSourceValueWarning,
@@ -28,15 +32,9 @@ from sources.tasks.transform.transform_df import compute_location, merge_duplica
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_fixed
 from utils import logging_utils as log
-from utils.db_tmp_tables import column_contains_lists
 from utils.django import django_setup_full
 
 logger = logging.getLogger(__name__)
-
-REPLACE_NULL_MAPPING = {
-    key: ""
-    for key in ["null", "none", "nan", "na", "n/a", "non applicable", "aucun", "-"]
-}
 
 
 class LogBase(BaseModel):
@@ -379,15 +377,7 @@ def load_acteur_dataframe_at_normalize_start(
         df = df_acteur_from_source
 
     log.preview("df avant normalisation (brut)", df)
-
-    for column in df.columns:
-        if column_contains_lists(df[column]):
-            continue
-        if df[column].dtype == bool:
-            continue
-        if df[column].dtype != str:
-            df[column] = df[column].astype(str)
-
+    df = coerce_source_dataframe_to_str(df)
     log.preview("df avant normalisation", df)
     return df
 
@@ -555,6 +545,7 @@ def df_normalize_sinoe(
         logger.info(
             f"Versions SINOE filtrées (années antérieures): {nb_filtered} / {nb_before}"
         )
+        log.preview("Versions SINOE filtrées (années antérieures)", df)
     df = df.drop(columns=["annee"]).reset_index(drop=True)
 
     # Remove entities with a date_fermeture_service
