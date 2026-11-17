@@ -94,7 +94,7 @@ Toute l'infra Scaleway est décrite dans `infrastructure/` (OpenTofu + Terragrun
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | **Sentry**                     | Détection en temps réel des erreurs back/front (`DjangoIntegration`, `@sentry/browser`).                   |
 | **Scaleway Cockpit (Grafana)** | Métriques RDB PostgreSQL & containers Airflow.                                                             |
-| **PostHog / Matomo**           | Surveillance indirecte de l'usage (chute de trafic = signal faible d'incident).                            |
+| **PostHog**                    | Surveillance indirecte de l'usage (chute de trafic = signal faible d'incident).                            |
 | **Dashlord ADEME**             | Audit de sécurité externe continu ([dashlord.incubateur.ademe.fr](https://dashlord.incubateur.ademe.fr/)). |
 
 ## Stratégies de dégradation contrôlée
@@ -104,7 +104,6 @@ Toute l'infra Scaleway est décrite dans `infrastructure/` (OpenTofu + Terragrun
 | **API BAN / geo.api.gouv.fr** | Cache HTTP (1 h pour BAN, 30 j à 1 an pour EPCI) absorbe l'indisponibilité courte. L'autocomplete d'adresses dégrade silencieusement. |
 | **Notion API**                | Le formulaire de contact échoue côté `post_save` — un retry/fallback peut être mis en place (à définir si nécessaire).                |
 | **PostHog**                   | A/B testing et `/api/stats` indisponibles, mais le service principal (carte, assistant) reste fonctionnel.                            |
-| **Matomo**                    | Aucune incidence fonctionnelle (analytics uniquement).                                                                                |
 | **Sentry**                    | Aucune incidence fonctionnelle, mais perte temporaire de visibilité sur les erreurs.                                                  |
 | **Scaleway Object Storage**   | Les images médias (uploads Django Admin) ne se chargent plus côté front, mais les pages restent servies.                              |
 | **Airflow**                   | Les pipelines de données sont retardés — la webapp et l'API publique continuent de servir les données déjà consolidées.               |

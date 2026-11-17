@@ -62,7 +62,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Assistant settings
 # ------------------
 ASSISTANT = {
-    "MATOMO_ID": decouple.config("ASSISTANT_MATOMO_ID", default=82, cast=int),
     "POSTHOG_KEY": decouple.config(
         "ASSISTANT_POSTHOG_KEY",
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
@@ -78,7 +77,6 @@ ASSISTANT = {
 # Carte settings
 # --------------
 CARTE = {
-    "MATOMO_ID": decouple.config("LVAO_MATOMO_ID", default=50, cast=int),
     "GOOGLE_SEARCH_CONSOLE": "google9dfbbc61adbe3888.html",
     "DECLARATION_ACCESSIBILITE_PAGE_ID": decouple.config(
         "CARTE_DECLARATION_ACCESSBILITE_PAGE_ID",
