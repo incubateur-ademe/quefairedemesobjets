@@ -419,15 +419,17 @@
 <section id="publishing-a-release">
 <h2>Publishing a release<a class="headerlink" href="#publishing-a-release" title="Lien vers cette rubrique">¶</a></h2>
 <p>When a release is published on GitHub (event <code class="docutils literal notranslate"><span class="pre">published</span></code>), the <strong>🌞 Release to production</strong> workflow (<a class="reference external" href="https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml">deploy.yml</a>) is triggered to deploy to production.</p>
-<p>The tagged version of the code is deployed to the <code class="docutils literal notranslate"><span class="pre">prod</span></code> environment.</p>
+<p>The tagged version of the code is deployed to the <code class="docutils literal notranslate"><span class="pre">prod</span></code> environment. Airflow images built for <code class="docutils literal notranslate"><span class="pre">preprod</span></code> on the same commit are tagged with the version number instead of being built again. If one is missing, for example because of the registry cleanup, all of them are built.</p>
 <section id="deploy-workflow-flow">
 <h3>Deploy workflow flow<a class="headerlink" href="#deploy-workflow-flow" title="Lien vers cette rubrique">¶</a></h3>
 <pre  class="mermaid">
         graph TD
     C[Deployment of the webapp release version to production]
-    F[Build Airflow Docker images&lt;br/&gt;The image is tagged with the version number&lt;br/&gt;This tagged image is used for the production deployment]
-    F --&gt; H[Deployment of the Scheduler on Scaleway in production]
-    F --&gt; I[Deployment of the Webserver on Scaleway in production]
+    F{Images of this commit&lt;br/&gt;in the registry?}
+    F --&gt;|Yes| R[Tag them with the version number]
+    F --&gt;|No| B[Build and tag with the version number]
+    R --&gt; H[Deployment of Airflow on Scaleway in production]
+    B --&gt; H
     </pre></section>
 </section>
 <section id="scheduled-workflows">
