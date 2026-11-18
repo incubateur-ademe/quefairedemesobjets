@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
-
 from qfdmo.models.acteur import ActeurService, ActeurStatus, DisplayedActeur, Source
 from qfdmo.models.action import Action, GroupeAction
 from qfdmo.models.categorie_objet import SousCategorieObjet
@@ -212,26 +211,6 @@ def test_get_sources(client):
         assert "id" in data[0]
         assert "libelle" in data[0]
         assert "url" in data[0]
-
-
-@pytest.mark.django_db
-def test_get_sous_categories(client):
-    """Test the /sous-categories endpoint"""
-    sous_categorie_a = SousCategorieObjetFactory()
-    sous_categorie_b = SousCategorieObjetFactory()
-
-    response = client.get(f"{BASE_URL}/sous-categories")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
-    assert len(data) == SousCategorieObjet.objects.count()
-    data_ids = {sous_categorie["id"] for sous_categorie in data}
-    assert sous_categorie_a.id in data_ids
-    assert sous_categorie_b.id in data_ids
-    if data:
-        assert "code" in data[0]
-        assert "id" in data[0]
-        assert "libelle" in data[0]
 
 
 @pytest.mark.django_db

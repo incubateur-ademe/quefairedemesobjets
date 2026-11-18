@@ -1515,6 +1515,10 @@ class Produit(index.Indexed, AbstractBaseProduit):
         index.SearchField("id"),
     ]
 
+    @cached_property
+    def first_sous_categorie(self):
+        return self.sous_categories.first()
+
     def get_etats_descriptions(self) -> tuple[str, str] | None:
         # TODO: rename this method
         # Une fois que les fiches déchet auront toutes
