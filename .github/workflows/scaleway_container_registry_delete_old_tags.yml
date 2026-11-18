@@ -1,4 +1,4 @@
-name: "🟣 Scaleway Container Registry: delete old tags"
+name: 🟣 Delete old registry tags
 on:
   workflow_dispatch:
   schedule:
@@ -15,13 +15,13 @@ permissions:
 
 jobs:
   delete_old_tags:
-    name: Delete old tags
+    name: 🗑️ Delete old tags
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
       - name: Setup python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: '3.x'
       - name: Install requests

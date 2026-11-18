@@ -12,3 +12,4 @@ def django_db_setup(django_db_setup, django_db_blocker):
             "acteur_types",
             "actions",
         )
+        call_command("seed_lieux_de_depot")

@@ -39,6 +39,7 @@ class TAGS:
     DB: str = "db"
     DBT: str = "dbt"
     DECHETTERIE: str = "déchetterie"
+    DEDUPLICATION: str = "deduplication"
     DEPARTEMENT: str = "département"
     DEPRECATED: str = "deprecated"
     DEV_TOOLS: str = "dev tools"
@@ -62,10 +63,12 @@ class TAGS:
     JOUET: str = "JOUET"  # Fillière Jouet
     KOUMOUL: str = "koumoul"
     LAPOSTE: str = "laposte"
+    LEKO: str = "leko"  # eco-organisme
     LIEUX_DITS: str = "lieux-dits"
     LOGS: str = "logs"
     LUB: str = "LUB"  # Fillière Lubrifiant
     MAINTENANCE: str = "maintenance"
+    ML: str = "ml"
     NETTOYAGE: str = "nettoyage"
     OCA: str = "OCA"  # Organisme Coordonnateur Agrée
     OCAB: str = "ocab"  # OCA

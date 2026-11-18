@@ -1,0 +1,32 @@
+{# Header of a CLUSTERING SuggestionGroupe, see SuggestionGroupeTypeCluster #}
+<div class="qf-mb-3w">
+    <p>
+        <strong>{{ cluster.contexte.title|default:"📦 Cluster/dédup" }}</strong>
+        - cluster_id : <code>{{ cluster.contexte.cluster_id }}</code>
+        - parent : <code>{{ cluster.contexte.parent_id }}</code>
+    </p>
+    {% if cluster.contexte.exact_match %}
+        <p>
+            🎯 Correspondance exacte :
+            {% for field, value in cluster.contexte.exact_match.items %}
+                {% if not forloop.first %}, {% endif %}<strong>{{ field }}</strong> = {{ value }}
+            {% endfor %}
+        </p>
+    {% endif %}
+    {% if cluster.contexte.cluster_fields_fuzzy %}
+        <p>〰️ Champs fuzzy : {{ cluster.contexte.cluster_fields_fuzzy|join:", " }}</p>
+    {% endif %}
+    {% if cluster.metadata %}
+        <details>
+            <summary>📊 Statistiques du cluster</summary>
+            <ul>
+                {% for key, value in cluster.metadata.items %}
+                    <li>{{ key }} : {{ value }}</li>
+                {% endfor %}
+            </ul>
+        </details>
+    {% endif %}
+    <p class="qf-text-xs qf-italic">
+        Pour détacher un acteur du cluster, vider sa colonne « Parent après ».
+    </p>
+</div>

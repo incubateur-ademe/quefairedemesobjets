@@ -11,7 +11,7 @@ from sources.tasks.transform.exceptions import (
     RepriseWarning,
     SirenWarning,
     SiretWarning,
-    SousCategorieCodesError,
+    SousCategorieCodesWarning,
     UrlWarning,
 )
 from sources.tasks.transform.transform_column import (
@@ -23,6 +23,7 @@ from sources.tasks.transform.transform_column import (
     clean_horaires_osm,
     clean_number,
     clean_public_accueilli,
+    clean_public_accueilli_sinoe_libelle_type_service,
     clean_reprise,
     clean_siren,
     clean_siret,
@@ -337,6 +338,33 @@ class TestCleanPublicAccueilli:
             clean_public_accueilli(value, None)
 
 
+class TestCleanPublicAccueilliSinoeLibelleTypeService:
+    @pytest.mark.parametrize(
+        "value, expected_value",
+        [
+            (None, ""),
+            ("Déchèterie", ""),
+            ("Déchèterie professionnelle", "Professionnels"),
+            (
+                "Plateforme d'apports de déchets verts",
+                "",
+            ),
+            ("Centre d'apport volontaire", ""),
+        ],
+    )
+    def test_clean_public_accueilli_sinoe_libelle_type_service(
+        self, value, expected_value
+    ):
+        assert (
+            clean_public_accueilli_sinoe_libelle_type_service(value, None)
+            == expected_value
+        )
+
+    def test_clean_public_accueilli_sinoe_libelle_type_service_warning(self):
+        with pytest.raises(PublicAccueilliWarning):
+            clean_public_accueilli_sinoe_libelle_type_service("inconnu", None)
+
+
 class TestCleanReprise:
 
     @pytest.mark.parametrize(
@@ -494,8 +522,16 @@ class TestCleanSousCategorieCodes:
 
     def test_clean_sous_categorie_codes_raise(self, dag_config):
         dag_config.product_mapping = {"sscat1": 1.0}
-        with pytest.raises(SousCategorieCodesError):
+        with pytest.raises(SousCategorieCodesWarning):
             clean_sous_categorie_codes("sscat1", dag_config)
+
+    def test_clean_sous_categorie_codes_unknown_raises_warning(
+        self, dag_config, caplog
+    ):
+        dag_config.product_mapping = {"sscat1": "mapped1"}
+        with pytest.raises(SousCategorieCodesWarning):
+            clean_sous_categorie_codes("unknown", dag_config)
+        assert "Sous-catégorie absente du mapping : `unknown`" in caplog.text
 
 
 class TestCleanSouscategorieCodesSinoe:

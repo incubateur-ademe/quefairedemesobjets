@@ -1,0 +1,36 @@
+name: Prepare test databases
+description: Migrate once, or restore the last migration, then clone a database for each pytest-xdist worker
+
+runs:
+  using: composite
+  steps:
+    # A pull request cannot save for main: migrations and dependencies changed by a
+    # pull request run again until main has run once.
+    - name: Restore migrated database
+      id: cache
+      uses: actions/cache@v6
+      with:
+        path: test-db.pgdump
+        key: test-db-${{ hashFiles('uv.lock', 'webapp/*/migrations/*.py') }}
+
+    - name: Migrate
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: webapp
+      env:
+        DATABASE_URL: "postgres://webapp:webapp@localhost:5432/test_webapp" # pragma: allowlist secret
+        DJANGO_SETTINGS_MODULE: settings.test
+      run: |
+        createdb test_webapp
+        uv run python manage.py migrate --no-input --verbosity 0
+        pg_dump -Fc -f ../test-db.pgdump test_webapp
+        dropdb test_webapp
+
+    # pg_restore warns about settings from a newer client: the count below checks it.
+    - name: Create a database per worker
+      shell: bash
+      run: |
+        createdb test_webapp
+        pg_restore --no-owner --no-privileges --clean --if-exists -d test_webapp test-db.pgdump || true
+        psql -d test_webapp -Atc "select count(*) || ' migrations' from django_migrations"
+        for worker in 0 1 2 3; do createdb -T test_webapp "test_webapp_gw$worker"; done

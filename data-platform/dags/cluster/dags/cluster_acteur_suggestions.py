@@ -79,6 +79,12 @@ PARAMS = {
             donc pas visible dans Django Admin).
             {UI_PARAMS_SEPARATORS.READ_ACTEURS}""",
     ),
+    "use_legacy_suggestions": Param(
+        False,
+        type="boolean",
+        description_md="""🔄 Si coché, les suggestions seront écrites au format legacy
+            (Suggestion), sinon au format groupes (SuggestionGroupe)""",
+    ),
     # TODO: permettre de ne sélectionner aucune source = toutes les sources
     "include_sources": Param(
         [],

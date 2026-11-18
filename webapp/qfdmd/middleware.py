@@ -1,14 +1,10 @@
-import logging
-from urllib.parse import urlparse, urlunparse
-
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import Resolver404, resolve
+from django.utils.cache import add_never_cache_headers, patch_vary_headers
 from wagtail.admin.viewsets.base import reverse
 
 from core.utils import has_explicit_perm
-
-logger = logging.getLogger(__name__)
 
 
 class BetaMiddleware:
@@ -30,7 +26,6 @@ class BetaMiddleware:
 
 class RequestEnhancementMiddleware:
     LOGGED_IN_COOKIE = "logged_in"
-    CMS_CARTE_FALLBACK = "/lacarte"
     CARTE_PARAM = "carte"
     IFRAME_PARAM = "iframe"
     FORMULAIRE_PARAM = "formulaire"
@@ -40,42 +35,80 @@ class RequestEnhancementMiddleware:
 
     def __call__(self, request):
         # Prepare request
-        if url_to_redirect := self._check_redirect_from_legacy_domains(request):
-            return redirect(url_to_redirect, permanent=True)
-
         self._prepare_request_if_iframe(request)
+        if url_to_redirect := self._handle_special_query_params(request):
+            return redirect(url_to_redirect, permanent=True)
+        if url_to_redirect := self._redirect_embeds_to_assistant_v2(request):
+            response = redirect(url_to_redirect)
+            # Publishing a fiche moves its embeds to the V2: a cached redirect
+            # would keep them on the wrong assistant.
+            add_never_cache_headers(response)
+            return response
+
         response = self.get_response(request)
 
         # Prepare response
         self._set_logged_in_cookie(request, response)
-        self._persist_iframe_in_headers(request, response)
+        # Pages render differently in an iframe: nginx caches each version apart.
+        patch_vary_headers(response, ["Sec-Fetch-Dest"])
         self._cleanup_vary_header(response)
 
         return response
 
-    def _check_redirect_from_legacy_domains(self, request) -> str | None:
-        """
-        Handle direct access routing for legacy paths
-        based on host and query parameters.
+    # Legacy routes that embeds open, and their assistant V2 counterparts.
+    ASSISTANT_V2_ROUTES = {
+        "qfdmd:home": "assistant:home",
+        "qfdmd:dechet": "assistant:home",
+        "qfdmd:synonyme-detail": "assistant:produit",
+    }
 
-        Routes requests to:
-        - Carte view when 'carte' parameter present (highest priority)
-        - Formulaire view when 'iframe' parameter present
-        - Main domain redirect for allowed hosts
-        - CMS carte page as fallback for unknown hosts
-        """
-        # Check for special query parameters first (highest priority)
-        if redirect_url := self._handle_special_query_params(request):
-            return redirect_url
+    def _redirect_embeds_to_assistant_v2(self, request) -> str | None:
+        """Send embeds to the assistant V2, whatever code the embedder copied.
 
-        # Handle host-based redirects
-        # TODO: handle in nginx as well
-        # return self._handle_host_redirects(request)
+        `iframe.js` always adds `ref`; a bare `<iframe>` has none, but its
+        browser sends `Sec-Fetch-Dest: iframe`. Either tells an embed from a
+        visit to the site. `data-objet` is a fiche or a legacy synonyme slug,
+        resolved to its fiche as the legacy assistant does; a fiche that does not
+        exist in V2 stays on the legacy assistant rather than 404ing.
+        """
+        if "ref" not in request.GET and not request.iframe:
+            return None
+        try:
+            match = resolve(request.path)
+        except Resolver404:
+            return None
+        if not (target := self.ASSISTANT_V2_ROUTES.get(match.view_name)):
+            return None
+        url_kwargs = match.kwargs
+        if slug := match.kwargs.get("slug"):
+            if not (fiche_slug := self._fiche_slug(slug)):
+                return None
+            url_kwargs = {**match.kwargs, "slug": fiche_slug}
+        return self._build_redirect_url(
+            target,
+            request.GET,
+            [],
+            **url_kwargs,
+        )
+
+    @staticmethod
+    def _fiche_slug(slug: str) -> str | None:
+        from qfdmd.models import ProduitPage, Synonyme
+
+        fiches = ProduitPage.objects.live()
+        if fiches.filter(slug=slug).exists():
+            return slug
+        synonyme = Synonyme.objects.filter(slug=slug).first()
+        page = synonyme and synonyme.wagtail_page
+        if page and fiches.filter(pk=page.pk).exists():
+            return page.slug
         return None
 
     def _handle_special_query_params(self, request) -> str | None:
+        """Old embeds open the home page with `?carte`, `?iframe` or `?formulaire`,
+        sometimes through a legacy domain that nginx sends here."""
         try:
-            if resolve(request.path).view_name != "qfdmd:home":
+            if resolve(request.path).view_name not in ("qfdmd:home", "qfdmd:dechet"):
                 return
         except Resolver404:
             # Paths that don't match any urlpattern (e.g. Wagtail's preview
@@ -101,6 +134,7 @@ class RequestEnhancementMiddleware:
         view_name: str,
         get_params,
         params_to_remove: list,
+        **url_kwargs,
     ) -> str:
         from urllib.parse import urljoin
 
@@ -110,35 +144,11 @@ class RequestEnhancementMiddleware:
             get_params_copy.pop(param, None)  # Use pop() to avoid KeyError
 
         query_string = get_params_copy.urlencode()
-        relative_url = reverse(view_name)
+        relative_url = reverse(view_name, kwargs=url_kwargs)
 
         base_url = settings.BASE_URL.rstrip("/")
         absolute_url = urljoin(base_url, relative_url.lstrip("/"))
         return f"{absolute_url}?{query_string}" if query_string else absolute_url
-
-    def _handle_host_redirects(self, request) -> str | None:
-        base_netloc = urlparse(settings.BASE_URL).netloc
-        base_scheme = urlparse(settings.BASE_URL).scheme
-        request_host = request.META.get("HTTP_HOST")
-
-        if not request_host or request_host == base_netloc:
-            return None
-
-        if request_host in settings.ALLOWED_HOSTS:
-            # Redirect to main domain while preserving path and query params
-            full_requested_url = urlparse(request.build_absolute_uri())
-            redirect_url = urlunparse(
-                full_requested_url._replace(netloc=base_netloc, scheme=base_scheme)
-            )
-            logger.info(
-                f"Redirecting {full_requested_url.path} "
-                f"from {request_host} to {base_netloc}"
-            )
-            return redirect_url
-
-        # Unknown host - redirect to CMS
-        logger.info(f"Unknown host {request_host} redirected to CMS carte page")
-        return f"{settings.CMS['BASE_URL']}{self.CMS_CARTE_FALLBACK}"
 
     def _set_logged_in_cookie(self, request, response):
         """Set or update the 'logged-in' header based on authentication.
@@ -164,15 +174,6 @@ class RequestEnhancementMiddleware:
         browsers when a request is made from within an iframe.
         """
         request.iframe = request.headers.get("Sec-Fetch-Dest") == "iframe"
-
-    def _persist_iframe_in_headers(self, request, response):
-        """Add Sec-Fetch-Dest to the Vary header so nginx uses it as part of
-        the cache key, separating iframe and non-iframe versions of pages."""
-        vary_header = response.headers.get("Vary", "")
-        vary_values = [v.strip() for v in vary_header.split(",") if v.strip()]
-        if "Sec-Fetch-Dest" not in vary_values:
-            vary_values.append("Sec-Fetch-Dest")
-            response.headers["Vary"] = ", ".join(vary_values)
 
     @staticmethod
     def _cleanup_vary_header(response):

@@ -14,3 +14,4 @@ webapp/unit_tests
 webapp/integration_tests
 webapp/media
 webapp/.parcel-cache
+webapp/revue-front/.parcel-cache

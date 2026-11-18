@@ -1,4 +1,4 @@
-name: 🌚 CD
+name: 🌚 Main to preprod
 
 on:
   workflow_dispatch:
@@ -9,25 +9,50 @@ permissions:
   contents: write
   pull-requests: write
 
+# A new commit replaces the run in progress: only the last one gets deployed.
+# A re-run waits instead: it could be an older commit cancelling a newer one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.run_attempt == '1' }}
+
+# Deployments do not wait for CI: a failed check must not stop preprod. The release
+# waits for all of it.
 jobs:
-  ci:
-    name: 🤖 CI
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit #pragma: allowlist secret
+  ci_webapp:
+    name: 🌐 Webapp
+    uses: ./.github/workflows/ci-webapp.yml
+
+  ci_data_platform:
+    name: 📊 Data platform
+    uses: ./.github/workflows/ci-data-platform.yml
+
+  ci_revue:
+    name: 🧐 Revue
+    uses: ./.github/workflows/ci-revue.yml
+
+  ci_infrastructure:
+    name: 🏗️ Infrastructure
+    uses: ./.github/workflows/ci-infrastructure.yml
 
   webapp:
-    name: 🟠 Webapp
+    name: 🟠 Deploy webapp
     uses: ./.github/workflows/_deploy-webapp.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
     with:
       environment: preprod
 
   airflow:
-    name: 🟠 Airflow
+    name: 🟠 Deploy Airflow
     uses: ./.github/workflows/_deploy-airflow.yml
     secrets: inherit # pragma: allowlist secret`
-    needs: [ci]
+    with:
+      environment: preprod
+      tag_name: ${{ github.sha }}
+
+  nginx:
+    name: 🟠 Deploy Nginx gateway
+    uses: ./.github/workflows/_deploy-nginx.yml
+    secrets: inherit # pragma: allowlist secret`
     with:
       environment: preprod
       tag_name: ${{ github.sha }}
@@ -41,13 +66,22 @@ jobs:
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
-    needs: [webapp]
+    needs:
+      [
+        ci_webapp,
+        ci_data_platform,
+        ci_revue,
+        ci_infrastructure,
+        webapp,
+        airflow,
+        nginx,
+      ]
     permissions:
       contents: write
     runs-on: ubuntu-slim
     name: 🔢 Release
     steps:
-      - uses: release-drafter/release-drafter@34d80673e067bdc0c24568d3af899c216adcfaa9 # v7.7.0
+      - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         id: release-drafter
         with:
           config-name: release-config.yml
@@ -67,7 +101,7 @@ jobs:
     runs-on: ubuntu-slim
     name: 🔢 Release Hotfix
     steps:
-      - uses: release-drafter/release-drafter@34d80673e067bdc0c24568d3af899c216adcfaa9 # v7.7.0
+      - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         with:
           config-name: release-config.yml
         env:

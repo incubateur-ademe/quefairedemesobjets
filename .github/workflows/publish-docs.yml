@@ -1,4 +1,4 @@
-name: 📚 Deploy Documentation
+name: 📚 Documentation
 
 on:
   workflow_dispatch:
@@ -12,12 +12,13 @@ permissions:
 
 jobs:
   deploy:
+    name: 📚 Publish documentation
     runs-on: ubuntu-slim
     steps:
     - name: Check out the code
       uses: actions/checkout@v7.0.1
     - name: Install uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
       with:
         enable-cache: true
     - uses: actions/cache@v6

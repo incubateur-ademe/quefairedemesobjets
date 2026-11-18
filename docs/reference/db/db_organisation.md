@@ -47,6 +47,10 @@ Useful command: [Create links between databases](../../how-to/development/useful
 
 ## `webapp_sample` database
 
-`webapp_sample` is a database stored in `webapp` instance in preprod and locally (not in prod)
+`webapp_sample` is a database stored in the `webapp` instance in preprod and locally (not in prod).
 
-It is used to compute a sample of data (Auray and Montbeliard), this sample is computed weekly via a Airflow DAG is used to run tests
+It holds a sample of the data (Auray and Montbéliard EPCIs, plus all digital
+acteurs) used by the e2e tests. The sample is always built **locally** by the
+`compute_sample_acteur` Airflow DAG from the `webapp` database — no remote
+sample database is copied. See
+[create_webapp_sample_db.md](../../how-to/development/create_webapp_sample_db.md).

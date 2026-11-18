@@ -1,17 +1,31 @@
 import logging
-import os
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import TextIO
 
 import pendulum
 from acteurs.tasks.airflow_logic.config_management import ExportOpendataConfig
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from shared.config.airflow import TMP_FOLDER
+from shared.psql.utils import psql_env_from_dsn
 
 logger = logging.getLogger(__name__)
 
 MAIN_OPENDATA_FILENAME = "acteurs.csv"
+
+
+def run_psql_safely(dsn: str, cmd: str, stdout: TextIO) -> None:
+    try:
+        subprocess.run(
+            ["psql", "-c", cmd],
+            env=psql_env_from_dsn(dsn),
+            check=True,
+            stdout=stdout,
+            text=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"psql failed with exit code {exc.returncode}") from None
 
 
 def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
@@ -27,19 +41,14 @@ def export_opendata_csv_to_s3(export_opendata_config: ExportOpendataConfig):
         permatent_filename = MAIN_OPENDATA_FILENAME
         tempfile_path = Path(temp_dir, filename)
         with open(tempfile_path, "w") as f:
-            subprocess.run(
-                [
-                    "psql",
-                    "-d",
-                    settings.DB_WAREHOUSE,
-                    "-c",
-                    f"COPY {export_opendata_config.opendata_table}"
-                    " TO STDOUT WITH CSV HEADER",
-                ],
-                env={"PGPASSWORD": os.environ.get("POSTGRES_PASSWORD") or ""},
-                check=True,
-                stdout=f,
-                text=True,
+            run_psql_safely(
+                settings.DB_WAREHOUSE,
+                (
+                    "COPY "
+                    f"{export_opendata_config.opendata_table} "
+                    "TO STDOUT WITH CSV HEADER"
+                ),
+                f,
             )
 
         if not Path(tempfile_path).exists():

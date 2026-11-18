@@ -1,6 +1,7 @@
 import pytest
 from data.models.suggestion import SuggestionAction
 from data.views import (
+    get_context_from_suggestion_groupe,
     get_context_from_suggestion_groupe_type_enrich_multi,
     get_context_from_suggestion_groupe_type_source,
     update_suggestion_groupe,
@@ -406,6 +407,120 @@ class TestSerializeSuggestionGroupeEnrichMulti:
         assert "annuaire-entreprises.data.gouv.fr/entreprise/" in (
             label_cell.html_content
         )
+
+    def test_suggestion_modele_acteur_without_correction_link(self):
+        acteur = ActeurFactory(identifiant_unique="ACTEUR_4", code_postal="1000")
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+            ),
+            contexte={"code_postal actuel(le)": "1000"},
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            acteur_id=acteur.identifiant_unique,
+            champs=["code_postal"],
+            valeurs=["01000"],
+        )
+
+        result = get_context_from_suggestion_groupe(suggestion_groupe)
+        table = result["comparison_table"]
+
+        assert len(table.rows) == 1
+        label_cell = table.rows[0].cells[0]
+        assert "Acteur ACTEUR_4" in label_cell.html_content
+        assert [link.label for link in label_cell.links] == ["Source"]
+
+    @pytest.mark.parametrize(
+        "revision_ville,expected_removed",
+        [
+            # No RevisionActeur: diff with an empty value, not with the Acteur
+            (None, None),
+            # Empty value on RevisionActeur: diff with an empty value
+            ("", None),
+            # Value on RevisionActeur: diff with it
+            ("Lyon", "Lyon"),
+        ],
+    )
+    def test_revision_acteur_correction_diff_with_revision_value(
+        self, revision_ville, expected_removed
+    ):
+        acteur = ActeurFactory(identifiant_unique="ACTEUR_6", ville="Pâris")
+        if revision_ville is not None:
+            RevisionActeurFactory(identifiant_unique="ACTEUR_6", ville=revision_ville)
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="RevisionActeur",
+            revision_acteur_id=acteur.identifiant_unique,
+            champs=["ville"],
+            valeurs=["Paris"],
+        )
+
+        table = get_context_from_suggestion_groupe(suggestion_groupe)[
+            "comparison_table"
+        ]
+
+        correction_html = table.rows[0].cells[-1].fields[0].display_html
+        assert "Pâris" not in correction_html
+        if expected_removed:
+            assert (
+                f'<span class="suggestion-text-removed">{expected_removed}</span>'
+                in correction_html
+            )
+        else:
+            assert correction_html == (
+                '<span class="suggestion-text-added">Paris</span>'
+            )
+
+    def test_acteur_correction_diff_with_acteur_value(self):
+        acteur = ActeurFactory(identifiant_unique="ACTEUR_7", code_postal="1000")
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            acteur_id=acteur.identifiant_unique,
+            champs=["code_postal"],
+            valeurs=["01000"],
+        )
+
+        table = get_context_from_suggestion_groupe(suggestion_groupe)[
+            "comparison_table"
+        ]
+
+        correction_html = table.rows[0].cells[-1].fields[0].display_html
+        assert correction_html == '<span class="suggestion-text-added">0</span>1000'
+
+    def test_apply_suggestion_modele_acteur_updates_acteur_only(self):
+        from qfdmo.models.acteur import Acteur, RevisionActeur
+
+        acteur = ActeurFactory(identifiant_unique="ACTEUR_5", code_postal="1000")
+        suggestion_groupe = SuggestionGroupeFactory(
+            suggestion_cohorte=SuggestionCohorteFactory(
+                type_action=SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
+            ),
+        )
+        SuggestionUnitaireFactory(
+            suggestion_groupe=suggestion_groupe,
+            suggestion_modele="Acteur",
+            acteur_id=acteur.identifiant_unique,
+            champs=["code_postal"],
+            valeurs=["01000"],
+        )
+
+        suggestion_groupe.apply()
+
+        assert Acteur.objects.get(pk="ACTEUR_5").code_postal == "01000"
+        assert not RevisionActeur.objects.filter(pk="ACTEUR_5").exists()
 
 
 @pytest.mark.django_db

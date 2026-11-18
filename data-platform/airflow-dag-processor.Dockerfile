@@ -1,6 +1,7 @@
 # Builder python
 # --- --- --- ---
-FROM apache/airflow:slim-3.3.1-python3.12 AS python-builder
+ARG AIRFLOW_VERSION=3.3.1
+FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS python-builder
 
 # system dependencies
 USER root
@@ -12,7 +13,7 @@ RUN apt-get update && \
 # python dependencies
 USER ${AIRFLOW_UID:-50000}:0
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 WORKDIR /opt/airflow/
 
 # Copy data-platform uv project structure
@@ -20,37 +21,33 @@ COPY data-platform/pyproject.toml data-platform/pyproject.toml
 COPY pyproject.toml pyproject.toml
 COPY uv.lock uv.lock
 
-# Copy webapp source (needed for package install)
 COPY webapp/pyproject.toml webapp/pyproject.toml
-COPY webapp/core/ webapp/core/
-COPY webapp/data/ webapp/data/
-COPY webapp/dsfr_hacks/ webapp/dsfr_hacks/
-COPY webapp/infotri/ webapp/infotri/
-COPY webapp/qfdmd/ webapp/qfdmd/
-COPY webapp/qfdmo/ webapp/qfdmo/
-COPY webapp/search/ webapp/search/
-COPY webapp/settings/ webapp/settings/
-COPY webapp/stats/ webapp/stats/
 
 # Venv at /opt/airflow/.venv so shebangs match runtime (not data-platform/.venv)
 ENV UV_PROJECT_ENVIRONMENT=/opt/airflow/.venv
-RUN uv sync --project data-platform --frozen --no-editable
+RUN uv sync --project data-platform --frozen --no-editable --no-install-workspace
 
 # Runtime
 # --- --- --- ---
-FROM apache/airflow:slim-3.3.1-python3.12 AS dag-processor
+ARG AIRFLOW_VERSION
+FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS dag-processor
 
 USER root
 
 # unzip for Airflow DAG
-RUN apt-get update
-RUN apt-get install -y unzip curl
+# upgrade: the base image ships outdated Debian packages and docker CLI (Trivy)
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+    curl gdal-bin jq nginx unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install -y --no-install-recommends \
-    gdal-bin libgdal-dev jq
-
-# Nginx
-RUN apt-get install -y nginx
+# The base image installs its own Airflow in a venv at /home/airflow/.local.
+# We never run it: our venv (/opt/airflow/.venv) comes first on PATH and holds
+# Airflow and every dependency we use. Its outdated packages (PyJWT, certifi,
+# urllib3, uv…) only fail the Trivy scan, so we drop it. The base /entrypoint
+# only references it when the container runs as root, to extend PYTHONPATH.
+RUN rm -rf /home/airflow/.local
 
 # Installation du client Scaleway CLI
 # RUN curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/master/scripts/get.sh | sh
@@ -70,12 +67,24 @@ USER ${AIRFLOW_UID:-50000}:0
 WORKDIR /opt/airflow
 ENV VIRTUAL_ENV=/opt/airflow/.venv \
     LD_LIBRARY_PATH=/usr/lib \
-    PYTHONPATH="/opt/airflow/dags" \
+    PYTHONPATH="/opt/airflow/dags:/opt/airflow/webapp" \
     PATH="/opt/airflow/.venv/bin:$PATH"
 
 COPY --from=python-builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY ./data-platform/dbt/ /opt/airflow/dbt/
+# Kept out of the venv, so a code change does not push all the dependencies again
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/core/ /opt/airflow/webapp/core/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/data/ /opt/airflow/webapp/data/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/dsfr_hacks/ /opt/airflow/webapp/dsfr_hacks/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/infotri/ /opt/airflow/webapp/infotri/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/qfdmd/ /opt/airflow/webapp/qfdmd/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/qfdmo/ /opt/airflow/webapp/qfdmo/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/search/ /opt/airflow/webapp/search/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/settings/ /opt/airflow/webapp/settings/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/stats/ /opt/airflow/webapp/stats/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/assistant/ /opt/airflow/webapp/assistant/
+
+COPY --chown=${AIRFLOW_UID:-50000}:0 ./data-platform/dbt/ /opt/airflow/dbt/
 COPY ./scripts/ /opt/airflow/scripts/
 
 # Classique Airflow
@@ -93,7 +102,6 @@ RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/tmp
 
 WORKDIR /opt/airflow
 USER 0
-RUN chown -R ${AIRFLOW_UID:-50000}:0 /opt/airflow/dbt
 RUN touch /run/nginx.pid
 RUN chown -R ${AIRFLOW_UID:-50000}:0 /var/lib/nginx /var/log/nginx /run/nginx.pid
 RUN chmod +x /opt/airflow/airflow-dag-processor-start.sh

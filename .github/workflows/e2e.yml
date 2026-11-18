@@ -2,6 +2,12 @@ name: 🪤 E2E
 
 on:
   workflow_call:
+    inputs:
+      force:
+        description: "Run without the frontend label"
+        required: false
+        type: boolean
+        default: false
 
 env:
   PGHOST: localhost
@@ -22,9 +28,9 @@ jobs:
   # Each shard can then download the pre-built artifacts and start testing immediately,
   # significantly reducing total E2E test execution time.
   e2e-prepare:
-    name: Préparation
+    name: 📦 Prepare assets and database
     # On s'assure que npm ci et uv sync aient tourné au moins une fois.
-    if: ${{ github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
+    if: ${{ inputs.force || github.ref_name == 'main' || (github.event_name ==  'pull_request' && contains( github.event.pull_request.labels.*.name, 'frontend')) }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -78,24 +84,22 @@ jobs:
           retention-days: 1
 
   e2e:
-    name: Baseline shard ${{ matrix.shard }}
+    name: Playwright
     needs: e2e-prepare
     uses: ./.github/workflows/_e2e.yml
     with:
-      ref: ${{ github.ref }}
       compare: false
     permissions:
       contents: read
 
   e2e-compare:
-    name: Compare (main)
+    name: 🔍 Compare with main
     # Temporarily disabled: remove this condition to re-enable
     # the visual comparison against main.
     if: ${{ false }}
     needs: e2e
     uses: ./.github/workflows/_e2e.yml
     with:
-      ref: main
       compare: true
       # No sharding when comparing
       shard: '["1"]'
@@ -103,7 +107,7 @@ jobs:
       contents: read
 
   comment-visual-diffs:
-    name: Comment visual regression diffs
+    name: 💬 Comment visual regression diffs
     needs: e2e-compare
     if: |
       failure() &&

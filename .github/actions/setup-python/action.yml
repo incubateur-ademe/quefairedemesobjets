@@ -1,0 +1,25 @@
+name: Setup Python Environment
+description: Install uv and Python dependencies for a project directory (webapp or data-platform)
+
+inputs:
+  working-directory:
+    description: "Directory that contains pyproject.toml and uv.lock (e.g. webapp, data-platform)"
+    required: false
+    default: "."
+  uv-groups:
+    description: 'Arguments passed to uv sync (e.g. "--group dev")'
+    required: false
+    default: "--group dev"
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39
+      with:
+        enable-cache: true
+
+    - name: Install Python dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: uv sync ${{ inputs.uv-groups }}

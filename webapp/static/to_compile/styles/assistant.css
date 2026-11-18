@@ -1,0 +1,1121 @@
+@import "npm:@fontsource-variable/public-sans/wght.css";
+
+/* MapLibre's styles, including the `overflow: hidden` that keeps the pins inside the map. */
+@import "npm:maplibre-gl/dist/maplibre-gl.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* The frame of the iframe is set here rather than in iframe.js, which the legacy assistant shares. */
+html {
+  overflow: auto;
+  scroll-behavior: smooth;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  border: 3px solid var(--qfa-cadre);
+  border-radius: var(--qfa-rayon-sm);
+  overflow: clip;
+  background: var(--qfa-blanc);
+  color: var(--qfa-texte-titre);
+  font-family: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+:root {
+  --qfa-geste-reparation: #009081;
+  --qfa-geste-don: #417dc4;
+  --qfa-geste-vente: #bb8568;
+  --qfa-geste-loc: #ce614a;
+  --qfa-geste-loc-icone: #e4794a;
+  --qfa-geste-tri: #a558a0;
+
+  --qfa-bonus-color: var(--qfa-geste-reparation);
+  --qfa-user-address: #e1000f;
+
+  --qfa-geste-reparation-fond: #dffdf7;
+  --qfa-fond-vert-eau: var(--qfa-geste-reparation-fond);
+  --qfa-geste-don-fond: #dae6fd;
+  --qfa-geste-vente-fond: #f3e2d9;
+  --qfa-geste-loc-fond: #fddfd8;
+  --qfa-geste-tri-fond: #fee7fc;
+
+  --qfa-etat-reparable-fond: var(--qfa-geste-reparation-fond);
+  --qfa-etat-reparable-texte: #37635f;
+  --qfa-etat-bon-fond: #e1fee8;
+  --qfa-etat-bon-texte: #18753c;
+  --qfa-etat-mauvais-fond: var(--qfa-geste-tri-fond);
+  --qfa-etat-mauvais-texte: #6e445a;
+  --qfa-etat-bonus-fond: #fef7da;
+  --qfa-etat-bonus-texte: #66673d;
+  --qfa-etat-defaut-fond: #f9f6f2;
+  --qfa-etat-defaut-texte: #6a6156;
+
+  --qfa-texte-titre: #161616;
+  --qfa-texte-courant: #3a3a3a;
+  --qfa-accent: #37635f;
+  --qfa-erreur: #ce0500;
+  --qfa-bordure: #dddddd;
+  --qfa-cadre: #4f9d91;
+  --qfa-fond-survol: #f6f6f6;
+  --qfa-blanc: #fff;
+  --qfa-focus: #0a76f6;
+  --qfa-texte-discret: #666;
+
+  --qfa-taille-texte-sm: 14px;
+  --qfa-taille-texte-md: 16px;
+  --qfa-interligne-serre: 1.4;
+  --qfa-interligne: 1.5;
+
+  --qfa-espace-1v: 4px;
+  --qfa-espace-2v: 8px;
+  --qfa-espace-3v: 12px;
+  --qfa-espace-4v: 16px;
+
+  --qfa-rayon-sm: 4px;
+  --qfa-rayon-md: 8px;
+  --qfa-rayon-pilule: 999px;
+  --qfa-rayon: var(--qfa-rayon-md);
+}
+
+.qfa-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 450px;
+}
+
+.qfa-carte__canvas {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.qfa-carte .maplibregl-ctrl-top-left .maplibregl-ctrl {
+  margin: 12px 0 0 12px;
+}
+
+.qfa-carte .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0 12px 12px 0;
+}
+
+/* Over the map, never in the flow: resizing the canvas would make MapLibre redraw. */
+.qfa-carte__message {
+  position: absolute;
+  top: var(--qfa-espace-3v);
+  right: var(--qfa-espace-3v);
+  left: 47px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.qfa-carte__message[hidden] {
+  display: none;
+}
+
+.qfa-pinpoint:not(.qfa-pinpoint--address) {
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 0s;
+}
+
+.qfa-carte[data-zoomed-out="true"] .qfa-pinpoint:not(.qfa-pinpoint--address),
+.qfa-pinpoint--leaving {
+  opacity: 0 !important;
+  visibility: hidden;
+  transition:
+    opacity 200ms ease,
+    visibility 0s linear 200ms;
+}
+
+.qfa-pinpoint {
+  /* MapLibre positions markers with `transform`, which needs `position: absolute`. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35px;
+  height: 47px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: none;
+  color: var(--qfa-pinpoint-color);
+}
+
+.qfa-pinpoint[data-geste="reparer"] {
+  --qfa-pinpoint-color: var(--qfa-geste-reparation);
+}
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"] {
+  --qfa-pinpoint-color: var(--qfa-geste-don);
+}
+.qfa-pinpoint[data-geste="vendre_acheter"] {
+  --qfa-pinpoint-color: var(--qfa-geste-vente);
+}
+.qfa-pinpoint[data-geste="emprunter_preter_louer"] {
+  --qfa-pinpoint-color: var(--qfa-geste-loc);
+}
+.qfa-pinpoint[data-geste="trier"] {
+  --qfa-pinpoint-color: var(--qfa-geste-tri);
+}
+
+/* Three layers: a white body, a ring in the geste colour, the geste icon. The tip, not the centre, points at the place. SVGs are used as masks so the colour comes from `--qfa-pinpoint-color`. */
+.qfa-pinpoint::before,
+.qfa-pinpoint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* `url()` written in `mask` directly: Parcel resolves a relative URL in a custom property where `var()` is used, not where it is defined. */
+.qfa-pinpoint::before {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc.svg");
+  background: #fff;
+}
+
+.qfa-pinpoint::after {
+  -webkit-mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  mask-image: url("../images/assistant/pinpoints/geste-loc-fond.svg");
+  background: currentColor;
+}
+
+.qfa-pinpoint__icon {
+  position: absolute;
+  top: 7.78px;
+  left: 7.77px;
+  width: 19.47px;
+  height: 19.5px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-reparation.svg");
+  top: 5.48px;
+  left: 6.99px;
+  width: 21.92px;
+  height: 21.96px;
+}
+
+.qfa-pinpoint[data-geste="reparer"]::before {
+  background: currentColor;
+}
+
+.qfa-pinpoint[data-geste="reparer"]::after {
+  background: var(--qfa-accent);
+}
+
+.qfa-pinpoint[data-geste="reparer"] .qfa-pinpoint__icon {
+  background: #fff;
+}
+.qfa-pinpoint[data-geste="vendre_acheter"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-vente.svg");
+}
+.qfa-pinpoint[data-geste="emprunter_preter_louer"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-loc.svg");
+  background: var(--qfa-geste-loc-icone);
+}
+.qfa-pinpoint[data-geste="trier"] .qfa-pinpoint__icon {
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-tri.svg");
+}
+
+/* The donner icon is exported with its white body: its glyph lives in `icone-don.svg`, framed like the whole pin. */
+.qfa-pinpoint[data-geste="donner_echanger_rapporter"] .qfa-pinpoint__icon {
+  top: 0;
+  left: 0;
+  width: 35px;
+  height: 46px;
+  -webkit-mask-image: url("../images/assistant/pinpoints/icone-don.svg");
+  mask-image: url("../images/assistant/pinpoints/icone-don.svg");
+}
+
+.qfa-pinpoint__bonus {
+  position: absolute;
+  /* Above the ring: `::after` paints after the pinpoint's children. */
+  z-index: 1;
+  top: -5px;
+  left: 23px;
+  width: 20px;
+  height: 20px;
+  background:
+    url("../images/assistant/pinpoints/bonus-pourcent.svg") center / 20px no-repeat,
+    url("../images/assistant/pinpoints/bonus-ellipse.svg") center / 10px no-repeat;
+}
+
+.qfa-pinpoint:focus-visible {
+  outline: 2px solid #0a76f6;
+  outline-offset: 2px;
+}
+
+.qfa-carte__accessible-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.qfa-skiplink {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.qfa-skiplink:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  clip: auto;
+  color: var(--qfa-accent);
+}
+
+.qfa-preview {
+  margin: 0;
+  padding: 2rem;
+}
+
+.qfa-chrono {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--qfa-rayon);
+  background: rgb(0 0 0 / 0.75);
+  color: var(--qfa-blanc);
+  font:
+    500 0.75rem/1.4 ui-monospace,
+    monospace;
+  pointer-events: none;
+}
+
+.qfa-chrono[data-over-budget="true"] {
+  background: var(--qfa-user-address);
+}
+
+.qfa-chrono span {
+  opacity: 0.75;
+}
+
+/* On the red background, the muted text would fall below 4.5:1. */
+.qfa-chrono[data-over-budget="true"] span {
+  opacity: 1;
+}
+
+/* `view-transition-name` makes each field and the banner a stacking context: the list's z-index only counts inside it, so the field itself is raised. */
+.qfa-combobox {
+  position: relative;
+  z-index: 1;
+}
+
+#recherche-objet {
+  z-index: 2;
+}
+
+.qfa-combobox__label {
+  display: block;
+  margin-bottom: var(--qfa-espace-2v);
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-sm);
+  font-weight: 600;
+  line-height: normal;
+}
+
+.qfa-combobox__cadre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  padding: 10px var(--qfa-espace-3v);
+  border: 2px solid var(--qfa-accent);
+  border-radius: var(--qfa-rayon-sm);
+  background: var(--qfa-blanc);
+}
+
+.qfa-combobox__cadre:has(~ .qfa-combobox__erreur--bloquante) {
+  border-color: var(--qfa-erreur);
+}
+
+.qfa-combobox__cadre:focus-within {
+  outline: 2px solid var(--qfa-focus);
+  outline-offset: 2px;
+}
+
+.qfa-combobox__loupe {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: var(--qfa-accent);
+  -webkit-mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/recherche-loupe.svg") center / contain no-repeat;
+}
+
+.qfa-combobox__champ {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: var(--qfa-texte-titre);
+  font-family: inherit;
+  font-size: var(--qfa-taille-texte-md);
+  line-height: var(--qfa-interligne);
+
+  text-overflow: ellipsis;
+}
+
+.qfa-combobox__champ::placeholder {
+  color: var(--qfa-texte-discret);
+}
+
+.qfa-combobox__champ:focus-visible {
+  outline: none;
+}
+
+/* In the flow rather than overlaid: the list lengthens the iframe instead of covering what follows. */
+.qfa-combobox__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--qfa-blanc);
+  border: 2px solid var(--qfa-accent);
+  border-top: 0;
+  border-radius: 0 0 var(--qfa-rayon-sm) var(--qfa-rayon-sm);
+  overflow: clip;
+}
+
+.qfa-combobox__cadre:has(+ .qfa-combobox__liste:not([hidden])) {
+  padding-bottom: calc(10px + 2px);
+  border-bottom: 0;
+  border-radius: var(--qfa-rayon-sm) var(--qfa-rayon-sm) 0 0;
+}
+
+/* The offset focus ring would cut the top of the open list. */
+.qfa-combobox__cadre:focus-within:has(+ .qfa-combobox__liste:not([hidden])) {
+  outline: none;
+}
+
+.qfa-combobox__liste:not([hidden]) ~ .qfa-combobox__erreur {
+  display: none;
+}
+
+.qfa-combobox__option {
+  padding: var(--qfa-espace-3v) var(--qfa-espace-4v);
+  border-top: 1px solid var(--qfa-bordure);
+  border-bottom: 1px solid var(--qfa-bordure);
+  color: var(--qfa-texte-titre);
+  cursor: pointer;
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-combobox__option[aria-selected="true"],
+.qfa-combobox__option:hover {
+  background: var(--qfa-fond-survol);
+}
+
+.qfa-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.qfa-etiquette {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+  padding: 3px var(--qfa-espace-3v) 3px var(--qfa-espace-1v);
+  border-radius: var(--qfa-rayon-pilule);
+  color: var(--qfa-texte-titre);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: var(--qfa-interligne-serre);
+  white-space: nowrap;
+}
+
+.qfa-etiquette__icone {
+  width: 20px;
+  height: 20px;
+
+  background: var(--qfa-etiquette-icone-couleur);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.qfa-etiquette[data-geste="reparer"] {
+  background: var(--qfa-geste-reparation-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-reparation);
+}
+.qfa-etiquette[data-geste="reparer"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-reparer.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-reparer.svg");
+}
+.qfa-etiquette[data-geste="donner_echanger_rapporter"] {
+  background: var(--qfa-geste-don-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-don);
+}
+.qfa-etiquette[data-geste="donner_echanger_rapporter"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-donner.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-donner.svg");
+}
+.qfa-etiquette[data-geste="vendre_acheter"] {
+  background: var(--qfa-geste-vente-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-vente);
+}
+.qfa-etiquette[data-geste="vendre_acheter"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-vendre.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-vendre.svg");
+}
+.qfa-etiquette[data-geste="emprunter_preter_louer"] {
+  background: var(--qfa-geste-loc-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-loc);
+}
+.qfa-etiquette[data-geste="emprunter_preter_louer"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-preter.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-preter.svg");
+}
+.qfa-etiquette[data-geste="trier"] {
+  background: var(--qfa-geste-tri-fond);
+  --qfa-etiquette-icone-couleur: var(--qfa-geste-tri);
+}
+.qfa-etiquette[data-geste="trier"] .qfa-etiquette__icone {
+  -webkit-mask-image: url("../images/assistant/gestes/etiquette-deposer.svg");
+  mask-image: url("../images/assistant/gestes/etiquette-deposer.svg");
+}
+
+.qfa-badge {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+  padding: var(--qfa-espace-1v) 10px;
+  border-radius: var(--qfa-rayon-pilule);
+  background: var(--qfa-etat-defaut-fond);
+  color: var(--qfa-etat-defaut-texte);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  line-height: var(--qfa-interligne-serre);
+  white-space: nowrap;
+}
+
+.qfa-badge[data-condition="reparable"] {
+  background: var(--qfa-etat-reparable-fond);
+  color: var(--qfa-etat-reparable-texte);
+}
+.qfa-badge[data-condition="bon_etat"] {
+  background: var(--qfa-etat-bon-fond);
+  color: var(--qfa-etat-bon-texte);
+}
+.qfa-badge[data-condition="mauvais_etat"] {
+  background: var(--qfa-etat-mauvais-fond);
+  color: var(--qfa-etat-mauvais-texte);
+}
+.qfa-badge[data-condition="bonus"] {
+  background: var(--qfa-etat-bonus-fond);
+  color: var(--qfa-etat-bonus-texte);
+}
+
+.qfa-badge__icone {
+  width: 14px;
+  height: 14px;
+  background-image: url("../images/assistant/ui/badge-bonus.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.qfa-alerte {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border: 1px solid var(--qfa-texte-courant);
+  border-radius: var(--qfa-rayon-sm);
+  background: var(--qfa-fond-survol);
+  color: var(--qfa-texte-courant);
+  font-size: 12px;
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-alerte__icone {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/alerte-info.svg") center / contain no-repeat;
+  mask: url("../images/assistant/ui/alerte-info.svg") center / contain no-repeat;
+}
+
+.qfa-icone-geste {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.qfa-icone-geste[data-geste="reparer"] {
+  background-image: url("../images/assistant/gestes/geste-reparer.svg");
+}
+/* The donner icon's glyph is exported apart from its circle. */
+.qfa-icone-geste[data-geste="donner_echanger_rapporter"] {
+  position: relative;
+  background-image: url("../images/assistant/gestes/geste-donner.svg");
+}
+
+.qfa-icone-geste[data-geste="donner_echanger_rapporter"]::after {
+  content: "";
+  position: absolute;
+  inset: 16.67%;
+  background: url("../images/assistant/gestes/geste-donner-main.svg") center / contain
+    no-repeat;
+}
+.qfa-icone-geste[data-geste="emprunter_preter_louer"] {
+  background-image: url("../images/assistant/gestes/geste-preter.svg");
+}
+.qfa-icone-geste[data-geste="vendre_acheter"] {
+  background-image: url("../images/assistant/gestes/geste-vendre.svg");
+}
+.qfa-icone-geste[data-geste="trier"] {
+  background-image: url("../images/assistant/gestes/geste-deposer.svg");
+}
+
+.qfa-bouton {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  justify-content: center;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-4v);
+  border: 0;
+  border-radius: var(--qfa-rayon-md);
+  font-family: inherit;
+  font-size: var(--qfa-taille-texte-sm);
+  font-weight: 600;
+  line-height: var(--qfa-interligne-serre);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qfa-bouton--primaire {
+  background: var(--qfa-accent);
+  color: var(--qfa-blanc);
+}
+
+.qfa-bouton--secondaire {
+  border: 1px solid var(--qfa-accent);
+  background: var(--qfa-blanc);
+  color: var(--qfa-accent);
+}
+
+.qfa-bouton--tertiaire {
+  background: none;
+  color: var(--qfa-accent);
+}
+
+.qfa-bouton:focus-visible,
+.qfa-changer-geste:focus-visible,
+.qfa-accordeon__entete:focus-visible {
+  outline: 2px solid var(--qfa-focus);
+  outline-offset: 2px;
+}
+
+.qfa-bouton__fleche,
+.qfa-bouton__externe,
+.qfa-bouton__localisation {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.qfa-bouton__fleche {
+  -webkit-mask-image: url("../images/assistant/ui/fleche-droite.svg");
+  mask-image: url("../images/assistant/ui/fleche-droite.svg");
+}
+
+.qfa-bouton__externe {
+  -webkit-mask-image: url("../images/assistant/ui/lien-externe.svg");
+  mask-image: url("../images/assistant/ui/lien-externe.svg");
+}
+
+.qfa-bouton__localisation {
+  -webkit-mask-image: url("../images/assistant/ui/localisation.svg");
+  mask-image: url("../images/assistant/ui/localisation.svg");
+}
+
+.qfa-bloc-geste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-bloc-geste__badges {
+  display: flex;
+  gap: var(--qfa-espace-1v);
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.qfa-bloc-geste__titre {
+  display: flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-md);
+  font-weight: 700;
+  line-height: var(--qfa-interligne-serre);
+}
+
+.qfa-bloc-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
+.qfa-bloc-geste__consigne {
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-bloc-geste__consigne > * {
+  margin: 0;
+}
+
+.qfa-bloc-geste__consigne > * + * {
+  margin-top: var(--qfa-espace-2v);
+}
+
+.qfa-bloc-geste .qfa-bouton {
+  width: 100%;
+  max-width: 300px;
+}
+
+.qfa-bouton--pres-de-moi {
+  padding-inline: var(--qfa-espace-3v);
+  white-space: nowrap;
+}
+
+.qfa-bouton--pres-de-moi[aria-busy="true"] .qfa-bouton__localisation {
+  -webkit-mask-image: url("../images/assistant/ui/chargement.svg");
+  mask-image: url("../images/assistant/ui/chargement.svg");
+  animation: qfa-rotation 0.7s linear infinite;
+}
+
+@keyframes qfa-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qfa-bouton--pres-de-moi[aria-busy="true"] .qfa-bouton__localisation {
+    animation: none;
+  }
+}
+
+.qfa-bloc-gestes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--qfa-espace-3v);
+  list-style: none;
+}
+
+.qfa-changer-geste {
+  display: inline-flex;
+  gap: var(--qfa-espace-2v);
+  align-items: center;
+  min-height: 40px;
+  padding: var(--qfa-espace-2v) var(--qfa-espace-3v);
+  border-radius: var(--qfa-rayon-md);
+  background: var(--qfa-accent);
+  color: var(--qfa-blanc);
+  font-size: var(--qfa-taille-texte-sm);
+  font-weight: 600;
+  line-height: var(--qfa-interligne-serre);
+  text-decoration: none;
+}
+
+.qfa-changer-geste__retour {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+
+  transform: rotate(180deg);
+  -webkit-mask: url("../images/assistant/ui/chevron-droite.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/chevron-droite.svg") center / contain no-repeat;
+}
+
+.qfa-changer-geste__icones {
+  display: inline-flex;
+  gap: var(--qfa-espace-1v);
+  align-items: center;
+}
+
+.qfa-accordeon {
+  border-top: 1px solid var(--qfa-bordure);
+  border-bottom: 1px solid var(--qfa-bordure);
+}
+
+.qfa-accordeon + .qfa-accordeon {
+  border-top: 0;
+}
+
+.qfa-accordeon__entete {
+  display: flex;
+  gap: var(--qfa-espace-4v);
+  align-items: center;
+  padding: var(--qfa-espace-3v) var(--qfa-espace-4v);
+  cursor: pointer;
+  list-style: none;
+}
+
+.qfa-accordeon__entete::-webkit-details-marker {
+  display: none;
+}
+
+.qfa-accordeon__textes {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--qfa-espace-1v);
+}
+
+.qfa-accordeon__intitule {
+  color: var(--qfa-accent);
+  font-size: var(--qfa-taille-texte-md);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-accordeon__apercu {
+  color: var(--qfa-texte-courant);
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
+}
+
+/* The asset points up (open): the closed state is the rotated one. */
+.qfa-accordeon__chevron {
+  flex: none;
+  transform: rotate(180deg);
+  width: 16px;
+  height: 16px;
+  background: var(--qfa-accent);
+  transition: transform 150ms ease-out;
+  -webkit-mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/accordeon-chevron.svg") center / contain no-repeat;
+}
+
+.qfa-accordeon[open] .qfa-accordeon__entete {
+  background: var(--qfa-fond-vert-eau);
+}
+
+.qfa-accordeon[open] .qfa-accordeon__chevron {
+  transform: rotate(0deg);
+}
+
+.qfa-accordeon__contenu {
+  padding: var(--qfa-espace-4v);
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-accordeon__contenu p {
+  margin: 0;
+}
+
+.qfa-lieu__infos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  margin: 0;
+}
+
+.qfa-lieu__infos dt {
+  font-weight: 700;
+  line-height: var(--qfa-interligne-serre);
+}
+
+.qfa-lieu__infos dd {
+  margin: 0;
+}
+
+.qfa-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  align-items: center;
+}
+
+.qfa-footer__marques {
+  display: flex;
+  gap: 21px;
+  align-items: center;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qfa-accordeon__chevron {
+    transition: none;
+  }
+}
+
+.qfa-combobox__detail {
+  color: var(--qfa-texte-courant);
+}
+
+.qfa-ecran {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-4v);
+  align-items: center;
+  width: 100%;
+  padding-bottom: var(--qfa-espace-4v);
+}
+
+.qfa-panneau {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  padding: var(--qfa-espace-4v) var(--qfa-espace-3v);
+  background: var(--qfa-fond-vert-eau);
+
+  view-transition-name: entete;
+
+  position: relative;
+  z-index: 2;
+}
+
+#recherche-adresse {
+  view-transition-name: champ-adresse;
+}
+
+#recherche-objet {
+  view-transition-name: champ-objet;
+}
+
+.qfa-changer-geste {
+  view-transition-name: bouton-geste;
+}
+
+.qfa-changer-geste__icones {
+  view-transition-name: bouton-geste-icones;
+}
+
+.qfa-changer-geste__libelle {
+  view-transition-name: bouton-geste-libelle;
+}
+
+::view-transition-old(bouton-geste) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(bouton-geste) {
+  animation: none;
+}
+
+/* The label changes width: without this, the old snapshot is stretched during the cross-fade. */
+::view-transition-old(bouton-geste-libelle),
+::view-transition-new(bouton-geste-libelle) {
+  width: auto;
+  height: 100%;
+}
+
+::view-transition-old(champ-adresse) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(champ-adresse) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  .qfa-pinpoint {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.qfa-ecran > form {
+  width: 100%;
+}
+
+/* Parked off the solutions screen, the map canvas is hidden but alive: Turbo keeps the permanent node, and with it the map. */
+body > #assistant-carte-canvas {
+  display: none;
+}
+
+.qfa-haut-de-page {
+  width: 100%;
+}
+
+.qfa-panneau--solutions {
+  gap: var(--qfa-espace-2v);
+}
+
+.qfa-lieu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-3v);
+  width: 100%;
+  padding: 0 var(--qfa-espace-3v);
+}
+
+.qfa-lieu__identite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-2v);
+  align-items: flex-start;
+}
+
+.qfa-lieu__nom {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-md);
+  font-weight: 700;
+  line-height: var(--qfa-interligne-serre);
+}
+
+.qfa-lieu__type {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: 10px;
+  line-height: var(--qfa-interligne-serre);
+}
+
+.qfa-lieu__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qfa-espace-1v);
+}
+
+.qfa-lieu__section p {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-sm);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-lieu__soustitre {
+  margin: 0;
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-sm);
+  font-weight: 700;
+  line-height: var(--qfa-interligne-serre);
+}
+
+.qfa-lieu__gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qfa-espace-2v);
+}
+
+.qfa-lieu__accordeons {
+  display: flex;
+  flex-direction: column;
+}
+
+/* `turbo-frame` is an unknown element, inline by default. */
+turbo-frame {
+  display: block;
+}
+
+.qfa-bouton--pleine-largeur {
+  width: 100%;
+}
+
+.qfa-bouton__loupe {
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain
+    no-repeat;
+  mask: url("../images/assistant/ui/bouton-recherche.svg") center / contain no-repeat;
+}
+
+.qfa-pinpoint--address {
+  width: 50px;
+  height: 50px;
+}
+
+.qfa-pinpoint--address::before,
+.qfa-pinpoint--address::after {
+  -webkit-mask: none;
+  mask: none;
+}
+
+.qfa-pinpoint--address::before {
+  background: url("../images/assistant/ui/adresse-cercle.svg") center / contain
+    no-repeat;
+}
+
+.qfa-pinpoint--address::after {
+  inset: 9px;
+  background: url("../images/assistant/ui/adresse-pin.svg") center / contain no-repeat;
+}
+
+.qfa-combobox__erreur {
+  margin: var(--qfa-espace-1v) 0 0;
+  color: var(--qfa-texte-titre);
+  font-size: var(--qfa-taille-texte-md);
+  line-height: var(--qfa-interligne);
+}
+
+.qfa-combobox__erreur--bloquante {
+  color: var(--qfa-erreur);
+}

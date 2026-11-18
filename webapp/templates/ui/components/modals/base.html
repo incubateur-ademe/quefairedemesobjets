@@ -23,7 +23,6 @@ Requires a unique 'id' per modal for accessibility.
     class="fr-btn {% block button_extra_classes %}{% endblock %} {{ button_extra_classes }} qf-whitespace-nowrap"
     data-fr-opened="false"
     aria-controls="fr-modal-{{ namespaced_id }}"
-    aria-labelledby="fr-modal-title-{{ namespaced_id }}"
     {# Ensure turbo frame is disabled as DSFR modals should not interact with turbo frame #}
     data-turbo="false"
     data-testid="modal-button-{{ namespaced_id }}"

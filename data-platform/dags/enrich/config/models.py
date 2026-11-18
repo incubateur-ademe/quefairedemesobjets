@@ -59,6 +59,11 @@ class EnrichBaseConfig(BaseModel):
         default="",
         description="🧪 Commande DBT à exécuter pour tester les modèles",
     )
+    use_legacy_suggestions: bool = Field(
+        default=False,
+        description="""🔄 Si coché, les suggestions seront écrites au format legacy
+        (Suggestion), sinon au format groupes (SuggestionGroupe)""",
+    )
     filter_contains__acteur_commentaires: Optional[str] = Field(
         default=None,
         description="🔍 Filtre sur **acteur_commentaires**",

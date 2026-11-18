@@ -1,0 +1,36 @@
+# Every image built from the repository root. The ML image has its own file.
+.git
+
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+**/.env
+**/.env.*
+**/.venv
+**/node_modules
+**/.parcel-cache
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/.coverage
+**/htmlcov
+
+# Tests stay out so that changing one does not rebuild the frontend
+webapp/e2e_tests
+webapp/unit_tests
+webapp/integration_tests
+data-platform/dags/e2e_tests
+data-platform/dags/tests
+
+# Build outputs from a local checkout
+webapp/dist
+webapp/media
+webapp/static/collected
+webapp/static/compiled
+webapp/staticfiles
+webapp/test-results
+webapp/playwright-report
+webapp/blob-report
+data-platform/dbt/dbt_packages
+data-platform/dbt/logs
+data-platform/dbt/target

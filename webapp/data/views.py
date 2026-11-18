@@ -8,7 +8,18 @@ from data.models.suggestion import (
     SuggestionStatut,
     SuggestionUnitaire,
 )
-from data.models.suggestions.enrich_multi import SuggestionGroupeTypeEnrichMulti
+from data.models.suggestions.cluster import (
+    CLUSTER_TYPE_ACTIONS,
+    SuggestionGroupeTypeCluster,
+)
+from data.models.suggestions.enrich_acteur import (
+    ENRICH_ACTEUR_TYPE_ACTIONS,
+    SuggestionGroupeTypeEnrichActeur,
+)
+from data.models.suggestions.enrich_multi import (
+    ENRICH_MULTI_TYPE_ACTIONS,
+    SuggestionGroupeTypeEnrichMulti,
+)
 from data.models.suggestions.source import (
     SuggestionGroupeTypeSource,
     SuggestionSourceModel,
@@ -39,13 +50,12 @@ def get_context_from_suggestion_groupe(
         SuggestionAction.SOURCE_SUPPRESSION,
     ]:
         return get_context_from_suggestion_groupe_type_source(suggestion_groupe)
-    elif type_action in [
-        SuggestionAction.CRAWL_URLS,
-        SuggestionAction.ENRICH_ACTEURS_SIRET,
-        SuggestionAction.ENRICH_ACTEURS_SIREN,
-        SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
-    ]:
+    elif type_action in ENRICH_ACTEUR_TYPE_ACTIONS:
+        return get_context_from_suggestion_groupe_type_enrich_acteur(suggestion_groupe)
+    elif type_action in ENRICH_MULTI_TYPE_ACTIONS:
         return get_context_from_suggestion_groupe_type_enrich_multi(suggestion_groupe)
+    elif type_action in CLUSTER_TYPE_ACTIONS:
+        return get_context_from_suggestion_groupe_type_cluster(suggestion_groupe)
 
     raise NotImplementedError(f"Not implemented for type_action: {type_action}")
 
@@ -66,6 +76,55 @@ def get_context_from_suggestion_groupe_type_enrich_multi(
         "comparison_table": sg_type_enrich_multi.to_comparison_table(),
     }
     return context
+
+
+def get_context_from_suggestion_groupe_type_cluster(
+    suggestion_groupe: SuggestionGroupe, errors: dict | None = None
+) -> dict:
+    """
+    Serialize a SuggestionGroupe into a SuggestionGroupeTypeCluster and return a
+    template context dict with the acteurs and parent ComparisonTables.
+    """
+    sg_type_cluster = SuggestionGroupeTypeCluster.from_suggestion_groupe(
+        suggestion_groupe
+    )
+    points = sg_type_cluster.map_points()
+    return {
+        "suggestion_groupe": suggestion_groupe,
+        "identifiant_unique": sg_type_cluster.parent_id,
+        "suggestion_groupe_type": sg_type_cluster,
+        "comparison_table": sg_type_cluster.to_comparison_table(errors=errors),
+        "cluster": {
+            "contexte": sg_type_cluster.contexte,
+            "metadata": suggestion_groupe.metadata or {},
+            "parent_comparison_table": (
+                sg_type_cluster.to_parent_comparison_table(errors=errors)
+            ),
+            "localisation": {"points": points} if points else None,
+        },
+    }
+
+
+def get_context_from_suggestion_groupe_type_enrich_acteur(
+    suggestion_groupe: SuggestionGroupe,
+) -> dict:
+    """
+    Serialize a SuggestionGroupe into a SuggestionGroupeTypeEnrichActeur and
+    return a template context dict, the same way as the SOURCE suggestions.
+    """
+    sg_type_enrich_acteur = SuggestionGroupeTypeEnrichActeur.from_suggestion_groupe(
+        suggestion_groupe
+    )
+    return {
+        "suggestion_groupe": suggestion_groupe,
+        "identifiant_unique": sg_type_enrich_acteur.identifiant_unique,
+        "suggestion_groupe_type": sg_type_enrich_acteur,
+        "comparison_table": sg_type_enrich_acteur.to_comparison_table(),
+        "acteur": sg_type_enrich_acteur.acteur,
+        "revision_acteur": sg_type_enrich_acteur.revision_acteur,
+        "parent_revision_acteur": sg_type_enrich_acteur.parent_revision_acteur,
+        "fields_groups": sg_type_enrich_acteur.fields_groups,
+    }
 
 
 def get_context_from_suggestion_groupe_type_source(
@@ -421,15 +480,18 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
         return context
 
     def _build_full_context(self, request, suggestion_groupe):
-        if suggestion_groupe.suggestion_cohorte.type_action in [
-            SuggestionAction.CRAWL_URLS,
-            SuggestionAction.ENRICH_ACTEURS_SIRET,
-            SuggestionAction.ENRICH_ACTEURS_SIREN,
-            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
-        ]:
+        type_action = suggestion_groupe.suggestion_cohorte.type_action
+        if type_action in ENRICH_ACTEUR_TYPE_ACTIONS:
+            # Same display as SOURCE, without tabs
+            return get_context_from_suggestion_groupe_type_enrich_acteur(
+                suggestion_groupe
+            )
+        if type_action in ENRICH_MULTI_TYPE_ACTIONS:
             return get_context_from_suggestion_groupe_type_enrich_multi(
                 suggestion_groupe
             )
+        if type_action in CLUSTER_TYPE_ACTIONS:
+            return get_context_from_suggestion_groupe_type_cluster(suggestion_groupe)
         else:
             context = get_context_from_suggestion_groupe_type_source(suggestion_groupe)
             tab_context = self._manage_tab_in_context(
@@ -475,6 +537,27 @@ class SuggestionGroupeView(LoginRequiredMixin, View):
             )
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Payload fields_list invalide")
+
+        if suggestion_groupe.suggestion_cohorte.type_action in CLUSTER_TYPE_ACTIONS:
+            with transaction.atomic():
+                errors = SuggestionGroupeTypeCluster.from_suggestion_groupe(
+                    suggestion_groupe
+                ).update_suggestion_unitaire(
+                    suggestion_modele_payload,
+                    request.POST.get("identifiant_unique", ""),
+                    fields_values,
+                )
+            context = get_context_from_suggestion_groupe_type_cluster(
+                suggestion_groupe, errors=errors
+            )
+            if errors:
+                context["errors"] = errors
+            return render(
+                request,
+                self.template_name,
+                context,
+                content_type="text/vnd.turbo-stream.html",
+            )
 
         with transaction.atomic():
             _, errors = update_suggestion_groupe(

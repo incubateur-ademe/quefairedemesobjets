@@ -1,0 +1,53 @@
+{% load admin_data_tags comparison_table_tags %}
+
+<div class="fr-table fr-table--bordered ">
+    <table class="qf-w-full qf-table-fixed qf-break-words">
+        <thead>
+            <tr>
+                {% for column in table.columns %}
+                    <th class="{% if column.header_action %}qf-text-center{% endif %}">
+                        {% if column.header_action %}
+                            <div
+                                data-controller="report-update"
+                                data-report-update-fields-value="{{ column.header_action.fields }}"
+                                {% if column.header_action.suggestion_modele %}data-report-update-suggestion-modele-value="{{ column.header_action.suggestion_modele }}"{% endif %}
+                                {% if column.header_action.update_url %}data-report-update-update-url-value="{{ column.header_action.update_url }}"{% endif %}
+                                {% if column.header_action.target_values %}data-report-update-target-values-value="{{ column.header_action.target_values }}"{% endif %}
+                                {% if column.header_action.fields_groups %}data-report-update-fields-groups-value="{{ column.header_action.fields_groups }}"{% endif %}
+                                data-action="click->report-update#report"
+                                class="qf-cursor-pointer">
+                                {{ column.label }}
+                            </div>
+                        {% else %}
+                            <div class="qf-truncate">
+                                {{ column.label }}
+                                {% if column.links %}
+                                    (
+                                    {% for link in column.links %}
+                                        {% if not forloop.first %}, {% endif %}
+                                        <a href="{{ link.url }}" target="_blank" rel="noreferrer" data-turbo="false">{{ link.label }}</a>
+                                    {% endfor %}
+                                    )
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if column.subtitle %}
+                            <div class="qf-truncate">{{ column.subtitle }}</div>
+                        {% endif %}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table.rows %}
+                <tr>
+                    {% for cell in row.cells %}
+                        <td>
+                            {% display_cell_as_html cell %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

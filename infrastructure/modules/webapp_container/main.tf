@@ -1,7 +1,3 @@
-# Captured once on first apply, preserved across re-applies of the same stack.
-# Used by the cleanup workflow to age previews.
-resource "time_static" "created_at" {}
-
 resource "scaleway_container" "webapp" {
   name = "${var.prefix}-${var.environment}-webapp"
   tags = concat(
@@ -9,7 +5,6 @@ resource "scaleway_container" "webapp" {
       var.environment,
       var.prefix,
       "webapp",
-      "created-at-${time_static.created_at.unix}",
     ],
     var.extra_tags,
   )

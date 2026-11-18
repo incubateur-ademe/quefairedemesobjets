@@ -74,7 +74,7 @@ class SiretWarning(ImportSourceException, ImportSourceValueWarning):
     pass
 
 
-class SousCategorieCodesError(ImportSourceException, ImportSourceValueError):
+class SousCategorieCodesWarning(ImportSourceException, ImportSourceValueWarning):
     pass
 
 

@@ -20,7 +20,6 @@ with DAG(
     start_date=START_DATES.DEFAULT,
     description=("Clone le jeu de données 'code postal' de LAPOSTE dans notre DB"),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.LAPOSTE,
         TAGS.CP,

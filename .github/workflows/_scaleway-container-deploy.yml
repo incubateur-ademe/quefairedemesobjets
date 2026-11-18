@@ -7,10 +7,13 @@ on:
       registry_image:
         type: string
         required: true
+      component:
+        type: string
+        required: true
 
 jobs:
   deploy_container:
-    name: Scaleway deploy container
+    name: 🚀 Deploy ${{ inputs.component }} to Scaleway
     runs-on: ubuntu-slim
     env:
       CONTAINER_ID: ${{ inputs.container_id }}
@@ -35,22 +38,26 @@ jobs:
           image=$REGISTRY_IMAGE \
           region=$SCW_DEFAULT_REGION
 
+    # Scaleway does not restart a container whose probe fails: a slow start goes
+    # through `error` and back to `ready`, so only a timeout is a failure.
+    # Keep the timeout above the startup probe budget of the slowest container.
     - name: Check deployment status
+      env:
+        START_TIMEOUT_SECONDS: 360
       run: |
-        EXPECTED_VALUE="ready"
-        ERROR_VALUE="error"
-
         while true; do
-            RESPONSE_VALUE=$(scw container container get $CONTAINER_ID region=fr-par -o json | jq -r '.status')
+            CONTAINER=$(scw container container get $CONTAINER_ID region=$SCW_DEFAULT_REGION -o json || true)
+            STATUS=$(jq -r '.status' <<< "$CONTAINER")
 
-            echo "Current status: $RESPONSE_VALUE"
+            echo "Current status: $STATUS"
 
-            if [ "$RESPONSE_VALUE" == "$EXPECTED_VALUE" ]; then
-                echo "🎉 The expected value '$EXPECTED_VALUE' was returned. Exiting."
+            if [ "$STATUS" == "ready" ]; then
+                echo "🎉 $REGISTRY_IMAGE is deployed."
                 break
             fi
-            if [ "$RESPONSE_VALUE" == "$ERROR_VALUE" ]; then
-                echo "🚨 Ended with error : ERROR_VALUE."
+            if [ "$SECONDS" -ge "$START_TIMEOUT_SECONDS" ]; then
+                ERROR=$(jq -r '.error_message // "Scaleway gave no error message"' <<< "$CONTAINER")
+                echo "::error title=Scaleway deployment failed::$REGISTRY_IMAGE is $STATUS after ${SECONDS}s: ${ERROR//$'\n'/%0A}"
                 exit 1
             fi
 

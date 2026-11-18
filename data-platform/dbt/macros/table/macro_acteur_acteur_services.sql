@@ -20,10 +20,14 @@ acteur_acteur_services AS (
     SELECT * FROM nochild_acteur_acteur_services
     UNION ALL
     SELECT * FROM parentacteur_acteur_services
+),
+deduplicated_acteur_acteur_services AS (
+    SELECT acteur_id, acteurservice_id FROM acteur_acteur_services
+    GROUP BY acteur_id, acteurservice_id
 )
 
-SELECT ROW_NUMBER() OVER (ORDER BY acteur_id, aas.acteurservice_id) AS id, aas.*
-FROM acteur_acteur_services AS aas
+SELECT ROW_NUMBER() OVER (ORDER BY acteur_id, acteurservice_id) AS id, aas.*
+FROM deduplicated_acteur_acteur_services AS aas
 INNER JOIN {{ ref(acteur) }} AS a ON a.identifiant_unique = acteur_id
 
 {%- endmacro -%}

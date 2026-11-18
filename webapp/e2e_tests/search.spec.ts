@@ -139,7 +139,7 @@ test.describe("Recherche de produits", () => {
   test("Les résultats SearchTag portent les data attributes de tracking et non des paramètres URL", async ({
     page,
   }) => {
-    await typeSearchQuery(page, "canapé d'angle")
+    await typeSearchQuery(page, "canapé-lit", page)
     const results = await waitForResults(page)
 
     const count = await results.count()
@@ -185,7 +185,7 @@ test.describe("Recherche de produits", () => {
     page,
   }) => {
     // Étape 1 : rechercher via un synonyme (SearchTag) et naviguer vers la fiche
-    await typeSearchQuery(page, "canapé d'angle")
+    await typeSearchQuery(page, "canapé-lit", page)
     const results = await waitForResults(page)
     const count = await results.count()
     expect(count).toBeGreaterThan(0)
@@ -216,7 +216,14 @@ test.describe("Recherche de produits", () => {
     const headerSearchInput = page.locator("#id_header-autocomplete-search")
     await headerSearchInput.click()
     await headerSearchInput.fill("")
-    await headerSearchInput.pressSequentially("lave", { delay: 50 })
+    // "canapé" ranks the ProduitPage term first, a non-SearchTag result.
+    const nextResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/autocomplete-search") &&
+        new URL(response.url()).searchParams.get("q") === "canapé",
+    )
+    await headerSearchInput.pressSequentially("canapé", { delay: 50 })
+    await nextResponse
     const nextResults = await waitForResults(page)
     const nextCount = await nextResults.count()
     expect(nextCount).toBeGreaterThan(0)

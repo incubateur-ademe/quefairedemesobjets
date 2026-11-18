@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import cast
 
 import pandas as pd
 import requests
@@ -81,6 +82,21 @@ def _rename_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     return df
 
 
+def _format_error_messages_with_identifier(row: pd.Series, e: Exception) -> str:
+    def _identifiant_str(row: pd.Series) -> str:
+        if "identifiant_unique" in row.index:
+            return f"identifiant_unique : {row['identifiant_unique']}"
+        if "identifiant_externe" in row.index:
+            return f"identifiant_externe : {row['identifiant_externe']}"
+        return ""
+
+    messages = []
+    if identifiant_str := _identifiant_str(row):
+        messages.append(identifiant_str)
+    messages.append(str(e))
+    return " - ".join(messages)
+
+
 def _transform_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
     columns_to_transform = [
         t
@@ -105,7 +121,7 @@ def _transform_columns(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFra
                         fonction_de_transformation=function_name,
                         origine_colonnes=[column_to_transform.origin],
                         origine_valeurs=[str(origin_value)],
-                        message=str(e),
+                        message=_format_error_messages_with_identifier(row, e),
                     )
                 )
                 transformed_column[index] = ""
@@ -159,7 +175,7 @@ def _transform_df(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
                         fonction_de_transformation=function_name,
                         origine_colonnes=column_to_transform_df.origin,
                         origine_valeurs=[str(v) for v in origin_values.tolist()],
-                        message=str(e),
+                        message=_format_error_messages_with_identifier(row, e),
                     )
                 )
                 # Set default values for all destination columns
@@ -230,8 +246,7 @@ def _remove_undesired_lines(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         if nb_filtered := nb_before - len(df):
             metadata[METADATA_NO_SOUS_CATEGORIE_FILTERED] = str(nb_filtered)
             logger.error(
-                "Acteurs ignorés car sans sous_categorie: "
-                f"{nb_filtered} / {nb_before}"
+                f"Acteurs ignorés car sans sous_categorie: {nb_filtered} / {nb_before}"
             )
             log.preview("Acteurs ignorés (sans sous_categorie)", df_ignored)
 
@@ -260,11 +275,61 @@ def _remove_undesired_lines(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         if nb_filtered := nb_before - len(df):
             metadata[METADATA_NO_LOCATION_FILTERED] = str(nb_filtered)
             logger.error(
-                "Acteurs ignorés car sans localisation: " f"{nb_filtered} / {nb_before}"
+                f"Acteurs ignorés car sans localisation: {nb_filtered} / {nb_before}"
             )
             log.preview("Acteurs ignorés (sans localisation)", df_ignored)
 
     return df, metadata
+
+
+def _log_summary_by_transformation(label: str, df_log: pd.DataFrame) -> None:
+    """Log, for each transformation, the number of logs and the source values
+    that triggered them."""
+    if df_log.empty or "fonction_de_transformation" not in df_log.columns:
+        return
+    for function_name, df_function_log in df_log.groupby("fonction_de_transformation"):
+        logger.warning(
+            f"{label} - {function_name} : {len(df_function_log)} ligne(s) concernée(s)"
+        )
+        log.preview_df_as_markdown(
+            f"{label} - {function_name} : valeurs source",
+            df_function_log["origine_valeurs"]
+            .astype(str)
+            .value_counts()
+            .rename_axis("origine_valeurs")
+            .reset_index(name="occurrences"),
+        )
+
+
+def _log_logs_of_ignored_acteurs(
+    identifiants_ignored: set[str],
+    df_log_error: pd.DataFrame,
+    df_log_warning: pd.DataFrame,
+) -> None:
+    """Log the transformation logs of acteurs removed by the normalization, so
+    that the reason of their removal is visible in Airflow."""
+    for label, df_log in [("Erreurs", df_log_error), ("Warnings", df_log_warning)]:
+        if df_log.empty or "message" not in df_log.columns:
+            continue
+        df_log_ignored = df_log[df_log["identifiant_unique"].isin(identifiants_ignored)]
+        if df_log_ignored.empty:
+            continue
+        logger.error(
+            f"{label} de normalisation sur les acteurs ignorés : "
+            f"{len(df_log_ignored)} log(s) pour "
+            f"{df_log_ignored['identifiant_unique'].nunique()} acteur(s)"
+        )
+        log.preview_df_as_markdown(
+            f"{label} de normalisation sur les acteurs ignorés",
+            df_log_ignored[
+                [
+                    "identifiant_unique",
+                    "fonction_de_transformation",
+                    "origine_valeurs",
+                    "message",
+                ]
+            ],
+        )
 
 
 def _manage_oca_config(df: pd.DataFrame, dag_config: SourceConfig) -> pd.DataFrame:
@@ -308,6 +373,8 @@ def source_data_normalize(
             columns={"Numéro d'établissement": "identifiant_externe"},
             inplace=True,
         )
+    if dag_id == "source_sinoe":
+        df = df_normalize_sinoe(df)
 
     # Init log_warning for each row
     df["log_warning"] = [[] for _ in range(len(df))]
@@ -363,7 +430,13 @@ def source_data_normalize(
             axis=1,
         )
 
+    _log_summary_by_transformation("Erreurs", df_log_error)
+    _log_summary_by_transformation("Warnings", df_log_warning)
+
     # drop row with not empty log_error
+    identifiants_with_error = set(
+        df.loc[df["log_error"].apply(len) > 0, "identifiant_unique"]
+    )
     df = df[df["log_error"].apply(len) == 0]
 
     # drop logs from df
@@ -388,12 +461,16 @@ def source_data_normalize(
     if dag_id == "pharmacies":
         df = df_normalize_pharmacie(df)
 
-    if dag_id == "source_sinoe":
-        df = df_normalize_sinoe(df)
-
     # Filter by content (home, duplicates, subcategory, location)
+    identifiants_before_filtering = set(df["identifiant_unique"])
     df, metadata = _remove_undesired_lines(df)
     log.preview("df after filtering rows by content", df)
+    _log_logs_of_ignored_acteurs(
+        identifiants_with_error
+        | (identifiants_before_filtering - set(df["identifiant_unique"])),
+        df_log_error,
+        df_log_warning,
+    )
 
     log.preview("df après normalisation", df)
     if df.empty:
@@ -419,13 +496,22 @@ def df_normalize_pharmacie(df: pd.DataFrame) -> pd.DataFrame:
 def df_normalize_sinoe(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
-    # DUPLICATES: extra safety — even though the API should not return
-    # duplicates (q_mode=simple&ANNEE_eq=2025),
-    # we still check that there is only one year
-    log.preview("ANNEE uniques", df["ANNEE"].unique().tolist())
-    if df["ANNEE"].nunique() != 1:
-        raise ValueError("Plusieurs ANNEE, changer requête API pour n'en avoir qu'une")
-    df = df.drop(columns=["ANNEE"])
+    # For each entity, keep the latest version of the year
+    log.preview("annees uniques", sorted(df["annee"].unique().tolist()))
+    nb_before = len(df)
+    df = cast(
+        pd.DataFrame,
+        df.loc[df.groupby("code_service", sort=False)["annee"].idxmax()],
+    )
+    if nb_filtered := nb_before - len(df):
+        logger.info(
+            "Versions SINOE filtrées (années antérieures): "
+            f"{nb_filtered} / {nb_before}"
+        )
+    df = df.drop(columns=["annee"]).reset_index(drop=True)
+
+    # Remove entities with a date_fermeture_service
+    df = cast(pd.DataFrame, df.loc[df["date_fermeture_service"].isna()])
 
     return df
 

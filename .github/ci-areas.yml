@@ -1,0 +1,72 @@
+# Which CI jobs a pull request needs, read by dorny/paths-filter in review.yml.
+# An exclusion is final: no other pattern of the same area can include the file back.
+# A file matching `other` runs every job, and any change to .github matches it.
+
+webapp-django: &webapp-django
+  - "uv.lock"
+  - "pyproject.toml"
+  - "webapp/**"
+  - "!webapp/**/*.md"
+  - "!webapp/package.json"
+  - "!webapp/revue-front/**"
+  - "!webapp/static/to_compile/**"
+  - "!webapp/parcel-transformers/**"
+  - "!webapp/*.config.*"
+  - "!webapp/tsconfig.json"
+  - "!webapp/.eslintrc.js"
+  - "!webapp/.parcelrc"
+  - "!webapp/.postcssrc"
+
+webapp-js:
+  - "package.json"
+  - "package-lock.json"
+  - "webapp/package.json"
+  # Copied to .env by the JS tests
+  - "webapp/.env.template"
+  - "webapp/static/to_compile/**"
+  - "webapp/parcel-transformers/**"
+  - "webapp/*.config.*"
+  - "webapp/tsconfig.json"
+  - "webapp/.eslintrc.js"
+  - "webapp/.parcelrc"
+  - "webapp/.postcssrc"
+
+# The DAGs import the webapp models, so a webapp change can break them.
+data-platform:
+  - *webapp-django
+  - "data-platform/**"
+  # Loaded by data-platform/dags/utils/docs.py
+  - "docs/reference/data-platform/**"
+  - "!data-platform/**/*.md"
+
+revue:
+  - "package.json"
+  - "package-lock.json"
+  - "webapp/package.json"
+  - "webapp/revue-front/**"
+
+infrastructure:
+  - "infrastructure/**"
+  - "!infrastructure/**/*.md"
+
+dependencies:
+  - "**/uv.lock"
+  - "**/package-lock.json"
+
+other:
+  - "**"
+  - "!**/*.md"
+  - "!docs/**"
+  - "!infrastructure/**"
+  - "!data-platform/**"
+  - "!ml_deduplication/**"
+  - "!webapp/**"
+  - "!uv.lock"
+  - "!pyproject.toml"
+  - "!package.json"
+  - "!package-lock.json"
+
+# Also runs the E2E tests without the frontend label: a CI change proves the whole CI.
+ci:
+  - ".github/**"
+  - "!**/*.md"

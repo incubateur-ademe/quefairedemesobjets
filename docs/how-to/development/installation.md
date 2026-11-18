@@ -66,9 +66,9 @@ Provisionnement:
 
 Le `docker-compose.yml` à la racine expose deux profiles indépendants :
 
-| Profile   | Services                                                                                                                                                       |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lvao`    | `lvao-webapp-db` (PostGIS, port 6543), nginx local SSL (`webapp/nginx/` + mkcert, domaine `quefairedemesdechets.ademe.local`).                                 |
+| Profile   | Services                                                                                                                                                                                                                     |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lvao`    | `lvao-webapp-db` (PostGIS, port `WEBAPP_DB_PORT`, 6543 par défaut, à définir dans le `.env` racine), `lvao-warehouse-db` (8765), nginx local SSL (`nginx-local-only/` + mkcert, domaine `quefairedemesdechets.ademe.local`). |
 | `airflow` | `lvao-webapp-db`, `lvao-warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM), `airflow-dag-processor` (8082). |
 
 > Pas de **Redis** ni de **mailcatcher** en local : le cache Django est stocké en base (`django.core.cache.backends.db.DatabaseCache`, table `qf_django_cache`).
@@ -209,10 +209,20 @@ Tests JS unitaires
 npm run test
 ```
 
-End to end avec Playwright (depuis **`webapp/`**) :
+End-to-end avec Playwright.
+Ces tests nécessitent une base de données incluant un échantillon d'acteurs issus de la base de données principale.
+Celle-ci peut être générée en local facilement, via une commande à lancer depuis la racine du dépôt.
+(`make e2e-prepare` construit l'échantillon via le DAG `compute_sample_acteur`,
+voir [create_webapp_sample_db.md](create_webapp_sample_db.md)) :
 
 ```sh
-make init-playwright
+make -C webapp init-playwright
+make e2e            # préparation + tests
+```
+
+Pour relancer seulement les tests (depuis **`webapp/`**) :
+
+```sh
 make e2e-test
 make e2e-test-ui
 ```

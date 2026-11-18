@@ -6,4 +6,4 @@ SELECT
 FROM {{ ref('int_acteur_with_siret_without_siren') }} AS av
 INNER JOIN {{ ref('int_ae_etablissement') }} AS ae
     ON av.siret = ae.siret
-WHERE ae.etat_administratif = 'A'
+WHERE ae.est_actif

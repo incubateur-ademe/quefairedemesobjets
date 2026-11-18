@@ -14,7 +14,7 @@ active_etablissements AS (
     FROM {{ ref('int_ae_etablissement') }} AS ae
     INNER JOIN {{ ref('int_acteur_with_siren_without_siret') }} AS av
         ON ae.siren = av.siren
-    WHERE ae.etat_administratif = 'A'
+    WHERE ae.est_actif
     GROUP BY ae.siren, ae.siret, ae.code_postal
 ),
 

@@ -1,0 +1,58 @@
+name: Setup Node Environment
+description: Install Node.js and npm dependencies
+
+inputs:
+  build:
+    description: "Build frontend assets"
+    required: false
+    default: "false"
+  base-url:
+    description: "Base URL for frontend build"
+    required: false
+    default: ""
+  working-directory:
+    description: "Working directory"
+    required: false
+    default: "webapp"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: ".tool-versions"
+
+    - name: Cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v6
+      with:
+        # npm workspace: packages are hoisted to the root node_modules and the
+        # lockfile lives at the repo root, not in the working directory
+        path: |
+          node_modules
+          ${{ inputs.working-directory }}/node_modules
+        key: node-modules-${{ runner.os }}-${{ inputs.working-directory }}-${{ hashFiles('package-lock.json') }}
+
+    - name: Install npm dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci
+      working-directory: ${{ inputs.working-directory }}
+
+    # - name: Cache Parcel build cache
+    #   if: inputs.build == 'true'
+    #   uses: actions/cache@v6
+    #   with:
+    #     path: .parcel-cache
+    #     key: parcel-${{ runner.os }}-${{ hashFiles('static/to_compile/**') }}
+    #     restore-keys: |
+    #       parcel-${{ runner.os }}-
+
+    - name: Build assets
+      if: inputs.build == 'true'
+      shell: bash
+      run: npm run build
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        BASE_URL: ${{ inputs.base-url }}

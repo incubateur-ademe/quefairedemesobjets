@@ -1,16 +1,31 @@
 import logging
 import re
+from collections.abc import Iterable
 from datetime import datetime
 from typing import Protocol
 
 from core.models.mixin import TimestampedModel
 from data.models.change import SuggestionChange
+from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import BooleanField, CheckConstraint, Count, ExpressionWrapper, Q
+from django.db import transaction
+from django.db.models import (
+    BooleanField,
+    Case,
+    CheckConstraint,
+    Count,
+    ExpressionWrapper,
+    IntegerField,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from more_itertools import first
 from qfdmo.models.acteur import (
     Acteur,
@@ -89,6 +104,15 @@ class SuggestionAction(models.TextChoices):
     SOURCE_SUPPRESSION = "SOURCE_SUPRESSION", "ingestion de source de données"
 
 
+# Stored values of the SOURCE type_action (beware: SOURCE_SUPPRESSION is stored with
+# a typo, never filter SOURCE cohortes with a string prefix)
+SOURCE_TYPE_ACTIONS = [
+    SuggestionAction.SOURCE_AJOUT.value,
+    SuggestionAction.SOURCE_MODIFICATION.value,
+    SuggestionAction.SOURCE_SUPPRESSION.value,
+]
+
+
 class SuggestionCohorteManager(models.Manager):
     def get_cohortes_with_suggestion_groupes(self):
         return (
@@ -106,11 +130,63 @@ class SuggestionCohorteManager(models.Manager):
             .order_by("-cree_le")
         )
 
+    def source_cohortes(self) -> QuerySet["SuggestionCohorte"]:
+        """SOURCE cohortes having at least one groupe."""
+        return (
+            self.get_queryset()
+            .filter(type_action__in=SOURCE_TYPE_ACTIONS)
+            .annotate(
+                total_groupes=Count("suggestion_groupes"),
+                nb_avalider=Count(
+                    "suggestion_groupes",
+                    filter=Q(suggestion_groupes__statut=SuggestionStatut.AVALIDER),
+                ),
+            )
+            .filter(total_groupes__gt=0)
+        )
 
-class SuggestionCohorte(TimestampedModel):
+
+class SuggestionStatutFieldsMixin:
+    """Shared statut write helpers for the review screen and apply tasks."""
+
+    HUMAN_DECISION_STATUTS = [SuggestionStatut.ATRAITER, SuggestionStatut.REJETEE]
+
+    @classmethod
+    def _statut_fields(cls, statut: str, user=None) -> dict:
+        """Fields to update with the statut: a human decision is traced, putting back
+        to AVALIDER clears the trace, processing statuts keep it untouched."""
+        fields = {"statut": statut, "modifie_le": timezone.now()}
+        if statut in cls.HUMAN_DECISION_STATUTS:
+            fields |= {"decision_par": user, "decision_le": timezone.now()}
+        elif statut == SuggestionStatut.AVALIDER:
+            fields |= {"decision_par": None, "decision_le": None}
+        return fields
+
+
+class SuggestionCohorte(SuggestionStatutFieldsMixin, TimestampedModel):
+    """Statut writes of the review screen (data/revue) and of the apply tasks
+    live on this model. The Django admin keeps its own statut management: both
+    live in parallel.
+
+    A SuggestionGroupe statut is always written together with the statut of its
+    SuggestionUnitaire, so that the « lignes de suggestion » (built from the
+    SuggestionUnitaire) stay consistent with their groupe.
+    """
+
     class Meta:
         verbose_name = "1️⃣ Suggestion Cohorte"
         verbose_name_plural = "1️⃣ Suggestions Cohortes"
+
+    PROCESSING_STATUTS = [
+        SuggestionStatut.ENCOURS,
+        SuggestionStatut.SUCCES,
+        SuggestionStatut.ERREUR,
+    ]
+    FINISHED_STATUTS = {
+        SuggestionStatut.SUCCES,
+        SuggestionStatut.ERREUR,
+        SuggestionStatut.REJETEE,
+    }
 
     objects: SuggestionCohorteManager = SuggestionCohorteManager()
 
@@ -169,6 +245,65 @@ class SuggestionCohorte(TimestampedModel):
 
     def __str__(self) -> str:
         return f"""{self.id} - {self.identifiant_action} -- {self.execution_datetime}"""
+
+    def set_groupes_statut(
+        self, groupe_ids: Iterable[int], statut: str, user=None
+    ) -> int:
+        """Set the statut of the groupes and of all their SuggestionUnitaire.
+        Returns the number of updated groupes."""
+        groupe_ids = list(
+            self.suggestion_groupes.filter(id__in=list(groupe_ids)).values_list(
+                "id", flat=True
+            )
+        )
+        fields = self._statut_fields(statut, user)
+        with transaction.atomic():
+            SuggestionUnitaire.objects.filter(
+                suggestion_groupe_id__in=groupe_ids
+            ).update(**fields)
+            return self.suggestion_groupes.filter(id__in=groupe_ids).update(**fields)
+
+    @classmethod
+    def _compute_cohorte_statut(
+        cls, groupe_statuts: set[str]
+    ) -> SuggestionCohorteStatut | None:
+        if not groupe_statuts:
+            return None
+        if SuggestionStatut.AVALIDER in groupe_statuts:
+            return SuggestionCohorteStatut.AVALIDER
+        if groupe_statuts <= cls.FINISHED_STATUTS:
+            return SuggestionCohorteStatut.SUCCES
+        return SuggestionCohorteStatut.ENCOURS
+
+    def recompute_cohorte_statut(self) -> None:
+        """Recompute the statut of the cohorte from the statut of its groupes.
+        Cohortes without groupe (legacy Suggestion) are left untouched."""
+        statut = self._compute_cohorte_statut(
+            set(self.suggestion_groupes.values_list("statut", flat=True).distinct())
+        )
+        if statut and statut != self.statut:
+            self.statut = statut
+            self.save(update_fields=["statut", "modifie_le"])
+
+    def logs_queryset(self, niveau: list[str]) -> QuerySet:
+        """Logs of the cohorte, the most severe first."""
+        log_levels = (
+            SuggestionLog.SuggestionLogLevel.ERROR,
+            SuggestionLog.SuggestionLogLevel.WARNING,
+            SuggestionLog.SuggestionLogLevel.INFO,
+        )
+        gravity = Case(
+            *(
+                When(niveau_de_log=level, then=Value(gravite))
+                for gravite, level in enumerate(log_levels)
+            ),
+            default=Value(len(log_levels)),
+            output_field=IntegerField(),
+        )
+        queryset = self.suggestion_logs.annotate(gravite=gravity)
+        if niveau:
+            queryset = queryset.filter(niveau_de_log__in=niveau)
+        return queryset.order_by("gravite", "-cree_le", "-id")
 
 
 class Suggestion(TimestampedModel):
@@ -494,10 +629,19 @@ class SuggestionActeurRelationsMixin:
             return None
 
 
-class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
+class SuggestionGroupe(
+    SuggestionStatutFieldsMixin, TimestampedModel, SuggestionActeurRelationsMixin
+):
     class Meta:
         verbose_name = "2️⃣ ⏳ ⚠️ Suggestion Groupe - Livraison prochainement"
         verbose_name_plural = "2️⃣ ⏳ ⚠️ Suggestions Groupes - Livraison prochainement"
+        indexes = [
+            # Review screen: groupes of a cohorte, filtered by statut, ordered by id
+            models.Index(
+                fields=["suggestion_cohorte", "statut", "id"],
+                name="data_sg_cohorte_statut_id",
+            ),
+        ]
 
     objects = SuggestionGroupeManager()
 
@@ -547,12 +691,38 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         blank=True,
         verbose_name="Metadata de la cohorte, données statistiques",
     )
+    # Human decision trace, written by the review screen (data/revue)
+    decision_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="Décision prise par",
+    )
+    decision_le = models.DateTimeField(
+        null=True, blank=True, verbose_name="Date de la décision"
+    )
 
     def __str__(self) -> str:
         libelle = self.suggestion_cohorte.identifiant_action
         if self.acteur:
             libelle += f" - {self.acteur.identifiant_unique}"
         return libelle
+
+    def set_lignes_statut(
+        self,
+        champs_list: Iterable[list[str]],
+        statut: str,
+        user=None,
+    ) -> int:
+        """Set the statut of the SuggestionUnitaire of the given lignes (a ligne is
+        identified by its `champs` tuple, all suggestion_modele included).
+        The groupe statut is left to the caller."""
+        return SuggestionUnitaire.objects.filter(
+            suggestion_groupe=self,
+            champs__in=[list(champs) for champs in champs_list],
+        ).update(**self._statut_fields(statut, user))
 
     @property
     def displayed_acteur_uuid(self) -> str | None:
@@ -589,7 +759,18 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
         )
 
     def apply(self):
-        from data.models.suggestions.enrich_multi import SuggestionGroupeTypeEnrichMulti
+        from data.models.suggestions.cluster import (
+            CLUSTER_TYPE_ACTIONS,
+            SuggestionGroupeTypeCluster,
+        )
+        from data.models.suggestions.enrich_acteur import (
+            ENRICH_ACTEUR_TYPE_ACTIONS,
+            SuggestionGroupeTypeEnrichActeur,
+        )
+        from data.models.suggestions.enrich_multi import (
+            ENRICH_MULTI_TYPE_ACTIONS,
+            SuggestionGroupeTypeEnrichMulti,
+        )
         from data.models.suggestions.source import SuggestionGroupeTypeSource
 
         type_action = self.suggestion_cohorte.type_action
@@ -599,13 +780,12 @@ class SuggestionGroupe(TimestampedModel, SuggestionActeurRelationsMixin):
             SuggestionAction.SOURCE_SUPPRESSION,
         ]:
             SuggestionGroupeTypeSource.from_suggestion_groupe(self).apply()
-        elif type_action in [
-            SuggestionAction.CRAWL_URLS,
-            SuggestionAction.ENRICH_ACTEURS_SIRET,
-            SuggestionAction.ENRICH_ACTEURS_SIREN,
-            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
-        ]:
+        elif type_action in ENRICH_ACTEUR_TYPE_ACTIONS:
+            SuggestionGroupeTypeEnrichActeur.from_suggestion_groupe(self).apply()
+        elif type_action in ENRICH_MULTI_TYPE_ACTIONS:
             SuggestionGroupeTypeEnrichMulti.from_suggestion_groupe(self).apply()
+        elif type_action in CLUSTER_TYPE_ACTIONS:
+            SuggestionGroupeTypeCluster.from_suggestion_groupe(self).apply()
 
     def suggestions_can_be_applied_to_parent(self) -> bool:
         return (
@@ -688,6 +868,18 @@ class SuggestionUnitaire(TimestampedModel, SuggestionActeurRelationsMixin):
     ordre = models.IntegerField(default=1, blank=True)
     raison = models.TextField(blank=True, db_default="", default="")
     parametres = models.JSONField(blank=True, default=dict)
+    # Human decision trace, written by the review screen (data/revue)
+    decision_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="Décision prise par",
+    )
+    decision_le = models.DateTimeField(
+        null=True, blank=True, verbose_name="Date de la décision"
+    )
     suggestion_modele = models.CharField(
         max_length=255, blank=True, db_default="", default="", choices=[]
     )
@@ -708,6 +900,7 @@ class SuggestionLog(TimestampedModel):
         verbose_name = "📝 Suggestion Log"
 
     class SuggestionLogLevel(models.TextChoices):
+        INFO = "INFO", "Info"
         WARNING = "WARNING", "Warning"
         ERROR = "ERROR", "Error"
 
@@ -741,6 +934,13 @@ class SuggestionLog(TimestampedModel):
     origine_valeurs = ArrayField(models.TextField(), null=True)
     destination_colonnes = ArrayField(models.CharField(max_length=255), null=True)
     message = models.TextField(blank=True, db_default="", default="")
+
+
+SUGGESTION_LOG_LEVELS_BY_GRAVITY = (
+    SuggestionLog.SuggestionLogLevel.ERROR,
+    SuggestionLog.SuggestionLogLevel.WARNING,
+    SuggestionLog.SuggestionLogLevel.INFO,
+)
 
 
 class BANCache(models.Model):

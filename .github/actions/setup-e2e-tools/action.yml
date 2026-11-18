@@ -18,14 +18,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup frontend environment
-      uses: ./.github/actions/setup-frontend
+    - name: Setup Node environment
+      uses: ./.github/actions/setup-node
       with:
         build: ${{ inputs.build-frontend }}
         base-url: ${{ inputs.base-url }}
 
-    - name: Setup backend environment
-      uses: ./.github/actions/setup-backend
+    - name: Setup Python environment
+      uses: ./.github/actions/setup-python
       with:
         uv-groups: "--group dev --group webapp-dev"
 

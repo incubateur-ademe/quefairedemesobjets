@@ -1,0 +1,14 @@
+{% load static %}<!doctype html>
+<html lang="fr" class="wa-cloak">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Revue des suggestions ({{ ENVIRONMENT }})</title>
+    <link rel="stylesheet" href="{% static 'revue/main.css' %}">
+    {{ bootstrap|json_script:"revue-bootstrap" }}
+    <script type="module" src="{% static 'revue/main.js' %}"></script>
+  </head>
+  <body data-environment="{{ ENVIRONMENT }}">
+    <div id="revue-root"></div>
+  </body>
+</html>

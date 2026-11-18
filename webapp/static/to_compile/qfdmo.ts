@@ -8,9 +8,9 @@ import "./styles/qfdmo.css"
 import "@gouvfr/dsfr/dist/dsfr.module.js"
 
 // Carte scripts.
-// This script lives in a different file because it is imported in qfdmd.ts
+// This script lives in a different file because it is imported in quefaire.ts
 // as well.
-// The current qfdmo.ts file cannot be imported as-is in qfdmd.ts because it
+// The current qfdmo.ts file cannot be imported as-is in quefaire.ts because it
 // includes dsfr css and js.
 // Once this project will use django-dsfr, the current script
 // could be deprecated.

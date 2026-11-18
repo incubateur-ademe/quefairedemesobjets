@@ -9,7 +9,8 @@ endif
 # Aliases
 BASE_DOMAIN := quefairedemesdechets.ademe.local
 BLACK := uv run black
-DB_URL := postgres://webapp:***@localhost:6543/webapp# pragma: allowlist secret
+WEBAPP_DB_PORT ?= 6543
+DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 PYTEST := uv run pytest
 PYTHON := uv run python
@@ -158,11 +159,10 @@ prepare-e2e-test:
 	make createsuperuser-example
 	BASE_URL=http://localhost:8888 npm run build
 
+# Alias for the root `make e2e-prepare`.
 .PHONY: prepare-e2e-test-local
 prepare-e2e-test-local:
-	make create-db-sample
-	make -C .. DB_WEBAPP_SAMPLE=$(DB_WEBAPP_SAMPLE) load-sample-dump
-	make DATABASE_URL=$(DB_WEBAPP_SAMPLE) prepare-e2e-test
+	make -C .. e2e-prepare
 
 .PHONY: e2e-test
 e2e-test:

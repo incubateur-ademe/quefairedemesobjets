@@ -12,7 +12,7 @@ Dépendances de développement : toutes centralisées dans le `pyproject.toml` r
 | ------------ | ---------------------------------------------------------- | ----------------------- |
 | `lint`       | black, ruff                                                | CI linter, pre-commit   |
 | `test`       | pytest*, factory-boy                                       | CI tests                |
-| `dev`        | lint + test + djade + pre-commit                           | CI + dev de base        |
+| `dev`        | lint + test + djade + pre-commit + detect-secrets          | CI + dev de base        |
 | `webapp-dev` | django-browser-reload, debug-toolbar, silk, ptpython, etc. | Développement webapp    |
 | `notebook`   | dedupe, ipython                                            | Notebooks data-platform |
 

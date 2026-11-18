@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 
 import pandas as pd
@@ -13,80 +14,61 @@ from sources.tasks.business_logic.source_data_normalize import (
 )
 from sources.tasks.transform.exceptions import ImportSourceValueWarning
 
-"""
-TODO:
-Pour la fonction df_nomalize_sinoe
-
-"""
-
-
-@pytest.fixture
-def df_sinoe():
-    return pd.DataFrame(
-        {
-            "identifiant_externe": ["DECHET_1"],
-            "ANNEE": [2024],
-            "_geopoint": ["48.4812237361283,3.120109493179493"],
-            "produitsdechets_acceptes": ["07.6"],
-            "public_accueilli": ["DMA"],
-        },
-    )
-
-
-@pytest.fixture
-def product_mapping():
-    return {
-        "Solvants usés": "Produits chimiques - Solvants",
-        "Papiers cartons mêlés triés": [
-            "papiers_graphiques",
-            "emballage_carton",
-        ],
-        "Déchets textiles": ["vêtement", "linge de maison"],
-    }
-
-
-@pytest.fixture
-def dechet_mapping():
-    return {
-        "01.1": "Solvants usés",
-        "07.25": "Papiers cartons mêlés triés",
-        "07.6": "Déchets textiles",
-        "01.22": "Déchets alcalins",
-        "NP": "Non précisé",
-    }
-
 
 class TestSourceDataNormalizeSinoe:
     """
     Test de la fonction df_normalize_sinoe
     """
 
-    def test_annee_unique(self, product_mapping, dechet_mapping, acteurtype_id_by_code):
+    def test_keep_latest_annee_per_code_service(self):
         df = pd.DataFrame(
             {
-                "identifiant_externe": ["DECHET_1", "DECHET_2"],
-                "ANNEE": [2024, 2025],
-                "_geopoint": [
-                    "48.4812237361283,3.120109493179493",
-                    "48.4812237361283,3.120109493179493",
+                "code_service": [
+                    "1234",
+                    "1234",
+                    "2345",
+                    "2345",
                 ],
-                "produitsdechets_acceptes": ["07.6", "07.6"],
-                "public_accueilli": ["DMA", "DMA"],
+                "annee": [2023, 2025, 2024, 2025],
+                "date_fermeture_service": [None, None, None, None],
+                "nom": ["ancien_1", "recent_1", "ancien_2", "recent_2"],
             },
         )
 
-        with pytest.raises(ValueError):
-            df = df_normalize_sinoe(
-                df=df,
-            )
+        result = df_normalize_sinoe(df=df)
 
-    def test_drop_annee_column(
-        self, df_sinoe, product_mapping, dechet_mapping, acteurtype_id_by_code
-    ):
-        df = df_normalize_sinoe(
-            df=df_sinoe,
+        assert len(result) == 2
+        assert set(result["code_service"]) == {"1234", "2345"}
+        assert set(result["nom"]) == {"recent_1", "recent_2"}
+        assert "annee" not in result.columns
+
+    def test_drop_annee_column(self):
+        df_sinoe = pd.DataFrame(
+            {
+                "code_service": ["1234"],
+                "annee": [2024],
+                "date_fermeture_service": [None],
+                "_geopoint": ["48.4812237361283,3.120109493179493"],
+                "produitsdechets_acceptes": ["07.6"],
+                "public_accueilli": ["DMA"],
+            },
         )
-        assert "ANNEE" not in df.columns
+        df = df_normalize_sinoe(df=df_sinoe)
+        assert "annee" not in df.columns
+        assert len(df) == 1
+
+    def test_remove_closed_services(self):
+        df = pd.DataFrame(
+            {
+                "code_service": ["OPEN", "CLOSED"],
+                "annee": [2025, 2025],
+                "date_fermeture_service": [None, "2020-01-01"],
+            },
+        )
+
+        result = df_normalize_sinoe(df=df)
+
+        assert list(result["code_service"]) == ["OPEN"]
 
 
 NORMALIZATION_RULES = [
@@ -206,6 +188,49 @@ class TestSourceDataNormalize:
         # Vérifier que les warnings ont été ajoutés
         assert len(result_df["log_warning"].iloc[0]) == 1
         assert len(result_df["log_warning"].iloc[1]) == 1
+
+    def test_source_data_normalize_logs_warnings_of_ignored_acteurs(self, caplog):
+        caplog.set_level(logging.INFO)
+        dag_config = SourceConfig.model_validate(
+            {
+                "normalization_rules": [
+                    {
+                        "origin": "categories",
+                        "transformation": "clean_sous_categorie_codes",
+                        "destination": "sous_categorie_codes",
+                    },
+                    {"keep": "identifiant_unique"},
+                ],
+                "endpoint": "https://example.com/api",
+                "product_mapping": {
+                    "chaussures, maroquinerie": ["chaussures", "maroquinerie"]
+                },
+                "save_datasource_in_warehouse_db": False,
+            }
+        )
+
+        df, _, df_log_warning, _ = source_data_normalize(
+            dag_config=dag_config,
+            df_acteur_from_source=pd.DataFrame(
+                {
+                    "identifiant_unique": ["id_ok", "id_ignored"],
+                    "categories": [
+                        ["Chaussures, maroquinerie"],
+                        ["Chaussures", "maroquinerie"],
+                    ],
+                }
+            ),
+            dag_id="dag_id",
+        )
+
+        assert df["identifiant_unique"].tolist() == ["id_ok"]
+        assert df_log_warning["identifiant_unique"].tolist() == ["id_ignored"]
+        assert "Sous-catégorie absente du mapping : `chaussures`" in caplog.text
+        assert "Warnings - clean_sous_categorie_codes : 1 ligne(s)" in caplog.text
+        assert (
+            "Warnings de normalisation sur les acteurs ignorés : 1 log(s) pour"
+            " 1 acteur(s)" in caplog.text
+        )
 
     def test_source_data_normalize_normalization_remove_unknown_columns(self):
         normalization_rules = [

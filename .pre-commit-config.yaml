@@ -12,7 +12,7 @@ repos:
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        exclude: ^dbt/package-lock\.yml$|^qfdmo/migrations/fixtures/objets\.json$
+        exclude: ^dbt/package-lock\.yml$|^qfdmo/migrations/fixtures/objets\.json$|training_results.json
         name: Detect secrets
         language: python
         entry: detect-secrets-hook
@@ -48,7 +48,7 @@ repos:
         name: prettier
         entry: npx prettier --write
         language: system
-        files: \.(js|ts|css|md)$
+        files: \.(js|ts|tsx|css|md)$
       # OpenTofu hooks
       - id: tofu_fmt
         name: tofu fmt

@@ -72,6 +72,9 @@ inputs = {
   airflow_dag_processor_max_scale      = 1
   airflow_dag_processor_timeout        = 300
 
+  # Public hostname routed by nginx_containers (wildcard CNAME).
+  custom_domain = "airflow.quefairedemesobjets.ademe.fr"
+
   AIRFLOW__WEBSERVER__INSTANCE_NAME   = "‼️‼️‼️‼️ PROD ‼️‼️‼️‼️"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN = "postgresql://${dependency.database.outputs.airflow_db_username}:${dependency.database.outputs.airflow_db_password}@${dependency.database.outputs.airflow_endpoint_ip}:${dependency.database.outputs.airflow_endpoint_port}/${dependency.database.outputs.airflow_database_name}"
   AIRFLOW_METADATA_DB_URL             = "postgresql+psycopg2://${dependency.database.outputs.airflow_db_username}:${dependency.database.outputs.airflow_db_password}@${dependency.database.outputs.airflow_endpoint_ip}:${dependency.database.outputs.airflow_endpoint_port}/${dependency.database.outputs.airflow_database_name}"
@@ -90,6 +93,8 @@ inputs = {
   SCW_DEFAULT_ORGANIZATION_ID         = "[SCW_DEFAULT_ORGANIZATION_ID]"
   SCW_DEFAULT_PROJECT_ID              = "[SCW_DEFAULT_PROJECT_ID]"
   SCW_SECRET_KEY                      = "[SCW_SECRET_KEY]"
+  ML_DEDUPLICATION_SSH_KEY_B64        = "[ML_DEDUPLICATION_SSH_KEY_B64]"
+  ML_DEDUPLICATION_SSH_PUB_KEY        = "[ML_DEDUPLICATION_SSH_PUB_KEY]"
   SECRET_KEY                          = "[SECRET_KEY]"
   MATTERMOST_WEBHOOK_URL              = "[MATTERMOST_WEBHOOK_URL]"
   POSTHOG_PERSONAL_API_KEY            = "[POSTHOG_PERSONAL_API_KEY]"

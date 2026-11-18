@@ -46,6 +46,51 @@ resource "scaleway_rdb_privilege" "webapp_metabase_privilege" {
   permission    = "readonly"
 }
 
+# Scaleway readonly only covers objects that exist at apply time.
+# ALTER DEFAULT PRIVILEGES grants SELECT on those too.
+
+locals {
+  grant_metabase_default_privileges_enabled = var.grant_metabase_default_privileges_script_path != null
+  grant_metabase_default_privileges_script_sha256 = (local.grant_metabase_default_privileges_enabled
+    ? filesha256(var.grant_metabase_default_privileges_script_path)
+    : null
+  )
+  webapp_metabase_db_password_sha256 = nonsensitive(sha256(var.webapp_db_metabase_password))
+}
+
+resource "null_resource" "grant_webapp_metabase_default_privileges" {
+  count = local.grant_metabase_default_privileges_enabled ? 1 : 0
+
+  depends_on = [
+    scaleway_rdb_privilege.webapp_privilege,
+    scaleway_rdb_privilege.webapp_metabase_privilege,
+  ]
+
+  provisioner "local-exec" {
+    # Passwords go through env vars: putting them in the URL or inline would
+    # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
+    environment = {
+      PGPASSWORD = var.webapp_db_password
+    }
+    command = <<-EOT
+      psql -v ON_ERROR_STOP=1 \
+        "postgresql://${var.webapp_db_username}@${scaleway_rdb_instance.webapp.load_balancer.0.ip}:${scaleway_rdb_instance.webapp.load_balancer.0.port}/${scaleway_rdb_database.webapp.name}?sslmode=require" \
+        -v owner_user='${var.webapp_db_username}' \
+        -v metabase_user='${scaleway_rdb_user.webapp_metabase_user.name}' \
+        -f ${var.grant_metabase_default_privileges_script_path}
+    EOT
+  }
+
+  triggers = {
+    webapp_database_id                 = scaleway_rdb_database.webapp.id
+    script_sha256                      = local.grant_metabase_default_privileges_script_sha256
+    owner_user                         = var.webapp_db_username
+    metabase_user                      = scaleway_rdb_user.webapp_metabase_user.name
+    privilege_id                       = scaleway_rdb_privilege.webapp_metabase_privilege.id
+    webapp_metabase_db_password_sha256 = local.webapp_metabase_db_password_sha256
+  }
+}
+
 ## Warehouse
 
 resource "scaleway_rdb_instance" "warehouse" {
@@ -92,35 +137,44 @@ resource "scaleway_rdb_privilege" "warehouse_metabase_privilege" {
   permission    = "readonly"
 }
 
-## Airflow
+# Scaleway readonly only covers objects that exist at apply time.
+# ALTER DEFAULT PRIVILEGES grants SELECT on those too.
 
-resource "scaleway_rdb_instance" "airflow" {
-  name                      = "${var.prefix}-${var.environment}-airflow"
-  node_type                 = var.airflow_node_type
-  engine                    = "PostgreSQL-16"
-  is_ha_cluster             = true
-  disable_backup            = false
-  user_name                 = var.airflow_db_username
-  password                  = var.airflow_db_password
-  tags                      = ["${var.environment}", "postgresql", "airflow", "dbt"]
-  backup_schedule_frequency = 24
-  backup_schedule_retention = 7
-  backup_same_region        = false
-  volume_size_in_gb         = var.airflow_volume_size
-  volume_type               = "sbs_5k"
-  encryption_at_rest        = true
+locals {
+  warehouse_metabase_db_password_sha256 = nonsensitive(sha256(var.warehouse_db_metabase_password))
 }
 
-resource "scaleway_rdb_database" "airflow" {
-  instance_id = scaleway_rdb_instance.airflow.id
-  name        = var.airflow_db_name
-}
+resource "null_resource" "grant_warehouse_metabase_default_privileges" {
+  count = local.grant_metabase_default_privileges_enabled ? 1 : 0
 
-resource "scaleway_rdb_privilege" "airflow_privilege" {
-  instance_id   = scaleway_rdb_instance.airflow.id
-  user_name     = var.airflow_db_username
-  database_name = scaleway_rdb_database.airflow.name
-  permission    = "all"
+  depends_on = [
+    scaleway_rdb_privilege.warehouse_privilege,
+    scaleway_rdb_privilege.warehouse_metabase_privilege,
+  ]
+
+  provisioner "local-exec" {
+    # Passwords go through env vars: putting them in the URL or inline would
+    # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
+    environment = {
+      PGPASSWORD = var.warehouse_db_password
+    }
+    command = <<-EOT
+      psql -v ON_ERROR_STOP=1 \
+        "postgresql://${var.warehouse_db_username}@${scaleway_rdb_instance.warehouse.load_balancer.0.ip}:${scaleway_rdb_instance.warehouse.load_balancer.0.port}/${scaleway_rdb_database.warehouse_database.name}?sslmode=require" \
+        -v owner_user='${var.warehouse_db_username}' \
+        -v metabase_user='${scaleway_rdb_user.warehouse_metabase_user.name}' \
+        -f ${var.grant_metabase_default_privileges_script_path}
+    EOT
+  }
+
+  triggers = {
+    warehouse_database_id                 = scaleway_rdb_database.warehouse_database.id
+    script_sha256                         = local.grant_metabase_default_privileges_script_sha256
+    owner_user                            = var.warehouse_db_username
+    metabase_user                         = scaleway_rdb_user.warehouse_metabase_user.name
+    privilege_id                          = scaleway_rdb_privilege.warehouse_metabase_privilege.id
+    warehouse_metabase_db_password_sha256 = local.warehouse_metabase_db_password_sha256
+  }
 }
 
 ## Airflow DB on warehouse instance

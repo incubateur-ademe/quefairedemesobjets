@@ -17,7 +17,7 @@ from core.validators import EmptyEmailValidator
 from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.gis.db import models
-from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.db.models.functions import Distance, GeometryDistance
 from django.contrib.gis.geos import Point, Polygon
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.measure import D
@@ -32,6 +32,7 @@ from django.db.models import (
     Min,
     OuterRef,
     Q,
+    Subquery,
     Value,
     When,
 )
@@ -304,6 +305,55 @@ class LabelQualite(CodeAsNaturalKeyModel):
         return self.libelle
 
 
+MAX_PLACES_ON_MAP = 20
+
+OFFERS_CACHE_TTL = 60 * 60 * 12
+
+GEOGRAPHIC_SCAN_THRESHOLD = 1_000
+
+_MISSING = object()
+
+
+def acteur_ids_offering(groupe_action_codes, sous_categorie_ids) -> list[str] | None:
+    """Ids of the acteurs offering one of these gestes for this objet, France-wide,
+    or `None` when they are too many to be worth listing.
+
+    A rare geste/objet pair would otherwise make the geographic scan walk every
+    acteur looking for almost no result; a common one finds its places nearby.
+    """
+    codes = ",".join(sorted(groupe_action_codes))
+    key = (
+        f"acteur_ids_offering:{codes}:{','.join(map(str, sorted(sous_categorie_ids)))}"
+    )
+    # `None` is a cached answer ("too many"): a miss needs its own sentinel.
+    ids = cache.get(key, _MISSING)
+    if ids is _MISSING:
+        propositions = DisplayedPropositionService.objects.filter(
+            action__groupe_action__code__in=groupe_action_codes,
+            sous_categories__in=sous_categorie_ids,
+        )
+        found = list(
+            propositions.values_list("acteur_id", flat=True).distinct()[
+                : GEOGRAPHIC_SCAN_THRESHOLD + 1
+            ]
+        )
+        ids = None if len(found) > GEOGRAPHIC_SCAN_THRESHOLD else found
+        cache.set(key, ids, OFFERS_CACHE_TTL)
+    return ids
+
+
+def _offers(groupe_action_codes, sous_categorie_ids):
+    """Propositions of the outer acteur for one of these gestes, for the objet
+    when given: the geste and the objet on the same proposition."""
+    propositions = DisplayedPropositionService.objects.filter(
+        acteur=OuterRef("pk"),
+        action__groupe_action__code__in=groupe_action_codes,
+    )
+    if sous_categorie_ids:
+        propositions = propositions.filter(sous_categories__in=sous_categorie_ids)
+    return propositions
+
+
 class DisplayedActeurQuerySet(models.QuerySet):
     def with_reparer(self):
         proposition_service_reparer = DisplayedPropositionService.objects.filter(
@@ -316,6 +366,23 @@ class DisplayedActeurQuerySet(models.QuerySet):
             displayedacteur=OuterRef("pk"), bonus=True
         )
         return self.annotate(bonus=Exists(bonus_label_qualite))
+
+    def with_geste(self, groupe_action_codes, sous_categorie_ids=None):
+        """`geste`: the first of these gestes, in display order, the acteur
+        offers, for the objet when given, matched as in `proposing`.
+
+        A correlated subquery in the same query, which Postgres evaluates for the
+        rows kept by the LIMIT only; none for a single geste, which every acteur
+        `proposing` it offers.
+        """
+        if len(groupe_action_codes) == 1:
+            return self.annotate(geste=Value(groupe_action_codes[0]))
+        first_offered = (
+            _offers(groupe_action_codes, sous_categorie_ids)
+            .order_by("action__groupe_action__order")
+            .values("action__groupe_action__code")[:1]
+        )
+        return self.annotate(geste=Subquery(first_offered))
 
     def with_displayable_labels(self):
         """
@@ -394,6 +461,68 @@ class DisplayedActeurQuerySet(models.QuerySet):
             )
             .annotate(distance=Distance("location", reference_point))
             .order_by("distance")
+        )
+
+    def proposing(self, groupe_action_codes, sous_categorie_ids=None):
+        """Acteurs offering one of these gestes (GroupeAction codes), optionally
+        for a given objet.
+
+        The geste and the objet are matched on the same proposition: a bike
+        repairer that also takes furniture donations is not a furniture
+        repairer. EXISTS rather than a join, so an acteur with several matching
+        propositions is listed once.
+        """
+        codes = (
+            [groupe_action_codes]
+            if isinstance(groupe_action_codes, str)
+            else list(groupe_action_codes)
+        )
+        if sous_categorie_ids:
+            ids = acteur_ids_offering(codes, sous_categorie_ids)
+            if ids is not None:
+                return self.filter(identifiant_unique__in=ids)
+
+        return self.filter(Exists(_offers(codes, sous_categorie_ids)))
+
+    def nearest_to(self, longitude, latitude):
+        """Physical acteurs sorted from nearest to farthest.
+
+        `GeometryDistance` (KNN operator `<->`) walks the GiST index in distance
+        order and stops at the LIMIT; `Distance` would compute every distance
+        then sort. Its value is for sorting only: annotate `Distance` to show
+        one. No `ST_DWithin` bound: it would prevent the ordered index scan.
+        """
+        reference_point = Point(float(longitude), float(latitude), srid=4326)
+        return self.physical().order_by(GeometryDistance("location", reference_point))
+
+    def within(self, bbox):
+        """Acteurs of the visible area, from nearest to its center to farthest.
+
+        `bboverlaps` (`&&`) rather than `within`, which ignores the GiST index on
+        a geography column; for points the result is the same.
+        """
+        area = Polygon.from_bbox(bbox)
+        area.srid = 4326
+        center = Point((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2, srid=4326)
+        return (
+            self.physical()
+            .filter(location__bboverlaps=area)
+            .order_by(GeometryDistance("location", center))
+        )
+
+    def for_the_map(self, limit: int = MAX_PLACES_ON_MAP):
+        # `location` is nullable and `NULL <-> point` sorts last: with few
+        # candidates, unlocated acteurs would pad the result and break
+        # `as_geojson_feature`.
+        return self.filter(location__isnull=False).with_bonus()[:limit]
+
+    def for_the_detail(self):
+        """A place and everything its page shows, without cascading queries."""
+        return self.select_related("acteur_type").prefetch_related(
+            "labels",
+            "sources",
+            "proposition_services__action__groupe_action",
+            "proposition_services__sous_categories",
         )
 
 
@@ -1528,6 +1657,22 @@ class DisplayedActeur(FinalActeur, LatLngPropertiesMixin):
         return not self.is_digital and bool(
             self.adresse or self.adresse_complement or self.code_postal or self.ville
         )
+
+    def as_geojson_feature(self) -> dict:
+        """GeoJSON representation of the place for the map."""
+        return {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [self.location.x, self.location.y],
+            },
+            "properties": {
+                "uuid": self.uuid,
+                "nom": self.nom_commercial or self.nom,
+                "bonus": getattr(self, "bonus", False),
+                "geste": getattr(self, "geste", None),
+            },
+        }
 
 
 class DisplayedPerimetreADomicile(BasePerimetreADomicile):

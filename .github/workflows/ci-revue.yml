@@ -1,0 +1,95 @@
+name: 🧐 Revue
+
+on:
+  workflow_call:
+    inputs:
+      code:
+        description: "Run the jobs that only depend on the revue code"
+        required: false
+        type: boolean
+        default: true
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  UV_PROJECT_ENVIRONMENT: .venv
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  CI: true
+
+jobs:
+  lint:
+    name: 📝 Lint + format + typecheck TS
+    if: ${{ inputs.code }}
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: webapp/revue-front
+
+      - name: Check code formatting
+        run: npm run format:check
+        working-directory: webapp/revue-front
+
+      - name: Lint
+        run: npm run lint
+        working-directory: webapp/revue-front
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: webapp/revue-front
+
+  api-types:
+    name: 📝 API types up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Django (GeoDjango) is loaded to export the OpenAPI schema
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
+
+      - name: Regenerate the OpenAPI schema and the TypeScript types
+        run: npm run api:types
+        working-directory: webapp/revue-front
+
+      - name: Fail if the committed types are outdated
+        run: git diff --exit-code -- webapp/revue-front/src/api
+
+  tests:
+    name: ✅ TS tests + build
+    if: ${{ inputs.code }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: webapp/revue-front
+
+      - name: Run tests
+        run: npm run test
+        working-directory: webapp/revue-front
+
+      - name: Build
+        run: npm run build
+        working-directory: webapp/revue-front
+
+# Address actions/missing-workflow-permissions rule in
+# code scanning alerts
+permissions:
+  contents: read

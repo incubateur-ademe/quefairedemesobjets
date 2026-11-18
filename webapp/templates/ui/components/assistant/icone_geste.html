@@ -1,0 +1,4 @@
+{% comment %}Decorative unless `titre` is given.{% endcomment %}
+<span class="qfa-icone-geste"
+      data-geste="{{ geste }}"
+      {% if titre %}role="img" aria-label="{{ titre }}"{% else %}aria-hidden="true"{% endif %}></span>

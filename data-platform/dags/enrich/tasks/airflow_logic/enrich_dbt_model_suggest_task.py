@@ -51,6 +51,7 @@ def enrich_dbt_model_suggest_wrapper(
         cohort=cohort,
         identifiant_action=dag.dag_id,
         dry_run=config.dry_run,
+        use_legacy_suggestions=config.use_legacy_suggestions,
     )
     if not suggestions_written:
         raise AirflowSkipException("Pas de suggestions écrites")

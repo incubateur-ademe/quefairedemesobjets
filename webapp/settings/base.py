@@ -68,6 +68,11 @@ ASSISTANT = {
         default="phc_fSfhoWDOUxZdKWty16Z3XfRiAoWd1qdJK0N0z9kQHJr",  # pragma: allowlist secret  # noqa: E501
         cast=str,
     ),
+    # A page of the assistant opened outside an iframe redirects to its fiche on
+    # the site. Off in tests, or when this variable turns it off explicitly.
+    "V2_STANDALONE_REDIRECT": decouple.config(
+        "ASSISTANT_V2_STANDALONE_REDIRECT", default=True, cast=bool
+    ),
 }
 
 # Carte settings
@@ -130,7 +135,7 @@ VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
 BASE_URL = decouple.config(
     "BASE_URL",
-    default="http://quefairedemesdechets.ademe.local",
+    default="https://quefairedemesdechets.ademe.local",
     cast=str,
 )
 BASE_HOST = urlparse(BASE_URL).hostname
@@ -149,7 +154,8 @@ if urlparse(BASE_URL).scheme == "https":
 # Application definition
 # ----------------------
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    # django.contrib.admin with a custom default site (see core/admin_site.py)
+    "core.admin_site.QfdmoAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -171,6 +177,8 @@ INSTALLED_APPS = [
     "qfdmd",
     "qfdmo",
     "infotri",
+    "assistant",
+    "opendata",
     "data",
     "adminsortable2",
     "corsheaders",
@@ -178,6 +186,8 @@ INSTALLED_APPS = [
     "djangoql",
     "django_tasks",
     "django_tasks_db",
+    # Only for the export_openapi_schema management command
+    "ninja",
 ]
 
 
@@ -202,6 +212,7 @@ MIDDLEWARE = [
     "qfdmd.middleware.BetaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "assistant.middleware.IframeOnlyMiddleware",
 ]
 
 CACHES = {
@@ -543,7 +554,8 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Also rewrites references to Parcel chunks: see core/storage.py.
+        "BACKEND": "core.storage.ParcelManifestStaticFilesStorage",
     },
 }
 
@@ -599,12 +611,29 @@ WAGTAILADMIN_BASE_URL = BASE_URL
 WAGTAIL_AUTOSAVE_INTERVAL = 0
 # increase ping delay : 30s
 WAGTAIL_EDITING_SESSION_PING_INTERVAL = 30000
+# Autocomplete display thresholds, see search/ranking.py.
+# Raw similarity decides *whether* a result is shown, score decides *where*.
+SEARCH_DISPLAY_THRESHOLDS = {
+    # Below this raw similarity, a result is never shown.
+    "RAW_SIMILARITY_MINIMUM": decouple.config(
+        "SEARCH_RAW_SIMILARITY_MINIMUM", default=0.5, cast=float
+    ),
+    # At or above this raw similarity, a result is always shown.
+    "RAW_SIMILARITY_SUFFICIENT": decouple.config(
+        "SEARCH_RAW_SIMILARITY_SUFFICIENT", default=0.75, cast=float
+    ),
+    # Between the two, the result needs at least this score to be shown.
+    "SCORE_MINIMUM": decouple.config("SEARCH_SCORE_MINIMUM", default=1.2, cast=float),
+}
 MODELSEARCH_BACKENDS = {
     "default": {
         "BACKEND": "modelsearch.backends.database",
         "SEARCH_CONFIG": "wagtail_french",
         "FUZZY_ALGORITHM": "trigram",
-        "FUZZY_SIMILARITY_THRESHOLD": 0.2,
+        # The backend applies the coarse cut in SQL, ranking.py the rest.
+        "FUZZY_SIMILARITY_THRESHOLD": SEARCH_DISPLAY_THRESHOLDS[
+            "RAW_SIMILARITY_MINIMUM"
+        ],
         "FUZZY_PREFIX_BOOST": 0.5,
     }
 }

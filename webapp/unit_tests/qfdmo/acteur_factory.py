@@ -3,7 +3,7 @@ import string
 
 import factory.fuzzy
 from django.contrib.gis.geos import Point
-from factory import Faker, LazyFunction, SubFactory
+from factory import Faker, LazyFunction, SelfAttribute, SubFactory
 from factory.django import DjangoModelFactory as Factory
 from qfdmo.models import (
     Acteur,
@@ -45,7 +45,8 @@ class LabelQualiteFactory(Factory):
         model = LabelQualite
         django_get_or_create = ("code",)
 
-    libelle = Faker("word")
+    # Unique in the database, unlike Faker's words.
+    libelle = SelfAttribute("code")
     code = LazyFunction(generate_random_word)
     afficher = True
 

@@ -1,0 +1,85 @@
+name: Pytest job
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Python project directory (webapp or data-platform)"
+        required: false
+        type: string
+        default: "webapp"
+      make-target:
+        description: "Make target to run (e.g. unit-test, integration-test, dags-test)"
+        required: true
+        type: string
+      check-migrations:
+        description: "Whether to check for missing migrations (webapp only)"
+        required: false
+        type: boolean
+        default: false
+      display-name:
+        description: "Name of the job in the Actions sidebar"
+        required: true
+        type: string
+
+env:
+  PGHOST: localhost
+  PGPORT: 5432
+  PGUSER: webapp
+  PGPASSWORD: webapp # pragma: allowlist secret
+  PGDATABASE: webapp
+  BASE_URL: http://localhost:8000
+  DATABASE_URL: "postgres://webapp:webapp@localhost:5432/webapp" # pragma: allowlist secret
+  SECRET_KEY: coucou # pragma: allowlist secret
+  DJANGO_SETTINGS_MODULE: settings.test
+  CI: true
+  UV_PROJECT_ENVIRONMENT: .venv
+
+jobs:
+  run:
+    name: ${{ inputs.display-name }}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3-alpine
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 50
+          --tmpfs /var/lib/postgresql/data
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
+          POSTGRES_DB: webapp
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install GIS packages
+        uses: ./.github/actions/install-gis
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python
+        with:
+          # --all-packages: root depends only on webapp for Scalingo; data-platform tests need the other member too
+          uv-groups: "--all-packages --group dev"
+
+      - name: Prepare test databases
+        uses: ./.github/actions/prepare-test-databases
+
+      - name: Run tests
+        run: make -C ${{ inputs.working-directory }} ${{ inputs.make-target }}
+        env:
+          # As many workers as prepare-test-databases clones, and -n auto only sees 2.
+          # loadfile keeps a file together, so its fixtures load on a single worker.
+          PYTEST_ADDOPTS: --reuse-db -n 4 --dist loadfile
+
+      - name: Check for missing migrations
+        if: inputs.check-migrations && inputs.working-directory == 'webapp'
+        working-directory: webapp
+        run: uv run python manage.py makemigrations --check --no-input --settings=${{ env.DJANGO_SETTINGS_MODULE }}
+
+permissions:
+  contents: read

@@ -135,6 +135,24 @@ variable "SCW_SECRET_KEY" {
   type      = string
   sensitive = true
 }
+variable "SCW_SECRET_KEY_INFRA" {
+  type      = string
+  sensitive = true
+}
+variable "SCW_ACCESS_KEY_INFRA" {
+  type      = string
+  sensitive = true
+}
+variable "ML_DEDUPLICATION_SSH_KEY_B64" {
+  description = "Private SSH key (base64-encoded) used to SSH into the on-demand ml-deduplication inference instance. Decoded to a temp file at runtime by the provisioning scripts."
+  type        = string
+  sensitive   = true
+}
+variable "ML_DEDUPLICATION_SSH_PUB_KEY" {
+  description = "Public SSH key string injected into the on-demand ml-deduplication inference instance (via server tag / cloud-init) so the scheduler can SSH in."
+  type        = string
+  sensitive   = false
+}
 variable "SECRET_KEY" {
   type      = string
   sensitive = true
@@ -180,4 +198,11 @@ variable "POSTHOG_PERSONAL_API_KEY" {
   description = "Clé API personnelle PostHog (requêtes HogQL depuis les DAGs)"
   type        = string
   sensitive   = true
+}
+
+variable "custom_domain" {
+  description = "Public hostname served by the nginx gateway (e.g. airflow.preprod.quefairedemesobjets.ademe.fr). Used for Airflow BASE_URL. Null or empty keeps the Scaleway-generated domain in generated links."
+  type        = string
+  default     = null
+  nullable    = true
 }

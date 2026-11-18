@@ -299,8 +299,10 @@ export default class AutocompleteController extends ClickOutsideController<HTMLE
     ).getBoundingClientRect()
     const margin = AutocompleteController.#LISTBOX_BOTTOM_MARGIN_PX
     const frameTop = this.resultsTarget.getBoundingClientRect().top
-    const bodyBottom = document.documentElement.getBoundingClientRect().height
-    const available = computeAvailableHeight(frameTop, bodyBottom, margin)
+    // The listbox must scroll internally rather than extend below the
+    // visible area, so the limit is the viewport, not the document.
+    const viewportHeight = document.documentElement.clientHeight
+    const available = computeAvailableHeight(frameTop, viewportHeight, margin)
     this.resultsTarget.style.maxHeight = `${available}px`
   }
 

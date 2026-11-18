@@ -19,7 +19,7 @@ from sources.tasks.transform.exceptions import (
     RepriseWarning,
     SirenWarning,
     SiretWarning,
-    SousCategorieCodesError,
+    SousCategorieCodesWarning,
     UrlWarning,
 )
 from sources.tasks.transform.formatter import format_libelle_to_code
@@ -188,6 +188,32 @@ def clean_public_accueilli(value, _):
     )
 
 
+def clean_public_accueilli_sinoe_libelle_type_service(value, _):
+    from utils.django import django_setup_full
+
+    django_setup_full()
+
+    from qfdmo.models.acteur import ActeurPublicAccueilli
+
+    if not value or (isinstance(value, float) and pd.isna(value)):
+        return ActeurPublicAccueilli.UNKNOWN.value
+
+    values_mapping = {
+        "decheterie": ActeurPublicAccueilli.UNKNOWN.value,
+        "decheterie professionnelle": ActeurPublicAccueilli.PROFESSIONNELS.value,
+        "plateforme d'apports de dechets verts": (ActeurPublicAccueilli.UNKNOWN.value),
+        "centre d'apport volontaire": ActeurPublicAccueilli.UNKNOWN.value,
+    }
+    normalized = format_libelle_to_code(str(value))
+    if normalized not in values_mapping:
+        raise PublicAccueilliWarning(
+            "Public accueilli SINOE (libelle_type_service) "
+            f"`{value}` not found in mapping : {values_mapping.keys()}"
+        )
+
+    return values_mapping[normalized]
+
+
 def clean_reprise(value, _):
     from qfdmo.models.acteur import ActeurReprise
 
@@ -281,14 +307,22 @@ def clean_sous_categorie_codes(
     if isinstance(sscat_list, str):
         sscat_list = sscat_list.split("|")
     if not isinstance(sscat_list, list):
-        raise SousCategorieCodesError(
+        raise SousCategorieCodesWarning(
             f"Impossible d'interpréter les sous-catégories: {sscat_list}"
         )
 
     product_mapping = dag_config.product_mapping
+    errors = []
     for sscat in sscat_list:
         sscat = sscat.strip().lower()
         if not sscat:
+            continue
+        if sscat not in product_mapping:
+            logger.warning(
+                f"Sous-catégorie absente du mapping : `{sscat}`"
+                f" (valeur source : {sscat_list})"
+            )
+            errors.append(f"Impossible d'interpréter la sous-catégorie: {sscat}")
             continue
         sscat = product_mapping[sscat]
         if isinstance(sscat, str):
@@ -296,9 +330,11 @@ def clean_sous_categorie_codes(
         elif isinstance(sscat, list):
             sous_categorie_codes.extend(sscat)
         else:
-            raise SousCategorieCodesError(
-                f"Impossible d'interpréter la sous-catégorie: {sscat}"
-            )
+            errors.append(f"Impossible d'interpréter la sous-catégorie: {sscat}")
+            continue
+
+    if errors:
+        raise SousCategorieCodesWarning(", ".join(errors))
 
     return list(set(sous_categorie_codes))
 

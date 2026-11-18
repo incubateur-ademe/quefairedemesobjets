@@ -33,7 +33,7 @@ def enrich_siret_siren_to_suggestion_groupes(
     suggest_action: str,
     suggest_field: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
 ) -> bool:
     """Write 1 SuggestionGroupe per `suggest_field` value and 1
     SuggestionUnitaire per acteur, suggesting `suggest_field`."""
@@ -135,7 +135,7 @@ def enrich_siret_siren_suggest(
     suggest_action: str,
     suggest_field: str,
     identifiant_action: str,
-    dry_run: bool = True,
+    dry_run: bool = False,
 ) -> bool:
     """Reads a DBT model and generates grouped suggestions for it"""
     df = enrich_dbt_model_read(dbt_model_name)

@@ -17,7 +17,7 @@ variable "metabase_registry_image" {
 variable "tag_docker" {
   description = "Tag Docker de l'image Metabase"
   type        = string
-  default     = "v0.63.17.x"
+  default     = "v0.64.4.x"
 }
 
 variable "metabase_cpu_limit" {
@@ -67,4 +67,11 @@ variable "MB_LOAD_SAMPLE_CONTENT" {
   description = "Chargement du contenu d'exemple de Metabase"
   type        = string
   default     = "false"
+}
+
+variable "custom_domain" {
+  description = "Public hostname served by the nginx gateway (e.g. metabase.quefairedemesobjets.ademe.fr). Used for MB_SITE_URL. Null or empty keeps the Scaleway-generated domain in generated links."
+  type        = string
+  default     = null
+  nullable    = true
 }

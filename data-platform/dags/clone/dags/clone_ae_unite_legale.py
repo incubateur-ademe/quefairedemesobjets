@@ -24,7 +24,6 @@ with DAG(
         "Clone la table 'unite_legale' de l'Annuaire Entreprises (AE) dans notre DB"
     ),
     tags=[
-        TAGS.ENRICH,
         TAGS.CLONE,
         TAGS.ANNAIRE_ENTREPRISE,
         TAGS.UNITE_LEGALE,

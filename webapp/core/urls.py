@@ -22,7 +22,7 @@ from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 from sites_conformes.content_manager.urls import urlpatterns as sites_conformes_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap
@@ -31,7 +31,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from qfdmd.models import Synonyme
 
-from .api import api
+from .api import api, api_v1
 from .views import AutocompleteSynonyme, backlink, healthz, robots_txt
 
 info_dict = {
@@ -82,14 +82,30 @@ urlpatterns = (
     + sitemap_urlpatterns
     + [
         path("admin/", admin.site.urls),
+        # Before "api/": Django would otherwise try "v1/…" inside the old API.
+        path("api/v1/", api_v1.urls),
         path("api/", api.urls),
         path("healthz/", healthz),
         path("robots.txt", robots_txt),
         path("embed/backlink", backlink),
         path("", include(("qfdmo.urls", "qfdmo"), namespace="qfdmo")),
         path("", include(("qfdmd.urls", "qfdmd"), namespace="qfdmd")),
+        # Must stay before "data/": the review screen owns every path below it
+        path("data/revue/", include("data.revue.urls", namespace="revue")),
         path("data/", include(("data.urls", "data"), namespace="data")),
         path("infotri/", include(("infotri.urls", "infotri"), namespace="infotri")),
+        path(
+            "assistant/",
+            include(("assistant.urls", "assistant"), namespace="assistant"),
+        ),
+        # nginx proxies these tiles (servers.conf.erb); without it (runserver,
+        # e2e) they come straight from IGN.
+        path(
+            "tuiles/plan-ign/<path:tuile>",
+            RedirectView.as_view(
+                url="https://data.geopf.fr/tms/1.0.0/PLAN.IGN/%(tuile)s"
+            ),
+        ),
         path(
             "docs/",
             TemplateView.as_view(template_name="techdocs.html"),

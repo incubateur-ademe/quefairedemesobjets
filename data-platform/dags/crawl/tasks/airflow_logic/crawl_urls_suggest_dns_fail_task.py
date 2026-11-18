@@ -33,8 +33,8 @@ def crawl_urls_suggest_dns_fail_wrapper(ti, params, dag, run_id) -> None:
         df=xcom_pull(ti, XCOMS.DF_DNS_FAIL, skip_if_empty=True),
         dag_display_name=dag.dag_display_name,
         run_id=run_id,
-        dry_run=params.get("dry_run", True),
-        use_legacy_suggestions=params.get("use_legacy_suggestions", True),
+        dry_run=params.get("dry_run", False),
+        use_legacy_suggestions=params.get("use_legacy_suggestions", False),
     )
 
 

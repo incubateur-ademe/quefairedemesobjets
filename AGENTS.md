@@ -124,6 +124,7 @@ Use English in code and technical markdown. Details: [docs/reference/coding/READ
 - **Lint:** Ruff (`webapp/pyproject.toml` and `data-platform/pyproject.toml`)
 - **Format:** Black, line-length 88
 - Type hints when relevant
+- Imports: Organized according to Django conventions (stdlib, third-party, local). Import the symbols you use directly (`from package.module import func`), not the module for qualified access (`import module` then `module.func`).
 - Tests: pytest; webapp uses pytest-django (`settings.test`)
 - Language rules: [docs/reference/coding/README.md](./docs/reference/coding/README.md)
 

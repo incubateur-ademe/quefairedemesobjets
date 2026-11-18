@@ -207,8 +207,8 @@ def crawl_urls_suggest(
     df: pd.DataFrame,
     dag_display_name: str,
     run_id: str,
-    dry_run: bool = True,
-    use_legacy_suggestions: bool = True,
+    dry_run: bool = False,
+    use_legacy_suggestions: bool = False,
 ) -> int:
     """Main function to generate suggestions for URLs"""
     if df_none_or_empty(df):

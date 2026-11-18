@@ -17,6 +17,11 @@ on:
       image_tag:
         required: false
         type: string
+      source_tag:
+        description: "Existing image tag to reuse instead of building"
+        required: false
+        type: string
+        default: ""
       environment:
         required: true
         type: string
@@ -26,9 +31,41 @@ env:
   SCALEWAY_NAMESPACE: ns-qfdmo
 
 jobs:
-  build-and-push-image:
-    name: 🐳 Build and push Docker images
+  reuse-images:
+    name: ♻️ Reuse existing images
+    if: ${{ inputs.source_tag != '' }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    outputs:
+      reused: ${{ steps.retag.outputs.reused }}
+    steps:
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6
+        with:
+          registry: ${{ env.SCALEWAY_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      # A missing image stops here, and the next job builds all of them.
+      - name: Tag the existing images
+        id: retag
+        env:
+          SOURCE_TAG: ${{ inputs.source_tag }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          images="$SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE"
+          for image in airflow-scheduler airflow-webserver airflow-dag-processor; do
+            docker buildx imagetools create --tag "$images/$image:$IMAGE_TAG" "$images/$image:$SOURCE_TAG" || exit 0
+          done
+          echo "reused=true" >> "$GITHUB_OUTPUT"
+
+  build-and-push-image:
+    name: 🐳 Build and push Airflow images
+    runs-on: ubuntu-latest
+    needs: reuse-images
+    if: ${{ !cancelled() && needs.reuse-images.outputs.reused != 'true' }}
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
@@ -38,13 +75,20 @@ jobs:
 
       # https://github.com/docker/login-action
       - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
         with:
           registry: ${{ env.SCALEWAY_REGISTRY }}
           username: nologin
           password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
 
-      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e
+      - uses: docker/setup-buildx-action@594f3bf4285d9ea8dc53c9a0c9c4092420091003
+
+      - name: Extract Airflow version from pyproject.toml
+        id: airflow-version
+        run: |
+          version=$(sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Airflow version: $version"
 
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
@@ -56,15 +100,22 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-scheduler)"
         id: build-and-push-scheduler
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
           cache-from: type=gha,scope=scheduler
           cache-to: type=gha,scope=scheduler,mode=max
-          push: true
+          load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-scheduler.Dockerfile
+          build-args: |
+            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan and push (airflow-scheduler)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-scheduler
 
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
         id: airflow_webserver_meta_scaleway
@@ -74,15 +125,22 @@ jobs:
 
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-webserver)"
         id: build-and-push-webserver
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
           cache-from: type=gha,scope=webserver
           cache-to: type=gha,scope=webserver,mode=max
-          push: true
+          load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-webserver.Dockerfile
+          build-args: |
+            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan and push (airflow-webserver)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-webserver
 
       # https://github.com/docker/metadata-action
       - name: "[🟣 Scaleway] Extract metadata (tags, labels) for Docker"
@@ -94,12 +152,19 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: "[🟣 Scaleway] Build and push Docker image (airflow-dag-processor)"
         id: build-and-push-dag-processor
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
           cache-from: type=gha,scope=dag-processor
           cache-to: type=gha,scope=dag-processor,mode=max
-          push: true
+          load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-dag-processor', inputs.image_tag) || steps.airflow_dag-processor_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-dag-processor.Dockerfile
+          build-args: |
+            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+
+      - name: 🔍 Trivy scan and push (airflow-dag-processor)
+        uses: ./.github/actions/trivy-scan-and-push
+        with:
+          repository: ${{ env.SCALEWAY_REGISTRY }}/${{ env.SCALEWAY_NAMESPACE }}/airflow-dag-processor

@@ -1,3 +1,7 @@
+locals {
+  custom_domain_enabled = var.custom_domain != null && var.custom_domain != ""
+}
+
 resource "scaleway_container" "metabase" {
   name           = "${var.prefix}-metabase"
   tags           = [var.environment, var.prefix, "metabase"]
@@ -18,9 +22,9 @@ resource "scaleway_container" "metabase" {
     http {
       path = "/api/health"
     }
-    failure_threshold = 20
-    interval          = "10s"
-    timeout           = "5s"
+    failure_threshold = 30
+    interval          = "30s"
+    timeout           = "10s"
   }
 
   liveness_probe {
@@ -32,17 +36,23 @@ resource "scaleway_container" "metabase" {
     timeout           = "10s"
   }
 
-  environment_variables = {
-    ENVIRONMENT            = var.environment
-    MB_DB_TYPE             = "postgres"
-    MB_JETTY_PORT          = "3000"
-    MB_SITE_NAME           = var.MB_SITE_NAME
-    MB_LOAD_SAMPLE_CONTENT = var.MB_LOAD_SAMPLE_CONTENT
-    JAVA_TOOL_OPTIONS      = "-XX:MaxRAMPercentage=75.0"
-  }
+  environment_variables = merge(
+    {
+      ENVIRONMENT            = var.environment
+      MB_DB_TYPE             = "postgres"
+      MB_JETTY_PORT          = "3000"
+      MB_SITE_NAME           = var.MB_SITE_NAME
+      MB_LOAD_SAMPLE_CONTENT = var.MB_LOAD_SAMPLE_CONTENT
+      JAVA_TOOL_OPTIONS      = "-XX:MaxRAMPercentage=75.0"
+    },
+    local.custom_domain_enabled ? {
+      MB_SITE_URL = "https://${var.custom_domain}"
+    } : {},
+  )
 
   secret_environment_variables = {
     MB_DB_CONNECTION_URI     = var.MB_DB_CONNECTION_URI
     MB_ENCRYPTION_SECRET_KEY = var.MB_ENCRYPTION_SECRET_KEY
   }
 }
+
