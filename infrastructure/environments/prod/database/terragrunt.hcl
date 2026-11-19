@@ -36,4 +36,7 @@ inputs = {
   # From infrastructure/environments/airflowv3/database/, go up 4 levels to repo root.
   # create_remote_warehouse_in_webapp_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_warehouse_in_webapp.sql")
   # create_remote_webapp_in_warehouse_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_webapp_in_warehouse.sql")
+
+  # Default privileges of the read-only Metabase users
+  grant_metabase_default_privileges_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/grant_metabase_default_privileges.sql")
 }

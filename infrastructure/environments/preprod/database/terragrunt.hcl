@@ -12,7 +12,7 @@ inputs = {
   webapp_db_name              = "webapp"
   webapp_db_username          = "webapp"
   webapp_db_metabase_username = "webapp_metabase"
-  webapp_volume_size          = 20
+  webapp_volume_size          = 25
 
   # Warehouse
   warehouse_node_type            = "DB-PLAY2-NANO"
