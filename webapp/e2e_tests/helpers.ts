@@ -621,7 +621,7 @@ export async function openModal(
     parentTestId,
     buttonDataTestId,
     modalDataTestId,
-    modalContentSelector = `[data-testid="${modalDataTestId}"] .fr-modal__content h2`,
+    modalContentSelector = `[data-testid="${modalDataTestId}"] .fr-modal__content .fr-modal__title`,
     closeModal = true,
     timeout = TIMEOUT.DEFAULT,
   } = options
