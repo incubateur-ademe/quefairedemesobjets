@@ -37,26 +37,31 @@ def get_sharer_content(request, object, social_network=None):
         share_intro = ASSISTANT["partage"]["titre"]
         share_body = ASSISTANT["partage"]["corps"]
 
+    from qfdmd.models import AccessibilitySettings
+
+    a11y = AccessibilitySettings.load(request_or_site=request)
+    share = f"{a11y.share_label} {object}"
+
     share_intro = share_intro.format(**format_template)
     share_body = share_body.format(**format_template)
 
     template = {
         "url": url,
         "facebook": {
-            "title": f"partager {object} sur Facebook - {new_window}",
+            "title": f"{share} sur Facebook - {new_window}",
             "url": f"https://www.facebook.com/sharer.php?u={quoted_url}",
         },
         "twitter": {
-            "title": f"partager {object} sur X - {new_window}",
+            "title": f"{share} sur X - {new_window}",
             "url": f"https://twitter.com/intent/tweet?url={quoted_url}"
             f"&text={share_intro}&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe",
         },
         "linkedin": {
-            "title": f"partager {object} sur LinkedIn - {new_window}",
+            "title": f"{share} sur LinkedIn - {new_window}",
             "url": f"https://www.linkedin.com/shareArticle?url={quoted_url}&title={share_intro}",
         },
         "email": {
-            "title": f"partager {object} par email - {new_window}",
+            "title": f"{share} par email - {new_window}",
             "url": f"mailto:?subject={quote(share_intro)}&body={quote(share_body)}",
         },
     }

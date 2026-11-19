@@ -1,9 +1,12 @@
+import json
+
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.template.loader import render_to_string
 from django.test import RequestFactory
 
 from core.context_processors import global_context
+from core.templatetags.carte_tags import maplibre_locale
 from qfdmd.models import AccessibilitySettings
 
 
@@ -107,3 +110,51 @@ def test_carte_view_mode_nav_label_comes_from_settings():
     )
 
     assert 'aria-label="Choisir l&#x27;affichage"' in html
+
+
+@pytest.mark.django_db
+def test_maplibre_locale_comes_from_settings():
+    AccessibilitySettings.objects.create(
+        map_title="Plan", map_zoom_in="Agrandir", map_popup_close="Fermer"
+    )
+    request = RequestFactory().get("/")
+
+    locale = json.loads(maplibre_locale({"request": request}))
+
+    assert locale["Map.Title"] == "Plan"
+    assert locale["NavigationControl.ZoomIn"] == "Agrandir"
+    assert locale["Popup.Close"] == "Fermer"
+    assert locale["NavigationControl.ZoomOut"] == "Dézoomer"
+
+
+@pytest.mark.django_db
+def test_carte_fiche_labels_come_from_settings():
+    from core.templatetags.share_tags import get_sharer_content
+
+    AccessibilitySettings.objects.create(
+        acteur_close_label="Quitter la fiche",
+        acteur_tabs_label="Onglets du lieu",
+        share_label="diffuser",
+        new_window_mention="onglet neuf",
+        list_region_label="Résultats en liste",
+    )
+    request = RequestFactory().get("/")
+
+    assert 'aria-label="Résultats en liste"' in render_to_string(
+        "ui/components/carte/mode_liste.html", request=request
+    )
+    assert ">diffuser<" in render_to_string(
+        "ui/components/acteur/_action_share.html", request=request
+    )
+    assert 'aria-label="Onglets du lieu ' in render_to_string(
+        "ui/components/acteur/_tabs.html", {"adresse": "1 rue X"}, request=request
+    )
+    assert "Quitter la fiche" in render_to_string(
+        "ui/components/acteur/acteur_detail.html",
+        {"adresse": "1 rue X"},
+        request=request,
+    )
+
+    request.resolver_match = type("M", (), {"view_name": "qfdmd:home"})()
+    title = get_sharer_content(request, "Lieu", "facebook")["title"]
+    assert title == "diffuser Lieu sur Facebook - onglet neuf"

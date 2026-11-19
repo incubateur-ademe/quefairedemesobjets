@@ -13,6 +13,7 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css"
 import maplibreWorkerSource from "bundle-text:maplibre-gl/dist/maplibre-gl-worker.mjs"
 import MapController from "../controllers/carte/map_controller"
+import { MAPLIBRE_LOCALE_FR } from "./maplibre_locale"
 import type { Location } from "./types"
 
 // maplibre-gl v6 resolves its worker from import.meta.url, which parcel does not
@@ -42,12 +43,14 @@ export class SolutionMap {
     controller,
     initialZoom = DEFAULT_INITIAL_ZOOM,
     theme,
+    locale,
   }: {
     selector: HTMLDivElement
     location: Location
     controller: MapController
     initialZoom: number
     theme: string
+    locale?: Record<string, string>
   }) {
     this.#location = location
     this.#controller = controller
@@ -73,6 +76,7 @@ export class SolutionMap {
 
     this.map = new Map({
       container: selector,
+      locale: { ...MAPLIBRE_LOCALE_FR, ...locale },
       style: this.#useOsm ? osmStyle : mapStyles.desaturated,
       zoom: initialZoom,
       maxZoom: this.#useOsm ? DEFAULT_MAX_ZOOM : 18.9,

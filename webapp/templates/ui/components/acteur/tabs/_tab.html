@@ -1,8 +1,9 @@
 <li role="presentation">
     <button class="fr-tabs__tab fr-btn--sm fr-tabs__tab--noborder"
-        tabindex="0"
+        id="{{ map_container_id }}:{{ target }}Tab"
+        tabindex="{% if selected %}0{% else %}-1{% endif %}"
         role="tab"
-        aria-selected="true"
+        aria-selected="{% if selected %}true{% else %}false{% endif %}"
         aria-controls="{{ map_container_id }}:{{ target }}"
         type="button"
     >

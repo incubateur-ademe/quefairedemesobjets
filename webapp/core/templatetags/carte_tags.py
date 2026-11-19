@@ -19,6 +19,23 @@ VIEW_MODE_QUERY_PARAM = "view_mode-view"
 logger = logging.getLogger(__name__)
 
 
+@register.simple_tag(takes_context=True)
+def maplibre_locale(context):
+    from qfdmd.models import AccessibilitySettings
+
+    a11y = AccessibilitySettings.load(request_or_site=context.get("request"))
+    return json.dumps(
+        {
+            "AttributionControl.ToggleAttribution": a11y.map_attribution_toggle,
+            "AttributionControl.MapFeedback": a11y.map_feedback,
+            "Map.Title": a11y.map_title,
+            "NavigationControl.ZoomIn": a11y.map_zoom_in,
+            "NavigationControl.ZoomOut": a11y.map_zoom_out,
+            "Popup.Close": a11y.map_popup_close,
+        }
+    )
+
+
 @register.simple_tag
 def actions_for(dispayed_acteur: DisplayedActeur, direction):
     return dispayed_acteur.acteur_actions(direction=direction)
@@ -144,6 +161,7 @@ def acteur_pinpoint_tag(
         "latitude": acteur.latitude,
         "longitude": acteur.longitude,
         "href": acteur_url(context, acteur, with_map=False),
+        "libelle": getattr(acteur, "libelle", ""),
         "request": context.get("request"),
         MAP_CONTAINER_ID: context.get(MAP_CONTAINER_ID),
         "mask_id": mask_id,

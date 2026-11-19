@@ -1148,8 +1148,9 @@ class AccessibilitePreview(LookbookPreview):
         sur la carte, ne portent plus `tabindex="-1"` : ils sont à nouveau
         atteignables au clavier.
 
-        Pour rendre le tooltip visible dans la prévisualisation, le wrapper
-        `.fr-tooltip` est volontairement positionné statiquement.
+        Le bouton de partage déplie un panneau DSFR (`aria-expanded` et
+        `aria-controls`) et non plus un tooltip. Pour le rendre visible dans
+        la prévisualisation, le wrapper `.fr-collapse` est volontairement déplié.
 
         Cf. carte Notion A11Y-9.
         """
@@ -1165,9 +1166,10 @@ class AccessibilitePreview(LookbookPreview):
             """
             {% load share_tags %}
             <style>
-                .fr-tooltip { position: static !important; visibility: visible !important; opacity: 1 !important; max-width: 100%; }
+                .fr-collapse { visibility: visible !important; max-height: none !important; overflow: visible !important; }
             </style>
             {% include "ui/components/acteur/_action_share.html" %}
+            {% include "ui/components/acteur/_action_share_panel.html" %}
             """,
         )
         return template.render(context)

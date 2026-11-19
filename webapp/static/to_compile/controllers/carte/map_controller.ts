@@ -32,6 +32,7 @@ class MapController extends Controller<HTMLElement> {
   static values = {
     location: { type: Object, default: {} },
     initialZoom: Number,
+    locale: { type: Object, default: {} },
     theme: { type: String, default: "carto-light" },
   }
   declare readonly acteurTargets: Array<HTMLElement>
@@ -43,6 +44,7 @@ class MapController extends Controller<HTMLElement> {
   declare readonly locationValue: object
   declare readonly initialZoomValue: number
   declare readonly themeValue: string
+  declare readonly localeValue: Record<string, string>
 
   connect() {
     this.actorsMap = new SolutionMap({
@@ -51,6 +53,7 @@ class MapController extends Controller<HTMLElement> {
       initialZoom: this.initialZoomValue,
       controller: this,
       theme: this.themeValue,
+      locale: this.localeValue,
     })
 
     if (this.hasBboxTarget && this.bboxTarget.value !== "") {

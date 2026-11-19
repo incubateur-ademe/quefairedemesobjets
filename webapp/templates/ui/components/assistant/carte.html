@@ -1,9 +1,10 @@
-{% load l10n static %}
+{% load carte_tags l10n static %}
 <div
     class="qfa-carte"
     data-controller="assistant-carte"
     data-assistant-carte-assistant-chrono-outlet=".qfa-chrono"
     data-assistant-carte-url-value="{% url 'api_v1:lieux-geojson' %}"
+    data-assistant-carte-locale-value="{% maplibre_locale %}"
     data-assistant-carte-worker-url-value="{% static 'maplibre-worker.js' %}"
     data-assistant-carte-style-url-value="{% static 'assistant/carte-style.json' %}"
     {% comment %}

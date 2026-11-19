@@ -1,13 +1,14 @@
-{% load carte_tags dsfr_tags modal_tags %}
+{% load a11y_settings_tags carte_tags dsfr_tags modal_tags %}
 <section
     class="
     qf-flex
     qf-flex-col
     qf-relative
     qf-h-full"
+    id="liste-solutions"
     tabindex="0"
     data-testid="liste-mode-container"
-    aria-label="Liste des solutions"
+    aria-label="{% a11y_label "list_region_label" %}"
 >
     {% include "ui/components/carte/shared/disclaimers/loading_solutions.html" %}
     <div class="qf-flex qf-flex-col qf-gap-1w qf-px-1w md:qf-px-3w">
