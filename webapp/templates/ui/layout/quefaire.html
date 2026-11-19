@@ -107,8 +107,10 @@ parsing, which raises VariableDoesNotExist when seo is not in context (e.g., err
 
 
         <main id="content" class="{% if iframe %}[@media(min-height:600px)]:qf-pb-2w qf-pb-3w{% endif %}" role="main">
+            {% footnotes %}
             {% block main %}
             {% endblock main %}
+            {% endfootnotes %}
         </main>
 
         {% block footer %}

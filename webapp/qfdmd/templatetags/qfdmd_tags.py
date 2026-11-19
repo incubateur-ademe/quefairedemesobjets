@@ -7,6 +7,7 @@ from django.forms import FileField
 from django.utils.safestring import mark_safe
 from wagtail.models import Page
 
+from qfdmd.footnotes import make_footnotes_accessible
 from search.models import SearchTerm
 
 register = template.Library()
@@ -132,3 +133,28 @@ def render_svg_image(image) -> str:
 @register.inclusion_tag("templatetags/favicon.html")
 def favicon() -> dict:
     return {}
+
+
+class FootnotesNode(template.Node):
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        from qfdmd.models import AccessibilitySettings
+
+        labels = AccessibilitySettings.load(request_or_site=context.get("request"))
+        return mark_safe(
+            make_footnotes_accessible(
+                self.nodelist.render(context),
+                call_label=labels.footnote_label,
+                back_label=labels.footnote_back_label,
+                list_label=labels.footnotes_list_label,
+            )
+        )
+
+
+@register.tag
+def footnotes(parser, token):
+    nodelist = parser.parse(("endfootnotes",))
+    parser.delete_first_token()
+    return FootnotesNode(nodelist)
