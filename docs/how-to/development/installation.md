@@ -65,11 +65,11 @@ Provisionnement:
 make setup
 ```
 
-Cette commande construit les images, démarre la stack, applique les migrations et charge les données de référence dans une base vide. Elle peut être relancée sans risque : une base déjà peuplée n'est pas modifiée.
+Cette commande construit les images, démarre la stack, applique les migrations et crée un superutilisateur d'exemple (`admin` / `admin`). Elle peut être relancée sans risque. La base est vide après une première installation.
 
 L'application est ensuite accessible sur [http://quefairedemesdechets.localhost](http://quefairedemesdechets.localhost) (derrière nginx, comme en production) ou sur [http://localhost:8000](http://localhost:8000) (Django directement). Les domaines en `.localhost` pointent sur la machine sans modifier `/etc/hosts`.
 
-Pour peupler la base avec les données réelles, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local).
+Pour la peupler, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local).
 
 ## Services Docker Compose
 
