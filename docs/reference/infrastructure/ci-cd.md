@@ -74,6 +74,15 @@ graph TD
     G --> H
 ```
 
+### Hotfix
+
+A pull request labeled `hotfix` gets its draft release as soon as it is merged: the **🔢 Release Hotfix** job of `cd.yml` does not wait for CI nor for the deployments to `preprod`, which go on in parallel. The release can then be published at once to deploy to production (see below).
+
+- The label must be on the pull request when it is merged: it is read from the merged pull request of the pushed commit.
+- The pull request still needs its required checks to be merged.
+- The release holds every pull request merged since the previous one, not only the hotfix: check the draft before publishing.
+- Production then runs code that `preprod` may not have received yet, and that CI has not checked on `main`.
+
 ## Publishing a release
 
 When a release is published on GitHub (event `published`), the **🌞 Release to production** workflow ([deploy.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/deploy.yml)) is triggered to deploy to production.
