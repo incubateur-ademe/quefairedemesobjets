@@ -12,9 +12,15 @@ ifneq (,$(wildcard ./.env))
     export
 endif
 
-# apache/airflow:slim-<version>-python3.12 — extracted from data-platform/pyproject.toml
+# apache/airflow:slim-<version>-python3.12 — extracted from data-platform/pyproject.toml,
+# the only place where the Airflow version is written. The CI reads it with
+# `make -s airflow-version`.
 AIRFLOW_VERSION ?= $(shell sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
 export AIRFLOW_VERSION
+
+.PHONY: airflow-version
+airflow-version:
+	@echo $(AIRFLOW_VERSION)
 
 # Makefile config
 .PHONY: check

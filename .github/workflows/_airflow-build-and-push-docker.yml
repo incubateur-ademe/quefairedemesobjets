@@ -83,11 +83,12 @@ jobs:
 
       - uses: docker/setup-buildx-action@594f3bf4285d9ea8dc53c9a0c9c4092420091003
 
-      - name: Extract Airflow version from pyproject.toml
-        id: airflow-version
+      # data-platform/pyproject.toml is the only place where it is written
+      - name: Airflow version
         run: |
-          version=$(sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          version=$(make -s airflow-version)
+          [[ -n "$version" ]] || { echo "::error::no apache-airflow version in data-platform/pyproject.toml"; exit 1; }
+          echo "AIRFLOW_VERSION=$version" >> "$GITHUB_ENV"
           echo "Airflow version: $version"
 
       # https://github.com/docker/metadata-action
@@ -110,7 +111,7 @@ jobs:
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-scheduler.Dockerfile
           build-args: |
-            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+            AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
 
       - name: 🔍 Trivy scan and push (airflow-scheduler)
         uses: ./.github/actions/trivy-scan-and-push
@@ -135,7 +136,7 @@ jobs:
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-webserver.Dockerfile
           build-args: |
-            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+            AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
 
       - name: 🔍 Trivy scan and push (airflow-webserver)
         uses: ./.github/actions/trivy-scan-and-push
@@ -162,7 +163,7 @@ jobs:
           labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
           file: data-platform/airflow-dag-processor.Dockerfile
           build-args: |
-            AIRFLOW_VERSION=${{ steps.airflow-version.outputs.version }}
+            AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
 
       - name: 🔍 Trivy scan and push (airflow-dag-processor)
         uses: ./.github/actions/trivy-scan-and-push

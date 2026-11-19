@@ -4,7 +4,7 @@
 
 ## Configuration runtime
 
-- **Version** : `apache/airflow:slim-3.1.7-python3.12` (3 containers Scaleway : webserver `:8080`, scheduler avec dbt, dag-processor avec nginx healthcheck).
+- **Version** : `apache/airflow:slim-<version>-python3.12`, la version étant celle de `apache-airflow` dans `data-platform/pyproject.toml` (3 containers Scaleway : webserver `:8080`, scheduler avec dbt, dag-processor avec nginx healthcheck).
 - **Executor** : `LocalExecutor` (single-node).
 - **Auth manager** : **FAB** (`FabAuthManager`). Backends API : `basic_auth` + `session`. **JWT** pour les échanges internes (`AIRFLOW__API_AUTH__JWT_SECRET`).
 - **Compte admin** : créé au premier démarrage du webserver via `_AIRFLOW_WWW_USER_USERNAME / _PASSWORD / _EMAIL`.

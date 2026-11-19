@@ -279,6 +279,8 @@ SCALEWAY_REGISTRY="rg.fr-par.scw.cloud"
 SCALEWAY_NAMESPACE="ns-qfdmo"
 TAG="hotfix-vX.Y.Z"
 SCALEWAY_DOCKER_SECRET=$(scw config get secret-key)
+# Version de apache-airflow dans data-platform/pyproject.toml, requise par les Dockerfiles
+AIRFLOW_VERSION=$(make -s airflow-version)
 ```
 
 ### 1. Connexion au registre Scaleway
@@ -290,21 +292,21 @@ echo $SCALEWAY_DOCKER_SECRET | docker login $SCALEWAY_REGISTRY -u nologin --pass
 ### 2. Construction et push de l'image airflow-scheduler
 
 ```sh
-docker build --platform=linux/amd64 -f ./data-platform/airflow-scheduler.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG .
+docker build --platform=linux/amd64 --build-arg AIRFLOW_VERSION=$AIRFLOW_VERSION -f ./data-platform/airflow-scheduler.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG .
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG
 ```
 
 ### 3. Construction et push de l'image airflow-webserver
 
 ```sh
-docker build --platform=linux/amd64 -f ./data-platform/airflow-webserver.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG .
+docker build --platform=linux/amd64 --build-arg AIRFLOW_VERSION=$AIRFLOW_VERSION -f ./data-platform/airflow-webserver.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG .
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG
 ```
 
 ### 4. Construction et push de l'image airflow-dag-processor
 
 ```sh
-docker build --platform=linux/amd64 -f ./data-platform/airflow-dag-processor.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG .
+docker build --platform=linux/amd64 --build-arg AIRFLOW_VERSION=$AIRFLOW_VERSION -f ./data-platform/airflow-dag-processor.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG .
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG
 ```
 
