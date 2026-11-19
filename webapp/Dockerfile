@@ -4,6 +4,12 @@
 # Also the image of the local `assets` service (docker-compose.yml)
 FROM node:24.22.3-slim AS node_base
 
+# Mount points of the node_modules volumes of the `assets` service: a volume
+# takes the ownership of the directory it is first mounted on, and the service
+# runs as the host user.
+ENV HOME=/tmp
+RUN install -d -m 0777 /app/node_modules /app/webapp/node_modules /app/webapp/revue-front/node_modules
+
 
 FROM node_base AS node_build
 

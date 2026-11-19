@@ -34,30 +34,112 @@ x-airflow-common: &airflow-common
     airflow-db:
       condition: service_healthy
 
+# Every variable below has a default that works on the Compose network: a fresh
+# clone needs no .env. The root .env only holds secrets and overrides, for
+# example DATABASE_URL to work against another Postgres.
+x-webapp-common: &webapp-common
+  build:
+    context: .
+    dockerfile: webapp/Dockerfile
+    target: dev
+  # The host user, so that files written in the bind mount belong to it
+  user: "${HOST_UID:-0}:0"
+  volumes:
+    - .:/app
+  env_file:
+    - path: ./.env
+      required: false
+  environment:
+    DJANGO_SETTINGS_MODULE: settings.dev
+    SECRET_KEY: ${SECRET_KEY:-local-development-only} # pragma: allowlist secret
+    DEBUG: ${DEBUG:-True}
+    WITH_DJANGO_DEBUG_TOOLBAR: ${WITH_DJANGO_DEBUG_TOOLBAR:-True}
+    BASE_URL: ${BASE_URL:-https://quefairedemesdechets.ademe.local}
+    ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,webapp,host.docker.internal}
+    DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@lvao-webapp-db:5432/webapp} # pragma: allowlist secret
+    DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@lvao-webapp-db:5432/webapp_sample} # pragma: allowlist secret
+    DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@lvao-warehouse-db:5432/warehouse} # pragma: allowlist secret
+  depends_on:
+    lvao-webapp-db:
+      condition: service_healthy
+  develop:
+    watch:
+      - action: rebuild
+        path: ./uv.lock
+
 services:
+  webapp:
+    <<: *webapp-common
+    # Migrations first: a git pull that brings new ones cannot leave the
+    # database behind the code.
+    command: >
+      sh -c "python manage.py migrate --noinput
+      && python manage.py createcachetable
+      && exec python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - ${WEBAPP_PORT:-8000}:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8000), 2)"]
+      interval: 5s
+      retries: 5
+      start_period: 120s
+
+  # Processes the background tasks (django-tasks) enqueued by the webapp
+  worker:
+    <<: *webapp-common
+    command: python manage.py db_worker
+    depends_on:
+      webapp:
+        condition: service_healthy
+
+  # Installs the JS dependencies and rebuilds the assets on change
+  assets:
+    build:
+      context: .
+      dockerfile: webapp/Dockerfile
+      target: node_base
+    user: "${HOST_UID:-0}:0"
+    working_dir: /app
+    command: webapp/bin/dev-assets.sh
+    volumes:
+      - .:/app
+      # Linux binaries, kept apart from the node_modules of the host
+      - node_modules:/app/node_modules
+      - webapp_node_modules:/app/webapp/node_modules
+      - revue_node_modules:/app/webapp/revue-front/node_modules
+    environment:
+      BASE_URL: ${BASE_URL:-https://quefairedemesdechets.ademe.local}
+    healthcheck:
+      test: ["CMD-SHELL", "ls webapp/static/compiled/*.js"]
+      interval: 5s
+      retries: 5
+      start_period: 600s
+    develop:
+      watch:
+        - action: restart
+          path: ./package-lock.json
+
   lvao-proxy:
     build:
       context: .
       dockerfile: webapp/nginx/Dockerfile
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
-      - 80:80
-      - 443:443
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
     volumes:
       - ./webapp/nginx/certs:/etc/nginx/ssl
       - ./webapp/staticfiles:/app/staticfiles
-    env_file:
-      - path: ./webapp/.env
-        required: false
     environment:
       - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.ademe.local}
       - PORT=80
+      - DEBUG=${DEBUG:-True}
       - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
-      - UPSTREAM_HOST=host.docker.internal:8000
+      - UPSTREAM_HOST=webapp:8000
       - SSL_CERT_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}.pem
       - SSL_CERT_KEY_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}-key.pem
-    profiles: [lvao]
+    depends_on:
+      webapp:
+        condition: service_healthy
 
   lvao-webapp-db:
     # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
@@ -69,11 +151,12 @@ services:
       - POSTGRES_DB=webapp
     volumes:
       - webapp_dbdata:/var/lib/postgresql/data
-    expose:
-      - 5432
     ports:
       - ${WEBAPP_DB_PORT:-6543}:5432
-    profiles: [lvao, airflow]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "webapp"]
+      interval: 2s
+      retries: 30
 
   lvao-warehouse-db:
     # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
@@ -86,10 +169,12 @@ services:
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
       - warehouse16_dbdata:/var/lib/postgresql/data
-    expose:
-      - 5432
     ports:
-      - 8765:5432
+      - ${WAREHOUSE_DB_PORT:-8765}:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "warehouse"]
+      interval: 2s
+      retries: 30
     profiles: [airflow]
 
   airflow-db:
@@ -198,3 +283,6 @@ volumes:
   # Renamed with the move to Postgres 16: a 15 data directory does not start on 16
   warehouse16_dbdata:
   airflow_dbdata:
+  node_modules:
+  webapp_node_modules:
+  revue_node_modules:
