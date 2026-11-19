@@ -409,6 +409,10 @@ DEFAULT_DATABASE_SETTINGS = {
     "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
+# FIXME: this default points at a local Postgres that nothing sets up any more.
+# It stays because the deployed webapp container does not define
+# DB_WEBAPP_SAMPLE: define it there (or only declare this database when the
+# variable is set), then drop the default.
 DB_WEBAPP_SAMPLE = decouple.config(
     "DB_WEBAPP_SAMPLE",
     default="postgis://webapp_sample:webapp_sample@localhost:6543/webapp_sample",  # pragma: allowlist secret  # noqa: E501
@@ -420,6 +424,8 @@ WEBAPP_SAMPLE_DATABASE_SETTINGS = {
     "ENGINE": "django.contrib.gis.db.backends.postgis",
 }
 
+# FIXME: same as DB_WEBAPP_SAMPLE above, the deployed webapp container does not
+# define DB_WAREHOUSE.
 DB_WAREHOUSE = decouple.config(
     "DB_WAREHOUSE",
     cast=str,
