@@ -9,8 +9,58 @@ x-airflow-build-args: &airflow-build-args
 x-airflow-common: &airflow-common
   tmpfs:
     - /tmp
+  # Secrets only (Scaleway keys…), cf. .env.template
   env_file:
-    - ./data-platform/dags/.env
+    - path: ./.env
+      required: false
+  environment:
+    ENVIRONMENT: development
+    SECRET_KEY: ${SECRET_KEY:-local-development-only} # pragma: allowlist secret
+    _AIRFLOW_DB_MIGRATE: "true"
+    _AIRFLOW_WWW_USER_CREATE: "true"
+    _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+    _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-webserver:8080/execution/
+    # Project classes (Pydantic configs…) pushed to XCom; Airflow 3 handles
+    # DataFrames, BaseModel and numpy types natively
+    AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP: 'airflow\..* acteurs\..* clone\..* cluster\..* crawl\..* enrich\..* shared\..* sources\..* stats\..* suggestions\..* tools\..* utils\..*'
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-local-development-only} # pragma: allowlist secret
+    # Widens the dialogs (trigger DAG…) to 95% of the screen
+    AIRFLOW__API__THEME: '{"globalCss":{"[data-scope=\"dialog\"][data-part=\"content\"]":{"max-width":"95vw !important"}}}'
+    AIRFLOW__API__WORKERS: "2"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: "false"
+    AIRFLOW__WEBSERVER__X_FRAME_ENABLED: "false"
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: "false"
+    AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "30"
+    AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES: "1"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow # pragma: allowlist secret
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONNECT_ARGS: airflow_local_settings.keepalive_kwargs
+    # Read by data-platform/scripts/db_cleanup.sh
+    AIRFLOW_METADATA_DB_URL: postgresql+psycopg2://airflow:airflow@airflow-db/airflow # pragma: allowlist secret
+    AIRFLOW_CONN_WEBAPP_DB: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
+    DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
+    DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample} # pragma: allowlist secret
+    DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@warehouse-db:5432/warehouse} # pragma: allowlist secret
+    # API calls from the DAGs (acteur model metadata when parsing them)
+    WEBAPP_URL: http://webapp:8000
+    # dbt
+    POSTGRES_HOST: warehouse-db
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: warehouse
+    POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+    POSTGRES_DB: warehouse
+    POSTGRES_SCHEMA: public
+    # The ml_deduplication DAG runs the inference with the local Docker
+    # instead of a Scaleway instance
+    ML_DEDUPLICATION_RUN_LOCAL: "1"
   volumes:
     - ./data-platform/config:/opt/airflow/config
     - ./data-platform/dags:/opt/airflow/dags
@@ -26,9 +76,7 @@ x-airflow-common: &airflow-common
     # de la fusionner : une entrée sur le scheduler seul supprimerait tous les
     # autres montages (dont /opt/airflow/dags).
     - /var/run/docker.sock:/var/run/docker.sock
-  # Voir la doc et s'assurer que AIRFLOW_UID est
-  # définit dans le .env pour correspondre à votre UID
-  # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
+  # The images own their files as 50000: another user breaks the dag-processor
   user: "${AIRFLOW_UID:-50000}:0"
   extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -183,7 +231,7 @@ services:
     volumes:
       - airflow_dbdata:/var/lib/postgresql/data
     ports:
-      - 7654:5432
+      - ${AIRFLOW_DB_PORT:-7654}:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -193,12 +241,6 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
-    environment:
-      _AIRFLOW_DB_MIGRATE: "true"
-      _AIRFLOW_WWW_USER_CREATE: "true"
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
-      _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
     build:
       context: .
@@ -210,7 +252,7 @@ services:
         limits:
           memory: 2G
     ports:
-      - "8080:8080"
+      - ${AIRFLOW_PORT:-8080}:8080
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/version"]
       interval: 30s
@@ -223,8 +265,6 @@ services:
 
   airflow-scheduler:
     <<: *airflow-common
-    env_file:
-      - ./data-platform/dags/.env
     build:
       context: .
       dockerfile: data-platform/airflow-scheduler.Dockerfile
@@ -249,15 +289,11 @@ services:
 
   airflow-dag-processor:
     <<: *airflow-common
-    env_file:
-      - ./data-platform/dags/.env
     build:
       context: .
       dockerfile: data-platform/airflow-dag-processor.Dockerfile
       args:
         <<: *airflow-build-args
-    ports:
-      - "8082:80"
     healthcheck:
       test:
         [

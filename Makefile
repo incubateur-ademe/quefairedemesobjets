@@ -78,7 +78,7 @@ format:
 # Run development servers
 .PHONY: run-airflow
 run-airflow:
-	docker compose --profile airflow up -d
+	docker compose --profile airflow up -d --build --wait --remove-orphans
 
 # Run development servers
 .PHONY: build-airflow

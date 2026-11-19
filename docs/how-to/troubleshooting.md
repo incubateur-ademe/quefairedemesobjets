@@ -90,9 +90,9 @@ Cela signifie que la clé secrète JWT pour valider les tokens d'accès aux logs
 
 1. Générer une nouvelle clé secrète avec `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
 
-2. Remplacer la clé dans `data-platform/dags/.env` en localisant la ligne `AIRFLOW__API_AUTH__JWT_SECRET` et en la remplaçant avec la clé générée
+2. Définir `AIRFLOW__API_AUTH__JWT_SECRET` avec la clé générée dans le `.env` à la racine du dépôt
 
-3. Redémarrer Airflow avec `docker-compose --profile airflow down` puis `docker-compose --profile airflow up -d`
+3. Redémarrer Airflow avec `make down` puis `make run-airflow`
 
 ### Visualiser les logs d'un DAG en échec
 

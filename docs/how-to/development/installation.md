@@ -80,7 +80,7 @@ Pour la peupler, cf. [Copier la base de données de prod en local](useful_comman
 | `proxy`     | nginx local, avec la même configuration que la production (port 80)                              |
 | `webapp-db` | PostGIS (port 6543 sur la machine)                                                               |
 
-Le profile `airflow` ajoute `warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM) et `airflow-dag-processor` (8082).
+Le profile `airflow` (`make run-airflow`) ajoute `warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM) et `airflow-dag-processor`.
 
 > Pas de **Redis** ni de **mailcatcher** en local : le cache Django est stocké en base (`django.core.cache.backends.db.DatabaseCache`, table `qf_django_cache`).
 
@@ -171,24 +171,13 @@ uv run pre-commit install
 
 ## Installation de la plateforme DATA
 
-Copier les variables d'environnement `data-platform/dags/.env.template` vers `data-platform/dags/.env` :
-
 ```sh
-cp data-platform/dags/.env.template data-platform/dags/.env
+make run-airflow
 ```
 
-Lancer les containers docker avec docker compose:
+Cette commande ajoute à la stack le profile `airflow` : l'entrepôt de données, la base d'Airflow, son webserver, son scheduler (LocalExecutor) et son dag-processor.
 
-```sh
-docker compose --profile airflow up
-```
-
-docker compose lancera :
-
-- la base de données postgres nécessaire à la webapp de la carte
-- la base de données postgres nécessaire à Airflow
-- un webserver airflow
-- un scheduler airflow en mode LocalExecutor
+Comme pour la webapp, aucun fichier d'environnement n'est nécessaire : la configuration d'Airflow est dans `docker-compose.yml`. Les secrets dont certains DAGs ont besoin (clés Scaleway par exemple) se mettent dans le `.env` racine, cf. `.env.template`. Si vous aviez un `data-platform/dags/.env`, il n'est plus lu : reportez-y vos secrets puis supprimez-le.
 
 accéder à l'interface d'Airflow en local [http://localhost:8080](http://localhost:8080) ; identifiant/mot de passe : airflow / airflow
 

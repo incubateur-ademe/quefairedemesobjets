@@ -57,7 +57,7 @@ De la même manière que l'interface, cela permet de garder la cohérance entre 
 
 Les variables d'environnement sont déployées lors de l'exécution des recettes Terraform.
 
-Un exemple à adapter selon l'environnement est disponible dans le fichier [`data-platform/dags/.env.template`](../../../data-platform/dags/.env.template)
+En local, ces variables sont définies dans le bloc `x-airflow-common` du fichier [`docker-compose.yml`](../../../docker-compose.yml)
 
 #### Gestion des logs
 
