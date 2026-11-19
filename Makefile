@@ -29,13 +29,12 @@ PSQL := docker compose exec -T lvao-webapp-db psql -U webapp -d webapp
 # --- Local stack -----------------------------------------------------------
 # Everything runs in Docker Compose: no Python, Node or Postgres on the host.
 
-# First start: builds the images, starts the stack and loads the reference
-# data in an empty database. Safe to run again, a populated database is left untouched.
+# First start: builds the images, starts the stack and creates the example
+# superuser (admin / admin). Safe to run again. The data comes from a restore:
+# make db-restore-local-from-prod
 .PHONY: setup
 setup: up
-	@if [ "$$($(PSQL) -tAc 'select count(*) from qfdmo_source')" = "0" ]; then \
-		$(MAKE) -C webapp seed-reference-data createsuperuser-example; \
-	fi
+	$(MAKE) -C webapp createsuperuser-example
 	@echo "✓ http://$(BASE_DOMAIN) (ou http://localhost:8000)"
 
 # Rebuilds the images when a lockfile or a Dockerfile changed, then starts
@@ -132,17 +131,9 @@ webapp-create-remote-db-server:
 webapp-createsuperuser:
 	$(MAKE) -C webapp createsuperuser
 
-.PHONY: webapp-seed-database
-webapp-seed-database:
-	$(MAKE) -C webapp seed-database
-
 .PHONY: webapp-createsuperuser-example
 webapp-createsuperuser-example:
 	$(MAKE) -C webapp createsuperuser-example
-
-.PHONY: webapp-generate-fixtures-acteurs
-webapp-generate-fixtures-acteurs:
-	$(MAKE) -C webapp generate-fixtures-acteurs
 
 .PHONY: webapp-generate-fixtures
 webapp-generate-fixtures:
@@ -314,13 +305,6 @@ db-restore-preprod-from-prod:
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
 	./scripts/e2e_run_sample_dag.sh
-
-.PHONY: db-restore-local-for-tests
-db-restore-local-for-tests:
-	make drop-schema-public
-	make create-schema-public
-	make webapp-migrate
-	make webapp-seed-database
 
 # Docs
 .PHONY: build-docs

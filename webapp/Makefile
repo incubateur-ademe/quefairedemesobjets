@@ -100,14 +100,6 @@ create-remote-db-server:
 createsuperuser:
 	$(DJANGO_ADMIN) createsuperuser
 
-.PHONY: seed-reference-data
-seed-reference-data:
-	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes carte_configs
-
-.PHONY: seed-database
-seed-database: seed-reference-data
-	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
-
 .PHONY: createsuperuser-example
 createsuperuser-example:
 	$(DJANGO_ADMIN) createsuperuser_example
@@ -115,10 +107,6 @@ createsuperuser-example:
 .PHONY: create-db-sample
 create-db-sample:
 	$(DJANGO_ADMIN) create_webapp_sample_db
-
-.PHONY: generate-fixtures-acteurs
-generate-fixtures-acteurs:
-	$(DJANGO_ADMIN) dumpdata_acteurs
 
 .PHONY: generate-fixtures
 generate-fixtures:
