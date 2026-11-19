@@ -14,3 +14,4 @@ class QfdmoConfig(AppConfig):
         # See https://docs.djangoproject.com/fr/5.2/topics/signals/
         # flake8: noqa: F401
         import qfdmd.signals
+        import qfdmd.patches

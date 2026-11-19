@@ -1,0 +1,18 @@
+{% load wagtailcore_tags i18n %}
+{% translate "Restricted access" as restricted_access_label %}
+{% for entry in entries %}
+  <li>
+    {% if entry.restricted %}
+      <span class="fr-icon-lock-line"
+            aria-hidden="true"
+            title="{{ restricted_access_label }}"></span>
+    {% endif %}
+    <a href="{% pageurl entry.page %}">{{ entry.page.title }}</a>
+    {% if entry.restricted %}<span class="fr-sr-only">({{ restricted_access_label }})</span>{% endif %}
+    {% if entry.children %}
+      <ul>
+        {% include "sites_conformes_content_manager/blocks/sitemap_entry.html" with entries=entry.children %}
+      </ul>
+    {% endif %}
+  </li>
+{% endfor %}

@@ -22,6 +22,7 @@ from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import views as sitemaps_views
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import RedirectView, TemplateView
 from sites_conformes.content_manager.urls import urlpatterns as sites_conformes_urls
 from wagtail.admin import urls as wagtailadmin_urls
@@ -32,7 +33,13 @@ from wagtail.documents import urls as wagtaildocs_urls
 from qfdmd.models import Synonyme
 
 from .api import api, api_v1
-from .views import AutocompleteSynonyme, backlink, healthz, robots_txt
+from .views import (
+    AutocompleteSynonyme,
+    ReadableSitemapView,
+    backlink,
+    healthz,
+    robots_txt,
+)
 
 info_dict = {
     "queryset": Synonyme.objects.filter().order_by("nom"),
@@ -143,6 +150,7 @@ urlpatterns.extend(
     [
         path("cms/", include(wagtailadmin_urls)),
         path("documents/", include(wagtaildocs_urls)),
+        path(_("sitemap/"), ReadableSitemapView.as_view(), name="readable_sitemap"),
         # This URL should not be move above other "" paths in order to prevent
         # Wagtail pages' slugs to override internal routes defined in the project
         path("", include(sites_conformes_urls)),
