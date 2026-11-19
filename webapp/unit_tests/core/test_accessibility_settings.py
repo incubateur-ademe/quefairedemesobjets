@@ -1,4 +1,5 @@
 import pytest
+from django.template.loader import render_to_string
 from django.test import RequestFactory
 
 from core.context_processors import global_context
@@ -39,3 +40,16 @@ def test_templates_read_labels_from_settings_with_or_without_request():
     assert 'aria-label="Plan des lieux"' in render_to_string(
         "ui/components/carte/mode_carte.html", request=RequestFactory().get("/")
     )
+
+
+@pytest.mark.django_db
+def test_new_window_mention_comes_from_settings():
+    AccessibilitySettings.objects.create(new_window_mention="nouvel onglet")
+
+    html = render_to_string(
+        "ui/components/lien/lien.html",
+        {"lien": {"url": "https://a.fr", "titre_du_lien": "Un lien"}},
+        request=RequestFactory().get("/"),
+    )
+
+    assert 'title="Un lien - nouvel onglet"' in html

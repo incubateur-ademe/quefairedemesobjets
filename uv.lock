@@ -4896,6 +4896,7 @@ name = "webapp-quefairedemesobjetsetdechets"
 version = "9.5.0"
 source = { editable = "webapp" }
 dependencies = [
+    { name = "beautifulsoup4" },
     { name = "boto3" },
     { name = "diff-match-patch" },
     { name = "dj-database-url" },
@@ -4936,6 +4937,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.15.0,<5" },
     { name = "boto3", specifier = "<1.44" },
     { name = "diff-match-patch", specifier = ">=20241021,<20241022" },
     { name = "dj-database-url", specifier = ">=3.0.1,<4" },
