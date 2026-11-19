@@ -19,6 +19,11 @@ on:
         description: "Tag to deploy"
         type: string
         required: true
+      post_deploy:
+        description: "Run bin/post_deploy from the stack's image, between the plan and the apply (webapp only)"
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   apply:
@@ -45,6 +50,10 @@ jobs:
 
       - name: Terragrunt plan
         run: terragrunt plan -out="$RUNNER_TEMP/tfplan"
+
+      - name: Run bin/post_deploy in the new image
+        if: inputs.post_deploy
+        run: "$GITHUB_WORKSPACE/scripts/infrastructure/post_deploy.sh"
 
       - name: Terragrunt apply
         run: terragrunt apply "$RUNNER_TEMP/tfplan"

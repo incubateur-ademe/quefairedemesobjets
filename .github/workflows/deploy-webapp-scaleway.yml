@@ -1,0 +1,45 @@
+# Deploys the webapp + worker containers to Scaleway: build the image, run
+# its bin/post_deploy against the environment's databases, then apply the
+# <environment>/webapp_container stack, which rolls the new image out.
+# Manual, until cd.yml and deploy.yml are switched over from Scalingo.
+name: 🟣 Deploy webapp to Scaleway
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [preprod, prod]
+        required: true
+
+# The S3 state backend has no locking: two applies of the stack must never
+# overlap. The group holds the build too, so an older run cannot apply after a
+# newer one. Deployments queue: a newer pending one replaces an older pending
+# one, the one in flight finishes.
+concurrency:
+  group: deploy-webapp-scaleway-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 🐳 Build webapp image
+    uses: ./.github/workflows/_webapp-build-and-push-docker.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      image_tag: ${{ inputs.environment }}-${{ github.sha }}
+      environment: ${{ inputs.environment }}
+
+  apply:
+    name: 🚀 Post-deploy and apply
+    needs: [build]
+    uses: ./.github/workflows/_terragrunt-apply-stack.yml
+    secrets: inherit # pragma: allowlist secret
+    with:
+      environment: ${{ inputs.environment }}
+      stack: webapp_container
+      image_tag: ${{ inputs.environment }}-${{ github.sha }}
+      post_deploy: true
+
+permissions:
+  contents: read

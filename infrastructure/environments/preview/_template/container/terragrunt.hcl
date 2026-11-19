@@ -68,12 +68,8 @@ inputs = {
   min_scale = local.isoprod ? 1 : 0
   cpu_limit = local.isoprod ? 2000 : 1000
 
-  # The container is served on its Scaleway-generated domain, unknown before
-  # apply: trust the whole generated-domain suffix (Django wildcard syntax).
-  # 127.0.0.1 and localhost are needed for Scaleway's internal health probes.
-  # The actual probe uses a dynamic internal IP (e.g. 100.96.x.x:8000) which
-  # varies per deployment — "*" allows any host for ephemeral previews.
-  ALLOWED_HOSTS = "*"
+  # The probes go through HealthzMiddleware, whatever the host.
+  ALLOWED_HOSTS = local.host
   BASE_URL      = "https://${local.host}"
 
   DATABASE_URL                    = dependency.preview_database.outputs.database_url
