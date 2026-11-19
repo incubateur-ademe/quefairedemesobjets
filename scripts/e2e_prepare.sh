@@ -14,11 +14,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # As seen from the containers
-SAMPLE_URL="${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@lvao-webapp-db:5432/webapp_sample}" # pragma: allowlist secret
+SAMPLE_URL="${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample}" # pragma: allowlist secret
 
 die() { echo "✗ $1" >&2; exit 1; }
-webapp_psql() { docker compose exec -T lvao-webapp-db psql -U webapp -d webapp "$@"; }
-warehouse_psql() { docker compose exec -T lvao-warehouse-db psql -U warehouse -d warehouse "$@"; }
+webapp_psql() { docker compose exec -T webapp-db psql -U webapp -d webapp "$@"; }
+warehouse_psql() { docker compose exec -T warehouse-db psql -U warehouse -d warehouse "$@"; }
 
 # --- 1. Docker stack -------------------------------------------------------
 docker compose --profile airflow up -d --build --wait

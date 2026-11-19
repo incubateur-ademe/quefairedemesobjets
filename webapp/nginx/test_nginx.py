@@ -1,5 +1,5 @@
 # Integration tests for the nginx container (nginx/Dockerfile).
-# Requires the container to be running: docker compose up lvao-proxy -d
+# Requires the container to be running: docker compose up proxy -d
 # Override the target with NGINX_TEST_URL. Django does not need to be running.
 
 import time
@@ -34,7 +34,7 @@ def wait_for_nginx():
         except requests.ConnectionError:
             time.sleep(0.5)
     pytest.fail(
-        f"nginx not reachable at {BASE_URL}. " "Run: docker compose up lvao-proxy -d"
+        f"nginx not reachable at {BASE_URL}. " "Run: docker compose up proxy -d"
     )
 
 

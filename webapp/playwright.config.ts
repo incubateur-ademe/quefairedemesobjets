@@ -20,7 +20,7 @@ const WEB_SERVER_COMMAND = process.env.CI
   ? "uv run python manage.py runserver 0.0.0.0:8888"
   : "docker compose run --rm -p 8888:8888 -e ASSISTANT_V2_STANDALONE_REDIRECT webapp python manage.py runserver 0.0.0.0:8888"
 const LOCAL_SAMPLE_DATABASE_URL =
-  "postgres://webapp_sample:webapp_sample@lvao-webapp-db:5432/webapp_sample" // pragma: allowlist secret
+  "postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample" // pragma: allowlist secret
 
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",

@@ -72,15 +72,15 @@ Pour la peupler, cf. [Copier la base de données de prod en local](useful_comman
 
 ## Services Docker Compose
 
-| Service          | Rôle                                                                                             |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| `webapp`         | Django : migrations au démarrage, puis `runserver` (port 8000)                                   |
-| `worker`         | `db_worker`, qui traite les tâches de fond (django-tasks), par exemple les actions admin lourdes |
-| `assets`         | `npm ci` si `package-lock.json` a changé, puis `parcel watch`                                    |
-| `lvao-proxy`     | nginx local, avec la même configuration que la production (port 80)                              |
-| `lvao-webapp-db` | PostGIS (port 6543 sur la machine)                                                               |
+| Service     | Rôle                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| `webapp`    | Django : migrations au démarrage, puis `runserver` (port 8000)                                   |
+| `worker`    | `db_worker`, qui traite les tâches de fond (django-tasks), par exemple les actions admin lourdes |
+| `assets`    | `npm ci` si `package-lock.json` a changé, puis `parcel watch`                                    |
+| `proxy`     | nginx local, avec la même configuration que la production (port 80)                              |
+| `webapp-db` | PostGIS (port 6543 sur la machine)                                                               |
 
-Le profile `airflow` ajoute `lvao-warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM) et `airflow-dag-processor` (8082).
+Le profile `airflow` ajoute `warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM) et `airflow-dag-processor` (8082).
 
 > Pas de **Redis** ni de **mailcatcher** en local : le cache Django est stocké en base (`django.core.cache.backends.db.DatabaseCache`, table `qf_django_cache`).
 

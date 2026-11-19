@@ -62,11 +62,11 @@ x-webapp-common: &webapp-common
     WITH_DJANGO_DEBUG_TOOLBAR: ${WITH_DJANGO_DEBUG_TOOLBAR:-True}
     BASE_URL: ${BASE_URL:-http://quefairedemesdechets.localhost}
     ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,webapp,host.docker.internal}
-    DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@lvao-webapp-db:5432/webapp} # pragma: allowlist secret
-    DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@lvao-webapp-db:5432/webapp_sample} # pragma: allowlist secret
-    DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@lvao-warehouse-db:5432/warehouse} # pragma: allowlist secret
+    DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
+    DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample} # pragma: allowlist secret
+    DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@warehouse-db:5432/warehouse} # pragma: allowlist secret
   depends_on:
-    lvao-webapp-db:
+    webapp-db:
       condition: service_healthy
 
 services:
@@ -121,7 +121,7 @@ services:
       retries: 5
       start_period: 600s
 
-  lvao-proxy:
+  proxy:
     build:
       context: .
       dockerfile: webapp/nginx/Dockerfile
@@ -139,7 +139,7 @@ services:
       webapp:
         condition: service_healthy
 
-  lvao-webapp-db:
+  webapp-db:
     # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
     platform: ${POSTGIS_IMAGE_PLATFORM:-}
     image: imresamu/postgis:16-3.5-alpine # The official PostGIS image ships no ARM build
@@ -156,7 +156,7 @@ services:
       interval: 2s
       retries: 30
 
-  lvao-warehouse-db:
+  warehouse-db:
     # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
     platform: ${POSTGIS_IMAGE_PLATFORM:-}
     image: imresamu/postgis:16-3.5-alpine # The official PostGIS image ships no ARM build

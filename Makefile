@@ -27,7 +27,7 @@ versions:
 
 # The containers run as the host user (docker-compose.yml)
 export HOST_UID := $(shell id -u)
-PSQL := docker compose exec -T lvao-webapp-db psql -U webapp -d webapp
+PSQL := docker compose exec -T webapp-db psql -U webapp -d webapp
 
 # --- Local stack -----------------------------------------------------------
 # Everything runs in Docker Compose: no Python, Node or Postgres on the host.
@@ -43,7 +43,7 @@ setup: up
 # Rebuilds the images when a lockfile or a Dockerfile changed, then starts
 .PHONY: up
 up:
-	docker compose up -d --build --wait
+	docker compose up -d --build --wait --remove-orphans
 
 .PHONY: down
 down:
@@ -229,7 +229,7 @@ create-schema-public:
 
 .PHONY: psql
 psql:
-	docker compose exec lvao-webapp-db psql -U webapp -d webapp
+	docker compose exec webapp-db psql -U webapp -d webapp
 
 .PHONY: dump-prod
 dump-prod:

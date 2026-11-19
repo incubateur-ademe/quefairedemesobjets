@@ -131,7 +131,7 @@ of the NAF codes).
 
 ```bash
 # Database and superuser (admin / admin)
-docker compose up -d lvao-webapp-db
+docker compose up -d webapp-db
 make -C webapp migrate
 make -C webapp createsuperuser-example
 
