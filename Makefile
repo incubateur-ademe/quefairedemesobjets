@@ -1,5 +1,6 @@
 # Aliases
-BASE_DOMAIN := quefairedemesdechets.ademe.local
+BASE_DOMAIN := quefairedemesdechets.localhost
+LEGACY_SITE_VITRINE_DOMAIN ?= longuevieauxobjets.localhost
 WEBAPP_DB_PORT ?= 6543
 DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
 PYTHON := uv run python
@@ -35,10 +36,8 @@ init-certs:
 	mkcert -install
 	mkdir -p ./webapp/nginx/certs
 	mkcert -cert-file ./webapp/nginx/certs/$(BASE_DOMAIN).pem -key-file ./webapp/nginx/certs/$(BASE_DOMAIN)-key.pem $(BASE_DOMAIN) $(LEGACY_SITE_VITRINE_DOMAIN)
-	@echo "Adding local DNS entries to /etc/hosts (requires sudo)..."
-	@grep -q "$(BASE_DOMAIN)" /etc/hosts || echo "127.0.0.1 $(BASE_DOMAIN)" | sudo tee -a /etc/hosts
-	@grep -q "$(LEGACY_SITE_VITRINE_DOMAIN)" /etc/hosts || echo "127.0.0.1 $(LEGACY_SITE_VITRINE_DOMAIN)" | sudo tee -a /etc/hosts
-	docker compose --profile lvao restart lvao-proxy
+	@grep -q "^BASE_URL=" .env 2>/dev/null || echo "BASE_URL=https://$(BASE_DOMAIN)" >> .env
+	docker compose up -d --force-recreate webapp worker assets lvao-proxy
 
 # FIXME : Reactive it !
 # .PHONY: init-dev

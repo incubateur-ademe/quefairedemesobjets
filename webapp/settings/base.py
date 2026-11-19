@@ -135,7 +135,7 @@ VERSION = decouple.config("CONTAINER_VERSION", default="version", cast=str)
 APP = decouple.config("APP", default="local", cast=str)
 BASE_URL = decouple.config(
     "BASE_URL",
-    default="https://quefairedemesdechets.ademe.local",
+    default="https://quefairedemesdechets.localhost",
     cast=str,
 )
 BASE_HOST = urlparse(BASE_URL).hostname

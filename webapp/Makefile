@@ -7,7 +7,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Aliases
-BASE_DOMAIN := quefairedemesdechets.ademe.local
+BASE_DOMAIN := quefairedemesdechets.localhost
 BLACK := uv run black
 WEBAPP_DB_PORT ?= 6543
 DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret

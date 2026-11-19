@@ -12,9 +12,9 @@ import requests
 import decouple
 
 BASE_URL = decouple.config(
-    "NGINX_TEST_URL", "https://quefairedemesdechets.ademe.local"
+    "NGINX_TEST_URL", "https://quefairedemesdechets.localhost"
 ).rstrip("/")
-BASE_DOMAIN = decouple.config("BASE_DOMAIN", "quefairedemesdechets.ademe.local")
+BASE_DOMAIN = decouple.config("BASE_DOMAIN", "quefairedemesdechets.localhost")
 LEGACY_DOMAIN = decouple.config("LEGACY_SITE_VITRINE_DOMAIN", "")
 CACHE_DISABLED = decouple.config("NGINX_DISABLE_CACHE", "0") == "1"
 

@@ -54,7 +54,7 @@ x-webapp-common: &webapp-common
     SECRET_KEY: ${SECRET_KEY:-local-development-only} # pragma: allowlist secret
     DEBUG: ${DEBUG:-True}
     WITH_DJANGO_DEBUG_TOOLBAR: ${WITH_DJANGO_DEBUG_TOOLBAR:-True}
-    BASE_URL: ${BASE_URL:-https://quefairedemesdechets.ademe.local}
+    BASE_URL: ${BASE_URL:-http://quefairedemesdechets.localhost}
     ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,webapp,host.docker.internal}
     DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@lvao-webapp-db:5432/webapp} # pragma: allowlist secret
     DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@lvao-webapp-db:5432/webapp_sample} # pragma: allowlist secret
@@ -104,7 +104,7 @@ services:
       - webapp_node_modules:/app/webapp/node_modules
       - revue_node_modules:/app/webapp/revue-front/node_modules
     environment:
-      BASE_URL: ${BASE_URL:-https://quefairedemesdechets.ademe.local}
+      BASE_URL: ${BASE_URL:-http://quefairedemesdechets.localhost}
     healthcheck:
       test: ["CMD-SHELL", "ls webapp/static/compiled/*.js"]
       interval: 5s
@@ -121,13 +121,14 @@ services:
     volumes:
       - ./webapp/nginx/certs:/etc/nginx/ssl
     environment:
-      - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.ademe.local}
+      - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.localhost}
       - PORT=80
+      # Ignored until `make init-certs` has generated the certificates
       - DEBUG=${DEBUG:-True}
       - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
       - UPSTREAM_HOST=webapp:8000
-      - SSL_CERT_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}.pem
-      - SSL_CERT_KEY_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}-key.pem
+      - SSL_CERT_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.localhost}.pem
+      - SSL_CERT_KEY_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.localhost}-key.pem
     depends_on:
       webapp:
         condition: service_healthy
