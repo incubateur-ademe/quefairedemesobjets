@@ -32,39 +32,16 @@ git rebase --continue
 
 ## Mise en place du poste developpeur
 
-### Je n'arrive pas a accéder à l'interface via une url \*.local
+### Je n'arrive pas a accéder à l'interface via une url \*.localhost
 
-L'interface sur un poste développeur doit-être accessible via les URLs:
+L'interface sur un poste développeur est accessible sur [http://quefairedemesdechets.localhost](http://quefairedemesdechets.localhost), sans configuration de `/etc/hosts`.
 
-- http://quefairedemesdechets.ademe.local/
-- http://quefairedemesobjets.ademe.local/
-- http://lvao.ademe.local/ : redirigé vers le site institutionnel
+Si tel n'est pas le cas :
 
-Si tel n'est pas le cas, voici quelques configuration à vérifier
-
-#### /etc/hosts
-
-Dans la configuration `/etc/hosts`, vérifier la présence des lignes
-
-```
-127.0.0.1       lvao.ademe.local
-127.0.0.1       quefairedemesdechets.ademe.local
-127.0.0.1       quefairedemesobjets.ademe.local
-```
-
-#### Vérifier la présence des certificats ssl
-
-Si les certificats ne sont pas présents, les logs du serveur nginx affichent une erreur type
-
-```
-lvao-proxy-1  | 2025/05/20 10:47:25 [emerg] 1#1: cannot load certificate "/etc/nginx/ssl/lvao.ademe.local+1.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/ssl/lvao.ademe.local+1.pem, r) error:10000080:BIO routines::no such file)
-```
-
-Dans ce cas, (re-)générer les certificats
-
-```
-make init-certs
-```
+- vérifier que la stack est démarrée et saine : `docker compose ps`
+- vérifier que le port 80 n'est pas déjà pris sur la machine ; sinon, définir `HTTP_PORT` dans `.env`
+- Django répond aussi directement sur [http://localhost:8000](http://localhost:8000)
+- en HTTPS, (re-)générer les certificats : `make init-certs`
 
 #### .env
 

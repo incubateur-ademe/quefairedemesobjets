@@ -13,6 +13,15 @@ dotenv.config({ path: path.resolve(__dirname, ".env") })
 const PORT = 8888
 const BASE_URL = `http://localhost:${PORT}`
 
+// The CI runner has Python and its own Postgres: the server runs directly.
+// Locally it runs in the webapp service of docker-compose.yml, against the
+// sample database built by `make e2e-prepare`.
+const WEB_SERVER_COMMAND = process.env.CI
+  ? "uv run python manage.py runserver 0.0.0.0:8888"
+  : "docker compose run --rm -p 8888:8888 -e ASSISTANT_V2_STANDALONE_REDIRECT webapp python manage.py runserver 0.0.0.0:8888"
+const LOCAL_SAMPLE_DATABASE_URL =
+  "postgres://webapp_sample:webapp_sample@lvao-webapp-db:5432/webapp_sample" // pragma: allowlist secret
+
 export const config: PlaywrightTestConfig = {
   testDir: "./e2e_tests",
   timeout: 45000,
@@ -22,13 +31,16 @@ export const config: PlaywrightTestConfig = {
   workers: 1,
   reporter: process.env.CI ? "blob" : "html",
   webServer: {
-    command: "uv run python manage.py runserver 0.0.0.0:8888",
+    command: WEB_SERVER_COMMAND,
     port: 8888,
     reuseExistingServer: !process.env.CI,
     env: {
       ...(process.env as Record<string, string>),
-      DATABASE_URL: (process.env.DB_WEBAPP_SAMPLE ?? process.env.DATABASE_URL)!,
-      SECRET_KEY: process.env.SECRET_KEY!,
+      DATABASE_URL:
+        process.env.DB_WEBAPP_SAMPLE ??
+        process.env.DATABASE_URL ??
+        LOCAL_SAMPLE_DATABASE_URL,
+      SECRET_KEY: process.env.SECRET_KEY ?? "local-development-only", // pragma: allowlist secret
       BASE_URL: "http://localhost:8888",
       // The debug toolbar is a fixed-position overlay that interferes with
       // layout-sensitive tests (e.g. the autocomplete dropdown clamp at narrow
