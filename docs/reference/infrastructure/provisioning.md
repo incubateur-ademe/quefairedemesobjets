@@ -106,7 +106,7 @@ Toutes les ressources suivent la nomenclature `lvao-{env}-{nom}` où `env ∈ {p
 
 #### Container as a Service (CaaS)
 
-Trois Serverless Containers distincts pour Airflow 3 (`apache/airflow:slim-3.1.7-python3.12`), construits via Dockerfiles dédiés, plus un gateway nginx par environnement :
+Trois Serverless Containers distincts pour Airflow 3 (`apache/airflow:slim-<version>-python3.12`, version de `apache-airflow` dans `data-platform/pyproject.toml`), construits via Dockerfiles dédiés, plus un gateway nginx par environnement :
 
 | Container                    | Image                              | Rôle                                                                                                                                                                                                                     |
 | ---------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
