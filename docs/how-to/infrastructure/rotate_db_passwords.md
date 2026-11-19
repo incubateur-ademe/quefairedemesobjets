@@ -8,7 +8,7 @@ The two managed RDB instances (`lvao-{env}-webapp`, `lvao-{env}-warehouse`) stor
 
 ⚠️ **Expect a short outage.** As soon as the database stack is applied, the old passwords stop working. Update Airflow and Scalingo immediately afterwards. Prefer a maintenance window and announce it on Mattermost (`lvao-tour-de-controle`).
 
-⚠️ **Never commit `terraform.tfvars`.** These files are gitignored. After the rotation, copy the updated values into [Vaultwarden](https://vaultwarden.incubateur.net) (see [Save the new secrets](#4-save-the-new-secrets)).
+⚠️ **Never commit `secrets.json`.** The passwords live in Scaleway Secret Manager; the local file used to change them is gitignored and deleted afterwards. After the rotation, copy the updated values into [Vaultwarden](https://vaultwarden.incubateur.net) (see [Save the new secrets](#4-save-the-new-secrets)).
 
 ## 1. Prepare access
 
@@ -17,25 +17,30 @@ Confirm you can log in to every system involved **before** changing any password
 | Access                                         | Why it is needed                                                |
 | ---------------------------------------------- | --------------------------------------------------------------- |
 | **Scaleway** (console + CLI)                   | Apply OpenTofu, inspect RDB instances, check Airflow containers |
-| **OpenTofu / Terragrunt**                      | Local `terraform.tfvars` for the target environment             |
+| **Scaleway Secret Manager**                    | Read and write the secret of the `database` stack               |
 | **Scalingo** (console + CLI)                   | Update webapp environment variables and restart the app         |
 | **GitHub**                                     | Update repository / environment secrets used by CI              |
 | **Airflow UI**                                 | Smoke-test the metadata database after the rotation             |
-| **Vaultwarden** (`vaultwarden.incubateur.net`) | Persist the new `terraform.tfvars` values                       |
+| **Vaultwarden** (`vaultwarden.incubateur.net`) | Keep a copy of the new values outside Scaleway                  |
 
 You also need administration rights on the Scaleway organisation `Incubateur ADEME (Pathtech)`, project `longuevieauxobjets`.
 
 ## 2. Change the passwords
 
-### 2.1. Update `terraform.tfvars`
+### 2.1. Update the secret of the `database` stack
 
-Edit the **non-versioned** file:
+Fetch the secret into a **non-versioned** file (see [Provisioning](../../reference/infrastructure/provisioning.md#configuration)):
 
-```text
-infrastructure/environments/<ENV>/database/terraform.tfvars
+```sh
+make -C infrastructure secrets-show ENV=<ENV> STACK=database > infrastructure/environments/<ENV>/database/secrets.json
 ```
 
-Replace these three values with newly generated strong passwords:
+Replace these three values with newly generated strong passwords, then push the file and delete it:
+
+```sh
+make -C infrastructure secrets-push ENV=<ENV> STACK=database
+rm infrastructure/environments/<ENV>/database/secrets.json
+```
 
 | Variable                | Instance               | User        |
 | ----------------------- | ---------------------- | ----------- |
@@ -139,6 +144,5 @@ If a check fails, the usual cause is a consumer still using the old password, or
 
 ## 4. Save the new secrets
 
-1. Update the Vaultwarden note(s) that store the environment `terraform.tfvars` on [vaultwarden.incubateur.net](https://vaultwarden.incubateur.net) with the new `webapp_db_password`, `warehouse_db_password`, and `airflow_db_password`.
-2. Keep the local `terraform.tfvars` in sync with that note.
-3. Do not paste the passwords in Mattermost, GitHub issues, or commit messages.
+1. Update the Vaultwarden note(s) that copy the secrets of the environment on [vaultwarden.incubateur.net](https://vaultwarden.incubateur.net) with the new `webapp_db_password`, `warehouse_db_password`, and `airflow_db_password`.
+2. Do not paste the passwords in Mattermost, GitHub issues, or commit messages.

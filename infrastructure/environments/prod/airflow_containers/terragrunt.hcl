@@ -82,27 +82,9 @@ inputs = {
   DATABASE_URL                        = "postgres://${dependency.database.outputs.webapp_db_username}:${dependency.database.outputs.webapp_db_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database.outputs.webapp_database_name}?sslmode=require"
   DB_WAREHOUSE                        = "postgres://${dependency.database.outputs.warehouse_db_username}:${dependency.database.outputs.warehouse_db_password}@${dependency.database.outputs.warehouse_endpoint_ip}:${dependency.database.outputs.warehouse_endpoint_port}/${dependency.database.outputs.warehouse_database_name}?sslmode=require"
   DB_WEBAPP_SAMPLE                    = "postgres://${dependency.database_sample.outputs.webapp_db_sample_username}:${dependency.database_sample.outputs.webapp_db_sample_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database_sample.outputs.webapp_db_sample_database_name}?sslmode=require"
-  ENVIRONMENT                         = "[ENVIRONMENT]"
-  POSTGRES_DB                         = "[POSTGRES_DB]"
   POSTGRES_HOST                       = dependency.database.outputs.warehouse_endpoint_ip
   POSTGRES_PASSWORD                   = dependency.database.outputs.warehouse_db_password
   POSTGRES_PORT                       = tostring(dependency.database.outputs.warehouse_endpoint_port)
-  POSTGRES_SCHEMA                     = "[POSTGRES_SCHEMA]"
-  POSTGRES_USER                       = "[POSTGRES_USER]"
-  SCW_ACCESS_KEY                      = "[SCW_ACCESS_KEY]"
-  SCW_DEFAULT_ORGANIZATION_ID         = "[SCW_DEFAULT_ORGANIZATION_ID]"
-  SCW_DEFAULT_PROJECT_ID              = "[SCW_DEFAULT_PROJECT_ID]"
-  SCW_SECRET_KEY                      = "[SCW_SECRET_KEY]"
-  ML_DEDUPLICATION_SSH_KEY_B64        = "[ML_DEDUPLICATION_SSH_KEY_B64]"
-  ML_DEDUPLICATION_SSH_PUB_KEY        = "[ML_DEDUPLICATION_SSH_PUB_KEY]"
-  SECRET_KEY                          = "[SECRET_KEY]"
-  POSTHOG_PERSONAL_API_KEY            = "[POSTHOG_PERSONAL_API_KEY]"
-  _AIRFLOW_WWW_USER_USERNAME          = "[_AIRFLOW_WWW_USER_USERNAME]"
-  _AIRFLOW_WWW_USER_PASSWORD          = "[_AIRFLOW_WWW_USER_PASSWORD]"
-
-  AIRFLOW__API_AUTH__JWT_SECRET                         = "[AIRFLOW__API_AUTH__JWT_SECRET]"
-  AIRFLOW_CONN_SCALEWAYLOGS                             = "[AIRFLOW_CONN_SCALEWAYLOGS]"
-  AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = "[AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP]"
 
   AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL = 300
   AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES         = 1

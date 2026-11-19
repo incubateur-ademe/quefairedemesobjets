@@ -73,7 +73,7 @@ Les contrôles `pre-commit` sont la première barrière de qualité ; ils ne doi
 ### 7. Sécuriser l'infrastructure et la CI
 
 - Les modifications d'infrastructure passent par **OpenTofu/Terragrunt** ; relire les _plans_ avant `apply`.
-- Les variables sensibles vivent dans des `terraform.tfvars` **non versionnés** (`sensitive = true`).
+- Les variables sensibles vivent dans Scaleway Secret Manager, un secret par stack (`sensitive = true`), voir [Provisioning](../../reference/infrastructure/provisioning.md).
 - Les secrets CI/CD vivent dans les **GitHub Environments** `preprod`/`prod` (protection sur `main`).
 - Ne **jamais** logguer un token, un secret ou une donnée personnelle en clair, ni dans Sentry, PostHog ou Matomo.
 
