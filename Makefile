@@ -22,12 +22,46 @@ export AIRFLOW_VERSION
 airflow-version:
 	@echo $(AIRFLOW_VERSION)
 
-# Makefile config
-.PHONY: check
-check:
-	@source .venv/bin/activate; python --version; pip --version
-	@npm --version
-	@node --version
+# The containers run as the host user (docker-compose.yml)
+export HOST_UID := $(shell id -u)
+PSQL := docker compose exec -T lvao-webapp-db psql -U webapp -d webapp
+
+# --- Local stack -----------------------------------------------------------
+# Everything runs in Docker Compose: no Python, Node or Postgres on the host.
+
+# First start: builds the images, starts the stack and loads the reference
+# data in an empty database. Safe to run again, a populated database is left untouched.
+.PHONY: setup
+setup: up
+	@if [ "$$($(PSQL) -tAc 'select count(*) from qfdmo_source')" = "0" ]; then \
+		$(MAKE) -C webapp seed-reference-data createsuperuser-example; \
+	fi
+	@echo "✓ http://$(BASE_DOMAIN) (ou http://localhost:8000)"
+
+# Rebuilds the images when a lockfile or a Dockerfile changed, then starts
+.PHONY: up
+up:
+	docker compose up -d --build --wait
+
+.PHONY: down
+down:
+	docker compose --profile airflow down
+
+.PHONY: logs
+logs:
+	docker compose logs -f --tail 50
+
+# make add pkg=requests [group=dev]
+.PHONY: add
+add:
+	docker compose run --rm webapp uv add --project /app/webapp $(if $(group),--group $(group)) $(pkg)
+	$(MAKE) up
+
+# make add-js pkg=lodash
+.PHONY: add-js
+add-js:
+	docker compose run --rm assets npm install -w webapp $(pkg)
+	$(MAKE) up
 
 .PHONY: check-format
 check-format:
@@ -192,15 +226,15 @@ drop-all-tables:
 .SILENT:
 .PHONY: drop-schema-public
 drop-schema-public:
-	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	$(PSQL) -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .SILENT:
 .PHONY: create-schema-public
 create-schema-public:
-	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
+	$(PSQL) -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .SILENT:
-.PHONY: create-db-extensions
+.PHONY: create-extensions
 create-extensions:
 	@echo "Creating required extensions"
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
@@ -208,7 +242,7 @@ create-extensions:
 
 .PHONY: psql
 psql:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo
+	docker compose exec lvao-webapp-db psql -U webapp -d webapp
 
 .PHONY: dump-prod
 dump-prod:

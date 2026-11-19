@@ -6,20 +6,27 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
+# Locally the commands run in the Compose services. They run directly in CI and
+# inside a container; `make DOCKER= NPM_DOCKER= <target>` forces the host.
+ifeq ($(CI)$(wildcard /.dockerenv),)
+export HOST_UID := $(shell id -u)
+DOCKER ?= docker compose run --rm webapp
+NPM_DOCKER ?= docker compose run --rm assets
+endif
+
 # Aliases
 BASE_DOMAIN := quefairedemesdechets.localhost
-BLACK := uv run black
-WEBAPP_DB_PORT ?= 6543
-DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
+BLACK := $(DOCKER) uv run black
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
-PYTEST := uv run pytest
-PYTHON := uv run python
+PYTEST := $(DOCKER) uv run pytest
+PYTHON := $(DOCKER) uv run python
 DJANGO_ADMIN := $(PYTHON) manage.py
-RUFF := uv run ruff
+RUFF := $(DOCKER) uv run ruff
+NPM := $(NPM_DOCKER) npm
 
 .PHONY: sync
 sync:
-	uv sync --group dev --group webapp-dev
+	$(DOCKER) uv sync --group dev --group webapp-dev
 
 .PHONY: check-format
 check-format:
@@ -36,17 +43,11 @@ init-playwright:
 	npx playwright install --with-deps
 
 # Local django operations
+# The webapp service runs the migrations then runserver, next to the worker
+# that processes the background tasks and to the assets watcher.
 .PHONY: runserver
-# Run the django-tasks worker alongside runserver so background tasks (enqueued
-# admin actions) are processed locally. The worker runs in the background (&) and
-# `trap 'kill %1' EXIT` kills it when runserver stops, so we don't orphan it.
-# Must stay on one line: each Make recipe line is its own shell.
 runserver:
-	$(DJANGO_ADMIN) db_worker & trap 'kill %1' EXIT; $(DJANGO_ADMIN) runserver
-
-.PHONY: runserver-e2e
-runserver-e2e:
-	make DATABASE_URL=$(DB_WEBAPP_SAMPLE) runserver
+	docker compose up webapp worker assets
 
 .PHONY: migrate
 migrate:
@@ -99,9 +100,12 @@ create-remote-db-server:
 createsuperuser:
 	$(DJANGO_ADMIN) createsuperuser
 
-.PHONY: seed-database
-seed-database:
+.PHONY: seed-reference-data
+seed-reference-data:
 	$(DJANGO_ADMIN) loaddata_with_computed_fields categories labels sources actions produits acteur_services acteur_types objets synonymes carte_configs
+
+.PHONY: seed-database
+seed-database: seed-reference-data
 	$(DJANGO_ADMIN) loaddata_with_computed_fields acteurs propositions_services
 
 .PHONY: createsuperuser-example
@@ -135,7 +139,7 @@ clear-cache:
 
 .PHONY: npm-upgrade
 npm-upgrade:
-	npx npm-upgrade
+	$(NPM_DOCKER) npx npm-upgrade
 
 # Happy testing
 .PHONY: unit-test
@@ -157,7 +161,7 @@ prepare-e2e-test:
 	$(DJANGO_ADMIN) enable_trigram
 	make rebuild-search-index
 	make createsuperuser-example
-	BASE_URL=http://localhost:8888 npm run build
+	BASE_URL=http://localhost:8888 $(NPM) -w webapp run build
 
 # Alias for the root `make e2e-prepare`.
 .PHONY: prepare-e2e-test-local
@@ -178,7 +182,7 @@ a11y:
 
 .PHONY: js-test
 js-test:
-	npm run test
+	$(NPM) -w webapp run test
 
 .PHONY: backend-test
 backend-test:
