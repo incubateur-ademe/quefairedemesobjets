@@ -82,9 +82,15 @@ inputs = {
   DATABASE_URL                        = "postgres://${dependency.database.outputs.webapp_db_username}:${dependency.database.outputs.webapp_db_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database.outputs.webapp_database_name}?sslmode=require"
   DB_WAREHOUSE                        = "postgres://${dependency.database.outputs.warehouse_db_username}:${dependency.database.outputs.warehouse_db_password}@${dependency.database.outputs.warehouse_endpoint_ip}:${dependency.database.outputs.warehouse_endpoint_port}/${dependency.database.outputs.warehouse_database_name}?sslmode=require"
   DB_WEBAPP_SAMPLE                    = "postgres://${dependency.database_sample.outputs.webapp_db_sample_username}:${dependency.database_sample.outputs.webapp_db_sample_password}@${dependency.database.outputs.webapp_endpoint_ip}:${dependency.database.outputs.webapp_endpoint_port}/${dependency.database_sample.outputs.webapp_db_sample_database_name}?sslmode=require"
+  ENVIRONMENT                         = "preprod"
+  POSTGRES_DB                         = dependency.database.outputs.warehouse_database_name
   POSTGRES_HOST                       = dependency.database.outputs.warehouse_endpoint_ip
   POSTGRES_PASSWORD                   = dependency.database.outputs.warehouse_db_password
   POSTGRES_PORT                       = tostring(dependency.database.outputs.warehouse_endpoint_port)
+  POSTGRES_SCHEMA                     = "public"
+  POSTGRES_USER                       = dependency.database.outputs.warehouse_db_username
+
+  AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP = "airflow\\..* acteurs\\..* clone\\..* cluster\\..* crawl\\..* enrich\\..* ml_deduplication\\..* shared\\..* sources\\..* stats\\..* suggestions\\..* tools\\..* utils\\..*"
 
   AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL = 300
   AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES         = 1

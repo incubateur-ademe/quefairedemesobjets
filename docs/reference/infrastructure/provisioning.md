@@ -77,6 +77,10 @@ a new secret input is added there first.
 An input set in a stack's `terragrunt.hcl` wins over its secret, and a local
 `terraform.tfvars` wins over both.
 
+Only secrets go there. A value that is not one (a user name, a database name,
+an image tag) is written in the stack's `terragrunt.hcl`, or read from the
+output of the stack that creates the resource.
+
 ### Execution
 
 #### tfstate
