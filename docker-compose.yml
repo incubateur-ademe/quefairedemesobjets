@@ -1,6 +1,8 @@
 ---
+# Exported by the Makefile from data-platform/pyproject.toml. Without make:
+# AIRFLOW_VERSION=$(make -s airflow-version) docker compose --profile airflow build
 x-airflow-build-args: &airflow-build-args
-  AIRFLOW_VERSION: ${AIRFLOW_VERSION:-3.3.1}
+  AIRFLOW_VERSION: ${AIRFLOW_VERSION:-}
 
 x-airflow-common: &airflow-common
   tmpfs:
