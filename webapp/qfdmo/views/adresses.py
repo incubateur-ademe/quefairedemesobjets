@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import unidecode
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.postgres.lookups import Unaccent
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.cache import cache
@@ -13,7 +14,7 @@ from django.db.models import Q
 from django.db.models.functions import Length, Lower
 from django.db.models.query import QuerySet
 from django.http import Http404, JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_GET
 from django.views.generic import DetailView
 from django.views.generic.edit import FormView
@@ -326,17 +327,16 @@ class AbstractSearchActeursView(
         return filters, excludes
 
 
+@staff_member_required
 def getorcreate_revisionacteur(request, acteur_identifiant):
-    try:
-        acteur = Acteur.objects.get(identifiant_unique=acteur_identifiant)
+    acteur = Acteur.objects.filter(identifiant_unique=acteur_identifiant).first()
+    if acteur:
         revision_acteur = acteur.get_or_create_revision()
-    except Acteur.DoesNotExist as e:
-        # Case of Parent Acteur
-        revision_acteur = RevisionActeur.objects.get(
-            identifiant_unique=acteur_identifiant
+    else:
+        # Parents, and revisions whose acteur is gone, only exist as revisions
+        revision_acteur = get_object_or_404(
+            RevisionActeur, identifiant_unique=acteur_identifiant
         )
-        if not revision_acteur.is_parent:
-            raise e
     return redirect(revision_acteur.change_url)
 
 
