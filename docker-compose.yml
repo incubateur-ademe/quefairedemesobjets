@@ -200,7 +200,7 @@ services:
     ports:
       - ${WEBAPP_DB_PORT:-6543}:5432
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "webapp"]
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "webapp"]
       interval: 2s
       retries: 30
 
@@ -217,7 +217,7 @@ services:
     ports:
       - ${WAREHOUSE_DB_PORT:-8765}:5432
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "warehouse"]
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "warehouse"]
       interval: 2s
       retries: 30
     profiles: [airflow]
