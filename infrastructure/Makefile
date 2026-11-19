@@ -89,11 +89,13 @@ secrets-show: check-stack
 	@cd $(STACK_DIR) && ../../../../scripts/infrastructure/stack_secrets.sh $(ENV) $(STACK) | jq .
 
 # Pushes FILE as a new version and disables the previous one. Refuses a file
-# whose keys differ from secrets.example.json.
+# whose keys differ from secrets.example.json. The listing is scoped to the
+# project: an API key limited to it cannot list the organisation's secrets.
 .PHONY: secrets-push
 secrets-push: check-stack
 	@[ "$$(jq -c 'keys' "$(STACK_DIR)/secrets.example.json")" = "$$(jq -c 'keys' "$(FILE)")" ] \
 	  || { echo "$(FILE): keys differ from $(STACK_DIR)/secrets.example.json"; exit 1; }
-	@id=$$(scw secret secret list path=/terraform/$(ENV) name=$(STACK) -o json | jq -r --arg n "$(STACK)" '[.[] | select(.name == $$n)][0].id // empty'); \
+	@project=$${SCW_DEFAULT_PROJECT_ID:-$$(scw config get default-project-id)}; \
+	  id=$$(scw secret secret list project-id=$$project path=/terraform/$(ENV) name=$(STACK) -o json | jq -r --arg n "$(STACK)" '[.[] | select(.name == $$n)][0].id // empty'); \
 	  [ -n "$$id" ] || id=$$(scw secret secret create path=/terraform/$(ENV) name=$(STACK) -o json | jq -er '.id'); \
 	  scw secret version create "$$id" data=@$(FILE) disable-previous=true -o json | jq -r '"/terraform/$(ENV)/$(STACK): revision \(.revision)"'
