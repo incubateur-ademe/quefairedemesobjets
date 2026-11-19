@@ -1,9 +1,7 @@
 # Integration tests for the nginx container (nginx/Dockerfile).
-# Requires the container to be running: docker compose --profile lvao up lvao-proxy -d
+# Requires the container to be running: docker compose up lvao-proxy -d
 # Override the target with NGINX_TEST_URL. Django does not need to be running.
 
-import os
-import subprocess
 import time
 
 import pytest
@@ -12,31 +10,16 @@ import requests
 import decouple
 
 BASE_URL = decouple.config(
-    "NGINX_TEST_URL", "https://quefairedemesdechets.localhost"
+    "NGINX_TEST_URL", "http://quefairedemesdechets.localhost"
 ).rstrip("/")
 BASE_DOMAIN = decouple.config("BASE_DOMAIN", "quefairedemesdechets.localhost")
 LEGACY_DOMAIN = decouple.config("LEGACY_SITE_VITRINE_DOMAIN", "")
 CACHE_DISABLED = decouple.config("NGINX_DISABLE_CACHE", "0") == "1"
 
 
-# Use the mkcert CA bundle when available so requests can verify local certs.
-# Falls back to False (no verification) if mkcert is not installed.
-def _ssl_verify():
-    try:
-        caroot = subprocess.check_output(["mkcert", "-CAROOT"], text=True).strip()
-        ca = os.path.join(caroot, "rootCA.pem")
-        return ca if os.path.exists(ca) else False
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return False
-
-
-SSL_VERIFY = _ssl_verify()
-
-
 def get(path="/", **kwargs) -> requests.Response:
     kwargs.setdefault("allow_redirects", False)
     kwargs.setdefault("timeout", 5)
-    kwargs.setdefault("verify", SSL_VERIFY)
     return requests.get(f"{BASE_URL}{path}", **kwargs)
 
 
@@ -45,13 +28,12 @@ def wait_for_nginx():
     deadline = time.time() + 10
     while time.time() < deadline:
         try:
-            requests.get(BASE_URL, timeout=2, allow_redirects=False, verify=SSL_VERIFY)
+            requests.get(BASE_URL, timeout=2, allow_redirects=False)
             return
         except requests.ConnectionError:
             time.sleep(0.5)
     pytest.fail(
-        f"nginx not reachable at {BASE_URL}. "
-        "Run: docker compose --profile lvao up lvao-proxy -d"
+        f"nginx not reachable at {BASE_URL}. " "Run: docker compose up lvao-proxy -d"
     )
 
 
@@ -74,7 +56,6 @@ class TestHostValidation:
             legacy_url + "/some/path",
             allow_redirects=False,
             timeout=5,
-            verify=SSL_VERIFY,
         )
         assert resp.status_code == 301
         location = resp.headers.get("Location", "")

@@ -1,6 +1,5 @@
 # Aliases
 BASE_DOMAIN := quefairedemesdechets.localhost
-LEGACY_SITE_VITRINE_DOMAIN ?= longuevieauxobjets.localhost
 WEBAPP_DB_PORT ?= 6543
 DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
 PYTHON := uv run python
@@ -29,39 +28,6 @@ check:
 	@source .venv/bin/activate; python --version; pip --version
 	@npm --version
 	@node --version
-
-.PHONY: init-certs
-init-certs:
-	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
-	mkcert -install
-	mkdir -p ./webapp/nginx/certs
-	mkcert -cert-file ./webapp/nginx/certs/$(BASE_DOMAIN).pem -key-file ./webapp/nginx/certs/$(BASE_DOMAIN)-key.pem $(BASE_DOMAIN) $(LEGACY_SITE_VITRINE_DOMAIN)
-	@grep -q "^BASE_URL=" .env 2>/dev/null || echo "BASE_URL=https://$(BASE_DOMAIN)" >> .env
-	docker compose up -d --force-recreate webapp worker assets lvao-proxy
-
-# FIXME : Reactive it !
-# .PHONY: init-dev
-# init-dev:
-# 	# python
-# 	pip install uv
-# 	uv install --with dev,airflow
-# 	make init-certs
-# 	# git
-# 	git config blame.ignoreRevsFile .git-blame-ignore-revs
-# 	pre-commit install
-# 	# javascript
-# 	npm ci
-# 	make init-playwright
-# 	# environment
-# 	cp .env.template .env
-# 	cp ./dags/.env.template ./dags/.env
-# 	# prepare django
-# 	make run-all
-# 	make create-remote-db-server
-# 	make migrate
-# 	make createcachetable
-# 	make createsuperuser
-# 	make seed-database
 
 .PHONY: check-format
 check-format:
