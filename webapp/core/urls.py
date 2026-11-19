@@ -23,13 +23,12 @@ from django.contrib.sitemaps import views as sitemaps_views
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 from django.views.generic import RedirectView, TemplateView
+from qfdmd.models import Synonyme
 from sites_conformes.content_manager.urls import urlpatterns as sites_conformes_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap
 from wagtail.contrib.sitemaps.views import index
 from wagtail.documents import urls as wagtaildocs_urls
-
-from qfdmd.models import Synonyme
 
 from .api import api, api_v1
 from .views import AutocompleteSynonyme, backlink, healthz, robots_txt

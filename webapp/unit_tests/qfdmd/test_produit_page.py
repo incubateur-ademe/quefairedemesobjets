@@ -439,9 +439,7 @@ class TestSyncFromLegacyProduitUsageUnique:
     def test_waste_gets_usage_unique_and_deposer_uniquement_carte(self):
         CarteConfigFactory(slug="tous-les-gestes", nom="Tous les gestes")
         CarteConfigFactory(slug="ass-deposer-uniquement", nom="Déposer uniquement")
-        page = self._page_for(
-            SousCategorieObjetFactory(reemploi_possible=False, afficher_carte=True)
-        )
+        page = self._page_for(SousCategorieObjetFactory(reemploi_possible=False))
 
         page.sync_from_legacy_produit()
 
@@ -452,7 +450,7 @@ class TestSyncFromLegacyProduitUsageUnique:
         CarteConfigFactory(slug="tous-les-gestes", nom="Tous les gestes")
         CarteConfigFactory(slug="ass-deposer-uniquement", nom="Déposer uniquement")
         page = self._page_for(
-            SousCategorieObjetFactory(reemploi_possible=False, afficher_carte=True),
+            SousCategorieObjetFactory(reemploi_possible=False),
             SousCategorieObjetFactory(reemploi_possible=True),
         )
 
