@@ -4,8 +4,8 @@
 #
 # FIXME: nothing bumps these versions automatically. Dependabot does not read
 # .tool-versions, and no longer sees them in the Dockerfiles. To configure in
-# Renovate (asdf manager) when it is set up; a python bump must also update
-# .python-version, which the CI checks.
+# Renovate (asdf manager) when it is set up. Only Scalingo still reads
+# .python-version: keep it in step by hand until it is dropped.
 tool-version = $(shell awk '$$1 == "$(1)" {print $$2}' $(dir $(lastword $(MAKEFILE_LIST))).tool-versions)
 
 export NODE_VERSION := $(call tool-version,nodejs)

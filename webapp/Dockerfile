@@ -84,7 +84,9 @@ RUN apt-get update \
 # bind-mounted on /app, so the virtualenv lives outside of it.
 FROM runtime_base AS dev
 
+# UV_PYTHON: the Python of the image, whatever the mounted .python-version says
 ENV UV_LINK_MODE=copy \
+    UV_PYTHON=/usr/local/bin/python \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_CACHE_DIR=/tmp/uv-cache \
     VIRTUAL_ENV=/opt/venv \

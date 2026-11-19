@@ -103,7 +103,7 @@ Les cibles de `webapp/Makefile` s'exécutent dans les conteneurs. `make DOCKER= 
 
 `.tool-versions`, à la racine, est le seul endroit où elles sont écrites. `make` les lit et les passe à la construction des images, la CI fait de même. Les images se construisent donc avec `make up`, pas avec `docker compose build` seul.
 
-Pour changer de version : modifier `.tool-versions` (et `.python-version`, lu par Scalingo et uv, que la CI vérifie identique), puis `make up`.
+Pour changer de version : modifier `.tool-versions` (et `.python-version` tant que Scalingo, seul à le lire encore, est en service), puis `make up`.
 
 ### Dépendances à jour
 
