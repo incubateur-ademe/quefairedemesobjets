@@ -62,10 +62,6 @@ x-webapp-common: &webapp-common
   depends_on:
     lvao-webapp-db:
       condition: service_healthy
-  develop:
-    watch:
-      - action: rebuild
-        path: ./uv.lock
 
 services:
   webapp:
@@ -114,10 +110,6 @@ services:
       interval: 5s
       retries: 5
       start_period: 600s
-    develop:
-      watch:
-        - action: restart
-          path: ./package-lock.json
 
   lvao-proxy:
     build:
@@ -128,7 +120,6 @@ services:
       - ${HTTPS_PORT:-443}:443
     volumes:
       - ./webapp/nginx/certs:/etc/nginx/ssl
-      - ./webapp/staticfiles:/app/staticfiles
     environment:
       - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.ademe.local}
       - PORT=80
@@ -166,7 +157,6 @@ services:
       - POSTGRES_USER=warehouse
       - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
       - POSTGRES_DB=warehouse
-      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
       - warehouse16_dbdata:/var/lib/postgresql/data
     ports:
