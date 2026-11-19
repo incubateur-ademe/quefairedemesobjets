@@ -596,6 +596,8 @@ Si ce n’est pas le cas suivre <a class="reference external" href="https://gith
 <span class="nv">SCALEWAY_NAMESPACE</span><span class="o">=</span><span class="s2">&quot;ns-qfdmo&quot;</span>
 <span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;hotfix-vX.Y.Z&quot;</span>
 <span class="nv">SCALEWAY_DOCKER_SECRET</span><span class="o">=</span><span class="k">$(</span>scw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>secret-key<span class="k">)</span>
+<span class="c1"># Version de apache-airflow dans data-platform/pyproject.toml, requise par les Dockerfiles</span>
+<span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="k">$(</span>make<span class="w"> </span>-s<span class="w"> </span>airflow-version<span class="k">)</span>
 </pre></div>
 </div>
 </section>
@@ -608,21 +610,21 @@ Si ce n’est pas le cas suivre <a class="reference external" href="https://gith
 </section>
 <section id="construction-et-push-de-l-image-airflow-scheduler">
 <h3>2. Construction et push de l’image airflow-scheduler<a class="headerlink" href="#construction-et-push-de-l-image-airflow-scheduler" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-scheduler.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span><span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="nv">$AIRFLOW_VERSION</span><span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-scheduler.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span><span class="w"> </span>.
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span>
 </pre></div>
 </div>
 </section>
 <section id="construction-et-push-de-l-image-airflow-webserver">
 <h3>3. Construction et push de l’image airflow-webserver<a class="headerlink" href="#construction-et-push-de-l-image-airflow-webserver" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-webserver.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span><span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="nv">$AIRFLOW_VERSION</span><span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-webserver.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span><span class="w"> </span>.
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span>
 </pre></div>
 </div>
 </section>
 <section id="construction-et-push-de-l-image-airflow-dag-processor">
 <h3>4. Construction et push de l’image airflow-dag-processor<a class="headerlink" href="#construction-et-push-de-l-image-airflow-dag-processor" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-dag-processor.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span><span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="nv">$AIRFLOW_VERSION</span><span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-dag-processor.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span><span class="w"> </span>.
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span>
 </pre></div>
 </div>
