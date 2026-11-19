@@ -1,11 +1,5 @@
 SHELL := /bin/bash
 
-# Loading environment variables
-ifneq (,$(wildcard ./.env))
-	include .env
-	export
-endif
-
 # Locally the commands run in the Compose services. They run directly in CI and
 # inside a container; `make DOCKER= NPM_DOCKER= <target>` forces the host.
 ifeq ($(CI)$(wildcard /.dockerenv),)

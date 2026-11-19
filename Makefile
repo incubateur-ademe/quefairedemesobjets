@@ -6,12 +6,6 @@ PYTHON := uv run python
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 
-# Loading environment variables
-ifneq (,$(wildcard ./.env))
-    include .env
-    export
-endif
-
 # apache/airflow:slim-<version>-python3.12 — extracted from data-platform/pyproject.toml,
 # the only place where the Airflow version is written. The CI reads it with
 # `make -s airflow-version`.
