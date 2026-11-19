@@ -29,10 +29,13 @@ Make sure you have administration rights on the project targeted by this infrast
 ```
 infrastructure/
 ├── environments/
-│   ├── root.hcl
+│   ├── root.hcl                     -> backend, provider, secrets: every stack
+│   ├── _envcommon/
+│   │   └── database.hcl             -> what the stack is in every environment
 │   ├── prod/
+│   │   ├── env.hcl                  -> what the stacks share about prod (domain…)
 │   │   └── database/
-│   │       ├── terragrunt.hcl
+│   │       ├── terragrunt.hcl       -> includes both, adds what is prod's own
 │   │       └── secrets.example.json -> keys of the stack's secret
 │   ├── preprod/
 │   └── preview/
@@ -43,6 +46,8 @@ infrastructure/
     │   └── outputs.tf
     └── provider/
 ```
+
+A stack is described once, in `_envcommon/<stack>.hcl`: its module, its dependencies and the inputs that are the same everywhere. The `terragrunt.hcl` of an environment only holds what differs there (sizing, names). A stack that exists in a single environment (`metabase_containers`, `container_registry`) keeps everything in its `terragrunt.hcl`.
 
 #### Configuration
 
