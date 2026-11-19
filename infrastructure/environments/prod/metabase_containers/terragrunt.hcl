@@ -29,6 +29,7 @@ inputs = {
   prefix = "qfdmod"
 
   metabase_registry_image = "metabase/metabase"
+  tag_docker              = "v0.64.7.x"
   metabase_cpu_limit      = 1000
   metabase_memory_limit   = 2048
   metabase_min_scale      = 1

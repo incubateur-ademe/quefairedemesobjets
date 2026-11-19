@@ -123,14 +123,6 @@ variable "SCW_ACCESS_KEY" {
   type      = string
   sensitive = true
 }
-variable "SCW_DEFAULT_ORGANIZATION_ID" {
-  type      = string
-  sensitive = true
-}
-variable "SCW_DEFAULT_PROJECT_ID" {
-  type      = string
-  sensitive = true
-}
 variable "SCW_SECRET_KEY" {
   type      = string
   sensitive = true

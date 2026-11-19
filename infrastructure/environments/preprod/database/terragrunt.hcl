@@ -8,17 +8,23 @@ include {
 
 inputs = {
   # Web app
-  webapp_node_type   = "DB-PLAY2-NANO"
-  webapp_db_name     = "webapp"
-  webapp_volume_size = 20
+  webapp_node_type            = "DB-PLAY2-NANO"
+  webapp_db_name              = "webapp"
+  webapp_db_username          = "webapp"
+  webapp_db_metabase_username = "webapp_metabase"
+  webapp_volume_size          = 20
 
   # Warehouse
-  warehouse_node_type   = "DB-PLAY2-NANO"
-  warehouse_db_name     = "warehouse"
-  warehouse_volume_size = 100
+  warehouse_node_type            = "DB-PLAY2-NANO"
+  warehouse_db_name              = "warehouse"
+  warehouse_db_username          = "warehouse"
+  warehouse_db_metabase_username = "warehouse_metabase"
+  warehouse_volume_size          = 100
 
   # Airflow (database on warehouse instance)
-  airflow_db_name = "airflow"
+  airflow_db_name     = "airflow"
+  airflow_db_username = "airflow"
+
   # Cross-DB postgres_fdw setup between webapp and warehouse.
   create_remote_warehouse_in_webapp_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_warehouse_in_webapp.sql")
   create_remote_webapp_in_warehouse_script_path = abspath("${get_terragrunt_dir()}/../../../../scripts/sql/create_remote_webapp_in_warehouse.sql")
