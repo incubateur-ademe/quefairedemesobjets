@@ -1,7 +1,11 @@
 ############################################
-# Stage 1: build frontend assets (Node)
+# Stage 1: Node, then the frontend assets build
 ############################################
-FROM node:24.22.3-slim AS node_build
+# Also the image of the local `assets` service (docker-compose.yml)
+FROM node:24.22.3-slim AS node_base
+
+
+FROM node_base AS node_build
 
 WORKDIR /build
 
@@ -57,6 +61,42 @@ RUN apt-get update \
       libpq5 \
       nginx \
     && rm -rf /var/lib/apt/lists/*
+
+
+############################################
+# Local development image (docker-compose.yml)
+############################################
+# Same system packages and Python as the runtime image. The repository is
+# bind-mounted on /app, so the virtualenv lives outside of it.
+FROM runtime_base AS dev
+
+ENV UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_CACHE_DIR=/tmp/uv-cache \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:${PATH}" \
+    HOME=/tmp
+
+# gettext for compilemessages, git for uv to install django-dsfr from its git
+# fork (tool.uv.sources)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+COPY webapp/pyproject.toml webapp/pyproject.toml
+COPY data-platform/pyproject.toml data-platform/pyproject.toml
+# Group-writable: the container runs as the host user, in group 0
+RUN UV_NO_CACHE=1 uv sync --frozen --group dev --group webapp-dev \
+    && chmod -R g=u /opt/venv
+
+COPY webapp/bin/dev-entrypoint.sh /usr/local/bin/dev-entrypoint.sh
+WORKDIR /app/webapp
+ENTRYPOINT ["dev-entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 
 ############################################
