@@ -44,7 +44,7 @@ Les contrôles `pre-commit` sont la première barrière de qualité ; ils ne doi
 - Ajouter une dépendance Python via `uv add <package>` depuis `webapp/` ou `data-platform/` (voir [Gestion de package](dependencies.md)).
 - Pour npm, respecter le **cooldown de 7 jours** (`--before="$(date -v -7d +%Y-%m-%d)"`) pour limiter le risque de _supply chain attack_.
 - Préférer des dépendances **maintenues, open source, à faible empreinte**.
-- Les mises à jour automatiques sont gérées par **Dependabot** (hebdomadaire) : les PR Dependabot doivent être traitées (relues, mergées ou refusées explicitement).
+- Les mises à jour automatiques sont gérées par **Renovate** (hebdomadaire) : les PR Renovate doivent être traitées (relues, mergées ou refusées explicitement).
 - Avant d'introduire une nouvelle dépendance, vérifier qu'elle ne duplique pas une capacité déjà présente et qu'elle n'a pas de CVE ouverte sérieuse.
 
 ### 4. Écrire et exécuter les tests

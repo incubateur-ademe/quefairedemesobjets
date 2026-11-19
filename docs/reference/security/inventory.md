@@ -50,7 +50,7 @@ Les actions ci-dessous sont menées de manière récurrente pour maintenir le ni
 
 | Action                                                     | Fréquence cible                                  | Outil / référence                                                                      |
 | ---------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| **Mise à jour des dépendances**                            | Hebdomadaire                                     | Dependabot ([`README.md`](README.md))                                                  |
+| **Mise à jour des dépendances**                            | Hebdomadaire                                     | Renovate ([`README.md`](README.md))                                                    |
 | **Scan de secrets**                                        | À chaque commit                                  | `detect-secrets` (pre-commit) + GitGuardian (CI) ([`secrets.md`](secrets.md))          |
 | **Analyse statique du code**                               | À chaque PR                                      | CodeQL, Ruff, ESLint, Black, Prettier ([`README.md`](README.md))                       |
 | **Audit sécurité externe**                                 | Continu                                          | Dashlord ADEME ([dashlord.incubateur.ademe.fr](https://dashlord.incubateur.ademe.fr/)) |

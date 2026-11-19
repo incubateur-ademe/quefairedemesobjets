@@ -46,7 +46,7 @@ Plateforme data :
 CI/CD:
 
 - Github
-- Dependabot
+- Renovate
 
 Administration:
 

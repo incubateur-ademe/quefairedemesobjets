@@ -2,7 +2,7 @@
 
 Outils d'observabilité applicative et infrastructure.
 
-> **Voir aussi** : [Sécurité — vue d'ensemble](../security/README.md) (CodeQL / GitGuardian / Dependabot / Dashlord), [Architecture applicative](../architecture/README.md), [CI/CD](ci-cd.md).
+> **Voir aussi** : [Sécurité — vue d'ensemble](../security/README.md) (CodeQL / GitGuardian / Renovate / Dashlord), [Architecture applicative](../architecture/README.md), [CI/CD](ci-cd.md).
 
 ## Vue d'ensemble
 
