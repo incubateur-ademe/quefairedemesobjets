@@ -5,7 +5,8 @@
 @tailwind utilities;
 
 @layer base {
-  p a {
+  p a,
+  .fr-card__desc a {
     @apply qf-text-blue-france-sun-113-625;
   }
 
@@ -17,6 +18,10 @@
   iframe {
     max-width: 100%;
   }
+}
+
+ul.fr-card__desc > li + li {
+  margin-top: 0.75rem;
 }
 
 @layer components {
