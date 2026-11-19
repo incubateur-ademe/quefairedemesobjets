@@ -133,6 +133,8 @@ updates:
         patterns:
           - "*"
 
+  # Node, Python and uv are build arguments read from .tool-versions: they are
+  # not bumped here, see the FIXME in versions.mk (Renovate).
   - package-ecosystem: "docker"
     directories:
       - "/webapp"
