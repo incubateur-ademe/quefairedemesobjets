@@ -1,7 +1,7 @@
 ############################################
 # Stage 1: build frontend assets (Node)
 ############################################
-FROM node:24-slim AS node_build
+FROM node:24.22.3-slim AS node_build
 
 WORKDIR /build
 
@@ -20,7 +20,7 @@ RUN npm -w webapp/revue-front run build
 ############################################
 # Compiles servers.conf.erb — the same template Scalingo uses — with
 # preview-appropriate values baked in at build time.
-FROM ruby:alpine AS nginx_config
+FROM ruby:4.0.10-alpine AS nginx_config
 
 WORKDIR /build
 COPY servers.conf.erb .

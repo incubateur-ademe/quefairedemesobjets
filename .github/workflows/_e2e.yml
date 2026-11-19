@@ -38,7 +38,7 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgis/postgis:15-3.3-alpine
+        image: imresamu/postgis:16-3.5-alpine
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
@@ -144,6 +144,8 @@ jobs:
     steps:
     - uses: actions/checkout@v7.0.1
     - uses: actions/setup-node@v7.1.0
+      with:
+        node-version-file: ".tool-versions"
     - name: Install dependencies
       run: npm ci
       working-directory: webapp

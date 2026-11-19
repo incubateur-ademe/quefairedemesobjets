@@ -28,7 +28,7 @@ jobs:
       POSTGRES_SCHEMA: public
     services:
       postgres:
-        image: postgis/postgis:15-3.3-alpine
+        image: imresamu/postgis:16-3.5-alpine
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
