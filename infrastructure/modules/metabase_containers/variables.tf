@@ -55,6 +55,7 @@ variable "MB_ENCRYPTION_SECRET_KEY" {
   description = "Clé de chiffrement des secrets stockés par Metabase"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "MB_SITE_NAME" {
