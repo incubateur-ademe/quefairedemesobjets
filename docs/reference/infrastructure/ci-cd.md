@@ -58,7 +58,11 @@ When a Pull Request is merged into the `main` branch, the **🌚 Main to preprod
 
 Deployment to `preprod` does not wait for CI, and a CI failure does not stop it. CI runs in parallel, as on a pull request. The draft release is only updated when CI and both deployments succeeded.
 
-A new commit on `main` cancels the run in progress, so only the last commit gets deployed. A re-run waits for the run in progress instead of cancelling it, as it could be an older commit.
+A new commit on `main` cancels only the checks of the previous one. Deployments are never cancelled: they queue per target, and a newer pending one replaces an older pending one, so the last commit gets deployed.
+
+Airflow and the nginx gateway are deployed by applying their Terragrunt stack (`airflow_containers`, `nginx_containers`) with the new image tag, through [\_terragrunt-apply-stack.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/_terragrunt-apply-stack.yml): the stack is planned, the plan is applied, then the workflow waits for the containers to be `ready`. A deployment therefore also ships any change merged in the stack (environment variables, sizing, probes), and no container is updated outside of OpenTofu. The secrets of the stack are read from Scaleway Secret Manager, see [Provisioning](provisioning.md#configuration).
+
+The Scaleway key of the `preprod` and `prod` GitHub environments needs, on the project: read and write on the `lvao-terraform-state` bucket, `SecretManagerReadOnly` and `SecretManagerSecretAccess`, and the rights to manage the containers. The Terraform state has no lock: the workflows queue the applies of a stack, and a manual apply must not run during a deployment.
 
 ### CD workflow flow
 
@@ -67,7 +71,7 @@ graph TD
     A[Push on main] --> C[CI of each app]
     A --> W{Confirm deployment to preprod?}
     W -->|Yes| F[Webapp deployment]
-    W -->|Yes| G[Build Airflow images and deploy on Scaleway]
+    W -->|Yes| G[Build Airflow images and apply the airflow_containers stack]
     A --> E[E2E tests]
     C --> H[Update of the draft release]
     F --> H
@@ -88,7 +92,7 @@ graph TD
     F{Images of this commit<br/>in the registry?}
     F -->|Yes| R[Tag them with the version number]
     F -->|No| B[Build and tag with the version number]
-    R --> H[Deployment of Airflow on Scaleway in production]
+    R --> H[Apply of the airflow_containers stack in production]
     B --> H
 ```
 
