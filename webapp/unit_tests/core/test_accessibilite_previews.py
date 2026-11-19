@@ -17,6 +17,7 @@ def preview():
     return AccessibilitePreview()
 
 
+@pytest.mark.django_db
 class TestFilArianeProduit:
     """A11Y-3 — fil d'ariane sur ProduitPage / FamilyPage."""
 

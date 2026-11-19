@@ -1,7 +1,8 @@
+{% load a11y_settings_tags %}
 <a
   class="qf-grid qf-grid-cols-2 qf-pl-2w qf-py-2w"
   href="/"
-  title="Accueil — {{ SITE_CONFIG.site_title }}"
+  title="{% a11y_label "home_link_label" %} — {{ SITE_CONFIG.site_title }}"
 >
   <span> {% include "./_logo_rf.html" %} </span>
   <span> {% include "./_logo_ademe.html" %} </span>

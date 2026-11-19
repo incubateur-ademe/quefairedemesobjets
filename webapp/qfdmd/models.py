@@ -1796,6 +1796,215 @@ def clear_search_settings_cache(**kwargs):
     cache.delete(SEARCH_SETTINGS_CACHE_KEY)
 
 
+def _a11y_label(verbose_name, default, help_text=""):
+    return models.CharField(
+        verbose_name, max_length=255, default=default, help_text=help_text
+    )
+
+
+@register_setting(icon="glasses")
+class AccessibilitySettings(BaseGenericSetting):
+    """Every label read by assistive technologies only (aria-label, title,
+    visually hidden text), so that none is hardcoded in templates."""
+
+    # Toutes les pages
+    skiplink_content_label = _a11y_label("Lien d'évitement vers le contenu", "Contenu")
+    breadcrumb_label = _a11y_label("Fil d'Ariane", "vous êtes ici :")
+    new_window_mention = _a11y_label(
+        "Mention des liens ouverts dans une nouvelle fenêtre",
+        "nouvelle fenêtre",
+        "Ajoutée au titre des liens : « <texte du lien> - <mention> ».",
+    )
+    modal_close_label = _a11y_label(
+        "Bouton de fermeture des fenêtres modales", "Fermer la fenêtre modale"
+    )
+    loading_label = _a11y_label("Chargement en cours", "Chargement...")
+    copy_label = _a11y_label("Bouton de copie d'un code", "Copier")
+    search_submit_label = _a11y_label("Bouton de recherche", "Rechercher")
+    search_widget_label = _a11y_label(
+        "Étiquette du champ de recherche de déchet", "Entrez un déchet :"
+    )
+
+    # En-tête
+    header_search_label = _a11y_label(
+        "Étiquette du champ de recherche",
+        qfdmd_forms.DEFAULT_HEADER_SEARCH_PLACEHOLDER,
+        "Lue par les lecteurs d'écran et affichée en infobulle.",
+    )
+    home_link_label = _a11y_label(
+        "Lien vers l'accueil",
+        "Accueil",
+        "Suivi du nom du site : « Accueil — <nom du site> ».",
+    )
+
+    # Pied de page
+    footer_nav_label = _a11y_label("Navigation du pied de page", "Pour aller plus loin")
+
+    # Page d'accueil
+    home_search_label = _a11y_label(
+        "Étiquette du champ de recherche",
+        qfdmd_forms.DEFAULT_SEARCH_LABEL,
+        "Lue par les lecteurs d'écran et affichée en infobulle.",
+    )
+
+    # Fiche produit
+    produit_state_tabs_label = _a11y_label(
+        "Onglets bon état / mauvais état",
+        "État du produit",
+        "Suivi du nom du produit.",
+    )
+
+    # Contenu des pages
+    footnote_label = _a11y_label(
+        "Appel de note", "Note de bas de page", "Suivi du numéro de la note."
+    )
+    footnote_back_label = _a11y_label(
+        "Retour depuis une note", "retour au texte", "Précédé du numéro de la note."
+    )
+    footnotes_list_label = _a11y_label(
+        "Liste des notes de bas de page", "Notes de bas de page"
+    )
+    rating_label_singular = _a11y_label(
+        "Note en étoiles (singulier)", "étoile", "Lu après le nombre : « 1 étoile »."
+    )
+    rating_label_plural = _a11y_label(
+        "Note en étoiles (pluriel)", "étoiles", "Lu après le nombre : « 3 étoiles »."
+    )
+
+    # Carte
+    view_mode_nav_label = _a11y_label(
+        "Navigation entre les modes d'affichage", "Mode d'affichage"
+    )
+    map_region_label = _a11y_label("Zone de la carte", "Carte des solutions")
+    list_region_label = _a11y_label("Zone de la liste", "Liste des solutions")
+    assistant_map_region_label = _a11y_label(
+        "Zone de la carte d'une fiche produit", "Carte des lieux proposant ce geste"
+    )
+    map_title = _a11y_label("Nom de la carte", "Carte")
+    map_zoom_in = _a11y_label("Bouton zoomer", "Zoomer")
+    map_zoom_out = _a11y_label("Bouton dézoomer", "Dézoomer")
+    map_attribution_toggle = _a11y_label("Bouton des crédits", "Crédits de la carte")
+    map_feedback = _a11y_label(
+        "Lien de signalement", "Signaler un problème sur la carte"
+    )
+    map_popup_close = _a11y_label("Fermeture d'une infobulle", "Fermer la fenêtre")
+
+    # Fiche d'un lieu
+    acteur_close_label = _a11y_label("Bouton de fermeture de la fiche", "Fermer")
+    acteur_tabs_label = _a11y_label(
+        "Onglets de la fiche",
+        "Informations détaillées de la solution",
+        "Suivi de l'adresse du lieu.",
+    )
+    share_label = _a11y_label(
+        "Bouton et liens de partage",
+        "partager",
+        "Les liens deviennent « <libellé> <fiche> sur Facebook - <mention> ».",
+    )
+
+    # Formulaire
+    formulaire_title = _a11y_label(
+        "Titre de la page (masqué)", "Que faire de mes objets et déchets"
+    )
+    formulaire_results_label = _a11y_label(
+        "Zone des résultats", "Résultats du formulaire"
+    )
+    update_search_label = _a11y_label(
+        "Bouton de modification de la recherche", "Modifier ma recherche"
+    )
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(
+                [
+                    FieldPanel("skiplink_content_label"),
+                    FieldPanel("breadcrumb_label"),
+                    FieldPanel("new_window_mention"),
+                    FieldPanel("modal_close_label"),
+                    FieldPanel("loading_label"),
+                    FieldPanel("copy_label"),
+                    FieldPanel("search_submit_label"),
+                    FieldPanel("search_widget_label"),
+                ],
+                heading="Toutes les pages",
+            ),
+            ObjectList(
+                [FieldPanel("header_search_label"), FieldPanel("home_link_label")],
+                heading="En-tête",
+            ),
+            ObjectList([FieldPanel("footer_nav_label")], heading="Pied de page"),
+            ObjectList([FieldPanel("home_search_label")], heading="Page d'accueil"),
+            ObjectList(
+                [FieldPanel("produit_state_tabs_label")], heading="Fiche produit"
+            ),
+            ObjectList(
+                [
+                    MultiFieldPanel(
+                        [
+                            FieldPanel("footnote_label"),
+                            FieldPanel("footnote_back_label"),
+                            FieldPanel("footnotes_list_label"),
+                        ],
+                        heading="Notes de bas de page",
+                    ),
+                    MultiFieldPanel(
+                        [
+                            FieldPanel("rating_label_singular"),
+                            FieldPanel("rating_label_plural"),
+                        ],
+                        heading="Notes en étoiles",
+                    ),
+                ],
+                heading="Contenu des pages",
+            ),
+            ObjectList(
+                [
+                    MultiFieldPanel(
+                        [
+                            FieldPanel("view_mode_nav_label"),
+                            FieldPanel("map_region_label"),
+                            FieldPanel("list_region_label"),
+                            FieldPanel("assistant_map_region_label"),
+                        ],
+                        heading="Zones",
+                    ),
+                    MultiFieldPanel(
+                        [
+                            FieldPanel("map_title"),
+                            FieldPanel("map_zoom_in"),
+                            FieldPanel("map_zoom_out"),
+                            FieldPanel("map_attribution_toggle"),
+                            FieldPanel("map_feedback"),
+                            FieldPanel("map_popup_close"),
+                        ],
+                        heading="Contrôles de la carte",
+                    ),
+                ],
+                heading="Carte",
+            ),
+            ObjectList(
+                [
+                    FieldPanel("acteur_close_label"),
+                    FieldPanel("acteur_tabs_label"),
+                    FieldPanel("share_label"),
+                ],
+                heading="Fiche d'un lieu",
+            ),
+            ObjectList(
+                [
+                    FieldPanel("formulaire_title"),
+                    FieldPanel("formulaire_results_label"),
+                    FieldPanel("update_search_label"),
+                ],
+                heading="Formulaire",
+            ),
+        ]
+    )
+
+    class Meta:
+        verbose_name = "Accessibilité"
+
+
 @register_setting
 class FormPageValidationSettings(BaseGenericSetting):
     form_page = models.ForeignKey(

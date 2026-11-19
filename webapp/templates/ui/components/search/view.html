@@ -1,3 +1,4 @@
+{% load a11y_settings_tags %}
 {% load qfdmd_tags %}
 {% with id=search_form.id.value %}
 <turbo-frame id="{{ id }}">
@@ -44,7 +45,7 @@
                 qf-h-full
                 !qf-max-h-[none]
                 qf-text-green-menthe-sun-373-moon-652-hover"
-            ><span class="qf-sr-only">Rechercher</span></button>
+            ><span class="qf-sr-only">{% a11y_label "search_submit_label" %}</span></button>
         </form>
 
         <turbo-frame

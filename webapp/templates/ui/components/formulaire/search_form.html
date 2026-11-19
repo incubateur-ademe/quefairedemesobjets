@@ -1,3 +1,4 @@
+{% load a11y_settings_tags %}
 {% load static %}
 {# Panel «Formulaire de recherche» #}
 <div
@@ -8,7 +9,7 @@
     qf-flex-grow"
     data-search-solution-form-target="searchFormPanel"
 >
-    <h1 class="qf-sr-only">Que faire de mes objets et déchets</h1>
+    <h1 class="qf-sr-only">{% a11y_label "formulaire_title" %}</h1>
     <div class="qf-flex">
         <div data-testid="form-content">
             {# TODO: REFACTO OVERFLOW : supprimer les overflow et le padding left #}

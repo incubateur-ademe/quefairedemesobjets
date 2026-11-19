@@ -1,3 +1,4 @@
+{% load a11y_settings_tags %}
 <div class="
     qf-relative
     qf-hidden qf-flex-row
@@ -13,7 +14,7 @@
                fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-search-line
                qf-whitespace-nowrap qf-flex qf-justify-center"
         data-action="click -> search-solution-form#backToSearch"
-        aria-label="Modifier ma recherche"
+        aria-label="{% a11y_label "update_search_label" %}"
         data-testid="modifier-recherche"
     >Modifier ma recherche</button>
     <button

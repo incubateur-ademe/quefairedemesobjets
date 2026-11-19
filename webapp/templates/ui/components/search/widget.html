@@ -1,10 +1,11 @@
+{% load a11y_settings_tags %}
 {% comment %}
 This widget is copy pasted from django/forms/widgets/input.html
 https://github.com/django/django/blob/main/django/forms/templates/django/forms/widgets/input.html
 
 It is used mainly for styles, to add clasnames.
 {% endcomment %}
-<label for="{{ widget.attrs.id }}" class="qf-sr-only">Entrez un déchet :</label>
+<label for="{{ widget.attrs.id }}" class="qf-sr-only">{% a11y_label "search_widget_label" %}</label>
 <input
     class="qf-pl-1w qf-pr-2w
     qf-rounded-r-full

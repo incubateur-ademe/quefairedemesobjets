@@ -1,3 +1,4 @@
+{% load a11y_settings_tags %}
 <section
     class="
     qf-flex
@@ -7,7 +8,7 @@
     qf-overflow-auto
     "
     tabindex="0"
-    aria-label="Résultats du formulaire"
+    aria-label="{% a11y_label "formulaire_results_label" %}"
 >
     {% block form_result %}
         <turbo-frame id="addressesPanel"
