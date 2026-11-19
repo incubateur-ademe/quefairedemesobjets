@@ -3,6 +3,21 @@ output "container_id" {
   value       = scaleway_container.airflow_webserver.id
 }
 
+output "scheduler_container_id" {
+  description = "ID du container Airflow scheduler"
+  value       = scaleway_container.airflow_scheduler.id
+}
+
+output "dag_processor_container_id" {
+  description = "ID du container Airflow dag processor"
+  value       = scaleway_container.airflow_dag_processor.id
+}
+
+output "registry_image" {
+  description = "Image running now (the three images share one tag): pass its tag as IMAGE_TAG to apply by hand without redeploying"
+  value       = scaleway_container.airflow_scheduler.registry_image
+}
+
 output "domain_name" {
   description = "Nom de domaine public Scaleway du container Airflow webserver (upstream du gateway nginx)"
   value       = scaleway_container.airflow_webserver.domain_name

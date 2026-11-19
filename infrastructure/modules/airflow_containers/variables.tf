@@ -9,6 +9,12 @@ variable "prefix" {
 
 variable "airflow_scheduler_registry_image" {
   type = string
+  validation {
+    # An empty tag is what get_env("IMAGE_TAG", "") gives without IMAGE_TAG.
+    # The three images share the tag: checked once.
+    condition     = can(regex(":[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$", var.airflow_scheduler_registry_image))
+    error_message = "Set IMAGE_TAG to the tag to deploy. To apply without redeploying, use the tag of the registry_image output."
+  }
 }
 
 variable "airflow_scheduler_cpu_limit" {
