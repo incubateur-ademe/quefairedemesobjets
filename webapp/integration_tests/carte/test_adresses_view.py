@@ -597,50 +597,67 @@ class TestIsCarteContext:
 @pytest.mark.django_db
 class TestGetOrCreateRevisionActeur:
     def test_get_or_create_revision_acteur_only_acteur(
-        self, client, acteur_type_commerce
+        self, admin_client, acteur_type_commerce
     ):
         acteur = ActeurFactory()
         url = f"/qfdmo/getorcreate_revisionacteur/{acteur.identifiant_unique}"
 
-        response = client.get(url)
+        response = admin_client.get(url)
         assert response.status_code == 302
         revision_acteur = RevisionActeur.objects.get(
             identifiant_unique=acteur.identifiant_unique
         )
         assert response.url == revision_acteur.change_url
 
-    def test_get_or_create_revision_acteur_acteur_and_revision(self, client):
+    def test_get_or_create_revision_acteur_acteur_and_revision(self, admin_client):
         acteur = ActeurFactory()
         revision_acteur = RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique
         )
         url = f"/qfdmo/getorcreate_revisionacteur/{acteur.identifiant_unique}"
 
-        response = client.get(url)
+        response = admin_client.get(url)
         assert response.status_code == 302
         revision_acteur = RevisionActeur.objects.get(
             identifiant_unique=acteur.identifiant_unique
         )
         assert response.url == revision_acteur.change_url
 
-    def test_get_or_create_revision_acteur_revision_parent(self, client):
+    def test_get_or_create_revision_acteur_revision_parent(self, admin_client):
         acteur = ActeurFactory()
         parent = RevisionActeur(identifiant_unique="parent12345")
         parent.save_as_parent()
         parent = RevisionActeur.objects.get(identifiant_unique="parent12345")
-        print("parent", parent)
         RevisionActeurFactory(
             identifiant_unique=acteur.identifiant_unique,
             parent=parent,
         )
         url = f"/qfdmo/getorcreate_revisionacteur/{parent.identifiant_unique}"
 
-        response = client.get(url)
+        response = admin_client.get(url)
         assert response.status_code == 302
         assert response.url == parent.change_url
 
-    def test_get_or_create_revision_acteur_no_acteur(self, client):
+    def test_get_or_create_revision_acteur_no_acteur(self, admin_client):
         url = "/qfdmo/getorcreate_revisionacteur/1234567890"  # pragma: allowlist secret
 
-        with pytest.raises((Acteur.DoesNotExist, RevisionActeur.DoesNotExist)):
-            client.get(url)
+        response = admin_client.get(url)
+        assert response.status_code == 404
+
+    def test_get_or_create_revision_acteur_revision_without_acteur(self, admin_client):
+        revision_acteur = RevisionActeurFactory()
+        Acteur.objects.filter(pk=revision_acteur.pk).delete()
+        url = f"/qfdmo/getorcreate_revisionacteur/{revision_acteur.pk}"
+
+        response = admin_client.get(url)
+        assert response.status_code == 302
+        assert response.url == revision_acteur.change_url
+
+    def test_get_or_create_revision_acteur_anonymous(self, client):
+        acteur = ActeurFactory()
+        url = f"/qfdmo/getorcreate_revisionacteur/{acteur.identifiant_unique}"
+
+        response = client.get(url)
+        assert response.status_code == 302
+        assert response.url.startswith("/admin/login/")
+        assert not RevisionActeur.objects.filter(pk=acteur.pk).exists()
