@@ -1,8 +1,10 @@
 ---
-# Exported by the Makefile from data-platform/pyproject.toml. Without make:
-# AIRFLOW_VERSION=$(make -s airflow-version) docker compose --profile airflow build
+# The versions are exported by the Makefile, from .tool-versions and from
+# data-platform/pyproject.toml for Airflow: build the images with make.
 x-airflow-build-args: &airflow-build-args
   AIRFLOW_VERSION: ${AIRFLOW_VERSION:-}
+  PYTHON_VERSION: ${PYTHON_VERSION:-}
+  UV_VERSION: ${UV_VERSION:-}
 
 x-airflow-common: &airflow-common
   tmpfs:
@@ -42,6 +44,10 @@ x-webapp-common: &webapp-common
     context: .
     dockerfile: webapp/Dockerfile
     target: dev
+    args:
+      NODE_VERSION: ${NODE_VERSION:-}
+      PYTHON_VERSION: ${PYTHON_VERSION:-}
+      UV_VERSION: ${UV_VERSION:-}
   # The host user, so that files written in the bind mount belong to it
   user: "${HOST_UID:-0}:0"
   volumes:
@@ -94,6 +100,10 @@ services:
       context: .
       dockerfile: webapp/Dockerfile
       target: node_base
+      args:
+        NODE_VERSION: ${NODE_VERSION:-}
+        PYTHON_VERSION: ${PYTHON_VERSION:-}
+        UV_VERSION: ${UV_VERSION:-}
     user: "${HOST_UID:-0}:0"
     working_dir: /app
     command: webapp/bin/dev-assets.sh

@@ -99,6 +99,12 @@ make -C webapp createsuperuser
 
 Les cibles de `webapp/Makefile` s'exécutent dans les conteneurs. `make DOCKER= NPM_DOCKER= <cible>` les exécute sur la machine, ce qui suppose d'y avoir installé Python, Node et GDAL : ce mode n'est pas maintenu.
 
+### Versions de Python, Node et uv
+
+`.tool-versions`, à la racine, est le seul endroit où elles sont écrites. `make` les lit et les passe à la construction des images, la CI fait de même. Les images se construisent donc avec `make up`, pas avec `docker compose build` seul.
+
+Pour changer de version : modifier `.tool-versions` (et `.python-version`, lu par Scalingo et uv, que la CI vérifie identique), puis `make up`.
+
 ### Dépendances à jour
 
 `make up` reconstruit les images quand `uv.lock`, `package-lock.json` ou un Dockerfile a changé. En plus, à chaque démarrage, `webapp` resynchronise son virtualenv sur `uv.lock` et `assets` réinstalle `node_modules` si `package-lock.json` a changé. Un `git pull` qui apporte de nouvelles dépendances ou migrations est donc pris en compte par un simple `make up`.

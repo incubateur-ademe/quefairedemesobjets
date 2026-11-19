@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+include ../versions.mk
+
 # Locally the commands run in the Compose services. They run directly in CI and
 # inside a container; `make DOCKER= NPM_DOCKER= <target>` forces the host.
 ifeq ($(CI)$(wildcard /.dockerenv),)

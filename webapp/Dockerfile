@@ -1,8 +1,16 @@
+# The versions come from .tool-versions, through make (versions.mk)
+ARG NODE_VERSION
+ARG PYTHON_VERSION
+ARG UV_VERSION
+
+FROM ghcr.io/astral-sh/uv:${UV_VERSION:?build_through_make_which_reads_.tool-versions} AS uv
+
+
 ############################################
 # Stage 1: Node, then the frontend assets build
 ############################################
 # Also the image of the local `assets` service (docker-compose.yml)
-FROM node:24.22.3-slim AS node_base
+FROM node:${NODE_VERSION:?build_through_make_which_reads_.tool-versions}-slim AS node_base
 
 # Mount points of the node_modules volumes of the `assets` service: a volume
 # takes the ownership of the directory it is first mounted on, and the service
@@ -52,7 +60,7 @@ RUN NGINX_ALLOW_ALL_HOSTS=1 \
 ############################################
 # Stage 3: system packages needed at runtime
 ############################################
-FROM python:3.12-slim-bookworm AS runtime_base
+FROM python:${PYTHON_VERSION:?build_through_make_which_reads_.tool-versions}-slim-bookworm AS runtime_base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -89,7 +97,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gettext git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
+COPY --from=uv /uv /bin/
 
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
@@ -119,7 +127,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gettext git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
+COPY --from=uv /uv /bin/
 
 WORKDIR /app
 

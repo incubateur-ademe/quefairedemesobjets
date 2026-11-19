@@ -5,7 +5,9 @@ DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: al
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 
-# apache/airflow:slim-<version>-python3.12 — extracted from data-platform/pyproject.toml,
+include versions.mk
+
+# apache/airflow:slim-<version>-python<version> — extracted from data-platform/pyproject.toml,
 # the only place where the Airflow version is written. The CI reads it with
 # `make -s airflow-version`.
 AIRFLOW_VERSION ?= $(shell sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
@@ -14,6 +16,14 @@ export AIRFLOW_VERSION
 .PHONY: airflow-version
 airflow-version:
 	@echo $(AIRFLOW_VERSION)
+
+# KEY=value lines, appended to $GITHUB_ENV by the image build workflows
+.PHONY: versions
+versions:
+	@echo NODE_VERSION=$(NODE_VERSION)
+	@echo PYTHON_VERSION=$(PYTHON_VERSION)
+	@echo UV_VERSION=$(UV_VERSION)
+	@echo AIRFLOW_VERSION=$(AIRFLOW_VERSION)
 
 # The containers run as the host user (docker-compose.yml)
 export HOST_UID := $(shell id -u)

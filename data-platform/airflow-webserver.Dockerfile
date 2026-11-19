@@ -1,8 +1,13 @@
 # Builder python
 # --- --- --- ---
 # The version comes from data-platform/pyproject.toml: `make -s airflow-version`
+# Python and uv come from .tool-versions, through make (versions.mk)
 ARG AIRFLOW_VERSION
-FROM apache/airflow:slim-${AIRFLOW_VERSION:?pass_--build-arg_AIRFLOW_VERSION}-python3.12 AS python-builder
+ARG PYTHON_VERSION
+ARG UV_VERSION
+FROM ghcr.io/astral-sh/uv:${UV_VERSION:?build_through_make_which_reads_.tool-versions} AS uv
+
+FROM apache/airflow:slim-${AIRFLOW_VERSION:?pass_--build-arg_AIRFLOW_VERSION}-python${PYTHON_VERSION:?build_through_make_which_reads_.tool-versions} AS python-builder
 
 # system dependencies
 USER root
@@ -14,7 +19,7 @@ RUN apt-get update && \
 # python dependencies
 USER ${AIRFLOW_UID:-50000}:0
 
-COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
+COPY --from=uv /uv /uvx /bin/
 WORKDIR /opt/airflow/
 
 # Copy workspace structure for uv resolution
@@ -30,8 +35,7 @@ RUN uv sync --project data-platform --frozen --no-editable --no-install-workspac
 
 # Runtime
 # --- --- --- ---
-ARG AIRFLOW_VERSION
-FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS webserver
+FROM apache/airflow:slim-${AIRFLOW_VERSION}-python${PYTHON_VERSION} AS webserver
 
 USER root
 

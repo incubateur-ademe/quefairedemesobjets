@@ -14,9 +14,18 @@ inputs:
 runs:
   using: composite
   steps:
+    # Scalingo and uv read .python-version, which cannot be derived
+    - name: Read the versions from .tool-versions
+      id: versions
+      shell: bash
+      run: |
+        echo "uv=$(awk '$1 == "uv" {print $2}' .tool-versions)" >> "$GITHUB_OUTPUT"
+        [ "$(cat .python-version)" = "$(awk '$1 == "python" {print $2}' .tool-versions)" ]
+
     - name: Install uv
       uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39
       with:
+        version: ${{ steps.versions.outputs.uv }}
         enable-cache: true
 
     - name: Install Python dependencies
