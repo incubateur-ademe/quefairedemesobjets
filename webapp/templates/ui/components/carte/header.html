@@ -28,11 +28,11 @@
         </div>
 
         {# Navigation entre carte / liste #}
-        <div class="max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
+        <nav role="navigation" aria-label="{{ settings.qfdmd.AccessibilitySettings.view_mode_nav_label }}" class="max-nolegend:qf-flex qf-justify-between qf-items-end" id="view-mode-nav" data-testid="view-mode-nav">
             {{ forms.view_mode }}
             <div class="nolegend:qf-hidden">
             {% modal_button modal_id="filtres" button_text="Filtres" button_extra_classes="fr-btn--secondary fr-btn--icon-left fr-icon-equalizer-line fr-btn--sm" %}
             </div>
-        </div>
+        </nav>
     </div>
 </header>

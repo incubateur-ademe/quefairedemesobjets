@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import AnonymousUser
 from django.template.loader import render_to_string
 from django.test import RequestFactory
 
@@ -91,3 +92,18 @@ def test_produit_state_tabs_label_comes_from_settings():
         {"bon_etat": "a", "mauvais_etat": "b", "produit": Produit()},
     )
     assert 'aria-label="Etat de Velo"' in html
+
+
+@pytest.mark.django_db
+def test_carte_view_mode_nav_label_comes_from_settings():
+    AccessibilitySettings.objects.create(view_mode_nav_label="Choisir l'affichage")
+    request = RequestFactory().get("/")
+    request.user = AnonymousUser()
+
+    html = render_to_string(
+        "ui/components/carte/header.html",
+        {"forms": {"view_mode": ""}, "mode_liste": False},
+        request=request,
+    )
+
+    assert 'aria-label="Choisir l&#x27;affichage"' in html

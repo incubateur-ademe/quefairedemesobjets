@@ -57,7 +57,7 @@
         {# Skip link for accessibility - using DSFR component (RGAA 12.7) #}
         {% dsfr_skiplinks skiplinks %}
 
-        <main id="content" class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden" role="main">
+        {% block content_wrapper_open %}<main id="content" class="qf-h-full qf-overflow-y-auto qf-overflow-x-hidden" role="main">{% endblock %}
             <noscript>
                 <div class="fr-container fr-my-3w">
                     <div class="fr-alert fr-alert--error">
@@ -74,7 +74,7 @@
                 </div>
             </div>
             {% block content %}{% endblock %}
-        </main>
+        {% block content_wrapper_close %}</main>{% endblock %}
 
         {% block modals %}{% endblock %}
         {% block js %}
