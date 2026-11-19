@@ -2,7 +2,6 @@
 BASE_DOMAIN := quefairedemesdechets.localhost
 WEBAPP_DB_PORT ?= 6543
 DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
-PYTHON := uv run python
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 
@@ -218,13 +217,6 @@ drop-schema-public:
 create-schema-public:
 	$(PSQL) -c "CREATE SCHEMA IF NOT EXISTS public;"
 
-.SILENT:
-.PHONY: create-extensions
-create-extensions:
-	@echo "Creating required extensions"
-	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
-	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL)
-
 .PHONY: psql
 psql:
 	docker compose exec lvao-webapp-db psql -U webapp -d webapp
@@ -254,14 +246,6 @@ load-prod-dump:
 	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
 	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
 	pg_restore -d '$(DB_URL)' --schema=public --clean --if-exists --no-acl --no-owner --no-privileges --jobs=4 "$$DUMP_FILE"
-
-.SILENT:
-.PHONY: load-preprod-dump
-load-preprod-dump:
-	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
-	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
 
 .SILENT:
 .PHONY: load-dump-to-loc

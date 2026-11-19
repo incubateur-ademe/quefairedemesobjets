@@ -9,7 +9,6 @@ NPM_DOCKER ?= docker compose run --rm assets
 endif
 
 # Aliases
-BASE_DOMAIN := quefairedemesdechets.localhost
 BLACK := $(DOCKER) uv run black
 FIXTURES_OPTIONS := --indent 4 --natural-foreign --natural-primary
 PYTEST := $(DOCKER) uv run pytest
@@ -17,10 +16,6 @@ PYTHON := $(DOCKER) uv run python
 DJANGO_ADMIN := $(PYTHON) manage.py
 RUFF := $(DOCKER) uv run ruff
 NPM := $(NPM_DOCKER) npm
-
-.PHONY: sync
-sync:
-	$(DOCKER) uv sync --group dev --group webapp-dev
 
 .PHONY: check-format
 check-format:
