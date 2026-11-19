@@ -8,7 +8,8 @@ from django.db.models import TextChoices
 from django.db.utils import cached_property
 from django.http import HttpRequest, QueryDict
 from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
+from django.utils.functional import lazy
+from django.utils.safestring import SafeString, mark_safe
 from dsfr.enums import SegmentedControlChoices
 from dsfr.forms import DsfrBaseForm
 from dsfr.widgets import SegmentedControl
@@ -38,6 +39,13 @@ from qfdmo.widgets import (
 
 from core.constants import MAP_CONTAINER_ID
 from qfdmo.constants import MAP_FORM_PREFIX
+
+
+def _render_safe(template_name: str) -> SafeString:
+    return mark_safe(render_to_string(template_name))
+
+
+render_lazily = lazy(_render_safe, SafeString)
 
 
 def generate_form_prefix(
@@ -236,9 +244,7 @@ class FormulaireForm(forms.Form):
                 "data-search-solution-form-target": "reparerFilter",
             }
         ),
-        label=render_to_string(
-            "ui/components/formulaire/filtres/reparacteurs/label.html"
-        ),
+        label=render_lazily("ui/components/formulaire/filtres/reparacteurs/label.html"),
         label_suffix="",
         required=False,
     )
@@ -591,10 +597,8 @@ class ConfiguratorForm(DsfrBaseForm):
                 "selected_label": "Vos EPCI sélectionnés",
                 "empty_label": "Il n’y a pas d’EPCI sélectionné pour le moment",
                 "endpoint": "/api/qfdmo/autocomplete/configurateur?query=",
-                "additionnal_info": mark_safe(
-                    render_to_string(
-                        "ui/forms/widgets/epci_codes_additionnal_info.html",
-                    )
+                "additionnal_info": render_lazily(
+                    "ui/forms/widgets/epci_codes_additionnal_info.html"
                 ),
             },
         ),

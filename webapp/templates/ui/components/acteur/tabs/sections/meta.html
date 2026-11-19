@@ -1,3 +1,4 @@
+{% load external_link_tags %}
 <div>
     <div class="
         qf-flex qf-flex-col
@@ -8,6 +9,7 @@
                 Pour le staff : <a
                     target="_blank"
                     rel="noreferrer"
+                    title="Lien vers l'admin - {% new_window_mention %}"
                     data-turbo=false
                     href="{{ object.change_url }}"
                 >
@@ -25,7 +27,7 @@
         href="{{ object.suggestion_form_url }}"
         target="_blank"
         rel="noreferrer"
-        title="Proposer une modification - Nouvelle fenêtre"
+        title="Proposer une modification - {% new_window_mention %}"
         data-action="click -> analytics#captureInteractionWithSolutionDetails"
     >
         Proposer une modification

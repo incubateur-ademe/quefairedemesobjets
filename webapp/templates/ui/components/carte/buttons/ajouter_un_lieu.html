@@ -1,3 +1,4 @@
+{% load external_link_tags %}
 <a class="qf-flex
     fr-btn fr-btn--icon-left fr-icon-epingle-plus qf-whitespace-nowrap qf-w-auto qf-justify-center
     qf-absolute qf-left-2w qf-right-2w qf-bottom-4w qf-z-20
@@ -7,7 +8,7 @@
     href="{% url 'qfdmo:address-suggestion-form' %}"
     target="_blank"
     rel="noreferrer"
-    aria-label="Proposer une adresse - Nouvelle fenêtre"
+    title="{{ CARTE.ajouter_un_lieu }} - {% new_window_mention %}"
 >
     {{ CARTE.ajouter_un_lieu }}
 </a>

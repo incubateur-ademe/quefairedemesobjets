@@ -1,5 +1,5 @@
 {% extends "ui/components/modals/base.html" %}
-{% load script_tags %}
+{% load script_tags external_link_tags %}
 
 {% block modal_footer %}{% endblock %}
 
@@ -28,7 +28,7 @@
             href="https://github.com/incubateur-ademe/quefairedemesobjets/"
             target="_blank"
             rel="noreferrer"
-            title="disponible librement - Nouvelle fenêtre"
+            title="disponible librement - {% new_window_mention %}"
         >disponible librement</a>.
     </p>
 </div>

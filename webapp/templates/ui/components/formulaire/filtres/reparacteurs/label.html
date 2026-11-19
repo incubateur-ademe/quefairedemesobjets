@@ -1,4 +1,5 @@
 {% extends "ui/components/formulaire/filtres/_label.html" %}
+{% load external_link_tags %}
 
 {% block icon %}
 {% include "ui/components/icons/reparacteurs.html" %}
@@ -13,7 +14,7 @@ Afficher uniquement les artisans labellisés (uniquement valable lorsque l'actio
   href='https://www.artisanat.fr/nous-connaitre/vous-accompagner/reparacteurs'
   target="_blank"
   rel="noreferrer"
-  title="sur le site de la CMA - Nouvelle fenêtre"
+  title="Chambre des Métiers et de l’Artisanat - {% new_window_mention %}"
 >
   Chambre des Métiers et de l’Artisanat
 </a>

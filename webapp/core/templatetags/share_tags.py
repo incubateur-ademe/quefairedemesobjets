@@ -3,6 +3,7 @@ from urllib.parse import quote, quote_plus
 from django import template
 
 from core.constants import ASSISTANT, CARTE
+from core.templatetags.external_link_tags import new_window_mention_setting
 
 register = template.Library()
 
@@ -23,6 +24,7 @@ def get_sharer_content(request, object, social_network=None):
     share_body = ""
     share_intro = ""
     quoted_url = quote_plus(url)
+    new_window = new_window_mention_setting(request)
     format_template = {
         "URL": url,
     }
@@ -41,20 +43,20 @@ def get_sharer_content(request, object, social_network=None):
     template = {
         "url": url,
         "facebook": {
-            "title": f"partager {object} sur Facebook - nouvelle fenêtre",
+            "title": f"partager {object} sur Facebook - {new_window}",
             "url": f"https://www.facebook.com/sharer.php?u={quoted_url}",
         },
         "twitter": {
-            "title": f"partager {object} sur X - nouvelle fenêtre",
+            "title": f"partager {object} sur X - {new_window}",
             "url": f"https://twitter.com/intent/tweet?url={quoted_url}"
             f"&text={share_intro}&via=Longue+vie+aux+objets&hashtags=longuevieauxobjets,ademe",
         },
         "linkedin": {
-            "title": f"partager {object} sur LinkedIn - nouvelle fenêtre",
+            "title": f"partager {object} sur LinkedIn - {new_window}",
             "url": f"https://www.linkedin.com/shareArticle?url={quoted_url}&title={share_intro}",
         },
         "email": {
-            "title": f"partager {object} par email - nouvelle fenêtre",
+            "title": f"partager {object} par email - {new_window}",
             "url": f"mailto:?subject={quote(share_intro)}&body={quote(share_body)}",
         },
     }
