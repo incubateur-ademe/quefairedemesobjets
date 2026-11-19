@@ -75,17 +75,44 @@ test.describe("🗺️ Carte address combobox", () => {
     await expect(latitude).toHaveValue("47.668099")
     await expect(longitude).toHaveValue("-2.990838")
 
-    // state.ts mirrors the chosen location into sessionStorage.
+    // state.ts mirrors the chosen location into localStorage.
     const persisted = await page.evaluate(() => ({
-      adresse: sessionStorage.getItem("adresse"),
-      latitude: sessionStorage.getItem("latitude"),
-      longitude: sessionStorage.getItem("longitude"),
+      adresse: localStorage.getItem("adresse"),
+      latitude: localStorage.getItem("latitude"),
+      longitude: localStorage.getItem("longitude"),
     }))
     expect(persisted).toEqual({
       adresse: "Auray",
       latitude: "47.668099",
       longitude: "-2.990838",
     })
+  })
+
+  test("the chosen address is restored in a new tab", async ({ page, context }) => {
+    await navigateTo(page, "/carte")
+    await pickFirstAddress(page, "Auray")
+    await expect(page.locator(CARTE_INPUT)).toHaveValue("Auray")
+
+    const newTab = await context.newPage()
+    await navigateTo(newTab, "/carte")
+    await expect(newTab.locator(CARTE_INPUT)).toHaveValue("Auray")
+  })
+
+  test("a stored address older than 30 days is forgotten", async ({ page }) => {
+    await navigateTo(page, "/carte")
+    await page.evaluate(() => {
+      localStorage.setItem("adresse", "Auray")
+      localStorage.setItem("latitude", "47.668099")
+      localStorage.setItem("longitude", "-2.990838")
+      localStorage.setItem(
+        "adresse_enregistree_le",
+        String(Date.now() - 31 * 24 * 60 * 60 * 1000),
+      )
+    })
+
+    await page.reload()
+    await expect(page.locator(CARTE_INPUT)).toHaveValue("")
+    expect(await page.evaluate(() => localStorage.getItem("adresse"))).toBeNull()
   })
 
   test("the address field is serialized exactly once when the form submits", async ({

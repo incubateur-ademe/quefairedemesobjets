@@ -21,6 +21,10 @@
 {% flat_menu handle="footer_assistant" template="ui/components/footer/footer-menu.html" %}
 {% endwagtailcache %}
 {% endif %}
-
+{% if settings.sites_conformes_content_manager.CustomScriptsSettings.use_tarteaucitron %}
+<li class="fr-footer__bottom-item">
+  <button type="button" id="tarteaucitronManager" class="fr-footer__bottom-link">Gestion des cookies</button>
+</li>
+{% endif %}
 {% endblock footer_links %}
 {% load static %}

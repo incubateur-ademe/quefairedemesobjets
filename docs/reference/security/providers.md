@@ -62,7 +62,6 @@ Ces services sont **opérés par l'incubateur beta.gouv.fr (ADEME / DINUM)** et 
 | Service              | Périmètre                                                     | Référence                                                                                                                   |
 | -------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **Sentry beta.gouv** | Monitoring d'erreurs back + front.                            | [sentry.incubateur.net](https://sentry.incubateur.net/organizations/betagouv/projects/que-faire-de-mes-objets/?project=115) |
-| **Matomo beta.gouv** | Statistiques d'audience.                                      | `stats.beta.gouv.fr`                                                                                                        |
 | **Mattermost ADEME** | Notifications de déploiement (canal `lvao-tour-de-controle`). | Plateforme interne ADEME.                                                                                                   |
 | **Dashlord ADEME**   | Audit sécurité externe continu.                               | [dashlord.incubateur.ademe.fr](https://dashlord.incubateur.ademe.fr/)                                                       |
 
@@ -70,7 +69,7 @@ Ces services sont **opérés par l'incubateur beta.gouv.fr (ADEME / DINUM)** et 
 
 - **Aucune donnée de santé** n'est traitée par la plateforme : la certification HDS de Scaleway et Scalingo n'est pas un prérequis pour ce projet, mais constitue un signal positif de maturité sécurité.
 - **Pas de données sensibles au sens RGPD** (origine raciale, opinions, santé, etc.) — la plateforme manipule essentiellement des données ouvertes (acteurs, propositions de service) et des comptes administrateurs internes.
-- **Données personnelles limitées** : comptes Django/Wagtail (admins), formulaires de contact (transmis à Notion / Tally), analytics anonymisés (PostHog / Matomo).
+- **Données personnelles limitées** : comptes Django/Wagtail (admins), formulaires de contact (transmis à Notion / Tally), analytics anonymisés (PostHog).
 
 À ce titre, le périmètre actuel **ne justifie pas le passage à des prestataires SecNumCloud**, mais cette possibilité reste ouverte (région `osc-secnum-fr1` chez Scalingo, qualification SecNumCloud en cours chez Scaleway).
 

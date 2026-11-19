@@ -56,7 +56,6 @@ flowchart LR
     subgraph monitoring["📈 Monitoring & analytics"]
         sentry["Sentry (beta.gouv)"]
         posthog["PostHog EU"]
-        matomo["Matomo (stats.beta.gouv.fr)"]
         cockpit["Scaleway Cockpit (Grafana)"]
         mattermost["Mattermost\nlvao-tour-de-controle"]
         dashlord["Dashlord ADEME"]
@@ -103,7 +102,6 @@ flowchart LR
     ns_qfdmo -->|"pull"| CaaS
     sync -->|"restore"| db_webapp
 
-    user -.->|"analytics"| matomo
     Databases -.->|"métriques"| cockpit
     cd -.->|"notif deploy"| mattermost
 ```
@@ -161,10 +159,10 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 
 ### Observabilité
 
-| Composant                                                          | Référence                                                         |
-| ------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Sentry, PostHog, Matomo, Scaleway Cockpit, Mattermost, healthcheck | [`infrastructure/monitoring.md`](../infrastructure/monitoring.md) |
-| CodeQL, GitGuardian, Dependabot, Dashlord                          | [`security/README.md`](../security/README.md)                     |
+| Composant                                                  | Référence                                                         |
+| ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| Sentry, PostHog, Scaleway Cockpit, Mattermost, healthcheck | [`infrastructure/monitoring.md`](../infrastructure/monitoring.md) |
+| CodeQL, GitGuardian, Dependabot, Dashlord                  | [`security/README.md`](../security/README.md)                     |
 
 ### Sécurité
 

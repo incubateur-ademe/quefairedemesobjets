@@ -9,6 +9,25 @@ import SearchFormController from "../carte/search_solution_form_controller"
 // `latitude` and `longitude` for the hidden coordinate fields.
 type AddressOutlet = AdresseAutocompleteController | CarteAddressAutocompleteController
 
+// Exempt from consent (validated with Numéricité) as long as it expires.
+const LOCATION_MAX_AGE_IN_DAYS = 30
+const LOCATION_KEYS = ["adresse", "latitude", "longitude"] as const
+const LOCATION_SAVED_AT_KEY = "adresse_enregistree_le"
+
+function readStoredLocation() {
+  const savedAt = Number(localStorage.getItem(LOCATION_SAVED_AT_KEY))
+  if (Date.now() - savedAt > LOCATION_MAX_AGE_IN_DAYS * 24 * 60 * 60 * 1000) {
+    for (const key of [...LOCATION_KEYS, LOCATION_SAVED_AT_KEY]) {
+      localStorage.removeItem(key)
+    }
+  }
+  return {
+    adresse: localStorage.getItem("adresse"),
+    latitude: localStorage.getItem("latitude"),
+    longitude: localStorage.getItem("longitude"),
+  }
+}
+
 export default class extends Controller<HTMLElement> {
   static values = {
     location: Object,
@@ -30,7 +49,7 @@ export default class extends Controller<HTMLElement> {
   hasSearchSolutionFormOutletConnected = false
 
   connect() {
-    this.fetchLocationFromSessionStorageOnFirstLoad()
+    this.fetchStoredLocationOnFirstLoad()
   }
 
   addressAutocompleteOutletConnected(outlet, element) {
@@ -47,18 +66,12 @@ export default class extends Controller<HTMLElement> {
     this.updateUIFromGlobalState(outlet)
   }
 
-  fetchLocationFromSessionStorageOnFirstLoad() {
+  fetchStoredLocationOnFirstLoad() {
     if (!isEmpty(this.locationValue)) {
       return
     }
 
-    const nextLocationValue = {
-      adresse: sessionStorage.getItem("adresse"),
-      latitude: sessionStorage.getItem("latitude"),
-      longitude: sessionStorage.getItem("longitude"),
-    }
-
-    this.#setLocationValue(nextLocationValue)
+    this.#setLocationValue(readStoredLocation())
   }
 
   resetBboxInputs() {
@@ -96,11 +109,17 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  locationValueChanged(value, previousValue) {
-    // Persist UI changes in session storage
-    this.persistInSessionStorageIfChanged(value?.adresse, "adresse")
-    this.persistInSessionStorageIfChanged(value?.latitude, "latitude")
-    this.persistInSessionStorageIfChanged(value?.longitude, "longitude")
+  locationValueChanged(value) {
+    let changed = false
+    for (const key of LOCATION_KEYS) {
+      if (value?.[key] && value[key] !== localStorage.getItem(key)) {
+        localStorage.setItem(key, value[key])
+        changed = true
+      }
+    }
+    if (changed) {
+      localStorage.setItem(LOCATION_SAVED_AT_KEY, String(Date.now()))
+    }
   }
 
   updateUIFromGlobalState(outlet) {
@@ -139,16 +158,6 @@ export default class extends Controller<HTMLElement> {
     // Update all bbox instances of Carte on the same page
     for (const outlet of this.searchSolutionFormOutlets) {
       outlet.updateBboxInput(event)
-    }
-  }
-
-  persistInSessionStorageIfChanged(value, key) {
-    if (!value) {
-      return
-    }
-
-    if (value !== sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, value)
     }
   }
 }

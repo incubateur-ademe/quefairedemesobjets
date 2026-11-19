@@ -40,7 +40,6 @@ Légende :
 | **OpenTofu / Terragrunt** (`terraform.tfvars`, bucket `lvao-terraform-state`)                         | —                      | Admin                  | —                      | —      | —      |
 | **Sentry** (beta.gouv — projet `que-faire-de-mes-objets`)                                             | Read                   | Admin                  | Read                   | —      | —      |
 | **PostHog EU**                                                                                        | Read                   | Admin                  | Read                   | —      | Read   |
-| **Matomo** (`stats.beta.gouv.fr`)                                                                     | Read                   | Read                   | Read                   | Read   | Read   |
 | **Scaleway Cockpit (Grafana)**                                                                        | Read                   | Admin                  | —                      | —      | —      |
 | **Mattermost** — canal `lvao-tour-de-controle` (alertes deploy)                                       | Membre                 | Membre                 | Membre                 | —      | —      |
 | **Mattermost** — canal équipe / produit                                                               | Membre                 | Membre                 | Membre                 | Membre | Membre |
@@ -71,7 +70,6 @@ Pour chaque ligne de la matrice où le rôle a un accès `Read` / `Write` / `Adm
 - [ ] **Airflow** : créer l'utilisateur FAB avec le rôle adapté (`Viewer`, `User`, `Admin`).
 - [ ] **Sentry** : inviter dans l'organisation beta.gouv (projet `que-faire-de-mes-objets`).
 - [ ] **PostHog EU** : inviter dans le workspace.
-- [ ] **Matomo** : ajouter dans `stats.beta.gouv.fr` (procédure beta.gouv).
 - [ ] **Cockpit Scaleway (Grafana)** : ajouter au dashboard.
 - [ ] **Mattermost** : inviter dans les canaux concernés.
 - [ ] **Notion** : inviter dans le workspace, attribuer le rôle adapté.
@@ -114,7 +112,6 @@ Pour chaque ligne de la matrice où le rôle avait un accès :
 - [ ] **Airflow** : désactiver l'utilisateur FAB.
 - [ ] **Sentry** : retirer du projet.
 - [ ] **PostHog** : retirer du workspace.
-- [ ] **Matomo** : retirer.
 - [ ] **Cockpit Scaleway** : retirer.
 - [ ] **Mattermost** : retirer des canaux internes (le canal `lvao-tour-de-controle` doit être nettoyé même si la personne reste sur l'instance).
 - [ ] **Notion** : retirer du workspace, transférer la propriété des pages partagées.
