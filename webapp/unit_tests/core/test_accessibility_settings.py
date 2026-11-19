@@ -71,3 +71,23 @@ def test_footer_and_modal_labels_come_from_settings():
     assert 'aria-label="Liens utiles"' in render_to_string(
         "ui/components/footer/base.html", request=RequestFactory().get("/")
     )
+
+
+@pytest.mark.django_db
+def test_produit_state_tabs_label_comes_from_settings():
+    from django.template.loader import render_to_string
+
+    AccessibilitySettings.objects.create(produit_state_tabs_label="Etat de")
+
+    class Produit:
+        qu_est_ce_que_j_en_fais = ""
+        sous_categorie_with_carte_display = False
+
+        def __str__(self):
+            return "Velo"
+
+    html = render_to_string(
+        "ui/components/produit/produit.html",
+        {"bon_etat": "a", "mauvais_etat": "b", "produit": Produit()},
+    )
+    assert 'aria-label="Etat de Velo"' in html
