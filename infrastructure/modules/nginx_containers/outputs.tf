@@ -20,3 +20,8 @@ output "public_endpoints" {
     name => "https://${route.hostname}"
   }
 }
+
+output "registry_image" {
+  description = "Image running now: pass its tag as IMAGE_TAG to apply by hand without redeploying"
+  value       = scaleway_container.nginx.registry_image
+}

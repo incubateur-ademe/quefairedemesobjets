@@ -5,6 +5,12 @@ on:
         type: string
         required: true
 
+# Deployments of one environment queue: a newer pending one replaces an older
+# pending one, the one in flight finishes.
+concurrency:
+  group: deploy-webapp-${{ inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   deploy-django:
     name: 🗺️ Webapp
