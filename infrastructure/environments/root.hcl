@@ -10,6 +10,12 @@ locals {
     "${get_parent_terragrunt_dir()}/../../scripts/infrastructure/stack_secrets.sh",
     local.environment, local.stack,
   ))
+
+  state_passphrase = run_cmd(
+    "--terragrunt-quiet",
+    "${get_parent_terragrunt_dir()}/../../scripts/infrastructure/state_passphrase.sh",
+    local.environment,
+  )
 }
 
 generate "provider" {
@@ -52,6 +58,50 @@ terraform {
 EOF
 }
 
+# OpenTofu encrypts the state and the saved plans itself, before they leave the
+# machine: the bucket only ever holds ciphertext.
+# TODO: drop the two fallback blocks once every state has been written
+# encrypted (one apply per stack).
+generate "encryption" {
+  path      = "encryption.tf"
+  if_exists = "overwrite"
+  disable   = local.state_passphrase == ""
+  contents  = <<EOF
+variable "state_passphrase" {
+  type      = string
+  sensitive = true
+}
+
+terraform {
+  encryption {
+    key_provider "pbkdf2" "passphrase" {
+      passphrase = var.state_passphrase
+    }
+
+    method "aes_gcm" "passphrase" {
+      keys = key_provider.pbkdf2.passphrase
+    }
+
+    method "unencrypted" "migration" {}
+
+    state {
+      method = method.aes_gcm.passphrase
+      fallback {
+        method = method.unencrypted.migration
+      }
+    }
+
+    plan {
+      method = method.aes_gcm.passphrase
+      fallback {
+        method = method.unencrypted.migration
+      }
+    }
+  }
+}
+EOF
+}
+
 generate "common_variables" {
   path      = "common_variables.tf"
   if_exists = "overwrite"
@@ -62,12 +112,13 @@ generate "common_variables" {
 # provider's. A stack's own inputs win over its secret.
 inputs = merge(
   {
-    prefix          = "lvao"
-    environment     = local.environment
-    access_key      = get_env("SCW_ACCESS_KEY", "")
-    secret_key      = get_env("SCW_SECRET_KEY", "")
-    project_id      = get_env("SCW_DEFAULT_PROJECT_ID", "")
-    organization_id = get_env("SCW_DEFAULT_ORGANIZATION_ID", "")
+    prefix           = "lvao"
+    environment      = local.environment
+    access_key       = get_env("SCW_ACCESS_KEY", "")
+    secret_key       = get_env("SCW_SECRET_KEY", "")
+    project_id       = get_env("SCW_DEFAULT_PROJECT_ID", "")
+    organization_id  = get_env("SCW_DEFAULT_ORGANIZATION_ID", "")
+    state_passphrase = local.state_passphrase
   },
   local.secrets,
 )
