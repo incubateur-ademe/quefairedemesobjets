@@ -29,7 +29,7 @@ include {
 }
 
 inputs = {
-  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:d01ae6888e92694e6dff09b0500e706c6a64bf6a"
+  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:${get_env("IMAGE_TAG", "")}"
   nginx_cpu_limit      = 500
   nginx_memory_limit   = 512
   nginx_min_scale      = 1
