@@ -104,7 +104,7 @@ en local, l'échantillon est toujours reconstruit par le DAG.
 
 ## Configuration
 
-La connexion est définie par `DB_WEBAPP_SAMPLE` (voir `webapp/.env.template`)
+La connexion est définie par `DB_WEBAPP_SAMPLE` (voir `docker-compose.yml`)
 et consommée dans `webapp/settings/base.py` ainsi que par
 `webapp/playwright.config.ts`, qui la passe en `DATABASE_URL` au serveur de
 test.

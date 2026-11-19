@@ -8,7 +8,6 @@
 
 Optionnel, selon ce que vous faites :
 
-- mkcert, pour servir l'application en HTTPS (`make init-certs`)
 - node 24 sur la machine, pour lancer les tests end-to-end Playwright (`mise` ou `asdf` lisent `.tool-versions`)
 - [uv](https://docs.astral.sh/uv/) sur la machine, pour les hooks de pre-commit et l'autocomplétion de l'éditeur
 - Le client Scaleway, en suivant [les instructions de Scaleway](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/), pour copier la base de production
@@ -78,7 +77,7 @@ Pour la peupler, cf. [Copier la base de données de prod en local](useful_comman
 | `webapp`         | Django : migrations au démarrage, puis `runserver` (port 8000)                                   |
 | `worker`         | `db_worker`, qui traite les tâches de fond (django-tasks), par exemple les actions admin lourdes |
 | `assets`         | `npm ci` si `package-lock.json` a changé, puis `parcel watch`                                    |
-| `lvao-proxy`     | nginx local, avec la même configuration que la production (ports 80 et 443)                      |
+| `lvao-proxy`     | nginx local, avec la même configuration que la production (port 80)                              |
 | `lvao-webapp-db` | PostGIS (port 6543 sur la machine)                                                               |
 
 Le profile `airflow` ajoute `lvao-warehouse-db` (8765), `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM) et `airflow-dag-processor` (8082).
@@ -118,15 +117,7 @@ DATABASE_URL=postgres://user:password@host.docker.internal:5432/webapp # pragma:
 
 Si vous aviez une installation précédente : supprimez `webapp/.env`, et retirez du `.env` racine les adresses de base en `localhost` (`DATABASE_URL`, `DB_WEBAPP_SAMPLE`, `DB_WAREHOUSE`), qui ne sont pas joignables depuis les conteneurs.
 
-## HTTPS
-
-```sh
-make init-certs
-```
-
-Génère les certificats avec mkcert, écrit `BASE_URL=https://quefairedemesdechets.localhost` dans `.env` et redémarre la stack.
-
-### Tester l'application
+## Tester l'application
 
 Tests Python (pytest) et tests JS unitaires, depuis le dossier **`webapp/`** :
 
@@ -163,7 +154,7 @@ Test d'accessibilité (depuis **`webapp/`**) :
 make a11y
 ```
 
-### Installer les hooks de pre-commit
+## Installer les hooks de pre-commit
 
 Les hooks tournent sur la machine, avec uv :
 

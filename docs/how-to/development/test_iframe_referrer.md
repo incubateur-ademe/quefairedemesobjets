@@ -40,13 +40,13 @@ Ngrok vous donnera une URL publique temporaire, par exemple : `https://4a3a46f65
 Allez sur la page de test Lookbook du referrer :
 
 ```
-https://quefairedemesdechets.localhost/lookbook/inspect/tests/t_1_referrer/
+http://quefairedemesdechets.localhost/lookbook/inspect/tests/t_1_referrer/
 ```
 
 En haut à droite de l'écran, copiez l'URL de prévisualisation. Elle ressemble à :
 
 ```
-https://quefairedemesdechets.localhost/lookbook/preview/tests/t_1_referrer/?timestamp=1768857086931&display=%257B%2522theme%2522%253A%2522light%2522%257D
+http://quefairedemesdechets.localhost/lookbook/preview/tests/t_1_referrer/?timestamp=1768857086931&display=%257B%2522theme%2522%253A%2522light%2522%257D
 ```
 
 ### 5. Remplacer le host par celui de ngrok

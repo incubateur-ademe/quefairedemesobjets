@@ -41,11 +41,6 @@ Si tel n'est pas le cas :
 - vérifier que la stack est démarrée et saine : `docker compose ps`
 - vérifier que le port 80 n'est pas déjà pris sur la machine ; sinon, définir `HTTP_PORT` dans `.env`
 - Django répond aussi directement sur [http://localhost:8000](http://localhost:8000)
-- en HTTPS, (re-)générer les certificats : `make init-certs`
-
-#### .env
-
-Enfin, vérifier les variables d'environnement en prenant exemple sur le fichier `.env.template`
 
 ## Bases de données / postgres_fdw
 
