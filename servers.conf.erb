@@ -70,7 +70,7 @@ server {
 
     # Redirect if host is not one of the allowed domains
     if ($is_valid_host = 0) {
-        return 301 https://<%= ENV["BASE_DOMAIN"] %>$request_uri;
+        return 301 <%= ENV["BASE_SCHEME"] || "https" %>://<%= ENV["BASE_DOMAIN"] %>$request_uri;
     }
 
 

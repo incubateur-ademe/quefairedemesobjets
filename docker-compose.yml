@@ -130,6 +130,8 @@ services:
     environment:
       - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.localhost}
       - PORT=80
+      # The local stack serves plain HTTP; deployed, the template defaults to https
+      - BASE_SCHEME=http
       - DEBUG=${DEBUG:-True}
       - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
       - UPSTREAM_HOST=webapp:8000

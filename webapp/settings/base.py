@@ -397,11 +397,7 @@ GEOS_LIBRARY_PATH = decouple.config("GEOS_LIBRARY_PATH", default=None)
 # Database
 # --------
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASE_URL = decouple.config(
-    "DATABASE_URL",
-    default="postgis://webapp:webapp@localhost:6543/qfdmo",  # pragma: allowlist secret  # noqa: E501
-    cast=str,
-)
+DATABASE_URL = decouple.config("DATABASE_URL", cast=str)
 
 CONN_MAX_AGE = decouple.config("CONN_MAX_AGE", cast=int, default=0)
 CONN_HEALTH_CHECKS = True

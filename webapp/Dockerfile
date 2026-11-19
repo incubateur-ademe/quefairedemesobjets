@@ -142,12 +142,12 @@ COPY webapp/ /app/webapp
 # Internationalisation and customisation of Wagtail messages.
 # This must be ran from git repo root for some obscure reason.
 # Running it from webapp subdirectory causes issues
-RUN SECRET_KEY=dummy python /app/webapp/manage.py compilemessages -l fr
+RUN SECRET_KEY=dummy DATABASE_URL=postgis://build python /app/webapp/manage.py compilemessages -l fr
 
 WORKDIR /app/webapp
 # Copy built frontend assets, then collect them
 COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
-RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
+RUN SECRET_KEY=dummy DATABASE_URL=postgis://build python manage.py collectstatic --noinput
 
 
 ############################################

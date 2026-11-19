@@ -3,6 +3,7 @@
 # Override the target with NGINX_TEST_URL. Django does not need to be running.
 
 import time
+from urllib.parse import urlparse
 
 import pytest
 import requests
@@ -47,7 +48,7 @@ class TestHostValidation:
         assert resp.status_code == 301
         location = resp.headers.get("Location", "")
         assert BASE_DOMAIN in location
-        assert location.startswith("https://")
+        assert location.startswith(f"{urlparse(BASE_URL).scheme}://")
 
     @pytest.mark.skipif(not LEGACY_DOMAIN, reason="LEGACY_SITE_VITRINE_DOMAIN not set")
     def test_legacy_domain_redirects_to_base_domain(self):
@@ -60,7 +61,7 @@ class TestHostValidation:
         assert resp.status_code == 301
         location = resp.headers.get("Location", "")
         assert BASE_DOMAIN in location
-        assert location.startswith("https://")
+        assert location.startswith(f"{urlparse(BASE_URL).scheme}://")
 
 
 class TestCacheBypass:
