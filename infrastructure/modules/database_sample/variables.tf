@@ -18,6 +18,7 @@ variable "webapp_db_sample_password" {
   description = "Mot de passe de la base de données sample webapp"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "create_extensions_script_path" {

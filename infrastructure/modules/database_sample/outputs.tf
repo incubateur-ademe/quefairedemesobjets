@@ -12,6 +12,6 @@ output "webapp_db_sample_username" {
 
 output "webapp_db_sample_password" {
   description = "Mot de passe de la base de données webapp"
-  value       = var.webapp_db_sample_password
+  value       = random_password.db.result
   sensitive   = true
 }
