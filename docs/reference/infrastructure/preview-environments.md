@@ -49,9 +49,11 @@ PR #123 labeled "preview"
 ┌─ preview-up.yml ─────────────────────────────────────────────┐
 │ 1. build webapp image  → rg.fr-par.scw.cloud/ns-qfdmo/       │
 │                          webapp:pr-123-<shortsha>            │
-│ 2. terragrunt run-all apply                                  │
+│ 2. terragrunt apply of                                       │
 │      infrastructure/environments/preview/pr-123/             │
-│      (materialised from _template at runtime)                │
+│      (materialised from _template at runtime):               │
+│      database and bucket, bin/post_deploy from the new       │
+│      image, then the container                               │
 │ 3. sticky PR comment with the URL                            │
 └──────────────────────────────────────────────────────────────┘
 
@@ -64,7 +66,9 @@ Per-PR resources (state: lvao-terraform-state/preview/pr-<n>/…):
 │                   project-wide SCW key (no bucket-scoped IAM key,
 │                   see Limitations)
 ├── container       serverless container in the shared
-│                   qfdmod-preview namespace, min_scale=0,
+│                   qfdmod-preview namespace, described by
+│                   _envcommon/webapp_container.hcl like preprod
+│                   and prod, min_scale=0,
 │                   tagged preview / preview-pr-<n>
 │                   (isoprod: min_scale=1, 2 vCPU, extra tag
 │                   preview-isoprod)
@@ -113,18 +117,25 @@ export SCW_SECRET_KEY=…              # object storage, IAM and containers
 export SCW_DEFAULT_PROJECT_ID=…
 export SCW_DEFAULT_ORGANIZATION_ID=…
 export SCALEWAY_DOCKER_SECRET=…      # registry push credential
-export SAMPLE_DB_URI=…               # postgres URI of the preprod sample DB
-                                     # (pg_dump source), reachable from CI
 
 make -C infrastructure preview-bootstrap
 ```
 
-This runs three idempotent steps, also callable individually:
+The previews read their own secrets (Django `SECRET_KEY`, `NOTION_TOKEN`)
+from Scaleway Secret Manager like the other stacks, one secret shared by
+every preview:
+
+```bash
+make -C infrastructure secrets-push ENV=preview STACK=container FILE=path/to/secrets.json
+```
+
+The seed source is derived from the outputs of the preprod `database` and
+`database_sample` stacks.
+
+`preview-bootstrap` runs three idempotent steps, also callable individually:
 
 1. `preview-github-env` — creates the GitHub `preview` environment and
-   pushes the secrets above, plus `PREVIEW_SECRET_KEY` (the shared Django
-   `SECRET_KEY` for previews, generated with `openssl rand` unless already
-   set in your shell).
+   pushes the secrets above.
 2. `preview-namespace` — `terragrunt apply` of the shared `qfdmod-preview`
    container namespace (interactive: review the plan before approving).
 3. `preview-label` — creates the `preview` and `preview:isoprod` labels
@@ -154,8 +165,8 @@ On a test PR:
   check the free space before labeling a second one.
 
 - Webapp only: no Airflow/data-platform previews, no warehouse database
-  (the entrypoint skips `create_remote_db_server` when `DB_WAREHOUSE` is
-  unset).
+  (`bin/post_deploy` skips `create_remote_db_server` when `DB_WAREHOUSE`
+  is unset).
 - Production deployment is unchanged (Scalingo); the Docker image is
   used by previews only for now.
 - Custom URLs (`pr-<n>.<preview_domain>`) need the wildcard CNAME

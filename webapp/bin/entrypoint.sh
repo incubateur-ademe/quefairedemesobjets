@@ -15,20 +15,6 @@ if [[ "${CONTAINER_ROLE:-web}" == "worker" ]]; then
   exec python manage.py db_worker
 fi
 
-# Previews only: preprod and prod run bin/post_deploy as a CI step before the
-# image is rolled out (RUN_MIGRATIONS_ON_START=false).
-if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
-  echo "Applying database migrations..."
-  python manage.py migrate --noinput
-  python manage.py populate_libelle_court
-  python manage.py seed_lieux_de_depot
-  # TODO: remove once the consignes grid is live in production.
-  # Grid of consignes of the live fiches, as bin/post_deploy does in
-  # production: the preview database is only seeded once, so redeploys
-  # would otherwise never convert the fiches. No-op once they have one.
-  python manage.py generate_consignes || echo "generate_consignes failed, starting anyway" >&2
-fi
-
 # Same settings as bin/start on Scalingo. Keep-alive: 75 s, the default of
 # the nginx that faced the Scaleway edge before (gunicorn's is 2 s).
 exec gunicorn core.wsgi \
