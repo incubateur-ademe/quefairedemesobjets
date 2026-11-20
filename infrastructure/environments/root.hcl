@@ -4,11 +4,12 @@ locals {
 
   # A stack that ships a secrets.example.json takes the inputs listed there
   # from Scaleway Secret Manager: secret <stack> at path /terraform/<environment>,
-  # a JSON object written by `make -C infrastructure secrets-push`.
+  # a JSON object written by `make -C infrastructure secrets-push`. Every
+  # preview (pr-<n>) reads /terraform/preview.
   secrets = jsondecode(run_cmd(
     "--terragrunt-quiet",
     "${get_parent_terragrunt_dir()}/../../scripts/infrastructure/stack_secrets.sh",
-    local.environment, local.stack,
+    replace(local.environment, "/^pr-\\d+$/", "preview"), local.stack,
   ))
 
   state_passphrase = run_cmd(
