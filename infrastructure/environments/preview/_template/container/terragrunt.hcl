@@ -68,12 +68,8 @@ inputs = {
   min_scale = local.isoprod ? 1 : 0
   cpu_limit = local.isoprod ? 2000 : 1000
 
-  # The container is served on its Scaleway-generated domain, unknown before
-  # apply: trust the whole generated-domain suffix (Django wildcard syntax).
-  # 127.0.0.1 and localhost are needed for Scaleway's internal health probes.
-  # The actual probe uses a dynamic internal IP (e.g. 100.96.x.x:8000) which
-  # varies per deployment — "*" allows any host for ephemeral previews.
-  ALLOWED_HOSTS = "*"
+  # The probes go through HealthzMiddleware, whatever the host.
+  ALLOWED_HOSTS = local.host
   BASE_URL      = "https://${local.host}"
 
   DATABASE_URL                    = dependency.preview_database.outputs.database_url
@@ -87,6 +83,17 @@ inputs = {
   AWS_SECRET_ACCESS_KEY   = get_env("SCW_SECRET_KEY")
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
   AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
+
+  # No nginx in front of a preview until its gateway: noindex by meta tag
+  # instead of X-Robots-Tag.
+  extra_environment_variables = {
+    BLOCK_ROBOTS = "true"
+  }
+
+  worker_enabled = false
+  # Persistent connections would add up across previews on the shared
+  # preprod instance.
+  CONN_MAX_AGE = 0
 
   # Keep the container warm for 1h after the last request to avoid cold starts.
   timeout = 3600

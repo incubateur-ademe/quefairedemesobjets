@@ -10,7 +10,7 @@ from django.db import connection
 from django.db.models.functions import Length, Lower
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import ListView
 from wagtail.templatetags.wagtailcore_tags import richtext
 
@@ -46,8 +46,16 @@ def backlink(request):
     return response
 
 
+@never_cache
+def livez(request):
+    """Liveness probe: the process answers. Without the database, so that an
+    incident there does not get every container restarted."""
+    return HttpResponse("ok", content_type="text/plain")
+
+
+@never_cache
 def healthz(request):
-    """Health check probe for container platforms (e.g. Scaleway).
+    """Startup probe for container platforms (e.g. Scaleway).
 
     Touches the default database so the container is only considered
     healthy once it can actually serve requests.

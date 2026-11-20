@@ -3,6 +3,8 @@
 locals {
   env              = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   metabase_enabled = local.env.locals.metabase_enabled
+  webapp_enabled   = local.env.locals.webapp_enabled
+  webapp_domain    = local.env.locals.webapp_gateway_domain
 }
 
 terraform {
@@ -28,10 +30,24 @@ dependency "metabase_containers" {
   }
 }
 
+dependency "webapp_container" {
+  config_path = "${get_terragrunt_dir()}/../webapp_container"
+  enabled     = local.webapp_enabled
+
+  # Not plan: the CI applies its plan, it must never carry mock outputs.
+  mock_outputs_allowed_terraform_commands = ["validate"]
+  mock_outputs = {
+    public_endpoint = "https://mock-webapp.functions.fnc.fr-par.scw.cloud"
+    registry_image  = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:mock"
+    privacy         = "public"
+  }
+}
+
 dependencies {
   paths = concat(
     ["${get_terragrunt_dir()}/../airflow_containers"],
     local.metabase_enabled ? ["${get_terragrunt_dir()}/../metabase_containers"] : [],
+    local.webapp_enabled ? ["${get_terragrunt_dir()}/../webapp_container"] : [],
   )
 }
 
@@ -59,4 +75,19 @@ inputs = {
       }
     } : {},
   )
+
+  webapp = local.webapp_enabled ? {
+    # The module wants https://<host>; the output may come without scheme
+    upstream = (
+      startswith(dependency.webapp_container.outputs.public_endpoint, "https://")
+      ? dependency.webapp_container.outputs.public_endpoint
+      : "https://${dependency.webapp_container.outputs.public_endpoint}"
+    )
+    release      = dependency.webapp_container.outputs.registry_image
+    base_domain  = local.webapp_domain
+    environment  = local.env.locals.webapp_environment
+    server_names = [local.webapp_domain]
+    domains      = [local.webapp_domain]
+    privacy      = dependency.webapp_container.outputs.privacy
+  } : null
 }
