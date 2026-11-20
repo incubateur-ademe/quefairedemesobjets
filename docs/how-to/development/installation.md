@@ -64,11 +64,17 @@ Provisionnement:
 make setup
 ```
 
-Cette commande construit les images, démarre la stack, applique les migrations et crée un superutilisateur d'exemple (`admin` / `admin`). Elle peut être relancée sans risque. La base est vide après une première installation.
+Cette commande construit les images, démarre la stack, applique les migrations et crée un superutilisateur d'exemple (`admin` / `admin`). Elle peut être relancée sans risque.
 
 L'application est ensuite accessible sur [http://quefairedemesdechets.localhost](http://quefairedemesdechets.localhost) (derrière nginx, comme en production) ou sur [http://localhost:8000](http://localhost:8000) (Django directement). Les domaines en `.localhost` pointent sur la machine sans modifier `/etc/hosts`.
 
-Pour la peupler, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local).
+Quand la base est vide, `make setup` la peuple :
+
+- avec la base d'échantillon (environ 2 000 acteurs, rapide) si `SAMPLE_DB_URI` est défini dans `.env` ;
+- sinon avec le dernier backup de production (environ 10 Go) si le client Scaleway (`scw`) est configuré ;
+- sinon elle reste vide, et la commande indique quoi configurer.
+
+Pour restaurer la production à la demande, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local).
 
 ## Services Docker Compose
 

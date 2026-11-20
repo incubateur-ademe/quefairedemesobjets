@@ -32,11 +32,12 @@ PSQL := docker compose exec -T webapp-db psql -U webapp -d webapp
 # --- Local stack -----------------------------------------------------------
 # Everything runs in Docker Compose: no Python, Node or Postgres on the host.
 
-# First start: builds the images, starts the stack and creates the example
-# superuser (admin / admin). Safe to run again. The data comes from a restore:
-# make db-restore-local-from-prod
+# First start: builds the images, starts the stack, fills the database when it
+# is empty (scripts/setup_database.sh) and creates the example superuser
+# (admin / admin). Safe to run again.
 .PHONY: setup
 setup: up
+	./scripts/setup_database.sh
 	$(MAKE) -C webapp createsuperuser-example
 	@echo "✓ http://$(BASE_DOMAIN) (ou http://localhost:8000)"
 
@@ -236,16 +237,16 @@ create-schema-public:
 psql:
 	docker compose exec webapp-db psql -U webapp -d webapp
 
+# USE_LATEST_BACKUP=true réutilise le dernier backup Scaleway prêt
+# au lieu d'en créer un nouveau (évite la création + polling).
 .PHONY: dump-prod
 dump-prod:
-	bash scripts/infrastructure/backup-db.sh --env prod
+	bash scripts/infrastructure/backup-db.sh --env prod $(if $(filter true,$(USE_LATEST_BACKUP)),--latest)
 
 .PHONY: dump-preprod
 dump-preprod:
 	bash scripts/infrastructure/backup-db.sh --quiet --env preprod
 
-# USE_LATEST_BACKUP=true réutilise le dernier backup Scaleway prêt
-# au lieu d'en créer un nouveau (évite la création + polling).
 .PHONY: dump-prod-quiet
 dump-prod-quiet:
 	bash scripts/infrastructure/backup-db.sh --quiet $(if $(filter true,$(USE_LATEST_BACKUP)),--latest)
