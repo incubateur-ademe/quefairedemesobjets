@@ -1,7 +1,8 @@
 # Builder python
 # --- --- --- ---
-ARG AIRFLOW_VERSION=3.3.1
-FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS python-builder
+# The version comes from data-platform/pyproject.toml: `make -s airflow-version`
+ARG AIRFLOW_VERSION
+FROM apache/airflow:slim-${AIRFLOW_VERSION:?pass_--build-arg_AIRFLOW_VERSION}-python3.12 AS python-builder
 
 # system dependencies
 USER root

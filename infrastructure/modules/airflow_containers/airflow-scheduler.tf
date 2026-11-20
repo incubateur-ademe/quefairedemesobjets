@@ -61,7 +61,6 @@ resource "scaleway_container" "airflow_scheduler" {
     DATABASE_URL                            = var.DATABASE_URL
     DB_WAREHOUSE                            = var.DB_WAREHOUSE
     DB_WEBAPP_SAMPLE                        = var.DB_WEBAPP_SAMPLE
-    MATTERMOST_WEBHOOK_URL                  = var.MATTERMOST_WEBHOOK_URL
     ML_DEDUPLICATION_SSH_KEY_B64            = var.ML_DEDUPLICATION_SSH_KEY_B64
     POSTGRES_DB                             = var.POSTGRES_DB
     POSTGRES_HOST                           = var.POSTGRES_HOST
