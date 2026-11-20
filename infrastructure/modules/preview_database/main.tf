@@ -82,7 +82,6 @@ resource "null_resource" "seed_from_sample" {
       DB_PASSWORD           = random_password.preview.result
       PREVIEW_DB_URL        = local.preview_db_url
       EXTENSIONS_SCRIPT     = var.create_extensions_script_path
-      IMAGE_TAG             = var.image_tag
       SAMPLE_DB_URI         = var.sample_db_uri
       ISOPROD               = var.isoprod ? "true" : "false"
       PROD_INSTANCE_NAME    = var.prod_instance_name
@@ -210,30 +209,6 @@ resource "null_resource" "seed_from_sample" {
         exit 1
       fi
       echo "Seed complete: $TABLE_COUNT tables, $ROW_COUNT rows restored"
-
-      # Run Django management commands against the freshly seeded database.
-      # Uses the Docker image that was just built; only runs when the seed
-      # runs (clear_db=true or SAMPLE_DB_URI changed).
-      echo "Running Django management commands..."
-      IMAGE="rg.fr-par.scw.cloud/ns-qfdmo/webapp:$${IMAGE_TAG}"
-      docker pull "$IMAGE"
-      docker run --rm \
-        -e DATABASE_URL="$PREVIEW_DB_URL" \
-        -e SECRET_KEY=dummy \
-        "$IMAGE" \
-        sh -c "
-          set -e
-          python manage.py createcachetable
-          python manage.py migrate
-          python manage.py enable_unaccent
-          python manage.py enable_trigram || true
-          python manage.py purge_orphan_searchterm_index || true
-          python manage.py populate_libelle_court
-          python manage.py seed_lieux_de_depot
-          # TODO: remove once the consignes grid is live in production.
-          python manage.py generate_consignes
-          echo 'Management commands complete.'
-        "
     EOT
   }
 

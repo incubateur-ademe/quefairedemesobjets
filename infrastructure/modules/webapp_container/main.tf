@@ -69,8 +69,7 @@ resource "scaleway_container" "webapp" {
     timeout           = "10s"
   }
 
-  # With the database: the container takes traffic once it can serve it. Up
-  # to 5 minutes, for the entrypoint of a preview to run its migrations.
+  # With the database: the container takes traffic once it can serve it.
   startup_probe {
     http {
       path = "/healthz/"
