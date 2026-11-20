@@ -107,10 +107,12 @@ def parse_args() -> argparse.Namespace:
         "--linkage-column",
         type=str,
         default=None,
-        help="Name of a column holding the dataset id (e.g. '_dataset' with values "
-        "'A'/'B') to run entity linkage between two datasets. Only cross-dataset "
-        "pairs (A vs B) are considered at the blocking stage. When not set, the "
-        "classic deduplication behavior is kept.",
+        help="Name of a column holding the dataset id to run entity linkage "
+        "between two datasets. Only cross-dataset pairs (rows with different "
+        "values) are considered at the blocking stage. Works with string ids "
+        "(e.g. '_dataset' with values 'A'/'B') or numeric ids with a catch-all "
+        "value (e.g. -1). When not set, the classic deduplication behavior is "
+        "kept.",
     )
     parser.add_argument(
         "--output-table",
@@ -204,8 +206,18 @@ def linkage_rule(column: str) -> tuple[list[str], list[str]]:
 
     Returns ``(additional_business_rules_sql_exprs, additional_columns_to_keep)``
     that restrict blocking to cross-dataset (A vs B) candidate pairs only.
+
+    The two sides are cast to VARCHAR before comparing so the rule works
+    whatever the column dtype: string dataset ids (e.g. 'A'/'B') but also
+    numeric ids (e.g. source ids with a '-1' catch-all for non-candidates).
+    Without the cast, a numeric column makes duckdb try ``coalesce(int, '')``,
+    which fails with a ConversionException.
     """
-    business_rule = f"coalesce({column}_l,'') <> coalesce({column}_r,'')"
+    business_rule = (
+        f"coalesce(cast({column}_l as varchar),'') "
+        f"<> coalesce(cast({column}_r as varchar),'')"
+    )
+    logger.info("Adding new linkage rule for blocking : %s", business_rule)
     return [business_rule], [column]
 
 

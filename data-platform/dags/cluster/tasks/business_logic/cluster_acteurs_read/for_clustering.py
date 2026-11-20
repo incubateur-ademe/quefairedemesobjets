@@ -147,8 +147,8 @@ def cluster_acteurs_read_parents(
 
 def _cluster_acteurs_read_base(
     fields: list[str],
-    include_source_ids: list[int],
-    exclude_source_ids: list[int],
+    include_source_ids: list[int] | None,
+    exclude_source_ids: list[int] | None,
     include_acteur_type_ids: list[int],
     include_only_if_regex_matches_nom: str | None,
     include_if_all_fields_filled: list[str] | None,
