@@ -37,3 +37,6 @@ jobs:
           # PR-Agent rewrites the pull request description by default.
           GITHUB_ACTION_CONFIG__AUTO_DESCRIBE: "false"
           GITHUB_ACTION_CONFIG__AUTO_IMPROVE: "false"
+          # PR-Agent creates and sets "Review effort" and security labels by default.
+          PR_REVIEWER__ENABLE_REVIEW_LABELS_EFFORT: "false"
+          PR_REVIEWER__ENABLE_REVIEW_LABELS_SECURITY: "false"
