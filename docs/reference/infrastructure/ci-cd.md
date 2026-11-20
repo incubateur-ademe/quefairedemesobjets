@@ -20,6 +20,8 @@ One reusable workflow runs per app: **🌐 Webapp** ([ci-webapp.yml](https://git
 
 A Pull Request does not deploy to `preprod`. The optional preview ([preview-up.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/preview-up.yml)) is triggered by the `preview` label. It is a separate workflow: it does not wait for CI, and a CI failure does not stop it.
 
+The `review` label asks for an automated pre-review ([pre-review.yml](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/.github/workflows/pre-review.yml)): [PR-Agent](https://github.com/The-PR-Agent/pr-agent) sends the diff to a model hosted by [Albert API](https://albert.api.etalab.gouv.fr) and posts its review as a comment. It works on draft pull requests too, and does not replace a human review. Remove the label and add it again to get a new review.
+
 Draft pull requests run no CI or E2E: they start when the pull request is marked as ready for review, and converting a pull request to draft cancels what is running.
 
 In a [stack of pull requests](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests), only the top pull request runs CI and E2E, as it contains the changes of the whole stack. Lower pull requests report the required checks as skipped so they stay mergeable, which means a lower pull request can merge even if the top one fails: check the top pull request before merging.
