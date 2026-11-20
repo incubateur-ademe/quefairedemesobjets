@@ -49,6 +49,11 @@ up:
 down:
 	docker compose --profile airflow down
 
+# Host ports of the running services: the database ones change at each start
+.PHONY: ports
+ports:
+	@docker compose --profile airflow ps --format 'table {{.Service}}\t{{.Ports}}'
+
 .PHONY: logs
 logs:
 	docker compose logs -f --tail 50

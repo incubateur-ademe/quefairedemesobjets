@@ -198,7 +198,9 @@ services:
     volumes:
       - webapp_dbdata:/var/lib/postgresql/data
     ports:
-      - ${WEBAPP_DB_PORT:-6543}:5432
+      # On the loopback, on a free port picked by Docker unless the variable
+      # sets one: `make ports` shows it
+      - 127.0.0.1:${WEBAPP_DB_PORT:-}:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "localhost", "-U", "webapp"]
       interval: 2s
@@ -215,7 +217,7 @@ services:
     volumes:
       - warehouse16_dbdata:/var/lib/postgresql/data
     ports:
-      - ${WAREHOUSE_DB_PORT:-8765}:5432
+      - 127.0.0.1:${WAREHOUSE_DB_PORT:-}:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "localhost", "-U", "warehouse"]
       interval: 2s
@@ -231,7 +233,7 @@ services:
     volumes:
       - airflow_dbdata:/var/lib/postgresql/data
     ports:
-      - ${AIRFLOW_DB_PORT:-7654}:5432
+      - 127.0.0.1:${AIRFLOW_DB_PORT:-}:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
