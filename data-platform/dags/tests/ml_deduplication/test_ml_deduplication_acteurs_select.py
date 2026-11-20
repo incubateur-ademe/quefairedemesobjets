@@ -19,6 +19,32 @@ from ml_deduplication.tasks.business_logic.ml_deduplication_acteurs_select impor
 )
 
 
+def _patch_read_base(monkeypatch, df):
+    captured = {}
+
+    def fake_read_base(**kwargs):
+        captured["kwargs"] = kwargs
+        return df, "SELECT ..."
+
+    monkeypatch.setattr(
+        "ml_deduplication.tasks.business_logic.ml_deduplication_acteurs_select"
+        "._cluster_acteurs_read_base",
+        fake_read_base,
+    )
+    return captured
+
+
+def _patch_create_temporary_table(monkeypatch):
+    created = []
+
+    monkeypatch.setattr(
+        "ml_deduplication.tasks.business_logic.ml_deduplication_acteurs_select"
+        ".create_temporary_table",
+        lambda df, table_name: created.append((df, table_name)),
+    )
+    return created
+
+
 def _config(
     limit_acteurs: int | None = None,
     include_sources: list[str] | None = None,
@@ -67,38 +93,14 @@ class TestActeursTableName:
 
 @pytest.mark.django_db
 class TestMLDeduplicationActeursSelect:
-    def _patch_read_base(self, monkeypatch, df):
-        captured = {}
-
-        def fake_read_base(**kwargs):
-            captured["kwargs"] = kwargs
-            return df, "SELECT ..."
-
-        monkeypatch.setattr(
-            "ml_deduplication.tasks.business_logic.ml_deduplication_acteurs_select"
-            "._cluster_acteurs_read_base",
-            fake_read_base,
-        )
-        return captured
-
-    def _patch_create_temporary_table(self, monkeypatch):
-        created = []
-
-        monkeypatch.setattr(
-            "ml_deduplication.tasks.business_logic.ml_deduplication_acteurs_select"
-            ".create_temporary_table",
-            lambda df, table_name: created.append((df, table_name)),
-        )
-        return created
-
     def test_limit_acteurs_is_passed_through(self, monkeypatch):
-        captured = self._patch_read_base(
+        captured = _patch_read_base(
             monkeypatch,
             pd.DataFrame(
                 [{"identifiant_unique": "a1", "nom": "Alpha", "source_id": 1}]
             ),
         )
-        created = self._patch_create_temporary_table(monkeypatch)
+        created = _patch_create_temporary_table(monkeypatch)
 
         df, table_name, linkage_column = ml_deduplication_acteurs_select(
             config=_config(limit_acteurs=100), run_id="ml_test"
@@ -111,13 +113,13 @@ class TestMLDeduplicationActeursSelect:
         assert created and created[0][1] == table_name
 
     def test_no_limit_when_none(self, monkeypatch):
-        captured = self._patch_read_base(
+        captured = _patch_read_base(
             monkeypatch,
             pd.DataFrame(
                 [{"identifiant_unique": "a1", "nom": "Alpha", "source_id": 1}]
             ),
         )
-        self._patch_create_temporary_table(monkeypatch)
+        _patch_create_temporary_table(monkeypatch)
 
         ml_deduplication_acteurs_select(
             config=_config(limit_acteurs=None), run_id="ml_test"
@@ -125,8 +127,8 @@ class TestMLDeduplicationActeursSelect:
         assert captured["kwargs"]["limit"] is None
 
     def test_empty_selection_returns_empty_table_name(self, monkeypatch):
-        self._patch_read_base(monkeypatch, pd.DataFrame())
-        created = self._patch_create_temporary_table(monkeypatch)
+        _patch_read_base(monkeypatch, pd.DataFrame())
+        created = _patch_create_temporary_table(monkeypatch)
 
         df, table_name, linkage_column = ml_deduplication_acteurs_select(
             config=_config(), run_id="ml_test"
@@ -146,8 +148,8 @@ class TestLinkageColumn:
             {"identifiant_unique": "a1", "nom": "Alpha", "source_id": 1},
             {"identifiant_unique": "b1", "nom": "Beta", "source_id": 2},
         ]
-        self._patch_read_base(monkeypatch, pd.DataFrame(rows))
-        created = self._patch_create_temporary_table(monkeypatch)
+        _patch_read_base(monkeypatch, pd.DataFrame(rows))
+        created = _patch_create_temporary_table(monkeypatch)
 
         df, _, linkage_column = ml_deduplication_acteurs_select(
             config=_config(), run_id="ml_test"
@@ -169,8 +171,8 @@ class TestLinkageColumn:
             # other sources get the -1 catch-all
             {"identifiant_unique": "o1", "nom": "Other", "source_id": 1},
         ]
-        self._patch_read_base(monkeypatch, pd.DataFrame(rows))
-        self._patch_create_temporary_table(monkeypatch)
+        _patch_read_base(monkeypatch, pd.DataFrame(rows))
+        _patch_create_temporary_table(monkeypatch)
 
         df, _, linkage_column = ml_deduplication_acteurs_select(
             config=_config(
@@ -192,7 +194,8 @@ class TestLinkageColumn:
             # parents not flagged as such have no source_id
             {"identifiant_unique": "p1", "nom": "Parent", "source_id": None},
         ]
-        self._patch_read_base(monkeypatch, pd.DataFrame(rows))
+        _patch_read_base(monkeypatch, pd.DataFrame(rows))
+        _patch_create_temporary_table(monkeypatch)
 
         df, _, linkage_column = ml_deduplication_acteurs_select(
             config=_config(), run_id="ml_test"
@@ -208,7 +211,8 @@ class TestLinkageColumn:
             {"identifiant_unique": "e1", "nom": "Eco A", "source_id": 252},
             {"identifiant_unique": "p1", "nom": "Parent", "source_id": None},
         ]
-        self._patch_read_base(monkeypatch, pd.DataFrame(rows))
+        _patch_read_base(monkeypatch, pd.DataFrame(rows))
+        _patch_create_temporary_table(monkeypatch)
 
         df, _, linkage_column = ml_deduplication_acteurs_select(
             config=_config(
