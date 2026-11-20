@@ -32,7 +32,7 @@ on:
         default: "false"
     outputs:
       endpoint:
-        description: "Public URL of the preview container"
+        description: "Public URL of the preview: pr-<n>.<preview_domain> on the preprod gateway, or the container's Scaleway address"
         value: ${{ jobs.terragrunt.outputs.endpoint }}
 
 jobs:
@@ -62,13 +62,11 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_SECRET_KEY }}
       AWS_DEFAULT_REGION: fr-par
 
-      # Inputs read by the preview templates via get_env(...)
+      # Inputs read by the preview templates via get_env(...). Their secrets
+      # come from Secret Manager (/terraform/preview), read by root.hcl.
+      SCW_DEFAULT_REGION: fr-par
       PR_NUMBER: ${{ inputs.pr_number }}
       IMAGE_TAG: ${{ inputs.image_tag }}
-      PREVIEW_SECRET_KEY: ${{ secrets.PREVIEW_SECRET_KEY }}
-      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-      NOTION_CONTACT_FORM_DATABASE_ID: ${{ secrets.NOTION_CONTACT_FORM_DATABASE_ID }}
-      SAMPLE_DB_URI: ${{ secrets.SAMPLE_DB_URI }}
       CLEAR_DB: ${{ inputs.clear_db }}
       ISOPROD: ${{ inputs.isoprod }}
 
@@ -86,9 +84,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends postgresql-client
 
-      - name: Login to Scaleway Container Registry
-        run: echo "${{ secrets.SCW_SECRET_KEY }}" | docker login rg.fr-par.scw.cloud -u nologin --password-stdin
-
       - name: Materialise per-PR terragrunt stack from _template
         run: |
           set -euo pipefail
@@ -102,13 +97,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          # run --all walks the unit DAG: apply in dependency order
-          # (database → object_storage → container). Init is implicit
-          # (auto-init) and -auto-approve is added automatically in --all
-          # mode; TG_NON_INTERACTIVE is set job-wide. --queue-exclude-external
-          # keeps the shared ../../namespace unit out of the queue.
+          # run --all walks the unit DAG: database and object_storage here.
+          # Init is implicit (auto-init) and -auto-approve is added
+          # automatically in --all mode; TG_NON_INTERACTIVE is set job-wide.
+          # --queue-exclude-external keeps the shared ../../namespace unit
+          # out of the queue; container and gateway_domain are applied by
+          # the next steps.
           # Teardown is not done with terragrunt: see preview-down.yml.
-          terragrunt run --all --queue-exclude-external -- apply 2>&1 | tee apply.log
+          terragrunt run --all --queue-exclude-external --queue-exclude-dir container --queue-exclude-dir gateway_domain -- apply 2>&1 | tee apply.log
           {
             echo "## Terragrunt apply (pr-${{ inputs.pr_number }})"
             echo
@@ -117,13 +113,41 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Read container public endpoint
+      # As on preprod and prod: migrations run before the new image is
+      # rolled out, never at container start.
+      - name: Run bin/post_deploy in the new image
+        working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}/container
+        run: "$GITHUB_WORKSPACE/scripts/infrastructure/post_deploy.sh"
+
+      - name: Terragrunt apply (container)
+        working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}/container
+        run: terragrunt apply -auto-approve
+
+      # Attaches nothing while preview_domain is empty in preprod/env.hcl
+      - name: Attach pr-${{ inputs.pr_number }} to the preprod gateway
+        id: domain
+        working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}/gateway_domain
+        run: |
+          set -uo pipefail
+          if terragrunt apply -auto-approve 2>&1 | tee apply.log && URL=$(terragrunt output -raw url); then
+            echo "url=$URL" >> "$GITHUB_OUTPUT"
+          else
+            # The preview stays usable on its Scaleway address
+            echo "::warning title=Preview domain::pr-${{ inputs.pr_number }} could not be attached to the preprod gateway (see this step, 50 domains per container at most): the preview is served on its Scaleway address only."
+          fi
+
+      - name: Read preview public endpoint
         id: endpoint
         working-directory: infrastructure/environments/preview/pr-${{ inputs.pr_number }}/container
+        env:
+          DOMAIN_URL: ${{ steps.domain.outputs.url }}
         run: |
           set -euo pipefail
-          ENDPOINT=$(terragrunt output -raw public_endpoint)
-          [[ "$ENDPOINT" == http* ]] || ENDPOINT="https://${ENDPOINT}"
+          ENDPOINT="$DOMAIN_URL"
+          if [[ -z "$ENDPOINT" ]]; then
+            ENDPOINT=$(terragrunt output -raw public_endpoint)
+            [[ "$ENDPOINT" == http* ]] || ENDPOINT="https://${ENDPOINT}"
+          fi
           echo "endpoint=$ENDPOINT" >> "$GITHUB_OUTPUT"
           echo "Preview endpoint: $ENDPOINT"
 

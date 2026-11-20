@@ -34,18 +34,16 @@ check-gh:
 	@gh auth status > /dev/null || { echo "gh is not authenticated, run: gh auth login"; exit 1; }
 
 # Create the GitHub `preview` environment and push the secrets the preview
-# workflows read. PREVIEW_SECRET_KEY is generated when not provided.
+# workflows read. The secrets of the previews themselves are in Secret Manager:
+# make secrets-push ENV=preview STACK=container
 .PHONY: preview-github-env
 preview-github-env: check-gh check-scw-credentials
 	@[ -n "$(SCALEWAY_DOCKER_SECRET)" ] || { echo "SCALEWAY_DOCKER_SECRET is not set (registry push credential)"; exit 1; }
-	@[ -n "$(SAMPLE_DB_URI)" ] || { echo "SAMPLE_DB_URI is not set (postgres URI of the preprod sample DB)"; exit 1; }
 	@echo "Creating GitHub environment 'preview' on $(REPO)…"
 	@gh api -X PUT "repos/$(REPO)/environments/preview" > /dev/null
-	@for s in SCW_ACCESS_KEY SCW_SECRET_KEY SCW_DEFAULT_PROJECT_ID SCW_DEFAULT_ORGANIZATION_ID SCALEWAY_DOCKER_SECRET SAMPLE_DB_URI; do \
+	@for s in SCW_ACCESS_KEY SCW_SECRET_KEY SCW_DEFAULT_PROJECT_ID SCW_DEFAULT_ORGANIZATION_ID SCALEWAY_DOCKER_SECRET; do \
 	  printenv "$$s" | gh secret set "$$s" --env preview --repo "$(REPO)" && echo "✓ $$s"; \
 	done
-	@KEY="$${PREVIEW_SECRET_KEY:-$$(openssl rand -hex 32)}"; \
-	  printf '%s' "$$KEY" | gh secret set PREVIEW_SECRET_KEY --env preview --repo "$(REPO)" && echo "✓ PREVIEW_SECRET_KEY"
 
 # Apply the shared container namespace (lvao-preview) read by every per-PR
 # container stack. Interactive on purpose: review the plan before approving.
@@ -75,9 +73,10 @@ preview-bootstrap: preview-github-env preview-namespace preview-label
 # Secrets of a stack, in Scaleway Secret Manager: one secret per stack, named
 # after it at path /terraform/<ENV>, holding a JSON object with the keys of
 # the stack's secrets.example.json. root.hcl reads it on every terragrunt run.
+# Every preview shares the secrets of ENV=preview, described in its _template.
 # Usage: make secrets-show ENV=preprod STACK=database
 #        make secrets-push ENV=preprod STACK=database [FILE=path/to/secrets.json]
-STACK_DIR = environments/$(ENV)/$(STACK)
+STACK_DIR = environments/$(ENV)/$(if $(filter preview,$(ENV)),_template/)$(STACK)
 FILE     ?= $(STACK_DIR)/secrets.json
 
 .PHONY: check-stack
@@ -86,7 +85,7 @@ check-stack:
 
 .PHONY: secrets-show
 secrets-show: check-stack
-	@cd $(STACK_DIR) && ../../../../scripts/infrastructure/stack_secrets.sh $(ENV) $(STACK) | jq .
+	@cd $(STACK_DIR) && $(CURDIR)/../scripts/infrastructure/stack_secrets.sh $(ENV) $(STACK) | jq .
 
 # Pushes FILE as a new version and disables the previous one. Refuses a file
 # whose keys differ from secrets.example.json. The listing is scoped to the

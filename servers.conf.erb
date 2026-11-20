@@ -8,6 +8,13 @@
   upstream_tls = upstream.start_with?("https://")
   upstream_name = upstream.sub(%r{\Ahttps://}, "").chomp("/")
   upstream_token = env.call("UPSTREAM_AUTH_TOKEN")
+  # Only the server block, next to a full rendering whose http-level
+  # directives (maps, cache zone) it reuses. No upstream block: proxy_pass
+  # goes straight to the host, which may hold server_name captures.
+  server_only = env.call("NGINX_SERVER_ONLY") == "1"
+  # The $no_cache map belongs to the main rendering: a server-only one turns
+  # the cache off instead (previews, never purged by a redeploy).
+  cache_zone = server_only && env.call("NGINX_DISABLE_CACHE") == "1" ? "off" : "assistant"
 
   nameservers = File.read("/etc/resolv.conf").scan(/^nameserver\s+(\d+\.\d+\.\d+\.\d+)/).flatten rescue []
   nameservers = ["8.8.8.8", "8.8.4.4"] if nameservers.empty?
@@ -17,7 +24,7 @@
   # The token never goes to PostHog or IGN: their locations do not include it
   # and clear the one a client may send.
   webapp_proxy = [
-    "proxy_pass #{upstream_tls ? "https" : "http"}://gunicorn;",
+    "proxy_pass #{upstream_tls ? "https" : "http"}://#{server_only ? upstream_name : "gunicorn"};",
     # HTTP/1.1 + empty Connection header required for upstream keepalive
     "proxy_http_version 1.1;",
     'proxy_set_header Connection "";',
@@ -39,6 +46,7 @@
   end
   webapp_proxy = webapp_proxy.join("\n        ")
 %>
+<% unless server_only %>
 open_file_cache max=1000 inactive=20s;
 open_file_cache_valid 30s;
 open_file_cache_min_uses 2;
@@ -109,6 +117,7 @@ upstream gunicorn {
     # TCP handshake overhead on every request
     keepalive 32;
 }
+<% end %>
 
 server {
 <% if ENV["SSL_CERT_PATH"] %>
@@ -135,10 +144,14 @@ server {
     add_header X-Robots-Tag "noindex, nofollow" always;
 <% end %>
 
+<%# $is_valid_host checks the host of the main rendering: a server-only one
+    relies on its server_name. %>
+<% unless server_only %>
     # Redirect if host is not one of the allowed domains
     if ($is_valid_host = 0) {
         return 301 https://<%= ENV["BASE_DOMAIN"] %>$request_uri;
     }
+<% end %>
 
 
 <% if env.call("NGINX_PROXY_STATIC") == "1" %>
@@ -146,7 +159,7 @@ server {
     location /static/ {
         <%= webapp_proxy %>
 
-        proxy_cache assistant;
+        proxy_cache <%= cache_zone %>;
         proxy_cache_key $scheme$host$request_uri;
         # Only 200s, whatever the upstream says: during a rolling deploy an
         # old instance answers 404 for the new hashed files.
@@ -168,7 +181,7 @@ server {
     location ~ ^/(static/)?(iframe|carte)\.js$ {
         <%= webapp_proxy %>
 
-        proxy_cache assistant;
+        proxy_cache <%= cache_zone %>;
         proxy_cache_key $scheme$host$request_uri;
         proxy_cache_valid 200 301 302 10m;
         proxy_cache_valid 404 1m;
@@ -290,7 +303,7 @@ server {
         proxy_cache_bypass $no_cache;
         proxy_no_cache $no_cache;
 
-        proxy_cache assistant;
+        proxy_cache <%= cache_zone %>;
         # Include $http_sec_fetch_dest in cache key to serve different cached
         # versions for standalone page loads vs iframe embeds
         proxy_cache_key $request_method$scheme$host$uri?$cache_args$http_sec_fetch_dest;

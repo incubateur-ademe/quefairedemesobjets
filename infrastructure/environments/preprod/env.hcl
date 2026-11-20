@@ -16,6 +16,9 @@ locals {
   # and servers.conf.erb test this exact value.
   webapp_environment = "staging"
 
+  # The webapp reads the warehouse (DB_WAREHOUSE); a preview has none.
+  warehouse_enabled = true
+
   # Host names of the webapp, the only ones Django accepts (ALLOWED_HOSTS).
   # base: canonical domain (BASE_URL). gateway: served by the gateway until
   # the DNS switch, under the existing wildcard CNAME. aliases: other domains
@@ -26,4 +29,10 @@ locals {
     "lvao.incubateur.ademe.dev",
     "quefairedemesobjets.incubateur.ademe.dev",
   ]
+
+  # The gateway also serves the previews at https://pr-<n>.<preview_domain>,
+  # with webapp_enabled only. Set it once the wildcard CNAME
+  # *.<preview_domain> points at the gateway (output domain_name of
+  # nginx_containers). Empty: previews only on their Scaleway address.
+  preview_domain = local.webapp_enabled ? "incubateur.ademe.dev" : ""
 }

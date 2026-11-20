@@ -28,16 +28,17 @@ re-seeded from the other source whenever the label is added or removed
 
 ## Decisions
 
-| Topic               | Decision                                 | Rationale                                                                                                                                                                                                                      |
-| ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Env keying          | **PR number** (`pr-<n>`)                 | Stable URL across pushes, one env per PR, destroyed on close.                                                                                                                                                                  |
-| Trigger             | **Label-gated** (`preview` label)        | Each up run builds a Docker image and seeds a DB: real cost, several minutes. Labeling opts a PR in.                                                                                                                           |
-| Hostname            | **Scaleway generated domain**            | No DNS to manage. The hostname is unknown before apply, so the container runs with `ALLOWED_HOSTS` relaxed to `.functions.fnc.fr-par.scw.cloud`.                                                                               |
-| Container namespace | **Dedicated `qfdmod-preview` namespace** | Isolation from preprod; the cleanup cron can list it exhaustively.                                                                                                                                                             |
-| DB seeding          | **`pg_dump` sample DB → `pg_restore`**   | Realistic data on the carte from the preprod sample database.                                                                                                                                                                  |
-| Isoprod seeding     | **Latest Scaleway backup of prod**       | With `preview:isoprod`, the seed downloads the most recent ready backup of the `webapp` database of `lvao-prod-webapp` (one is taken every 24 h) instead of creating one: no extra load on production, data at most a day old. |
-| Teardown            | **Scaleway CLI by naming convention**    | No terraform state needed to destroy, so a failed or partial apply can always be cleaned up. `preview_destroy.sh` is shared by destroy-on-close and the nightly GC.                                                            |
-| GC rule             | **PR state, not resource age**           | A preview is wanted iff its PR is open and labeled `preview`. Closed PRs get a 24h grace so a reopened PR keeps its environment.                                                                                               |
+| Topic               | Decision                                             | Rationale                                                                                                                                                                                                                                                                                                                                               |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Env keying          | **PR number** (`pr-<n>`)                             | Stable URL across pushes, one env per PR, destroyed on close.                                                                                                                                                                                                                                                                                           |
+| Trigger             | **Label-gated** (`preview` label), 5 at most         | Each up run builds a Docker image and seeds a DB: real cost, several minutes. Labeling opts a PR in. A 6th preview is refused (`capacity` job of `preview-up.yml`); existing ones are always updated.                                                                                                                                                   |
+| Hostname            | **Scaleway generated domain**                        | No DNS to manage. The hostname is unknown before apply, so the container runs with `ALLOWED_HOSTS` relaxed to `.functions.fnc.fr-par.scw.cloud`.                                                                                                                                                                                                        |
+| Custom hostname     | **`pr-<n>.<preview_domain>` on the preprod gateway** | `pr-<n>.incubateur.ademe.dev`, on once `webapp_enabled` is set in `preprod/env.hcl`. One server block of the preprod gateway serves every PR (no gateway redeploy per PR); each PR only attaches its domain to the gateway container, for its certificate (50 per container at most: beyond, the preview stays on its Scaleway address with a warning). |
+| Container namespace | **Dedicated `qfdmod-preview` namespace**             | Isolation from preprod; the cleanup cron can list it exhaustively.                                                                                                                                                                                                                                                                                      |
+| DB seeding          | **`pg_dump` sample DB → `pg_restore`**               | Realistic data on the carte from the preprod sample database.                                                                                                                                                                                                                                                                                           |
+| Isoprod seeding     | **Latest Scaleway backup of prod**                   | With `preview:isoprod`, the seed downloads the most recent ready backup of the `webapp` database of `lvao-prod-webapp` (one is taken every 24 h) instead of creating one: no extra load on production, data at most a day old.                                                                                                                          |
+| Teardown            | **Scaleway CLI by naming convention**                | No terraform state needed to destroy, so a failed or partial apply can always be cleaned up. `preview_destroy.sh` is shared by destroy-on-close and the nightly GC.                                                                                                                                                                                     |
+| GC rule             | **PR state, not resource age**                       | A preview is wanted iff its PR is open and labeled `preview`. Closed PRs get a 24h grace so a reopened PR keeps its environment.                                                                                                                                                                                                                        |
 
 ## Architecture
 
@@ -48,9 +49,11 @@ PR #123 labeled "preview"
 ┌─ preview-up.yml ─────────────────────────────────────────────┐
 │ 1. build webapp image  → rg.fr-par.scw.cloud/ns-qfdmo/       │
 │                          webapp:pr-123-<shortsha>            │
-│ 2. terragrunt run-all apply                                  │
+│ 2. terragrunt apply of                                       │
 │      infrastructure/environments/preview/pr-123/             │
-│      (materialised from _template at runtime)                │
+│      (materialised from _template at runtime):               │
+│      database and bucket, bin/post_deploy from the new       │
+│      image, then the container                               │
 │ 3. sticky PR comment with the URL                            │
 └──────────────────────────────────────────────────────────────┘
 
@@ -62,11 +65,17 @@ Per-PR resources (state: lvao-terraform-state/preview/pr-<n>/…):
 │                   1-day object expiry; container reuses the
 │                   project-wide SCW key (no bucket-scoped IAM key,
 │                   see Limitations)
-└── container       serverless container in the shared
-                    qfdmod-preview namespace, min_scale=0,
-                    tagged preview / preview-pr-<n>
-                    (isoprod: min_scale=1, 2 vCPU, extra tag
-                    preview-isoprod)
+├── container       serverless container in the shared
+│                   qfdmod-preview namespace, described by
+│                   _envcommon/webapp_container.hcl like preprod
+│                   and prod, min_scale=0,
+│                   tagged preview / preview-pr-<n>
+│                   (isoprod: min_scale=1, 2 vCPU, extra tag
+│                   preview-isoprod)
+└── gateway_domain  pr-<n>.<preview_domain> attached to the preprod
+                    gateway container, applied apart: a failure
+                    leaves a warning, not a failed deploy (nothing
+                    while preview_domain is empty)
 
 Shared (one-time):
 └── qfdmod-preview container namespace
@@ -82,7 +91,7 @@ the materialised directory path through `root.hcl` — the per-PR stacks
 carry no backend overrides.
 
 Teardown does not use terragrunt: `scripts/infrastructure/preview_destroy.sh`
-finds the container, database, user, bucket and state objects of a PR by
+finds the gateway domain, container, database, user, bucket and state objects of a PR by
 name and deletes them with the `scw`/`aws` CLIs. It is idempotent and takes
 `--dry-run`. Three paths call it:
 
@@ -108,18 +117,25 @@ export SCW_SECRET_KEY=…              # object storage, IAM and containers
 export SCW_DEFAULT_PROJECT_ID=…
 export SCW_DEFAULT_ORGANIZATION_ID=…
 export SCALEWAY_DOCKER_SECRET=…      # registry push credential
-export SAMPLE_DB_URI=…               # postgres URI of the preprod sample DB
-                                     # (pg_dump source), reachable from CI
 
 make -C infrastructure preview-bootstrap
 ```
 
-This runs three idempotent steps, also callable individually:
+The previews read their own secrets (Django `SECRET_KEY`, `NOTION_TOKEN`)
+from Scaleway Secret Manager like the other stacks, one secret shared by
+every preview:
+
+```bash
+make -C infrastructure secrets-push ENV=preview STACK=container FILE=path/to/secrets.json
+```
+
+The seed source is derived from the outputs of the preprod `database` and
+`database_sample` stacks.
+
+`preview-bootstrap` runs three idempotent steps, also callable individually:
 
 1. `preview-github-env` — creates the GitHub `preview` environment and
-   pushes the secrets above, plus `PREVIEW_SECRET_KEY` (the shared Django
-   `SECRET_KEY` for previews, generated with `openssl rand` unless already
-   set in your shell).
+   pushes the secrets above.
 2. `preview-namespace` — `terragrunt apply` of the shared `qfdmod-preview`
    container namespace (interactive: review the plan before approving).
 3. `preview-label` — creates the `preview` and `preview:isoprod` labels
@@ -149,11 +165,14 @@ On a test PR:
   check the free space before labeling a second one.
 
 - Webapp only: no Airflow/data-platform previews, no warehouse database
-  (the entrypoint skips `create_remote_db_server` when `DB_WAREHOUSE` is
-  unset).
+  (`bin/post_deploy` skips `create_remote_db_server` when `DB_WAREHOUSE`
+  is unset).
 - Production deployment is unchanged (Scalingo); the Docker image is
   used by previews only for now.
-- Served on the Scaleway-generated domain; no custom URLs.
+- Custom URLs (`pr-<n>.<preview_domain>`) need the wildcard CNAME
+  `*.<preview_domain>` pointing at the preprod gateway. Scaleway issues one
+  certificate per custom domain (HTTP-01, no wildcard certificate), 50 per
+  container at most.
 - No bucket-scoped IAM key for the media bucket: the CI Terraform credentials
   (`SCW_ACCESS_KEY`/`SCW_SECRET_KEY`) lack IAM write permission, so the
   container reuses those project-wide credentials for S3 access instead of a

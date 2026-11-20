@@ -125,3 +125,24 @@ variable "webapp_auth_token" {
     error_message = "webapp_auth_token must be empty or an IAM secret key (lowercase UUID)."
   }
 }
+
+variable "previews" {
+  description = <<-EOT
+    Previews served by the gateway at https://pr-<n>.<domain>, next to the webapp;
+    null serves none. domain: its wildcard CNAME must point at this container.
+    upstream: https address of the preview container of PR n, {pr} standing for n.
+  EOT
+  type = object({
+    domain   = string
+    upstream = string
+  })
+  default = null
+
+  validation {
+    condition = var.previews == null ? true : (
+      can(regex("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$", var.previews.domain))
+      && can(regex("^https://[a-z0-9][a-z0-9.-]*\\{pr\\}[a-z0-9.-]*[a-z0-9]/?$", var.previews.upstream))
+    )
+    error_message = "previews: domain must be a host name, upstream https://<host> with {pr} in the host."
+  }
+}

@@ -1,6 +1,8 @@
 #!/bin/sh
 # Serve the webapp from servers.conf.erb, the template Scalingo and the local
 # proxy also render. Does nothing while WEBAPP_UPSTREAM is empty.
+# With WEBAPP_PREVIEW_DOMAIN, also serves https://pr-<n>.<that domain> from
+# WEBAPP_PREVIEW_UPSTREAM, {pr} replaced by n.
 # The rendered file holds the IAM key: never print it, nor run `nginx -T`
 # where its output is logged.
 # -f: server names such as *.example.fr must not glob
@@ -9,6 +11,7 @@ set -euf
 [ -n "${WEBAPP_UPSTREAM:-}" ] || exit 0
 
 CONF=/etc/nginx/conf.d/webapp.conf
+PREVIEWS_CONF=/etc/nginx/conf.d/previews.conf
 HOST_RE='[a-z0-9]([a-z0-9.-]*[a-z0-9])?'
 UUID_RE='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 NEWLINE='
@@ -45,20 +48,45 @@ for name in $server_names; do
     || fail "WEBAPP_SERVER_NAMES: not a host name nor a ~regex: $name"
 done
 
+if [ -n "${WEBAPP_PREVIEW_DOMAIN:-}" ]; then
+  matches "$WEBAPP_PREVIEW_DOMAIN" "$HOST_RE" \
+    || fail "WEBAPP_PREVIEW_DOMAIN must be a host name"
+  matches "${WEBAPP_PREVIEW_UPSTREAM:-}" 'https://[a-z0-9][a-z0-9.-]*\{pr\}[a-z0-9.-]*[a-z0-9]/?' \
+    || fail "WEBAPP_PREVIEW_UPSTREAM must be https://<host> with {pr} in the host"
+fi
+
+render() { # file, variables of this rendering
+  out="$1"
+  shift
+  # env -i: the template sees none of the gateway's own variables
+  env -i \
+    PORT=8080 \
+    UPSTREAM_AUTH_TOKEN="${WEBAPP_AUTH_TOKEN:-}" \
+    NGINX_PROXY_STATIC=1 \
+    NGINX_GZIP=1 \
+    NGINX_ADMIN_MAX_BODY_SIZE=100m \
+    "$@" \
+    /usr/bin/ruby -e "require 'erb'; puts ERB.new(File.read(ARGV[0])).result(binding)" \
+    /etc/nginx/servers.conf.erb > "$out.tmp"
+  mv "$out.tmp" "$out"
+}
+
 umask 077
-# env -i: the template sees none of the gateway's own variables
-env -i \
-  PORT=8080 \
+render "$CONF" \
   ENVIRONMENT="$WEBAPP_ENVIRONMENT" \
   BASE_DOMAIN="$WEBAPP_BASE_DOMAIN" \
   NGINX_SERVER_NAMES="$server_names" \
   UPSTREAM_HOST="$WEBAPP_UPSTREAM" \
-  UPSTREAM_AUTH_TOKEN="${WEBAPP_AUTH_TOKEN:-}" \
-  NGINX_PROXY_STATIC=1 \
-  NGINX_GZIP=1 \
-  NGINX_ADMIN_MAX_BODY_SIZE=100m \
   NGINX_CACHE_PATH=/var/cache/nginx/assistant \
-  NGINX_CACHE_MAX_SIZE=256m \
-  /usr/bin/ruby -e "require 'erb'; puts ERB.new(File.read(ARGV[0])).result(binding)" \
-  /etc/nginx/servers.conf.erb > "$CONF.tmp"
-mv "$CONF.tmp" "$CONF"
+  NGINX_CACHE_MAX_SIZE=256m
+if [ -n "${WEBAPP_PREVIEW_DOMAIN:-}" ]; then
+  # Reuses the maps of $CONF. No cache: nothing purges it when a PR is pushed.
+  # No IAM key: previews run unreviewed code and are public.
+  render "$PREVIEWS_CONF" \
+    NGINX_SERVER_ONLY=1 \
+    NGINX_DISABLE_CACHE=1 \
+    UPSTREAM_AUTH_TOKEN= \
+    ENVIRONMENT=preview \
+    NGINX_SERVER_NAMES="~^pr-(?<pr>[1-9][0-9]*)\\.$(printf '%s' "$WEBAPP_PREVIEW_DOMAIN" | sed 's/\./\\./g')\$" \
+    UPSTREAM_HOST="$(printf '%s' "$WEBAPP_PREVIEW_UPSTREAM" | sed 's/{pr}/${pr}/')"
+fi
