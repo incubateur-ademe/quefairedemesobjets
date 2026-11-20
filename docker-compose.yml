@@ -133,7 +133,8 @@ services:
       test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8000), 2)"]
       interval: 5s
       retries: 5
-      start_period: 120s
+      # First start on an empty database: every migration runs
+      start_period: 600s
 
   # Processes the background tasks (django-tasks) enqueued by the webapp
   worker:
@@ -247,7 +248,8 @@ services:
     user: "0:0"
     build:
       context: .
-      dockerfile: data-platform/airflow-webserver.Dockerfile
+      dockerfile: data-platform/Dockerfile
+      target: webserver
       args:
         <<: *airflow-build-args
     deploy:
@@ -270,7 +272,8 @@ services:
     <<: *airflow-common
     build:
       context: .
-      dockerfile: data-platform/airflow-scheduler.Dockerfile
+      dockerfile: data-platform/Dockerfile
+      target: scheduler
       args:
         <<: *airflow-build-args
     deploy:
@@ -294,7 +297,8 @@ services:
     <<: *airflow-common
     build:
       context: .
-      dockerfile: data-platform/airflow-dag-processor.Dockerfile
+      dockerfile: data-platform/Dockerfile
+      target: dag-processor
       args:
         <<: *airflow-build-args
     healthcheck:
