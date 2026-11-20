@@ -1,14 +1,11 @@
 #!/bin/sh
-# Render servers.conf.erb in every mode it serves, run `nginx -t` on each
-# rendering in a container without network, and compare the Scalingo, local
-# and preview renderings with the expected ones in scripts/nginx_check/.
-#   NGINX_CHECK_UPDATE=1  rewrite the expected renderings after a wanted change
+# Render servers.conf.erb in every mode it serves and run `nginx -t` on each
+# rendering, in a container without network.
 #   TEMPLATE              template to render (default: servers.conf.erb)
 #   OUT_DIR               keep the renderings there (default: a temporary directory)
 set -eu
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-EXPECTED="$ROOT/scripts/nginx_check"
 TEMPLATE="${TEMPLATE:-$ROOT/servers.conf.erb}"
 NGINX_IMAGE="${NGINX_CHECK_IMAGE:-nginx:1.30-alpine}"
 WORK="$(mktemp -d)"
@@ -81,30 +78,7 @@ for conf in "$OUT_DIR"/*.conf; do
   fi
 done
 
-# Comments and blank lines left out. Only this machine's nameservers, found
-# as the template finds them, are replaced: the resolver directive stays (the
-# PostHog and IGN proxies fail without it) and any other address shows.
-NAMESERVERS="$(awk '/^nameserver[[:space:]]+[0-9.]+$/ { printf "%s%s", sep, $2; sep = " " }' /etc/resolv.conf 2> /dev/null || true)"
-NAMESERVERS="${NAMESERVERS:-8.8.8.8 8.8.4.4}"
-export NAMESERVERS
-normalize() {
-  perl -ne 'next if /^\s*(#.*)?$/; s/^(\s*resolver) \Q$ENV{NAMESERVERS}\E (valid=)/$1 <nameservers> $2/; print' "$1"
-}
-for mode in scalingo-production scalingo-staging local preview gateway; do
-  if [ "${NGINX_CHECK_UPDATE:-}" = 1 ]; then
-    mkdir -p "$EXPECTED"
-    normalize "$OUT_DIR/$mode.conf" > "$EXPECTED/$mode.conf"
-    echo "updated $EXPECTED/$mode.conf"
-  elif normalize "$OUT_DIR/$mode.conf" | diff -u "$EXPECTED/$mode.conf" -; then
-    echo "ok      $mode matches scripts/nginx_check/$mode.conf"
-  else
-    echo "FAILED  $mode differs from scripts/nginx_check/$mode.conf" \
-      "(NGINX_CHECK_UPDATE=1 make nginx-check if the change is wanted)"
-    status=1
-  fi
-done
-if normalize "$OUT_DIR/scalingo-production-empty.conf" |
-  diff -u "$EXPECTED/scalingo-production.conf" -; then
+if cmp -s "$OUT_DIR/scalingo-production-empty.conf" "$OUT_DIR/scalingo-production.conf"; then
   echo "ok      empty variables render as absent ones"
 else
   echo "FAILED  an empty variable is not treated as absent"

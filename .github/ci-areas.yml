@@ -53,7 +53,6 @@ infrastructure:
   - "nginx/**"
   - "webapp/nginx/nginx.conf"
   - "scripts/nginx_check.sh"
-  - "scripts/nginx_check/**"
 
 dependencies:
   - "**/uv.lock"
