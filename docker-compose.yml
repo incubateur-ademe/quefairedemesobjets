@@ -109,7 +109,8 @@ x-webapp-common: &webapp-common
     DEBUG: ${DEBUG:-True}
     WITH_DJANGO_DEBUG_TOOLBAR: ${WITH_DJANGO_DEBUG_TOOLBAR:-True}
     BASE_URL: ${BASE_URL:-http://quefairedemesdechets.localhost}
-    ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,webapp,host.docker.internal}
+    # gunicorn: the upstream name nginx sends as Host for iframe.js and carte.js
+    ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,webapp,gunicorn,host.docker.internal}
     DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
     DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample} # pragma: allowlist secret
     DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@warehouse-db:5432/warehouse} # pragma: allowlist secret
