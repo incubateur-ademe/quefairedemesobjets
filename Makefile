@@ -269,6 +269,7 @@ load-dump-to-loc:
 
 .PHONY: db-restore-local-from
 db-restore-local-from:
+	@docker compose up -d --wait webapp-db
 	@ENV=$(env) $(MAKE) dump-$(env)
 	@$(MAKE) drop-schema-public
 	@$(MAKE) create-schema-public
