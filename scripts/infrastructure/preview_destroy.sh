@@ -54,7 +54,8 @@ for pr in "$@"; do
 
   if scw object bucket list region="$REGION" -o json | jq -e --arg b "lvao-pr-$pr-media" 'any(.[]; .Name == $b)' > /dev/null; then
     echo "  bucket lvao-pr-$pr-media"
-    run scw object bucket delete "lvao-pr-$pr-media" region="$REGION"
+    # --force empties it first: a bucket that holds objects cannot be deleted
+    run aws --endpoint-url "$S3_ENDPOINT" s3 rb "s3://lvao-pr-$pr-media" --force
   fi
 
   echo "  state s3://$STATE_BUCKET/preview/pr-$pr/"
