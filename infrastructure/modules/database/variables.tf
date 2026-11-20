@@ -27,6 +27,7 @@ variable "webapp_db_password" {
   description = "Mot de passe de la base de données webapp"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "webapp_db_metabase_username" {
@@ -38,6 +39,7 @@ variable "webapp_db_metabase_password" {
   description = "Mot de passe Metabase de la base de données webapp"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "webapp_volume_size" {
@@ -64,6 +66,7 @@ variable "warehouse_db_password" {
   description = "Mot de passe de la base de données warehouse"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "warehouse_db_metabase_username" {
@@ -75,6 +78,7 @@ variable "warehouse_db_metabase_password" {
   description = "Mot de passe Metabase de la base de données warehouse"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "warehouse_volume_size" {
@@ -96,6 +100,7 @@ variable "airflow_db_password" {
   description = "Mot de passe de la base de données airflow"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "metabase_db_name" {

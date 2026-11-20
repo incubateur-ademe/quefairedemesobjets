@@ -7,7 +7,7 @@ resource "scaleway_rdb_instance" "webapp" {
   is_ha_cluster             = true
   disable_backup            = false
   user_name                 = var.webapp_db_username
-  password                  = var.webapp_db_password
+  password                  = random_password.db["webapp"].result
   tags                      = ["${var.environment}", "postgresql", "qfdmo"]
   backup_schedule_frequency = 24
   backup_schedule_retention = 30
@@ -35,7 +35,7 @@ resource "scaleway_rdb_privilege" "webapp_privilege" {
 resource "scaleway_rdb_user" "webapp_metabase_user" {
   instance_id = scaleway_rdb_instance.webapp.id
   name        = var.webapp_db_metabase_username
-  password    = var.webapp_db_metabase_password
+  password    = random_password.db["webapp_metabase"].result
   is_admin    = false
 }
 
@@ -55,7 +55,7 @@ locals {
     ? filesha256(var.grant_metabase_default_privileges_script_path)
     : null
   )
-  webapp_metabase_db_password_sha256 = nonsensitive(sha256(var.webapp_db_metabase_password))
+  webapp_metabase_db_password_sha256 = nonsensitive(sha256(random_password.db["webapp_metabase"].result))
 }
 
 resource "null_resource" "grant_webapp_metabase_default_privileges" {
@@ -70,7 +70,7 @@ resource "null_resource" "grant_webapp_metabase_default_privileges" {
     # Passwords go through env vars: putting them in the URL or inline would
     # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
     environment = {
-      PGPASSWORD = var.webapp_db_password
+      PGPASSWORD = random_password.db["webapp"].result
     }
     command = <<-EOT
       psql -v ON_ERROR_STOP=1 \
@@ -100,7 +100,7 @@ resource "scaleway_rdb_instance" "warehouse" {
   is_ha_cluster             = true
   disable_backup            = false
   user_name                 = var.warehouse_db_username
-  password                  = var.warehouse_db_password
+  password                  = random_password.db["warehouse"].result
   tags                      = ["${var.environment}", "postgresql", "warehouse", "dbt"]
   backup_schedule_frequency = 24
   backup_schedule_retention = 7
@@ -126,7 +126,7 @@ resource "scaleway_rdb_privilege" "warehouse_privilege" {
 resource "scaleway_rdb_user" "warehouse_metabase_user" {
   instance_id = scaleway_rdb_instance.warehouse.id
   name        = var.warehouse_db_metabase_username
-  password    = var.warehouse_db_metabase_password
+  password    = random_password.db["warehouse_metabase"].result
   is_admin    = false
 }
 
@@ -141,7 +141,7 @@ resource "scaleway_rdb_privilege" "warehouse_metabase_privilege" {
 # ALTER DEFAULT PRIVILEGES grants SELECT on those too.
 
 locals {
-  warehouse_metabase_db_password_sha256 = nonsensitive(sha256(var.warehouse_db_metabase_password))
+  warehouse_metabase_db_password_sha256 = nonsensitive(sha256(random_password.db["warehouse_metabase"].result))
 }
 
 resource "null_resource" "grant_warehouse_metabase_default_privileges" {
@@ -156,7 +156,7 @@ resource "null_resource" "grant_warehouse_metabase_default_privileges" {
     # Passwords go through env vars: putting them in the URL or inline would
     # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
     environment = {
-      PGPASSWORD = var.warehouse_db_password
+      PGPASSWORD = random_password.db["warehouse"].result
     }
     command = <<-EOT
       psql -v ON_ERROR_STOP=1 \
@@ -187,7 +187,7 @@ resource "scaleway_rdb_database" "airflow_db_on_warehouse" {
 resource "scaleway_rdb_user" "airflow_user_on_warehouse" {
   instance_id = scaleway_rdb_instance.warehouse.id
   name        = var.airflow_db_username
-  password    = var.airflow_db_password
+  password    = random_password.db["airflow"].result
   is_admin    = false
 }
 
@@ -214,7 +214,7 @@ resource "scaleway_rdb_user" "metabase_user_on_warehouse" {
   count       = local.metabase_enabled ? 1 : 0
   instance_id = scaleway_rdb_instance.warehouse.id
   name        = var.metabase_db_username
-  password    = var.metabase_db_password
+  password    = random_password.db["metabase"].result
   is_admin    = false
 }
 
@@ -244,8 +244,8 @@ locals {
     ? filesha256(var.create_remote_webapp_in_warehouse_script_path)
     : null
   )
-  webapp_db_password_sha256    = nonsensitive(sha256(var.webapp_db_password))
-  warehouse_db_password_sha256 = nonsensitive(sha256(var.warehouse_db_password))
+  webapp_db_password_sha256    = nonsensitive(sha256(random_password.db["webapp"].result))
+  warehouse_db_password_sha256 = nonsensitive(sha256(random_password.db["warehouse"].result))
 }
 
 resource "null_resource" "create_remote_warehouse_in_webapp" {
@@ -262,8 +262,8 @@ resource "null_resource" "create_remote_warehouse_in_webapp" {
     # Passwords go through env vars: putting them in the URL or inline would
     # let the shell expand `$` characters in passwords (e.g. `N$2$4efJE8c*`).
     environment = {
-      PGPASSWORD      = var.webapp_db_password
-      REMOTE_PASSWORD = var.warehouse_db_password
+      PGPASSWORD      = random_password.db["webapp"].result
+      REMOTE_PASSWORD = random_password.db["warehouse"].result
     }
     command = <<-EOT
       psql -v ON_ERROR_STOP=1 \
@@ -300,8 +300,8 @@ resource "null_resource" "create_remote_webapp_in_warehouse" {
 
   provisioner "local-exec" {
     environment = {
-      PGPASSWORD      = var.warehouse_db_password
-      REMOTE_PASSWORD = var.webapp_db_password
+      PGPASSWORD      = random_password.db["warehouse"].result
+      REMOTE_PASSWORD = random_password.db["webapp"].result
     }
     command = <<-EOT
       psql -v ON_ERROR_STOP=1 \
