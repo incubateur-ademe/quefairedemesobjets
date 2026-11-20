@@ -44,13 +44,16 @@ def ml_deduplication_acteurs_select_wrapper(ti) -> None:
     log.preview("Config reçue", config)
     log.preview("run_id", run_id)
 
-    df, table_name = ml_deduplication_acteurs_select(config, run_id)
+    df, table_name, linkage_column = ml_deduplication_acteurs_select(config, run_id)
 
     if df.empty:
         raise AirflowSkipException("Aucun acteur sélectionné, on s'arrête là")
 
     log.preview("table temporaire du pool d'acteurs", table_name)
     xcom_push(ti, XCOMS.ACTEURS_VIEW, table_name)
+    # Effective --linkage-column for the inference: "_linkage" when some
+    # sources are restricted to candidates, "" otherwise (classic dedup).
+    xcom_push(ti, XCOMS.LINKAGE_COLUMN, linkage_column)
 
 
 def ml_deduplication_acteurs_select_task() -> PythonOperator:
