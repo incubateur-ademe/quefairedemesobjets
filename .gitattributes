@@ -1,0 +1,3 @@
+# Collapsed in GitHub diffs: rendered or resolved by a tool, never edited by hand
+scripts/nginx_check/*.conf linguist-generated
+**/.terraform.lock.hcl linguist-generated
