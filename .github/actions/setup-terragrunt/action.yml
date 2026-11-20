@@ -1,0 +1,26 @@
+name: Setup Terragrunt
+description: Install OpenTofu, Terragrunt and the Scaleway CLI, at the versions every apply runs with
+
+runs:
+  using: composite
+  steps:
+    - name: Install OpenTofu
+      uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+      with:
+        tofu_version: "1.10.0"
+        tofu_wrapper: false
+
+    - name: Install Terragrunt
+      shell: bash
+      run: |
+        TG_VERSION="1.1.0"
+        curl -fsSL -o /usr/local/bin/terragrunt \
+          "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+        chmod +x /usr/local/bin/terragrunt
+        terragrunt --version
+
+    # Read by root.hcl (secrets of the stack) and by the preview_database module
+    - name: Setup Scaleway CLI
+      uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
+      with:
+        version: v2.56.0
