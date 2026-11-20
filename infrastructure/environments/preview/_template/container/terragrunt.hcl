@@ -2,16 +2,25 @@
 # Materialised to environments/preview/pr-<n>/ by the _terragrunt-apply.yml
 # workflow; `environment` (pr-<n>) and the state key derive from the
 # materialised path.
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+
+# The same description as preprod and prod, fed by ../../env.hcl and by the
+# ../database unit. deep: the inputs below are added to the shared ones and
+# win over them.
+include "stack" {
+  path           = "${dirname(find_in_parent_folders("root.hcl"))}/_envcommon/webapp_container.hcl"
+  merge_strategy = "deep"
+}
+
+# One directory deeper than preprod and prod.
 terraform {
   source = "../../../../modules/webapp_container"
 }
 
-include {
-  path = find_in_parent_folders("root.hcl")
-}
-
 dependencies {
-  paths = ["../database", "../object_storage"]
+  paths = ["../object_storage"]
 }
 
 dependency "preview_namespace" {
@@ -23,42 +32,24 @@ dependency "preview_namespace" {
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
 }
 
-dependency "preview_database" {
-  config_path = "../database"
-
-  mock_outputs = {
-    database_url = "postgresql://user:pass@host:5432/db?sslmode=require" # pragma: allowlist secret
-  }
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
-}
-
 dependency "preview_object_storage" {
   config_path = "../object_storage"
 
   mock_outputs = {
-    bucket_name  = "lvao-preview-mock-media"
-    endpoint_url = "https://s3.fr-par.scw.cloud"
+    bucket_name = "lvao-preview-mock-media"
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
 }
 
 locals {
   pr_number = get_env("PR_NUMBER")
-  # Tag set by preview-up.yml: pr-<n>-<shortsha>. Including the SHA forces a
-  # container redeploy on every push (the image reference changes).
-  image_tag = get_env("IMAGE_TAG")
   # preview:isoprod label: a preview meant to be used like production
   # (beta tests), see the database unit for its data.
   isoprod = get_env("ISOPROD", "false") == "true"
-  host    = format("qfdmodpreview6b0061c2-lvao-pr-%s-webapp.functions.fnc.fr-par.scw.cloud", local.pr_number)
-  # Served by the preprod gateway at pr-<n>.<preview_domain> when set
-  preview_domain = read_terragrunt_config("${get_terragrunt_dir()}/../../../preprod/env.hcl").locals.preview_domain
-  gateway_host   = local.preview_domain == "" ? "" : "pr-${local.pr_number}.${local.preview_domain}"
 }
 
 inputs = {
-  namespace_id   = dependency.preview_namespace.outputs.namespace_id
-  registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/webapp:${local.image_tag}"
+  namespace_id = dependency.preview_namespace.outputs.namespace_id
 
   # preview-isoprod marks the container of an isoprod preview.
   extra_tags = concat(
@@ -71,25 +62,18 @@ inputs = {
   min_scale = local.isoprod ? 1 : 0
   cpu_limit = local.isoprod ? 2000 : 1000
 
-  # The probes go through HealthzMiddleware, whatever the host.
-  ALLOWED_HOSTS = join(",", compact([local.host, local.gateway_host]))
-  BASE_URL      = "https://${coalesce(local.gateway_host, local.host)}"
-
-  DATABASE_URL                    = dependency.preview_database.outputs.database_url
-  SECRET_KEY                      = get_env("PREVIEW_SECRET_KEY")
-  NOTION_TOKEN                    = get_env("NOTION_TOKEN")
-  NOTION_CONTACT_FORM_DATABASE_ID = get_env("NOTION_CONTACT_FORM_DATABASE_ID")
+  # The contact form of preprod.
+  NOTION_CONTACT_FORM_DATABASE_ID = "17c6523d57d7808b8cc5f5ccae264f7c"
 
   # reuses the project-wide Scaleway key (no IAM write access to
   # mint a bucket-scoped one). Revisit if IAM permissions are granted.
   AWS_ACCESS_KEY_ID       = get_env("SCW_ACCESS_KEY")
   AWS_SECRET_ACCESS_KEY   = get_env("SCW_SECRET_KEY")
   AWS_STORAGE_BUCKET_NAME = dependency.preview_object_storage.outputs.bucket_name
-  AWS_S3_ENDPOINT_URL     = dependency.preview_object_storage.outputs.endpoint_url
 
-  # Its Scaleway address has no nginx in front: noindex by meta tag, the
-  # gateway adds X-Robots-Tag.
   extra_environment_variables = {
+    # Its Scaleway address has no nginx in front: noindex by meta tag, the
+    # gateway adds X-Robots-Tag.
     BLOCK_ROBOTS = "true"
   }
 
