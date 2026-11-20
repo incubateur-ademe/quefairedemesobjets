@@ -49,10 +49,10 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE          = "false"
     ENVIRONMENT                                           = var.environment
     WEBAPP_URL                                            = var.WEBAPP_URL
-    ML_DEDUPLICATION_SSH_PUB_KEY                          = var.ML_DEDUPLICATION_SSH_PUB_KEY
+    ML_DEDUPLICATION_SSH_PUB_KEY                          = trimspace(tls_private_key.ml_deduplication.public_key_openssh)
   }
   secret_environment_variables = {
-    AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
+    AIRFLOW__API_AUTH__JWT_SECRET           = random_password.jwt_secret.result
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     AIRFLOW_CONN_SCALEWAYLOGS               = var.AIRFLOW_CONN_SCALEWAYLOGS
@@ -61,7 +61,7 @@ resource "scaleway_container" "airflow_scheduler" {
     DATABASE_URL                            = var.DATABASE_URL
     DB_WAREHOUSE                            = var.DB_WAREHOUSE
     DB_WEBAPP_SAMPLE                        = var.DB_WEBAPP_SAMPLE
-    ML_DEDUPLICATION_SSH_KEY_B64            = var.ML_DEDUPLICATION_SSH_KEY_B64
+    ML_DEDUPLICATION_SSH_KEY_B64            = base64encode(tls_private_key.ml_deduplication.private_key_openssh)
     POSTGRES_DB                             = var.POSTGRES_DB
     POSTGRES_HOST                           = var.POSTGRES_HOST
     POSTGRES_PASSWORD                       = var.POSTGRES_PASSWORD
@@ -74,7 +74,7 @@ resource "scaleway_container" "airflow_scheduler" {
     SCW_DEFAULT_PROJECT_ID                  = var.project_id
     SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
     SCW_SECRET_KEY_INFRA                    = var.SCW_SECRET_KEY_INFRA
-    SECRET_KEY                              = var.SECRET_KEY
+    SECRET_KEY                              = random_password.django_secret_key.result
     SCW_ACCESS_KEY_INFRA                    = var.SCW_ACCESS_KEY_INFRA
   }
 }
