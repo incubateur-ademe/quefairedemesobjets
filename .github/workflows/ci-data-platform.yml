@@ -26,22 +26,13 @@ jobs:
       POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
       POSTGRES_DB: warehouse
       POSTGRES_SCHEMA: public
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: warehouse
-          POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
-          POSTGRES_DB: warehouse
     steps:
       - uses: actions/checkout@v7.0.1
+
+      - name: Start the database
+        uses: ./.github/actions/start-database
+        with:
+          service: warehouse-db
 
       - name: Setup Python environment
         uses: ./.github/actions/setup-python

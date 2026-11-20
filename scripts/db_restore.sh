@@ -25,7 +25,7 @@ fi
 # Determine which Docker service and database URL to use
 case "$DB_LABEL" in
     prod|preprod|sample)
-        DOCKER_SERVICE="lvao-webapp-db"
+        DOCKER_SERVICE="webapp-db"
         DB_USER="webapp"
         DB_NAME="webapp"
         ;;

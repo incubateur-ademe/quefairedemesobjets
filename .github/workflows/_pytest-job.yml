@@ -39,23 +39,11 @@ jobs:
   run:
     name: ${{ inputs.display-name }}
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgis/postgis:15-3.3-alpine
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 50
-          --tmpfs /var/lib/postgresql/data
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: webapp
-          POSTGRES_PASSWORD: webapp # pragma: allowlist secret
-          POSTGRES_DB: webapp
     steps:
       - uses: actions/checkout@v7.0.1
+
+      - name: Start the database
+        uses: ./.github/actions/start-database
 
       - name: Install GIS packages
         uses: ./.github/actions/install-gis

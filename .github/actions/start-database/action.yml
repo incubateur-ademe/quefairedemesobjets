@@ -1,0 +1,19 @@
+name: Start database
+description: Start a Postgres of docker-compose.yml on localhost:5432, the same image and settings as the local stack
+
+inputs:
+  service:
+    description: "Compose service: webapp-db or warehouse-db"
+    required: false
+    default: "webapp-db"
+
+runs:
+  using: composite
+  steps:
+    - name: Start ${{ inputs.service }}
+      shell: bash
+      env:
+        SERVICE: ${{ inputs.service }}
+        WEBAPP_DB_PORT: "5432"
+        WAREHOUSE_DB_PORT: "5432"
+      run: docker compose up -d --wait "$SERVICE"

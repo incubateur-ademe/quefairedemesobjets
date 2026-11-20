@@ -4,22 +4,15 @@
 
 ### Prérequis
 
-- docker & docker-compose
-- python 3.12
-- node 20
-- mkcert (optionnel : utilisé pour la génération de certificats pour le développement frontend de la carte et assistant)
-- gdal (librairie nécessaire à l'utilisation de GeoDjango)
-- Installer et configurer le client Scaleway en suivant [les instructions de Scaleway](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/)
-- Installer et configurer le client Scalingo en suivant [les instructions de Scalingo](https://doc.scalingo.com/platform/cli/start)
-- [OpenTofu](https://opentofu.org/docs/intro/install/) et [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
+- Docker et Docker Compose : c'est le seul prérequis pour lancer l'application. Python, Node, GDAL et Postgres tournent dans les conteneurs, aux mêmes versions qu'en CI et en production.
 
-Conseil: utiliser `asdf` ou `mise` pour la gestion des environnements virtuel `node` et `python`
+Optionnel, selon ce que vous faites :
 
-⚠️ L'accès à la plateforme Scaleway est nécessaire pour exécuter la copie de la base de données de production en local
-
-#### Spécificité d'installation pour les processeurs Mx de Mac
-
-[https://gist.github.com/codingjoe/a31405952ec936beba99b059e665491e](https://gist.github.com/codingjoe/a31405952ec936beba99b059e665491e)
+- node 24 sur la machine, pour lancer les tests end-to-end Playwright (`mise` ou `asdf` lisent `.tool-versions`)
+- [uv](https://docs.astral.sh/uv/) sur la machine, pour les hooks de pre-commit et l'autocomplétion de l'éditeur
+- Le client Scaleway, en suivant [les instructions de Scaleway](https://www.scaleway.com/en/docs/scaleway-cli/quickstart/), pour copier la base de production
+- Le client Scalingo, en suivant [les instructions de Scalingo](https://doc.scalingo.com/platform/cli/start)
+- [OpenTofu](https://opentofu.org/docs/intro/install/) et [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/), pour l'infrastructure
 
 ### Technologies
 
@@ -65,144 +58,87 @@ Provisionnement:
 - OpenTofu
 - Terragrunt
 
-## Profiles Docker Compose
+## Installation rapide
 
-Le `docker-compose.yml` à la racine expose deux profiles indépendants :
+```sh
+make setup
+```
 
-| Profile   | Services                                                                                                                                                                                                                     |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lvao`    | `lvao-webapp-db` (PostGIS, port `WEBAPP_DB_PORT`, 6543 par défaut, à définir dans le `.env` racine), `lvao-warehouse-db` (8765), nginx local SSL (`nginx-local-only/` + mkcert, domaine `quefairedemesdechets.ademe.local`). |
-| `airflow` | `airflow-db` (7654), `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM), `airflow-dag-processor` (8082).                                                                                                             |
+Cette commande construit les images, démarre la stack, applique les migrations et crée un superutilisateur d'exemple (`admin` / `admin`). Elle peut être relancée sans risque.
+
+L'application est ensuite accessible sur [http://quefairedemesdechets.localhost](http://quefairedemesdechets.localhost) (derrière nginx, comme en production) ou sur [http://localhost:8000](http://localhost:8000) (Django directement). Les domaines en `.localhost` pointent sur la machine sans modifier `/etc/hosts`.
+
+Quand la base est vide, `make setup` la peuple :
+
+- avec la base d'échantillon (environ 2 000 acteurs, rapide) si `SAMPLE_DB_URI` est défini dans `.env` ;
+- sinon avec le dernier backup de production (environ 10 Go) si le client Scaleway (`scw`) est configuré ;
+- sinon elle reste vide, et la commande indique quoi configurer.
+
+Pour restaurer la production à la demande, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local).
+
+## Services Docker Compose
+
+| Service     | Rôle                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| `webapp`    | Django : migrations au démarrage, puis `runserver` (port 8000)                                   |
+| `worker`    | `db_worker`, qui traite les tâches de fond (django-tasks), par exemple les actions admin lourdes |
+| `assets`    | `npm ci` si `package-lock.json` a changé, puis `parcel watch`                                    |
+| `proxy`     | nginx local, avec la même configuration que la production (port 80)                              |
+| `webapp-db` | PostGIS (port libre choisi par Docker)                                                           |
+
+Le profile `airflow` (`make run-airflow`) ajoute `warehouse-db`, `airflow-db`, `airflow-webserver` (8080), `airflow-scheduler` (12 G RAM) et `airflow-dag-processor`.
+
+Les bases écoutent sur un port libre de la machine, différent à chaque démarrage, pour ne jamais entrer en conflit avec un autre projet : `make ports` les affiche, et `WEBAPP_DB_PORT` (ou `WAREHOUSE_DB_PORT`, `AIRFLOW_DB_PORT`) dans `.env` en fixe un, pour un client graphique par exemple. `make psql` ouvre une console sans connaître le port.
 
 > Pas de **Redis** ni de **mailcatcher** en local : le cache Django est stocké en base (`django.core.cache.backends.db.DatabaseCache`, table `qf_django_cache`).
 
-## Installation rapide
-
-la commande `init-dev` installe tout l'environnement Webapp et plateforme data
+## Commandes du quotidien
 
 ```sh
-make init-dev
+make up                       # démarrer, après un git pull par exemple
+make down                     # arrêter
+make logs                     # suivre les logs
+make add pkg=requests         # ajouter une dépendance Python (group=dev pour un groupe)
+make add-js pkg=lodash        # ajouter une dépendance JavaScript
+make -C webapp shell          # shell Django
+make -C webapp makemigrations
+make -C webapp createsuperuser
 ```
 
-### Lancement de la webapp et de la plateforme data
+Les cibles de `webapp/Makefile` s'exécutent dans les conteneurs. `make DOCKER= NPM_DOCKER= <cible>` les exécute sur la machine, ce qui suppose d'y avoir installé Python, Node et GDAL : ce mode n'est pas maintenu.
 
-Modifier le fichier `/etc/hosts`, ajouter les lignes
+### Versions de Python, Node et uv
 
-```
-127.0.0.1       lvao.ademe.local
-127.0.0.1       quefairedemesdechets.ademe.local
-127.0.0.1       quefairedemesobjets.ademe.local
-```
+`.tool-versions`, à la racine, est le seul endroit où elles sont écrites. `make` les lit et les passe à la construction des images, la CI fait de même. Les images se construisent donc avec `make up`, pas avec `docker compose build` seul.
 
-Copier la base de données de prod
+Pour changer de version : modifier `.tool-versions` (et `.python-version` tant que Scalingo, seul à le lire encore, est en service), puis `make up`.
+
+### Dépendances à jour
+
+`make up` reconstruit les images quand `uv.lock`, `package-lock.json` ou un Dockerfile a changé. En plus, à chaque démarrage, `webapp` resynchronise son virtualenv sur `uv.lock` et `assets` réinstalle `node_modules` si `package-lock.json` a changé. Un `git pull` qui apporte de nouvelles dépendances ou migrations est donc pris en compte par un simple `make up`.
+
+## Variables d'environnement
+
+Aucun fichier `.env` n'est nécessaire : `docker-compose.yml` porte les valeurs par défaut de tout ce qui n'est pas un secret, y compris les adresses des bases sur le réseau Docker.
+
+Le fichier `.env` à la racine sert uniquement aux secrets et aux surcharges, cf. `.env.template`. Par exemple, pour travailler avec un autre Postgres que celui de Compose :
 
 ```sh
-make db-restore-local-from-prod
+DATABASE_URL=postgres://user:password@host.docker.internal:5432/webapp # pragma: allowlist secret
 ```
 
-Lancer l'application
+`webapp/.env.template` reste utilisé par pytest et par les tests JS.
 
-```sh
-make run-all
-```
+Si vous aviez une installation précédente : supprimez `webapp/.env`, et retirez du `.env` racine les adresses de base en `localhost` (`DATABASE_URL`, `DB_WEBAPP_SAMPLE`, `DB_WAREHOUSE`), qui ne sont pas joignables depuis les conteneurs.
 
-la webapp est accessible à l'adresse [quefairedemesobjets.ademe.local](https://quefairedemesobjets.ademe.local/)
-la plateforme data est accessible à l'adresse [http://localhost:8080](http://localhost:8080)
+## Tester l'application
 
-## Installation de la Webapp uniquement
-
-### Configuration
-
-Modifier le fichier `/etc/hosts`, ajouter les lignes
-
-```
-127.0.0.1       lvao.ademe.local
-127.0.0.1       quefairedemesdechets.ademe.local
-127.0.0.1       quefairedemesobjets.ademe.local
-```
-
-### Installation & Exécution
-
-Configuration des variables d'environnement: ajouter (ou mettre à jour si existant)
-
-```sh
-cp .env.template .env
-```
-
-Modifier les variables dans le fichier .env si nécessaire
-
-Générer les certificats utilisé par nginx
-
-make init-certs
-
-Les bases de données `Postgres + Postgis` sont executées et mises à disposition par le gestionnaire de conteneur Docker
-
-Pour lancer uniquement les services utiliser par la webapp
-
-```sh
-docker compose  --profile lvao up -d
-```
-
-Installation des dépendances Python et JavaScript (depuis la racine du repo) :
-
-```sh
-uv sync --all-groups
-npm ci
-```
-
-Migrations Django (toujours depuis **`webapp/`**) :
-
-```sh
-uv run python manage.py migrate
-```
-
-Créer la table de cache (depuis **`webapp/`**) :
-
-```sh
-make createcachetable
-```
-
-Pour peupler la base de données `webapp` le plus simple est de copier la base de données de production, cf. [Copier la base de données de prod en local](useful_command.md#copier-la-base-de-donnees-de-prod-en-local)
-
-Sinon, utiliser la commande de peuplement ci-dessous (depuis **`webapp/`**) :
-
-```sh
-make seed-database
-```
-
-### Créer un superutilisatteur
-
-Si vous n'en avez pas déjà un (depuis **`webapp/`**) :
-
-```sh
-uv run python manage.py createsuperuser
-```
-
-### Lancement
-
-Depuis **`webapp/`** :
-
-```sh
-make runserver
-```
-
-`runserver` démarre le serveur Django **et** le worker `db_worker` en arrière-plan. Ce worker est nécessaire pour traiter les actions admin lourdes (≥ 1 000 `SuggestionGroupe` sélectionnés) qui passent par django-tasks. Voir [`reference/webapp/django.md`](../../reference/webapp/django.md).
-
-Une fois le serveur démarré, l'application est accessible à l'adresse [quefairedemesobjets.ademe.local](https://quefairedemesobjets.ademe.local/), écoutant sur le port 8000 (derrière nginx local si le profile `lvao` Docker est actif).
-
-### Tester l'application
-
-Tests Python (pytest), depuis le dossier **`webapp/`** :
+Tests Python (pytest) et tests JS unitaires, depuis le dossier **`webapp/`** :
 
 ```sh
 make unit-test
 make integration-test
-```
-
-Tests JS unitaires
-
-```sh
-npm run test
+make js-test
 ```
 
 End-to-end avec Playwright.
@@ -212,9 +148,12 @@ Celle-ci peut être générée en local facilement, via une commande à lancer d
 voir [create_webapp_sample_db.md](create_webapp_sample_db.md)) :
 
 ```sh
+npm ci                          # Playwright tourne sur la machine
 make -C webapp init-playwright
 make e2e            # préparation + tests
 ```
+
+Le navigateur tourne sur la machine, et Playwright démarre lui-même le serveur testé dans le service `webapp`, sur le port 8888.
 
 Pour relancer seulement les tests (depuis **`webapp/`**) :
 
@@ -229,34 +168,24 @@ Test d'accessibilité (depuis **`webapp/`**) :
 make a11y
 ```
 
-### Installer les hooks de pre-commit
+## Installer les hooks de pre-commit
 
-Pour installer les git hook de pre-commit, installer le package precommit et installer les hooks en executant pre-commit
+Les hooks tournent sur la machine, avec uv :
 
 ```sh
-pre-commit install
+uv sync --group dev
+uv run pre-commit install
 ```
 
 ## Installation de la plateforme DATA
 
-Copier les variables d'environnement `data-platform/dags/.env.template` vers `data-platform/dags/.env` :
-
 ```sh
-cp data-platform/dags/.env.template data-platform/dags/.env
+make run-airflow
 ```
 
-Lancer les containers docker avec docker compose:
+Cette commande ajoute à la stack le profile `airflow` : l'entrepôt de données, la base d'Airflow, son webserver, son scheduler (LocalExecutor) et son dag-processor.
 
-```sh
-docker compose --profile airflow up
-```
-
-docker compose lancera :
-
-- la base de données postgres nécessaire à la webapp de la carte
-- la base de données postgres nécessaire à Airflow
-- un webserver airflow
-- un scheduler airflow en mode LocalExecutor
+Comme pour la webapp, aucun fichier d'environnement n'est nécessaire : la configuration d'Airflow est dans `docker-compose.yml`. Les secrets dont certains DAGs ont besoin (clés Scaleway par exemple) se mettent dans le `.env` racine, cf. `.env.template`. Si vous aviez un `data-platform/dags/.env`, il n'est plus lu : reportez-y vos secrets puis supprimez-le.
 
 accéder à l'interface d'Airflow en local [http://localhost:8080](http://localhost:8080) ; identifiant/mot de passe : airflow / airflow
 

@@ -88,7 +88,8 @@ jobs:
         run: |
           version=$(make -s airflow-version)
           [[ -n "$version" ]] || { echo "::error::no apache-airflow version in data-platform/pyproject.toml"; exit 1; }
-          echo "AIRFLOW_VERSION=$version" >> "$GITHUB_ENV"
+          # Airflow, plus Python and uv from .tool-versions
+          make -s versions >> "$GITHUB_ENV"
           echo "Airflow version: $version"
 
       # https://github.com/docker/metadata-action
@@ -109,9 +110,12 @@ jobs:
           load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-scheduler', inputs.image_tag) || steps.airflow_scheduler_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_scheduler_meta_scaleway.outputs.labels }}
-          file: data-platform/airflow-scheduler.Dockerfile
+          file: data-platform/Dockerfile
+          target: scheduler
           build-args: |
             AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+            UV_VERSION=${{ env.UV_VERSION }}
 
       - name: 🔍 Trivy scan and push (airflow-scheduler)
         uses: ./.github/actions/trivy-scan-and-push
@@ -134,9 +138,12 @@ jobs:
           load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-webserver', inputs.image_tag) || steps.airflow_webserver_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_webserver_meta_scaleway.outputs.labels }}
-          file: data-platform/airflow-webserver.Dockerfile
+          file: data-platform/Dockerfile
+          target: webserver
           build-args: |
             AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+            UV_VERSION=${{ env.UV_VERSION }}
 
       - name: 🔍 Trivy scan and push (airflow-webserver)
         uses: ./.github/actions/trivy-scan-and-push
@@ -161,9 +168,12 @@ jobs:
           load: true
           tags: ${{ inputs.image_tag && format('{0}/{1}/{2}:{3}', env.SCALEWAY_REGISTRY, env.SCALEWAY_NAMESPACE, 'airflow-dag-processor', inputs.image_tag) || steps.airflow_dag-processor_meta_scaleway.outputs.tags }}
           labels: ${{ steps.airflow_dag-processor_meta_scaleway.outputs.labels }}
-          file: data-platform/airflow-dag-processor.Dockerfile
+          file: data-platform/Dockerfile
+          target: dag-processor
           build-args: |
             AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
+            PYTHON_VERSION=${{ env.PYTHON_VERSION }}
+            UV_VERSION=${{ env.UV_VERSION }}
 
       - name: 🔍 Trivy scan and push (airflow-dag-processor)
         uses: ./.github/actions/trivy-scan-and-push

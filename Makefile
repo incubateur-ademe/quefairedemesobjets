@@ -1,18 +1,13 @@
 # Aliases
-BASE_DOMAIN := quefairedemesdechets.ademe.local
+BASE_DOMAIN := quefairedemesdechets.localhost
 WEBAPP_DB_PORT ?= 6543
 DB_URL = postgres://webapp:webapp@localhost:$(WEBAPP_DB_PORT)/webapp# pragma: allowlist secret
-PYTHON := uv run python
 PG_RESTORE_JOBS ?= 1
 WAGTAIL_FRENCH_SQL := webapp/qfdmd/migrations/sql/create_wagtail_french_config.sql
 
-# Loading environment variables
-ifneq (,$(wildcard ./.env))
-    include .env
-    export
-endif
+include versions.mk
 
-# apache/airflow:slim-<version>-python3.12 — extracted from data-platform/pyproject.toml,
+# apache/airflow:slim-<version>-python<version> — extracted from data-platform/pyproject.toml,
 # the only place where the Airflow version is written. The CI reads it with
 # `make -s airflow-version`.
 AIRFLOW_VERSION ?= $(shell sed -n 's/.*"apache-airflow==\([^"]*\)".*/\1/p' data-platform/pyproject.toml)
@@ -22,47 +17,59 @@ export AIRFLOW_VERSION
 airflow-version:
 	@echo $(AIRFLOW_VERSION)
 
-# Makefile config
-.PHONY: check
-check:
-	@source .venv/bin/activate; python --version; pip --version
-	@npm --version
-	@node --version
+# KEY=value lines, appended to $GITHUB_ENV by the image build workflows
+.PHONY: versions
+versions:
+	@echo NODE_VERSION=$(NODE_VERSION)
+	@echo PYTHON_VERSION=$(PYTHON_VERSION)
+	@echo UV_VERSION=$(UV_VERSION)
+	@echo AIRFLOW_VERSION=$(AIRFLOW_VERSION)
 
-.PHONY: init-certs
-init-certs:
-	@which mkcert > /dev/null || { echo "mkcert is not installed. Please install it first: brew install mkcert (macOS) or visit https://github.com/FiloSottile/mkcert"; exit 1; }
-	mkcert -install
-	mkdir -p ./webapp/nginx/certs
-	mkcert -cert-file ./webapp/nginx/certs/$(BASE_DOMAIN).pem -key-file ./webapp/nginx/certs/$(BASE_DOMAIN)-key.pem $(BASE_DOMAIN) $(LEGACY_SITE_VITRINE_DOMAIN)
-	@echo "Adding local DNS entries to /etc/hosts (requires sudo)..."
-	@grep -q "$(BASE_DOMAIN)" /etc/hosts || echo "127.0.0.1 $(BASE_DOMAIN)" | sudo tee -a /etc/hosts
-	@grep -q "$(LEGACY_SITE_VITRINE_DOMAIN)" /etc/hosts || echo "127.0.0.1 $(LEGACY_SITE_VITRINE_DOMAIN)" | sudo tee -a /etc/hosts
-	docker compose --profile lvao restart lvao-proxy
+# The containers run as the host user (docker-compose.yml)
+export HOST_UID := $(shell id -u)
+PSQL := docker compose exec -T webapp-db psql -U webapp -d webapp
 
-# FIXME : Reactive it !
-# .PHONY: init-dev
-# init-dev:
-# 	# python
-# 	pip install uv
-# 	uv install --with dev,airflow
-# 	make init-certs
-# 	# git
-# 	git config blame.ignoreRevsFile .git-blame-ignore-revs
-# 	pre-commit install
-# 	# javascript
-# 	npm ci
-# 	make init-playwright
-# 	# environment
-# 	cp .env.template .env
-# 	cp ./dags/.env.template ./dags/.env
-# 	# prepare django
-# 	make run-all
-# 	make create-remote-db-server
-# 	make migrate
-# 	make createcachetable
-# 	make createsuperuser
-# 	make seed-database
+# --- Local stack -----------------------------------------------------------
+# Everything runs in Docker Compose: no Python, Node or Postgres on the host.
+
+# First start: builds the images, starts the stack, fills the database when it
+# is empty (scripts/setup_database.sh) and creates the example superuser
+# (admin / admin). Safe to run again.
+.PHONY: setup
+setup: up
+	./scripts/setup_database.sh
+	$(MAKE) -C webapp createsuperuser-example
+	@echo "✓ http://$(BASE_DOMAIN) (ou http://localhost:8000)"
+
+# Rebuilds the images when a lockfile or a Dockerfile changed, then starts
+.PHONY: up
+up:
+	docker compose up -d --build --wait --remove-orphans
+
+.PHONY: down
+down:
+	docker compose --profile airflow down
+
+# Host ports of the running services: the database ones change at each start
+.PHONY: ports
+ports:
+	@docker compose --profile airflow ps --format 'table {{.Service}}\t{{.Ports}}'
+
+.PHONY: logs
+logs:
+	docker compose logs -f --tail 50
+
+# make add pkg=requests [group=dev]
+.PHONY: add
+add:
+	docker compose run --rm webapp uv add --project /app/webapp $(if $(group),--group $(group)) $(pkg)
+	$(MAKE) up
+
+# make add-js pkg=lodash
+.PHONY: add-js
+add-js:
+	docker compose run --rm assets npm install -w webapp $(pkg)
+	$(MAKE) up
 
 .PHONY: check-format
 check-format:
@@ -77,7 +84,7 @@ format:
 # Run development servers
 .PHONY: run-airflow
 run-airflow:
-	docker compose --profile airflow up -d
+	docker compose --profile airflow up -d --build --wait --remove-orphans
 
 # Run development servers
 .PHONY: build-airflow
@@ -133,17 +140,9 @@ webapp-create-remote-db-server:
 webapp-createsuperuser:
 	$(MAKE) -C webapp createsuperuser
 
-.PHONY: webapp-seed-database
-webapp-seed-database:
-	$(MAKE) -C webapp seed-database
-
 .PHONY: webapp-createsuperuser-example
 webapp-createsuperuser-example:
 	$(MAKE) -C webapp createsuperuser-example
-
-.PHONY: webapp-generate-fixtures-acteurs
-webapp-generate-fixtures-acteurs:
-	$(MAKE) -C webapp generate-fixtures-acteurs
 
 .PHONY: webapp-generate-fixtures
 webapp-generate-fixtures:
@@ -227,34 +226,27 @@ drop-all-tables:
 .SILENT:
 .PHONY: drop-schema-public
 drop-schema-public:
-	psql -d '$(DB_URL)' -c "DROP SCHEMA IF EXISTS public CASCADE;"
+	$(PSQL) -c "DROP SCHEMA IF EXISTS public CASCADE;"
 
 .SILENT:
 .PHONY: create-schema-public
 create-schema-public:
-	psql -d '$(DB_URL)' -c "CREATE SCHEMA IF NOT EXISTS public;"
-
-.SILENT:
-.PHONY: create-db-extensions
-create-extensions:
-	@echo "Creating required extensions"
-	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql
-	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL)
+	$(PSQL) -c "CREATE SCHEMA IF NOT EXISTS public;"
 
 .PHONY: psql
 psql:
-	docker compose exec lvao-db psql -U qfdmo -d qfdmo
+	docker compose exec webapp-db psql -U webapp -d webapp
 
+# USE_LATEST_BACKUP=true réutilise le dernier backup Scaleway prêt
+# au lieu d'en créer un nouveau (évite la création + polling).
 .PHONY: dump-prod
 dump-prod:
-	bash scripts/infrastructure/backup-db.sh --env prod
+	bash scripts/infrastructure/backup-db.sh --env prod $(if $(filter true,$(USE_LATEST_BACKUP)),--latest)
 
 .PHONY: dump-preprod
 dump-preprod:
 	bash scripts/infrastructure/backup-db.sh --quiet --env preprod
 
-# USE_LATEST_BACKUP=true réutilise le dernier backup Scaleway prêt
-# au lieu d'en créer un nouveau (évite la création + polling).
 .PHONY: dump-prod-quiet
 dump-prod-quiet:
 	bash scripts/infrastructure/backup-db.sh --quiet $(if $(filter true,$(USE_LATEST_BACKUP)),--latest)
@@ -272,20 +264,13 @@ load-prod-dump:
 	pg_restore -d '$(DB_URL)' --schema=public --clean --if-exists --no-acl --no-owner --no-privileges --jobs=4 "$$DUMP_FILE"
 
 .SILENT:
-.PHONY: load-preprod-dump
-load-preprod-dump:
-	@DUMP_FILE=$$(find tmpbackup-preprod -type f -name "*.custom" -print -quit); \
-	psql -d '$(DB_URL)' -f scripts/sql/create_extensions.sql && \
-	psql -d '$(DB_URL)' -f $(WAGTAIL_FRENCH_SQL) && \
-	pg_restore -d '$(DB_URL)' --schema=public --clean --no-acl --no-owner --no-privileges "$$DUMP_FILE" || true
-
-.SILENT:
 .PHONY: load-dump-to-loc
 load-dump-to-loc:
 	./scripts/db_restore.sh $(ENV) $(TMPDIR) $(PG_RESTORE_JOBS)
 
 .PHONY: db-restore-local-from
 db-restore-local-from:
+	@docker compose up -d --wait webapp-db
 	@ENV=$(env) $(MAKE) dump-$(env)
 	@$(MAKE) drop-schema-public
 	@$(MAKE) create-schema-public
@@ -315,13 +300,6 @@ db-restore-preprod-from-prod:
 .PHONY: db-restore-local-from-sample
 db-restore-local-from-sample:
 	./scripts/e2e_run_sample_dag.sh
-
-.PHONY: db-restore-local-for-tests
-db-restore-local-for-tests:
-	make drop-schema-public
-	make create-schema-public
-	make webapp-migrate
-	make webapp-seed-database
 
 # Docs
 .PHONY: build-docs

@@ -12,7 +12,7 @@
 | `docs/`              | Technical documentation                                      | sphinx, markdown                                           |
 | `infrastructure/`    | Infrastructure deployment and management                     | opentofu, terragrunt, Scaleway                             |
 | `docker-compose.yml` | Local execution                                              | docker, docker compose                                     |
-| `nginx-local-only/`  | Nginx config for local development                           | nginx                                                      |
+| `webapp/nginx/`      | Nginx config for local development                           | nginx                                                      |
 | `Makefile`           | Global commands                                              |                                                            |
 | `scripts/`           | Scripts outside webapp                                       | bash                                                       |
 
@@ -70,7 +70,7 @@ For each kind of task below, refer to the specific documentation
 ├── docs/              # Documentation technique
 ├── infrastructure/    # Gestion et déploiement de l'infrastructure
 ├── docker-compose.yml # Exécution en local
-├── nginx-local-only/  # Configuration Nginx pour le dev local
+├── webapp/nginx/      # Configuration Nginx pour le dev local
 ├── Makefile           # Commandes globales
 ├── scripts/           # Scripts hors webapp
 ```
