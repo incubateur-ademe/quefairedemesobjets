@@ -1,12 +1,10 @@
 """Alerte si PostHog reçoit moins de 10 $pageview par minute.
 
 Vérifié toutes les 10 minutes de 9h à 18h, toutes les heures la nuit.
-La tâche échoue quand le seuil n'est pas atteint, et envoie un message
-mattermost.
+La tâche échoue quand le seuil n'est pas atteint.
 """
 
 import logging
-import os
 
 import requests
 from airflow.exceptions import AirflowException
@@ -19,11 +17,6 @@ from shared.config.tags import TAGS
 logger = logging.getLogger(__name__)
 
 PAGEVIEW_THRESHOLD = 10
-MATTERMOST_USERNAME = "Bipboop le robot de seconde main"
-MATTERMOST_ICON = (
-    "https://cdn3.iconfinder.com/data/icons/system-basic-vol-4-1/20/"
-    "icon-note-attention-alt3-512.png"
-)
 
 # fenêtre [now-2min, now-1min] pour absorber le délai d'ingestion PostHog
 QUERY = """
@@ -64,25 +57,6 @@ def check_pageviews(count: int, threshold: int) -> None:
         )
 
 
-def mattermost_payload(context: dict) -> dict:
-    ti = context["task_instance"]
-    return {
-        "text": f"{context.get('exception')} [Voir les logs]({ti.log_url})",
-        "username": MATTERMOST_USERNAME,
-        "icon_url": MATTERMOST_ICON,
-    }
-
-
-def notify_mattermost(context: dict) -> None:
-    webhook_url = os.environ.get("MATTERMOST_WEBHOOK_URL")
-    if not webhook_url:
-        logger.warning("MATTERMOST_WEBHOOK_URL absent : pas de notification")
-        return
-    response = requests.post(webhook_url, json=mattermost_payload(context), timeout=10)
-    logger.info("Mattermost : HTTP %s %s", response.status_code, response.text[:200])
-    response.raise_for_status()
-
-
 @dag(
     dag_id="posthog_pageview_alert",
     dag_display_name="Stats - PostHog - Alerte si trop peu de pages vues",
@@ -99,7 +73,7 @@ def notify_mattermost(context: dict) -> None:
     tags=[TAGS.STATS, TAGS.MAINTENANCE],
 )
 def posthog_pageview_alert():
-    @task(on_failure_callback=notify_mattermost)
+    @task
     def check():
         check_pageviews(posthog_pageview_count(), PAGEVIEW_THRESHOLD)
 
