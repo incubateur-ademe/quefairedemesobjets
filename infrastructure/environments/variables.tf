@@ -17,3 +17,9 @@ variable "organization_id" {
   description = "ID de l'organisation Scaleway"
   type        = string
 }
+
+variable "name_suffix" {
+  description = "Suffix of the names that are unique across Scaleway (buckets, registry namespaces)"
+  type        = string
+  default     = ""
+}

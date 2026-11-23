@@ -24,6 +24,12 @@ variable "public_read_buckets" {
   default     = []
 }
 
+variable "state_bucket" {
+  description = "The critical bucket that holds the OpenTofu states, created before the first apply"
+  type        = string
+  default     = null
+}
+
 variable "import_buckets" {
   description = "Buckets that already exist and are adopted on the next apply"
   type        = list(string)

@@ -1,5 +1,5 @@
 resource "scaleway_registry_namespace" "ns-qfdmo" {
-  name      = "ns-qfdmo"
+  name      = "ns-qfdmo${var.name_suffix}"
   is_public = false
 }
 
@@ -7,6 +7,6 @@ resource "scaleway_registry_namespace" "ns-qfdmo" {
 # qfdmod-prod project, with env discrimination done through image names
 # (see .github/workflows/ml-deduplication-inference-build-and-push.yml).
 resource "scaleway_registry_namespace" "ns-ml-deduplication-inference" {
-  name      = "ns-ml-deduplication-inference"
+  name      = "ns-ml-deduplication-inference${var.name_suffix}"
   is_public = false
 }

@@ -144,6 +144,22 @@ These pass as `IMAGE_TAG` the tag of the container running now, read from Scalew
 
 Without `IMAGE_TAG` the plan fails instead of deploying a placeholder image.
 
+#### Building a copy in another project
+
+Bucket and registry names are unique across Scaleway, not per project. To build the same stacks in another project (recovery rehearsal, or a rebuild while the old names are still taken), export a suffix: it is added to the state bucket, to every bucket and to the registry namespaces.
+
+```sh
+export NAME_SUFFIX=-dr
+export SCW_ACCESS_KEY=… SCW_SECRET_KEY=… SCW_DEFAULT_PROJECT_ID=… SCW_DEFAULT_ORGANIZATION_ID=…
+```
+
+Two things must exist before the first `terragrunt apply`, because every run reads them:
+
+1. The state bucket: `scw object bucket create name=lvao-terraform-state$NAME_SUFFIX`. The `object_storage` stack adopts it afterwards.
+2. The secrets of the stacks and the `state-passphrase`, at path `/terraform/<ENV>` of the project's Secret Manager (`make -C infrastructure secrets-push`).
+
+Then apply the stacks one by one, in the order of their dependencies: `container_registry`, `database`, `database_sample`, `object_storage`, then the container stacks once their images are in the new registry.
+
 ## Composants déployés
 
 > **Voir aussi** : [Architecture applicative](../architecture/README.md), [Bases de données](../db/db_organisation.md), [Airflow](../data-platform/airflow.md), [Sauvegardes](../security/backups.md), [PCA](../security/pca.md), [PRA](../security/pra.md).

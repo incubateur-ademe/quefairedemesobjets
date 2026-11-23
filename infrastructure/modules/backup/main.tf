@@ -1,7 +1,7 @@
 ## Bucket
 
 resource "scaleway_object_bucket" "backups" {
-  name = "${var.prefix}-${var.environment}-backups"
+  name = "${var.prefix}-${var.environment}-backups${var.name_suffix}"
 
   # A file the job overwrites or deletes stays recoverable for a month.
   versioning {

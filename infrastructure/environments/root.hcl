@@ -2,6 +2,11 @@ locals {
   environment = basename(dirname(get_terragrunt_dir()))
   stack       = basename(get_terragrunt_dir())
 
+  # Bucket and registry names are unique across Scaleway, not per project.
+  # NAME_SUFFIX lets the same code build a second copy in another project
+  # (recovery rehearsal, or a rebuild while the old names are still taken).
+  name_suffix = get_env("NAME_SUFFIX", "")
+
   # A stack that ships a secrets.example.json takes the inputs listed there
   # from Scaleway Secret Manager: secret <stack> at path /terraform/<environment>,
   # a JSON object written by `make -C infrastructure secrets-push`.
@@ -45,7 +50,7 @@ generate "backend" {
 terraform {
   backend "s3" {
     endpoint                    = "s3.fr-par.scw.cloud"
-    bucket                      = "lvao-terraform-state"
+    bucket                      = "lvao-terraform-state${local.name_suffix}"
     key                         = "${path_relative_to_include()}/terraform.tfstate"
     region                      = "fr-par"
     skip_credentials_validation = true
@@ -113,6 +118,7 @@ generate "common_variables" {
 inputs = merge(
   {
     prefix           = "lvao"
+    name_suffix      = local.name_suffix
     environment      = local.environment
     access_key       = get_env("SCW_ACCESS_KEY", "")
     secret_key       = get_env("SCW_SECRET_KEY", "")

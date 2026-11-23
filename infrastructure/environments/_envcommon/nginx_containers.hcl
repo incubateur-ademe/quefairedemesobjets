@@ -36,7 +36,7 @@ dependencies {
 }
 
 inputs = {
-  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway:${get_env("IMAGE_TAG", "")}"
+  nginx_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo${get_env("NAME_SUFFIX", "")}/nginx-gateway:${get_env("IMAGE_TAG", "")}"
   nginx_cpu_limit      = 500
   nginx_memory_limit   = 512
   nginx_min_scale      = 1
