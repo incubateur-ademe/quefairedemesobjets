@@ -1090,8 +1090,16 @@ export interface components {
       editable_models: string[]
       /** Shows Parent */
       shows_parent: boolean
+      /** Colonne Parent */
+      colonne_parent: boolean
       /** Shows Acteur Diff */
       shows_acteur_diff: boolean
+      /** Can Restore */
+      can_restore: boolean
+      /** Lignes Par Acteur */
+      lignes_par_acteur: boolean
+      /** Onglets */
+      onglets: ("localisation" | "annuaire")[]
       /** Badge */
       badge: string | null
     }
@@ -1161,6 +1169,21 @@ export interface components {
        */
       etat: "valeur" | "vide" | "pas_de_correction"
     }
+    /**
+     * CibleOut
+     * @description Acteur of a ligne, when the groupe gathers several acteurs.
+     */
+    CibleOut: {
+      /** Identifiant Unique */
+      identifiant_unique: string
+      /** Nom */
+      nom: string
+      /** Ville */
+      ville: string
+      /** Suggestion Modele */
+      suggestion_modele: string
+      admin_urls: components["schemas"]["AdminUrlsOut"]
+    }
     /** GroupeCapacitesOut */
     GroupeCapacitesOut: {
       /** Valider */
@@ -1189,6 +1212,8 @@ export interface components {
       /** Decision Le */
       decision_le: string | null
       acteur: components["schemas"]["ActeurIdentiteOut"]
+      /** Libelle */
+      libelle: string | null
       /** Is New */
       is_new: boolean
       /** Has Correction */
@@ -1198,6 +1223,8 @@ export interface components {
       lignes: components["schemas"]["LigneOut"][]
       /** Lignes Validees */
       lignes_validees: number
+      /** Lignes Refusees */
+      lignes_refusees: number
       /** Lignes Total */
       lignes_total: number
       capacites: components["schemas"]["GroupeCapacitesOut"]
@@ -1217,6 +1244,8 @@ export interface components {
     LigneCapacitesOut: {
       /** Valider */
       valider: boolean
+      /** Refuser */
+      refuser: boolean
       /** Remettre A Valider */
       remettre_a_valider: boolean
       /** Remettre Groupe A Valider */
@@ -1242,6 +1271,7 @@ export interface components {
       key: string
       /** Champs */
       champs: string[]
+      cible: components["schemas"]["CibleOut"] | null
       /** Statut */
       statut: string
       decision_par: components["schemas"]["UserOut"] | null
@@ -1378,6 +1408,8 @@ export interface components {
       /** Decision Le */
       decision_le: string | null
       acteur: components["schemas"]["ActeurIdentiteOut"]
+      /** Libelle */
+      libelle: string | null
       /** Is New */
       is_new: boolean
       /** Has Correction */
@@ -1387,6 +1419,8 @@ export interface components {
       lignes: components["schemas"]["LigneOut"][]
       /** Lignes Validees */
       lignes_validees: number
+      /** Lignes Refusees */
+      lignes_refusees: number
       /** Lignes Total */
       lignes_total: number
       capacites: components["schemas"]["GroupeCapacitesOut"]
@@ -1452,13 +1486,15 @@ export interface components {
     }
     /** LignesDecisionIn */
     LignesDecisionIn: {
+      /** Cles */
+      cles?: string[] | null
       /** Champs */
-      champs: string[][]
+      champs?: string[][] | null
       /**
        * Action
        * @enum {string}
        */
-      action: "validate" | "resubmit"
+      action: "validate" | "reject" | "resubmit"
       /** Expected Modifie Le */
       expected_modifie_le?: string | null
     }

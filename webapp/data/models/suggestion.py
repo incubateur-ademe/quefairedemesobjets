@@ -132,9 +132,16 @@ class SuggestionCohorteManager(models.Manager):
 
     def source_cohortes(self) -> QuerySet["SuggestionCohorte"]:
         """SOURCE cohortes having at least one groupe."""
+        return self.cohortes_with_groupes(SOURCE_TYPE_ACTIONS)
+
+    def cohortes_with_groupes(
+        self, type_actions: Iterable[str]
+    ) -> QuerySet["SuggestionCohorte"]:
+        """Cohortes of these type_action having at least one groupe, annotated with
+        their number of groupes (total and to validate)."""
         return (
             self.get_queryset()
-            .filter(type_action__in=SOURCE_TYPE_ACTIONS)
+            .filter(type_action__in=list(type_actions))
             .annotate(
                 total_groupes=Count("suggestion_groupes"),
                 nb_avalider=Count(
@@ -250,7 +257,11 @@ class SuggestionCohorte(SuggestionStatutFieldsMixin, TimestampedModel):
         self, groupe_ids: Iterable[int], statut: str, user=None
     ) -> int:
         """Set the statut of the groupes and of all their SuggestionUnitaire.
-        Returns the number of updated groupes."""
+        Returns the number of updated groupes.
+
+        A refused SuggestionUnitaire (ligne refused on its own) stays refused when
+        its groupe is validated or processed: only putting back to validate or
+        refusing the groupe changes it."""
         groupe_ids = list(
             self.suggestion_groupes.filter(id__in=list(groupe_ids)).values_list(
                 "id", flat=True
@@ -258,9 +269,12 @@ class SuggestionCohorte(SuggestionStatutFieldsMixin, TimestampedModel):
         )
         fields = self._statut_fields(statut, user)
         with transaction.atomic():
-            SuggestionUnitaire.objects.filter(
+            unitaires = SuggestionUnitaire.objects.filter(
                 suggestion_groupe_id__in=groupe_ids
-            ).update(**fields)
+            )
+            if statut not in (SuggestionStatut.AVALIDER, SuggestionStatut.REJETEE):
+                unitaires = unitaires.exclude(statut=SuggestionStatut.REJETEE)
+            unitaires.update(**fields)
             return self.suggestion_groupes.filter(id__in=groupe_ids).update(**fields)
 
     @classmethod
@@ -380,6 +394,9 @@ class Suggestion(TimestampedModel):
             SuggestionAction.CLUSTERING,
             SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
             SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_SIRET,
+            SuggestionAction.ENRICH_ACTEURS_SIREN,
+            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
         ]:
             template_name = "data/_partials/suggestion_details_changes.html"
             template_context = {"suggestion": self}
@@ -529,6 +546,9 @@ class Suggestion(TimestampedModel):
             SuggestionAction.ENRICH_ACTEURS_VILLES_NEW,
             SuggestionAction.ENRICH_ACTEURS_CP_TYPO,
             SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO,
+            SuggestionAction.ENRICH_ACTEURS_SIRET,
+            SuggestionAction.ENRICH_ACTEURS_SIREN,
+            SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION,
         ]:
             changes = self.suggestion["changes"]
             changes.sort(key=lambda x: x["order"])

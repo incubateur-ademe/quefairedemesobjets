@@ -138,7 +138,11 @@ class PolicyOut(Schema):
     can_reject_group: bool
     editable_models: list[str]
     shows_parent: bool
+    colonne_parent: bool
     shows_acteur_diff: bool
+    can_restore: bool
+    lignes_par_acteur: bool
+    onglets: list[Literal["localisation", "annuaire"]]
     badge: str | None
 
 
@@ -154,6 +158,7 @@ class CellOut(Schema):
 
 class LigneCapacitesOut(Schema):
     valider: bool
+    refuser: bool
     remettre_a_valider: bool
     remettre_groupe_a_valider: bool
     corriger_correction: bool
@@ -165,9 +170,27 @@ class LigneCapacitesOut(Schema):
     supprimer_parent: bool
 
 
+class AdminUrlsOut(Schema):
+    importe: str | None
+    affiche: str | None
+    corrige: str | None
+    parent: str | None
+
+
+class CibleOut(Schema):
+    """Acteur of a ligne, when the groupe gathers several acteurs."""
+
+    identifiant_unique: str
+    nom: str
+    ville: str
+    suggestion_modele: str
+    admin_urls: AdminUrlsOut
+
+
 class LigneOut(Schema):
     key: str
     champs: list[str]
+    cible: CibleOut | None
     statut: str
     decision_par: UserOut | None
     decision_le: datetime | None
@@ -175,13 +198,6 @@ class LigneOut(Schema):
     correction: CellOut
     parent: CellOut | None
     capacites: LigneCapacitesOut
-
-
-class AdminUrlsOut(Schema):
-    importe: str | None
-    affiche: str | None
-    corrige: str | None
-    parent: str | None
 
 
 class ActeurIdentiteOut(Schema):
@@ -213,11 +229,14 @@ class GroupeOut(Schema):
     decision_par: UserOut | None
     decision_le: datetime | None
     acteur: ActeurIdentiteOut
+    # Groupe of several acteurs: its contexte (ex: the suggested value)
+    libelle: str | None
     is_new: bool
     has_correction: bool
     parent: ParentOut | None
     lignes: list[LigneOut]
     lignes_validees: int
+    lignes_refusees: int
     lignes_total: int
     capacites: GroupeCapacitesOut
 
@@ -271,8 +290,10 @@ class GroupeDecisionIn(Schema):
 
 
 class LignesDecisionIn(Schema):
-    champs: list[list[str]] = Field(..., min_length=1)
-    action: Literal["validate", "resubmit"]
+    # Lignes designated by their key, or by their champs (groupe of one acteur)
+    cles: list[str] | None = Field(None, min_length=1)
+    champs: list[list[str]] | None = Field(None, min_length=1)
+    action: Literal["validate", "reject", "resubmit"]
     expected_modifie_le: datetime | None = None
 
 

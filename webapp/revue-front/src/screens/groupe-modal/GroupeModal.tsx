@@ -13,7 +13,7 @@ import {
   WaTabGroup,
   WaTabPanel,
 } from "../../wa"
-import type { ModalTab } from "../cohorte/GroupesView"
+import { MODAL_TABS, type ModalTab } from "../cohorte/GroupesView"
 import { AnnuaireTab } from "./AnnuaireTab"
 import {
   LocalisationMap,
@@ -22,12 +22,8 @@ import {
   type MarkerKey,
 } from "./LocalisationMap"
 
-const TABS: [ModalTab, string][] = [
-  ["localisation", "Localisation"],
-  ["annuaire", "Annuaire entreprise"],
-]
-
-/** Detail of a groupe in a modal: its localisation and the Annuaire Entreprises. */
+/** Detail of a groupe in a modal: its localisation and the Annuaire Entreprises,
+ * the tabs being the ones allowed by the policy. */
 export function GroupeModal({
   groupeId,
   tab,
@@ -37,7 +33,7 @@ export function GroupeModal({
   onClose,
 }: {
   groupeId: number | null
-  tab: ModalTab
+  tab: ModalTab | undefined
   policy: Policy
   actions: GroupeActions
   onTab: (tab: ModalTab) => void
@@ -76,19 +72,23 @@ export function GroupeModal({
             active={tab}
             onWaTabShow={(event) => onTab(event.detail.name as ModalTab)}
           >
-            {TABS.map(([name, label]) => (
+            {policy.onglets.map((name) => (
               <WaTab key={name} slot="nav" panel={name}>
-                {label}
+                {MODAL_TABS[name]}
               </WaTab>
             ))}
-            <WaTabPanel name="localisation">
-              {tab === "localisation" && (
-                <LocalisationTab groupe={groupe} actions={actions} />
-              )}
-            </WaTabPanel>
-            <WaTabPanel name="annuaire">
-              <AnnuaireTab groupe={groupe} />
-            </WaTabPanel>
+            {policy.onglets.includes("localisation") && (
+              <WaTabPanel name="localisation">
+                {tab === "localisation" && (
+                  <LocalisationTab groupe={groupe} actions={actions} />
+                )}
+              </WaTabPanel>
+            )}
+            {policy.onglets.includes("annuaire") && (
+              <WaTabPanel name="annuaire">
+                <AnnuaireTab groupe={groupe} />
+              </WaTabPanel>
+            )}
           </WaTabGroup>
         </>
       )}

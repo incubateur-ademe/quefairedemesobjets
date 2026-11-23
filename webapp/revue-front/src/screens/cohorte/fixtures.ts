@@ -2,6 +2,7 @@ import type { CohorteDetail, Groupe, GroupePage, Ligne, Stats } from "../../api/
 
 const NONE = {
   valider: false,
+  refuser: false,
   remettre_a_valider: false,
   remettre_groupe_a_valider: false,
   corriger_correction: false,
@@ -21,6 +22,7 @@ export function ligne(
   return {
     key: `${groupeId}:${champs.join(",")}`,
     champs,
+    cible: null,
     statut: "AVALIDER",
     decision_par: null,
     decision_le: null,
@@ -61,11 +63,13 @@ export function groupe(id: number, patch: Partial<Groupe> = {}): Groupe {
         parent: null,
       },
     },
+    libelle: null,
     is_new: false,
     has_correction: false,
     parent: null,
     lignes,
     lignes_validees: 0,
+    lignes_refusees: 0,
     lignes_total: lignes.length,
     capacites: {
       valider: true,
@@ -105,7 +109,11 @@ export const COHORTE: CohorteDetail = {
     can_reject_group: true,
     editable_models: ["RevisionActeur", "ParentRevisionActeur"],
     shows_parent: true,
+    colonne_parent: true,
     shows_acteur_diff: true,
+    can_restore: true,
+    lignes_par_acteur: false,
+    onglets: ["localisation", "annuaire"],
     badge: null,
   },
 }

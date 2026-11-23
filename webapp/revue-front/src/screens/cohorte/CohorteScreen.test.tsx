@@ -6,7 +6,11 @@ import { COHORTE, groupe, ligne, page, STATS } from "./fixtures"
 
 type Answer = (path: string, options: unknown, method: string) => unknown
 
-function setup(write: Answer = () => groupe(1), url = "/data/revue/cohortes/7") {
+function setup(
+  write: Answer = () => groupe(1),
+  url = "/data/revue/cohortes/7",
+  groupes = [groupe(1), groupe(2)],
+) {
   const api = fakeApi((path, options, method) => {
     if (method !== "GET") {
       return write(path, options, method)
@@ -15,7 +19,7 @@ function setup(write: Answer = () => groupe(1), url = "/data/revue/cohortes/7") 
     if (path.endsWith("/taches")) return []
     if (path.endsWith("/champs/choix")) return {}
     if (path.endsWith("/revue/filtres")) return { champs: [] }
-    if (path.endsWith("/groupes")) return page([groupe(1), groupe(2)])
+    if (path.endsWith("/groupes")) return page(groupes)
     return COHORTE
   })
   renderApp(<CohorteScreen cohorteId={7} />, { api, url })
@@ -34,7 +38,20 @@ describe("CohorteScreen", () => {
     expect(screen.getByTitle(/^Groupes du filtre/)).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Statut : À valider" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /^nom/ })).toBeInTheDocument()
-    expect(within(headerOf(1)).getByText("0/2 lignes")).toBeInTheDocument()
+    expect(within(headerOf(1)).getByText("0/2")).toBeInTheDocument()
+  })
+
+  it("shows the progress of the lignes only for a groupe to validate or to process", async () => {
+    setup(undefined, undefined, [
+      groupe(1),
+      groupe(2, { statut: "ATRAITER" }),
+      groupe(3, { statut: "REJETEE" }),
+    ])
+    await screen.findByText("Acteur 1")
+
+    expect(within(headerOf(1)).getByText("0/2")).toBeInTheDocument()
+    expect(within(headerOf(2)).getByText("0/2")).toBeInTheDocument()
+    expect(headerOf(3).querySelector(".lineprog")).toBeNull()
   })
 
   it("validates the groupe under the cursor with A and moves to the next groupe", async () => {

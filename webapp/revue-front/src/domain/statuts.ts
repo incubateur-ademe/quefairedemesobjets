@@ -27,10 +27,51 @@ export const COHORTE_STATUTS: Record<string, { label: string; tone: Tone }> = {
   SUCCES: { label: "Traitée", tone: "done" },
 }
 
-export const TYPE_ACTIONS: Record<string, string> = {
-  SOURCE_AJOUT: "Ajout",
-  SOURCE_MODIFICATION: "Modification",
-  SOURCE_SUPRESSION: "Suppression",
+/** Families of reviewable type_action (stored values: beware SOURCE_SUPRESSION). */
+export const TYPE_ACTION_FAMILIES = [
+  {
+    value: "SOURCE",
+    label: "Source",
+    types: {
+      SOURCE_AJOUT: "Ajout",
+      SOURCE_MODIFICATION: "Modification",
+      SOURCE_SUPRESSION: "Suppression",
+    },
+  },
+  {
+    value: "ENRICH",
+    label: "Enrichissement",
+    types: {
+      ENRICH_ACTEURS_CLOSED: "Acteurs fermés",
+      ENRICH_ACTEURS_RGPD: "Anonymisation RGPD",
+      ENRICH_ACTEURS_VILLES_TYPO: "Villes typographiques",
+      ENRICH_ACTEURS_VILLES_NEW: "Villes nouvelles",
+      ENRICH_ACTEURS_CP_TYPO: "Codes postaux non conformes",
+      ENRICH_REVISION_ACTEURS_CP_TYPO: "Codes postaux non conformes (corrections)",
+      ENRICH_ACTEURS_SIRET: "SIRET depuis le SIREN",
+      ENRICH_ACTEURS_SIREN: "SIREN depuis le SIRET",
+      ENRICH_ACTEURS_LIEN_SUCCESSION: "Lien de succession",
+    },
+  },
+] as const satisfies readonly {
+  value: string
+  label: string
+  types: Record<string, string>
+}[]
+
+export const TYPE_ACTIONS: Record<string, string> = Object.assign(
+  {},
+  ...TYPE_ACTION_FAMILIES.map((family) => family.types),
+)
+
+/** type_action sent to the API for a choice of the type selector: a family
+ * (all its types), a single type, or nothing (every type). */
+export function typeActionsOf(choice: string | undefined): string[] | undefined {
+  if (!choice) {
+    return undefined
+  }
+  const family = TYPE_ACTION_FAMILIES.find((item) => item.value === choice)
+  return family ? Object.keys(family.types) : [choice]
 }
 
 export const LOG_LEVEL_ORDER = ["ERROR", "WARNING", "INFO"] as const

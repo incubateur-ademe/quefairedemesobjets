@@ -1,9 +1,8 @@
-"""API of the SOURCE suggestions review screen, mounted on /api/suggestions/.
+"""API of the suggestions review screen, mounted on /api/suggestions/.
 
 Handlers stay thin: business rules live in the other modules of data.revue."""
 
-from data.models.suggestion import SOURCE_TYPE_ACTIONS, SuggestionCohorte
-from data.revue import cohortes, masse
+from data.revue import masse
 from data.revue.annuaire import lookup as annuaire_lookup
 from data.revue.auth import SuperuserSessionAuth
 from data.revue.choix import champs_choix
@@ -11,8 +10,9 @@ from data.revue.cohortes import (
     attach_counts,
     cohortes_filter_metadata,
     cohortes_page,
-    get_source_cohorte,
+    get_revue_cohorte,
     logs_page,
+    revue_cohortes,
 )
 from data.revue.detail import serialize_groupe_detail
 from data.revue.errors import RevueApiError
@@ -20,7 +20,7 @@ from data.revue.exports import XLSX_CONTENT_TYPE, export_filename, logs_xlsx
 from data.revue.filters import parse_filter
 from data.revue.lignes import groupes_queryset, ligne_key, serialize_groupes
 from data.revue.pagination import paginate
-from data.revue.policies import get_policy
+from data.revue.policies import REVUE_TYPE_ACTIONS, get_policy
 from data.revue.revue import (
     filtered_groupes,
     lignes_page,
@@ -106,7 +106,7 @@ def cohortes_filters(request: HttpRequest):
 
 @router.get("/cohortes/{cohorte_id}/logs", response=LogPageOut)
 def cohorte_logs(request: HttpRequest, cohorte_id: int, query: Query[LogsQuery]):
-    cohorte = get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     return logs_page(cohorte, query.niveau, query.page, query.page_size)
 
 
@@ -125,7 +125,7 @@ def export_cohorte_logs(
     request: HttpRequest, cohorte_id: int, query: Query[LogsExportQuery]
 ):
     """Excel export of the logs of a cohorte (same order and level filter)."""
-    cohorte = get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     response = HttpResponse(
         logs_xlsx(cohorte, query.niveau), content_type=XLSX_CONTENT_TYPE
     )
@@ -142,9 +142,9 @@ WRITE_RESPONSES = {200: GroupeOut, 404: ErrorOut, 409: ErrorOut, 422: ErrorOut}
 
 @router.get("/cohortes/{cohorte_id}", response={200: CohorteDetailOut, 404: ErrorOut})
 def cohorte_detail(request: HttpRequest, cohorte_id: int):
-    cohorte = SuggestionCohorte.objects.source_cohortes().filter(id=cohorte_id).first()
+    cohorte = revue_cohortes().filter(id=cohorte_id).first()
     if cohorte is None:
-        get_source_cohorte(cohorte_id)  # 404
+        get_revue_cohorte(cohorte_id)  # 404
     attach_counts([cohorte])
     cohorte.policy = get_policy(cohorte.type_action).describe()
     return cohorte
@@ -152,7 +152,7 @@ def cohorte_detail(request: HttpRequest, cohorte_id: int):
 
 @router.get("/cohortes/{cohorte_id}/revue/filtres", response=FilterMetaOut)
 def review_filters(request: HttpRequest, cohorte_id: int):
-    cohorte = get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     return {"champs": review_filter_metadata(cohorte)}
 
 
@@ -160,7 +160,7 @@ def review_filters(request: HttpRequest, cohorte_id: int):
     "/cohortes/{cohorte_id}/groupes", response={200: GroupePageOut, 422: ErrorOut}
 )
 def list_groupes(request: HttpRequest, cohorte_id: int, query: Query[GroupesQuery]):
-    cohorte = get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     groupes = filtered_groupes(
         cohorte,
         parse_filter(query.filtre),
@@ -185,7 +185,7 @@ def list_groupes(request: HttpRequest, cohorte_id: int, query: Query[GroupesQuer
     "/cohortes/{cohorte_id}/lignes", response={200: LignePageOut, 422: ErrorOut}
 )
 def list_lignes(request: HttpRequest, cohorte_id: int, query: Query[LignesQuery]):
-    cohorte = get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     keys, total = lignes_page(
         cohorte,
         parse_filter(query.filtre),
@@ -194,12 +194,12 @@ def list_lignes(request: HttpRequest, cohorte_id: int, query: Query[LignesQuery]
         query.page,
         query.page_size,
     )
-    groupe_ids = sorted({groupe_id for groupe_id, _ in keys})
+    groupe_ids = sorted({groupe_id for groupe_id, _, _ in keys})
     groupes = list(groupes_queryset().filter(id__in=groupe_ids).order_by("id"))
     return {
         "items": [
-            {"groupe_id": groupe_id, "key": ligne_key(groupe_id, champs)}
-            for groupe_id, champs in keys
+            {"groupe_id": groupe_id, "key": ligne_key(groupe_id, champs, cible)}
+            for groupe_id, cible, champs in keys
         ],
         "groupes": serialize_groupes(groupes, get_policy(cohorte.type_action)),
         "total": total,
@@ -210,7 +210,7 @@ def list_lignes(request: HttpRequest, cohorte_id: int, query: Query[LignesQuery]
 
 @router.get("/cohortes/{cohorte_id}/stats", response={200: StatsOut, 422: ErrorOut})
 def review_stats(request: HttpRequest, cohorte_id: int, query: Query[StatsQuery]):
-    cohorte = get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     return stats(
         cohorte,
         query.vue,
@@ -226,7 +226,7 @@ def groupe_detail(request: HttpRequest, groupe_id: int):
         groupes_queryset()
         .filter(
             id=groupe_id,
-            suggestion_cohorte__type_action__in=SOURCE_TYPE_ACTIONS,
+            suggestion_cohorte__type_action__in=REVUE_TYPE_ACTIONS,
         )
         .first()
     )
@@ -252,6 +252,7 @@ def lignes_decision(request: HttpRequest, groupe_id: int, payload: LignesDecisio
         payload.action,
         request.auth,
         payload.expected_modifie_le,
+        cles=payload.cles,
     )
 
 
@@ -308,7 +309,7 @@ def annuaire_entreprises(request: HttpRequest, query: Query[AnnuaireQuery]):
 )
 def mass_preview(request: HttpRequest, cohorte_id: int, payload: MassSelectionIn):
     """Number of elements each mass action would really change on the selection."""
-    cohorte = cohortes.get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     selection = masse.resolve(cohorte, payload.dict())
     return {"compteurs": masse.preview(selection)}
 
@@ -325,7 +326,7 @@ def mass_preview(request: HttpRequest, cohorte_id: int, payload: MassSelectionIn
 def mass_action(request: HttpRequest, cohorte_id: int, payload: MassActionIn):
     """Runs a mass action. The filter of a « tout le filtre » selection is applied
     again by the server. Large reports run in the background (202), see /taches."""
-    cohorte = cohortes.get_source_cohorte(cohorte_id)
+    cohorte = get_revue_cohorte(cohorte_id)
     selection = masse.resolve(cohorte, payload.dict())
     result = masse.run(selection, payload.action, request.auth)
     return Status(202 if "job_id" in result else 200, result)
@@ -336,4 +337,4 @@ def mass_action(request: HttpRequest, cohorte_id: int, payload: MassActionIn):
 )
 def taches(request: HttpRequest, cohorte_id: int):
     """Background tasks launched on the cohorte (large reports), most recent first."""
-    return cohorte_taches(cohortes.get_source_cohorte(cohorte_id))
+    return cohorte_taches(get_revue_cohorte(cohorte_id))

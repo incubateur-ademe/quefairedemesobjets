@@ -46,12 +46,15 @@ class FilterContext:
     - `groupe_ref`: reference to the groupe id, for the subqueries of expressions;
     - `related`: wrappers of the conditions on related rows, by name
       (ex: "ligne" → Exists(the SuggestionUnitaire of the ligne / of the groupe)).
-      A wrapper receives the condition and the annotations it needs.
+      A wrapper receives the condition and the annotations it needs;
+    - `par_acteur`: the lignes are also split by acteur (ReviewPolicy).
     """
 
     prefix: str = ""
     groupe_ref: str = "pk"
     related: dict[str, Callable[[Q, dict], Q]] = field(default_factory=dict)
+    # A ligne is (acteur, champs): see ReviewPolicy.lignes_par_acteur
+    par_acteur: bool = False
 
 
 @dataclass(frozen=True)

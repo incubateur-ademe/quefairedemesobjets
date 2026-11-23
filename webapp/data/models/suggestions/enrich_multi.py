@@ -15,6 +15,7 @@ from data.models.comparison_table import (
 from data.models.suggestion import (
     SuggestionAction,
     SuggestionGroupe,
+    SuggestionStatut,
     SuggestionUnitaire,
 )
 from data.models.suggestions.abstract import (
@@ -179,7 +180,7 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
             cells.append(
                 CellHtmlContent(
                     column_key="source",
-                    html_content=f"{", ".join(suggestion_unitaire.champs)}",
+                    html_content=f"{', '.join(suggestion_unitaire.champs)}",
                 )
             )
             if suggestion_unitaire.suggestion_modele == "ParentRevisionActeur":
@@ -357,8 +358,13 @@ class SuggestionGroupeTypeEnrichMulti(SuggestionGroupeType):
     def apply(self):
         suggestion_groupe = self.suggestion_groupe
 
-        # Acteur suggestions
-        for acteur_suggestion_unitaire in suggestion_groupe.suggestion_unitaires.all():
+        # Acteur suggestions; the lignes refused on their own (review screen) are
+        # not applied
+        for (
+            acteur_suggestion_unitaire
+        ) in suggestion_groupe.suggestion_unitaires.exclude(
+            statut=SuggestionStatut.REJETEE
+        ):
             if acteur_suggestion_unitaire.suggestion_modele == "Acteur":
                 # Direct update of the Acteur, without creating a revision
                 # (e.g. RGPD anonymization, code postal normalization)

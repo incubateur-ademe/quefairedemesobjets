@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 
 import { Marker } from "../../__mocks__/maplibre"
-import type { GroupeDetail } from "../../api/types"
+import type { CohorteDetail, GroupeDetail } from "../../api/types"
 import { fakeApi, renderApp } from "../../test-utils"
 import { CohorteScreen } from "../cohorte/CohorteScreen"
 import { COHORTE, groupe, ligne, page, STATS } from "../cohorte/fixtures"
@@ -83,7 +83,11 @@ function annuaireAnswer(options: unknown) {
   }
 }
 
-function setup(url: string, groupeDetail: GroupeDetail = detail()) {
+function setup(
+  url: string,
+  groupeDetail: GroupeDetail = detail(),
+  cohorte: CohorteDetail = COHORTE,
+) {
   const api = fakeApi((path, options, method) => {
     if (method !== "GET") return groupe(1)
     if (path.endsWith("/stats")) return STATS
@@ -93,7 +97,7 @@ function setup(url: string, groupeDetail: GroupeDetail = detail()) {
     if (path.endsWith("/groupes")) return page([groupe(1), groupe(2)])
     if (path === "/api/suggestions/groupes/{groupe_id}") return groupeDetail
     if (path === "/api/suggestions/annuaire-entreprises") return annuaireAnswer(options)
-    return COHORTE
+    return cohorte
   })
   renderApp(<CohorteScreen cohorteId={7} />, { api, url })
   return api
@@ -115,6 +119,43 @@ describe("GroupeModal", () => {
 
     await waitFor(() => expect(window.location.search).toBe("?groupe=2"))
     expect(dialog()).toHaveAttribute("open")
+  })
+
+  it("only offers the tabs of the policy (SIRET: Annuaire only)", async () => {
+    setup("/data/revue/cohortes/7", detail(), {
+      ...COHORTE,
+      policy: { ...COHORTE.policy, onglets: ["annuaire"] },
+    })
+    await screen.findByText("Acteur 1")
+
+    const header = document.querySelector('[data-cursor="g:1"]') as HTMLElement
+    expect(within(header).queryByText("Localisation")).not.toBeInTheDocument()
+    fireEvent.click(header)
+    fireEvent.keyDown(window, { key: "Enter" })
+
+    // Annuaire is the default tab: not in the URL
+    await waitFor(() => expect(window.location.search).toBe("?groupe=1"))
+    const modal = dialog()
+    expect(within(modal).queryByText("Localisation")).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(within(modal).getAllByText("RESSOURCERIE SA")).toHaveLength(2),
+    )
+  })
+
+  it("opens no modal when the policy has no tab", async () => {
+    setup("/data/revue/cohortes/7", detail(), {
+      ...COHORTE,
+      policy: { ...COHORTE.policy, onglets: [] },
+    })
+    await screen.findByText("Acteur 1")
+
+    const header = document.querySelector('[data-cursor="g:1"]') as HTMLElement
+    expect(within(header).queryByText("Annuaire entreprise")).not.toBeInTheDocument()
+    fireEvent.click(header)
+    fireEvent.keyDown(window, { key: "Enter" })
+
+    expect(window.location.search).toBe("")
+    expect(dialog()).not.toHaveAttribute("open")
   })
 
   it("opens a tab from the groupe header and keeps it in the URL", async () => {

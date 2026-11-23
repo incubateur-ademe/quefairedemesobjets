@@ -5,7 +5,8 @@ the groupe (and its acteur) or the ligne de suggestion:
 - in the Groupes view, a condition on the ligne keeps the groupes having at least
   one ligne matching it (two ET conditions may match two different lignes);
 - in the Lignes view, a condition on the groupe applies to the groupe of the ligne.
-Lignes are rows of SuggestionUnitaire grouped by (groupe, champs).
+Lignes are rows of SuggestionUnitaire grouped by (groupe, champs), and by acteur
+(`CIBLE`) when the groupe gathers several acteurs (ReviewPolicy.lignes_par_acteur).
 """
 
 from typing import Literal
@@ -49,7 +50,7 @@ from data.revue.filters import (
     registry_metadata,
 )
 from data.revue.lignes import ACTEUR, ORDERED_FIELDS, ordered_champs
-from data.revue.policies import PARENT, REVISION
+from data.revue.policies import PARENT, REVISION, get_policy
 
 Vue = Literal["groupes", "lignes"]
 Afficher = Literal["avalider", "tout"]
@@ -60,29 +61,66 @@ STATUT_CHOICES = tuple(SuggestionStatut.choices)
 COLONNES = {"correction": REVISION, "parent": PARENT}
 
 
-# --- Contexts of the two views ---
+# --- Lignes par acteur ---
+
+AVALIDER = SuggestionStatut.AVALIDER
+ATRAITER = SuggestionStatut.ATRAITER
+REJETEE = SuggestionStatut.REJETEE
+# Acteur targeted by a SU (same order as `lignes.cible_of`)
+CIBLE = Coalesce(
+    F("acteur_id"),
+    F("revision_acteur_id"),
+    F("parent_revision_acteur_id"),
+    Value(""),
+    output_field=CharField(),
+)
+OUTER_CIBLE = Coalesce(
+    OuterRef("acteur_id"),
+    OuterRef("revision_acteur_id"),
+    OuterRef("parent_revision_acteur_id"),
+    Value(""),
+    output_field=CharField(),
+)
 
 
-def _sus_of(context_view: Vue) -> QuerySet:
-    """SuggestionUnitaire of the outer row: of the groupe, or of the ligne."""
-    if context_view == "groupes":
-        return SuggestionUnitaire.objects.filter(suggestion_groupe_id=OuterRef("pk"))
-    return SuggestionUnitaire.objects.filter(
+def is_par_acteur(cohorte: SuggestionCohorte) -> bool:
+    return get_policy(cohorte.type_action).lignes_par_acteur
+
+
+def same_ligne_sus(par_acteur: bool) -> QuerySet[SuggestionUnitaire]:
+    """SuggestionUnitaire of the ligne of the outer SU row."""
+    sus = SuggestionUnitaire.objects.filter(
         suggestion_groupe_id=OuterRef("suggestion_groupe_id"),
         champs=OuterRef("champs"),
     )
+    if par_acteur:
+        sus = sus.alias(_cible=CIBLE).filter(_cible=OUTER_CIBLE)
+    return sus
 
 
-def filter_context(vue: Vue) -> FilterContext:
+# --- Contexts of the two views ---
+
+
+def _sus_of(context_view: Vue, par_acteur: bool = False) -> QuerySet:
+    """SuggestionUnitaire of the outer row: of the groupe, or of the ligne."""
+    if context_view == "groupes":
+        return SuggestionUnitaire.objects.filter(suggestion_groupe_id=OuterRef("pk"))
+    return same_ligne_sus(par_acteur)
+
+
+def filter_context(vue: Vue, par_acteur: bool = False) -> FilterContext:
     def ligne(q: Q, annotations: dict) -> Q:
-        return Q(Exists(_sus_of(vue).alias(**annotations).filter(q)))
+        return Q(Exists(_sus_of(vue, par_acteur).alias(**annotations).filter(q)))
 
     if vue == "groupes":
-        return FilterContext(prefix="", groupe_ref="pk", related={"ligne": ligne})
+        return FilterContext(
+            prefix="", groupe_ref="pk", related={"ligne": ligne}, par_acteur=par_acteur
+        )
     return FilterContext(
         prefix="suggestion_groupe__",
         groupe_ref="suggestion_groupe_id",
         related={"ligne": ligne},
+        par_acteur=par_acteur,
     )
 
 
@@ -93,37 +131,36 @@ def _vue_of(context: FilterContext) -> Vue:
 # --- Ligne statut (derived) ---
 
 
-def _not_validated_sus(vue: Vue) -> QuerySet:
-    return _sus_of(vue).exclude(statut=SuggestionStatut.ATRAITER)
+def ligne_statut_q(vue: Vue, statut: str, prefix: str, par_acteur: bool = False) -> Q:
+    """Rows (groupes: having at least one ligne / lignes) whose ligne statut is…
 
-
-def ligne_statut_q(vue: Vue, statut: str, prefix: str) -> Q:
-    """Rows (groupes: having at least one ligne / lignes) whose ligne statut is…"""
+    A ligne is refused when all its SU are refused (or its groupe is); the SU of
+    a ligne share their statut, so in the Groupes view a refused SU is a refused
+    ligne."""
     groupe_statut = f"{prefix}statut"
-    if statut == SuggestionStatut.AVALIDER:
-        return Q(**{groupe_statut: SuggestionStatut.AVALIDER}) & Q(
-            Exists(_not_validated_sus(vue))
+    sus = _sus_of(vue, par_acteur)
+    not_refused = Q(Exists(sus.exclude(statut=REJETEE)))
+    if statut == REJETEE:
+        if vue == "groupes":
+            return Q(**{groupe_statut: REJETEE}) | Q(Exists(sus.filter(statut=REJETEE)))
+        return Q(**{groupe_statut: REJETEE}) | ~not_refused
+    if statut == AVALIDER:
+        return Q(**{groupe_statut: AVALIDER}) & Q(
+            Exists(sus.exclude(statut__in=[ATRAITER, REJETEE]))
         )
-    if statut == SuggestionStatut.ATRAITER:
+    if statut == ATRAITER:
         if vue == "groupes":
             # A ligne all of whose SU are validated
             fully_validated = SuggestionUnitaire.objects.filter(
-                suggestion_groupe_id=OuterRef("pk"), statut=SuggestionStatut.ATRAITER
-            ).exclude(
-                Exists(
-                    SuggestionUnitaire.objects.filter(
-                        suggestion_groupe_id=OuterRef("suggestion_groupe_id"),
-                        champs=OuterRef("champs"),
-                    ).exclude(statut=SuggestionStatut.ATRAITER)
-                )
-            )
+                suggestion_groupe_id=OuterRef("pk"), statut=ATRAITER
+            ).exclude(Exists(same_ligne_sus(par_acteur).exclude(statut=ATRAITER)))
             validated_ligne = Q(Exists(fully_validated))
         else:
-            validated_ligne = ~Q(Exists(_not_validated_sus(vue)))
-        return Q(**{groupe_statut: SuggestionStatut.ATRAITER}) | (
-            Q(**{groupe_statut: SuggestionStatut.AVALIDER}) & validated_ligne
+            validated_ligne = ~Q(Exists(sus.exclude(statut=ATRAITER)))
+        return (Q(**{groupe_statut: ATRAITER}) & not_refused) | (
+            Q(**{groupe_statut: AVALIDER}) & validated_ligne
         )
-    return Q(**{groupe_statut: statut})
+    return Q(**{groupe_statut: statut}) & not_refused
 
 
 def _ligne_statut_builder(context: FilterContext, spec, operator, value) -> Q:
@@ -140,7 +177,7 @@ def _ligne_statut_builder(context: FilterContext, spec, operator, value) -> Q:
     vue = _vue_of(context)
     q = Q(pk__in=[])
     for item in values:
-        q |= ligne_statut_q(vue, item, context.prefix)
+        q |= ligne_statut_q(vue, item, context.prefix, context.par_acteur)
     return q
 
 
@@ -195,7 +232,13 @@ def _nb_lignes(context: FilterContext):
         )
         .order_by()
         .values("suggestion_groupe_id")
-        .annotate(n=Count("champs", distinct=True))
+        .annotate(
+            n=(
+                Count(ligne_key_expression(context.par_acteur), distinct=True)
+                if context.par_acteur
+                else Count("champs", distinct=True)
+            )
+        )
         .values("n")
     )
     return Coalesce(Subquery(lignes), 0)
@@ -255,9 +298,13 @@ def _escape_like(value: str) -> str:
 
 
 def _acteur_value_builder(context: FilterContext, spec, operator, value) -> Q:
-    """Current value of the acteur (Acteur importé, before the suggestion)."""
+    """Current value of the acteur (Acteur importé, before the suggestion): the
+    acteur of the groupe, or the acteur of the ligne (lignes par acteur)."""
+    acteur = CIBLE if context.par_acteur else None
     if operator in ("is_empty", "is_not_empty"):
-        q = context.related["ligne"](Q(ActeurValueMatches("is_empty")), {})
+        q = context.related["ligne"](
+            Q(ActeurValueMatches("is_empty", acteur=acteur)), {}
+        )
         return q if operator == "is_empty" else ~q
     values = value if operator == "in" else [value]
     if (
@@ -269,7 +316,9 @@ def _acteur_value_builder(context: FilterContext, spec, operator, value) -> Q:
     comparison = "eq" if operator in ("eq", "neq", "in") else operator
     q = Q(pk__in=[])
     for item in values:
-        q |= context.related["ligne"](Q(ActeurValueMatches(comparison, item)), {})
+        q |= context.related["ligne"](
+            Q(ActeurValueMatches(comparison, item, acteur=acteur)), {}
+        )
     return ~q if operator == "neq" else q
 
 
@@ -473,7 +522,7 @@ def filtered_groupes(
         cohorte.suggestion_groupes.all(),
         filtre,
         registry,
-        filter_context("groupes"),
+        filter_context("groupes", is_par_acteur(cohorte)),
     ).filter(_tuples_q(tuples, "groupes"))
     if afficher == "avalider":
         queryset = queryset.filter(statut=SuggestionStatut.AVALIDER)
@@ -488,20 +537,22 @@ def filtered_ligne_rows(
     registry: FieldRegistry | None = None,
 ) -> QuerySet[SuggestionUnitaire]:
     """SuggestionUnitaire rows of the lignes matching the filter: every SU of a
-    ligne matches or not, since conditions only depend on (groupe, champs)."""
+    ligne matches or not, since conditions only depend on (groupe, [acteur,]
+    champs)."""
     if filtre and registry is None:
         registry = review_registry(cohorte)
+    par_acteur = is_par_acteur(cohorte)
     queryset = apply_filter(
         SuggestionUnitaire.objects.filter(
             suggestion_groupe__suggestion_cohorte=cohorte
         ),
         filtre,
         registry,
-        filter_context("lignes"),
+        filter_context("lignes", par_acteur),
     ).filter(_tuples_q(tuples, "lignes"))
     if afficher == "avalider":
         queryset = queryset.filter(
-            ligne_statut_q("lignes", SuggestionStatut.AVALIDER, "suggestion_groupe__")
+            ligne_statut_q("lignes", AVALIDER, "suggestion_groupe__", par_acteur)
         )
     return queryset
 
@@ -513,9 +564,10 @@ def lignes_page(
     afficher: Afficher | None,
     page: int,
     page_size: int,
-) -> tuple[list[tuple[int, list[str]]], int]:
-    """(groupe id, champs) of the lignes of a page, ordered by groupe then as the
-    admin orders the champs, and the total number of lignes."""
+) -> tuple[list[tuple[int, str | None, list[str]]], int]:
+    """(groupe id, cible, champs) of the lignes of a page, ordered by groupe (then
+    acteur) then as the admin orders the champs, and the total number of lignes.
+    The cible is None when the groupe is a single acteur."""
     order = Case(
         *(
             When(champs=list(fields), then=Value(i))
@@ -524,27 +576,35 @@ def lignes_page(
         default=Value(len(ORDERED_FIELDS)),
         output_field=IntegerField(),
     )
+    par_acteur = is_par_acteur(cohorte)
     lignes = (
         filtered_ligne_rows(cohorte, filtre, tuples, afficher)
         .order_by()
-        .values("suggestion_groupe_id", "champs")
+        .annotate(cible=CIBLE if par_acteur else Value("", output_field=CharField()))
+        .values("suggestion_groupe_id", "cible", "champs")
         .distinct()
         .annotate(rang=order)
-        .order_by("suggestion_groupe_id", "rang", "champs")
+        .order_by("suggestion_groupe_id", "cible", "rang", "champs")
     )
     total = lignes.count()
     offset = (page - 1) * page_size
     keys = [
-        (row["suggestion_groupe_id"], row["champs"])
+        (
+            row["suggestion_groupe_id"],
+            row["cible"] if par_acteur else None,
+            row["champs"],
+        )
         for row in lignes[offset : offset + page_size]
     ]
     return keys, total
 
 
-def _ligne_key_expression():
+def ligne_key_expression(par_acteur: bool = False):
+    """`lignes.ligne_key` in SQL, on SuggestionUnitaire rows."""
     return Concat(
         Cast("suggestion_groupe_id", TextField()),
         Value(":"),
+        *((CIBLE, Value(":")) if par_acteur else ()),
         Func(
             F("champs"),
             Value(","),
@@ -555,24 +615,32 @@ def _ligne_key_expression():
     )
 
 
-def count_lignes_by_statut(rows: QuerySet[SuggestionUnitaire]) -> dict[str, int]:
-    """Lignes per (derived) statut, without loading them."""
-    key = _ligne_key_expression()
+def count_lignes_by_statut(
+    rows: QuerySet[SuggestionUnitaire], par_acteur: bool = False
+) -> dict[str, int]:
+    """Lignes per (derived) statut, without loading them (the SU of a ligne share
+    their statut)."""
+    key = ligne_key_expression(par_acteur)
     counts = {statut: 0 for statut in SuggestionStatut.values}
     for row in (
         rows.order_by()
         .values("suggestion_groupe__statut")
         .annotate(
             total=Count(key, distinct=True),
-            open=Count(key, distinct=True, filter=~Q(statut=SuggestionStatut.ATRAITER)),
+            open=Count(key, distinct=True, filter=~Q(statut__in=[ATRAITER, REJETEE])),
+            refused=Count(key, distinct=True, filter=Q(statut=REJETEE)),
         )
     ):
         groupe_statut = row["suggestion_groupe__statut"]
-        if groupe_statut == SuggestionStatut.AVALIDER:
-            counts[SuggestionStatut.AVALIDER] += row["open"]
-            counts[SuggestionStatut.ATRAITER] += row["total"] - row["open"]
+        if groupe_statut == AVALIDER:
+            counts[AVALIDER] += row["open"]
+            counts[REJETEE] += row["refused"]
+            counts[ATRAITER] += row["total"] - row["open"] - row["refused"]
+        elif groupe_statut == REJETEE:
+            counts[REJETEE] += row["total"]
         else:
-            counts[groupe_statut] += row["total"]
+            counts[REJETEE] += row["refused"]
+            counts[groupe_statut] += row["total"] - row["refused"]
     return counts
 
 
@@ -586,6 +654,8 @@ def stats(
     """Counters of the header (unit of the view, all statuts, ignoring
     « afficher »), size of each view, and counts per tuple."""
     registry = review_registry(cohorte) if filtre else None
+    par_acteur = is_par_acteur(cohorte)
+    key = ligne_key_expression(par_acteur)
     if vue == "groupes":
         counts = {statut: 0 for statut in SuggestionStatut.values}
         for row in (
@@ -597,14 +667,14 @@ def stats(
             counts[row["statut"]] = row["n"]
     else:
         counts = count_lignes_by_statut(
-            filtered_ligne_rows(cohorte, filtre, tuples, None, registry)
+            filtered_ligne_rows(cohorte, filtre, tuples, None, registry), par_acteur
         )
 
     nb_groupes = filtered_groupes(cohorte, filtre, tuples, afficher, registry).count()
     nb_lignes = (
         filtered_ligne_rows(cohorte, filtre, tuples, afficher, registry)
         .order_by()
-        .aggregate(n=Count(_ligne_key_expression(), distinct=True))["n"]
+        .aggregate(n=Count(key, distinct=True))["n"]
     )
 
     if vue == "groupes":
@@ -623,7 +693,7 @@ def stats(
             filtered_ligne_rows(cohorte, filtre, [], afficher, registry)
             .order_by()
             .values("champs")
-            .annotate(n=Count("suggestion_groupe_id", distinct=True))
+            .annotate(n=Count(key, distinct=True))
         )
     by_tuple = {tuple(row["champs"]): row["n"] for row in tuple_counts}
     return {

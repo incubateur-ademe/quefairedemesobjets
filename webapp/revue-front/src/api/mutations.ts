@@ -69,6 +69,7 @@ const EMPTY_VALUE = "__empty__"
 
 const NO_LIGNE_ACTION: Ligne["capacites"] = {
   valider: false,
+  refuser: false,
   remettre_a_valider: false,
   remettre_groupe_a_valider: false,
   corriger_correction: false,
@@ -91,6 +92,7 @@ export function withStatut(groupe: Groupe, statut: string, lignes?: string[]): G
     statut: lignes ? groupe.statut : statut,
     lignes: nextLignes,
     lignes_validees: nextLignes.filter((ligne) => ligne.statut === "ATRAITER").length,
+    lignes_refusees: nextLignes.filter((ligne) => ligne.statut === "REJETEE").length,
     capacites: lignes ? groupe.capacites : NO_GROUPE_ACTION,
   }
 }
@@ -287,18 +289,34 @@ export function useGroupeActions(cohorteId: number) {
             }),
           ),
       }),
-    decideLignes: (groupe: Groupe, keys: string[], action: "validate" | "resubmit") =>
+    decideLignes: (
+      groupe: Groupe,
+      keys: string[],
+      action: "validate" | "reject" | "resubmit",
+    ) =>
       write.mutateAsync({
         groupe,
         optimistic: (g) =>
-          action === "resubmit" && g.statut === "REJETEE"
+          action === "resubmit" &&
+          g.statut === "REJETEE" &&
+          // Lignes refused one by one go back to validate on their own
+          !g.lignes.some((ligne) => ligne.capacites.remettre_a_valider)
             ? withStatut(g, "AVALIDER")
-            : withStatut(g, action === "validate" ? "ATRAITER" : "AVALIDER", keys),
+            : withStatut(
+                g,
+                action === "validate"
+                  ? "ATRAITER"
+                  : action === "reject"
+                    ? "REJETEE"
+                    : "AVALIDER",
+                keys,
+              ),
+        // Designated by their key: a ligne may also be split by acteur
         request: (modifieLe) =>
           unwrap(
             api.POST("/api/suggestions/groupes/{groupe_id}/lignes/decision", {
               params: path(groupe),
-              body: { champs: champsOf(groupe, keys), action, ...expected(modifieLe) },
+              body: { cles: keys, action, ...expected(modifieLe) },
             }),
           ),
       }),

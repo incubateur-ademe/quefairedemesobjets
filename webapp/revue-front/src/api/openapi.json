@@ -3177,9 +3177,29 @@
             "title": "Shows Parent",
             "type": "boolean"
           },
+          "colonne_parent": {
+            "title": "Colonne Parent",
+            "type": "boolean"
+          },
           "shows_acteur_diff": {
             "title": "Shows Acteur Diff",
             "type": "boolean"
+          },
+          "can_restore": {
+            "title": "Can Restore",
+            "type": "boolean"
+          },
+          "lignes_par_acteur": {
+            "title": "Lignes Par Acteur",
+            "type": "boolean"
+          },
+          "onglets": {
+            "items": {
+              "enum": ["localisation", "annuaire"],
+              "type": "string"
+            },
+            "title": "Onglets",
+            "type": "array"
           },
           "badge": {
             "anyOf": [
@@ -3200,7 +3220,11 @@
           "can_reject_group",
           "editable_models",
           "shows_parent",
+          "colonne_parent",
           "shows_acteur_diff",
+          "can_restore",
+          "lignes_par_acteur",
+          "onglets",
           "badge"
         ],
         "title": "PolicyOut",
@@ -3374,6 +3398,39 @@
         "title": "CellOut",
         "type": "object"
       },
+      "CibleOut": {
+        "description": "Acteur of a ligne, when the groupe gathers several acteurs.",
+        "properties": {
+          "identifiant_unique": {
+            "title": "Identifiant Unique",
+            "type": "string"
+          },
+          "nom": {
+            "title": "Nom",
+            "type": "string"
+          },
+          "ville": {
+            "title": "Ville",
+            "type": "string"
+          },
+          "suggestion_modele": {
+            "title": "Suggestion Modele",
+            "type": "string"
+          },
+          "admin_urls": {
+            "$ref": "#/components/schemas/AdminUrlsOut"
+          }
+        },
+        "required": [
+          "identifiant_unique",
+          "nom",
+          "ville",
+          "suggestion_modele",
+          "admin_urls"
+        ],
+        "title": "CibleOut",
+        "type": "object"
+      },
       "GroupeCapacitesOut": {
         "properties": {
           "valider": {
@@ -3447,6 +3504,17 @@
           "acteur": {
             "$ref": "#/components/schemas/ActeurIdentiteOut"
           },
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
           "is_new": {
             "title": "Is New",
             "type": "boolean"
@@ -3476,6 +3544,10 @@
             "title": "Lignes Validees",
             "type": "integer"
           },
+          "lignes_refusees": {
+            "title": "Lignes Refusees",
+            "type": "integer"
+          },
           "lignes_total": {
             "title": "Lignes Total",
             "type": "integer"
@@ -3491,11 +3563,13 @@
           "decision_par",
           "decision_le",
           "acteur",
+          "libelle",
           "is_new",
           "has_correction",
           "parent",
           "lignes",
           "lignes_validees",
+          "lignes_refusees",
           "lignes_total",
           "capacites"
         ],
@@ -3532,6 +3606,10 @@
         "properties": {
           "valider": {
             "title": "Valider",
+            "type": "boolean"
+          },
+          "refuser": {
+            "title": "Refuser",
             "type": "boolean"
           },
           "remettre_a_valider": {
@@ -3573,6 +3651,7 @@
         },
         "required": [
           "valider",
+          "refuser",
           "remettre_a_valider",
           "remettre_groupe_a_valider",
           "corriger_correction",
@@ -3598,6 +3677,16 @@
             },
             "title": "Champs",
             "type": "array"
+          },
+          "cible": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CibleOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "statut": {
             "title": "Statut",
@@ -3648,6 +3737,7 @@
         "required": [
           "key",
           "champs",
+          "cible",
           "statut",
           "decision_par",
           "decision_le",
@@ -3924,6 +4014,17 @@
           "acteur": {
             "$ref": "#/components/schemas/ActeurIdentiteOut"
           },
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
           "is_new": {
             "title": "Is New",
             "type": "boolean"
@@ -3953,6 +4054,10 @@
             "title": "Lignes Validees",
             "type": "integer"
           },
+          "lignes_refusees": {
+            "title": "Lignes Refusees",
+            "type": "integer"
+          },
           "lignes_total": {
             "title": "Lignes Total",
             "type": "integer"
@@ -3974,11 +4079,13 @@
           "decision_par",
           "decision_le",
           "acteur",
+          "libelle",
           "is_new",
           "has_correction",
           "parent",
           "lignes",
           "lignes_validees",
+          "lignes_refusees",
           "lignes_total",
           "capacites",
           "localisation",
@@ -4094,19 +4201,41 @@
       },
       "LignesDecisionIn": {
         "properties": {
-          "champs": {
-            "items": {
-              "items": {
-                "type": "string"
+          "cles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
               },
-              "type": "array"
-            },
-            "minItems": 1,
-            "title": "Champs",
-            "type": "array"
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cles"
+          },
+          "champs": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Champs"
           },
           "action": {
-            "enum": ["validate", "resubmit"],
+            "enum": ["validate", "reject", "resubmit"],
             "title": "Action",
             "type": "string"
           },
@@ -4123,7 +4252,7 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["champs", "action"],
+        "required": ["action"],
         "title": "LignesDecisionIn",
         "type": "object"
       },

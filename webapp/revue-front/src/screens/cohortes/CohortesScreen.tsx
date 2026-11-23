@@ -22,7 +22,7 @@ import {
   serializeFilter,
 } from "../../domain/filterModel"
 import { scrollRowIntoView } from "../../domain/scroll"
-import { TYPE_ACTIONS } from "../../domain/statuts"
+import { TYPE_ACTION_FAMILIES, TYPE_ACTIONS, typeActionsOf } from "../../domain/statuts"
 import { buildHref, Link, useRouter, useSearchParams } from "../../router"
 import { WaButton, WaSpinner } from "../../wa"
 
@@ -48,7 +48,8 @@ const parseSort = (tri: string | undefined): Sort => ({
   descending: (tri ?? "-cree_le").startsWith("-"),
 })
 
-/** Screen 1: SOURCE cohortes having at least one groupe. */
+/** Screen 1: reviewable cohortes (SOURCE, enrichissements) having at least one
+ * groupe. */
 export function CohortesScreen() {
   const { basepath, navigate } = useRouter()
   const [search, setSearch] = useSearchParams()
@@ -62,7 +63,7 @@ export function CohortesScreen() {
   const pageSize = Number(search.par_page) || DEFAULT_PAGE_SIZE
   const params: CohortesParams = {
     filtre: serializeFilter(filter),
-    type_action: search.type ? [search.type] : undefined,
+    type_action: typeActionsOf(search.type),
     statut: search.statut ? [search.statut] : undefined,
     cree_apres: search.periode ? daysAgo(Number(search.periode)) : undefined,
     tri: search.tri,
@@ -134,14 +135,9 @@ export function CohortesScreen() {
   return (
     <main className="screen screen--full">
       <div className="toolbar">
-        <Segmented
-          label="Type"
+        <TypeActionSelect
           value={search.type ?? ""}
-          options={[
-            { value: "", label: "Tous" },
-            ...Object.entries(TYPE_ACTIONS).map(([value, label]) => ({ value, label })),
-          ]}
-          onChange={(type) => setListSearch({ type })}
+          onChange={(type) => setListSearch({ type: type || undefined })}
         />
         <Segmented
           label="Statut"
@@ -178,9 +174,7 @@ export function CohortesScreen() {
         />
         <span className="spacer" />
         {cohortes.isFetching && <WaSpinner />}
-        <span className="muted">
-          {plural(cohortes.data?.total ?? 0, "cohorte")} SOURCE
-        </span>
+        <span className="muted">{plural(cohortes.data?.total ?? 0, "cohorte")}</span>
       </div>
       {filtersOpen && fields.data && (
         <div className="fbwrap">
@@ -259,6 +253,40 @@ export function CohortesScreen() {
         onClose={() => setSearch({ logs: undefined })}
       />
     </main>
+  )
+}
+
+/** Type of cohorte: every type, a whole family, or a single type_action. */
+function TypeActionSelect({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="tgroup">
+      <span className="tlabel" aria-hidden="true">
+        Type
+      </span>
+      <select
+        aria-label="Type de cohorte"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">Tous</option>
+        {TYPE_ACTION_FAMILIES.map((family) => (
+          <optgroup key={family.value} label={family.label}>
+            <option value={family.value}>Toutes les cohortes {family.label}</option>
+            {Object.entries(family.types).map(([type, label]) => (
+              <option key={type} value={type}>
+                {label}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </div>
   )
 }
 

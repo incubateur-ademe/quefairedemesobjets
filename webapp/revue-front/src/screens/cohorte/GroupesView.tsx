@@ -24,10 +24,10 @@ export function cursorItems(groupes: Groupe[]): string[] {
   ])
 }
 
-export function LigneHead() {
+export function LigneHead({ policy }: { policy: Policy }) {
   return (
     <>
-      <th>Champ(s)</th>
+      <th className="c-champs">Champ(s)</th>
       <th className="c-cmp">
         Acteur importé
         <span className="hsub">suggestion de la source, non corrigeable</span>
@@ -38,12 +38,16 @@ export function LigneHead() {
       <th className="c-cmp">
         Correction<span className="hsub">RevisionActeur · corrigeable</span>
       </th>
-      <th className="c-rep" title="Reporter vers le parent">
-        ⏩
-      </th>
-      <th className="c-cmp">
-        Parent<span className="hsub">ParentRevisionActeur · corrigeable</span>
-      </th>
+      {policy.colonne_parent && (
+        <>
+          <th className="c-rep" title="Reporter vers le parent">
+            ⏩
+          </th>
+          <th className="c-cmp">
+            Parent<span className="hsub">ParentRevisionActeur · corrigeable</span>
+          </th>
+        </>
+      )}
       <th>Statut</th>
       <th />
     </>
@@ -51,6 +55,8 @@ export function LigneHead() {
 }
 
 const PROCESSING = ["ENCOURS", "SUCCES", "ERREUR"]
+// Statuts of the groupes showing the progress of their lignes
+const WITH_PROGRESS = ["AVALIDER", "ATRAITER"]
 
 /** Correction with the value of the acteur on every restorable ligne. */
 function RestaurerAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActions }) {
@@ -107,12 +113,17 @@ function ReportAll({
   )
 }
 
-export type ModalTab = "localisation" | "annuaire"
+export type ModalTab = Policy["onglets"][number]
 
-const MODAL_TABS: [ModalTab, string][] = [
-  ["localisation", "Localisation"],
-  ["annuaire", "Annuaire entreprise"],
-]
+export const MODAL_TABS: Record<ModalTab, string> = {
+  localisation: "Localisation",
+  annuaire: "Annuaire entreprise",
+}
+
+/** Class of the comparison table: when a groupe gathers several acteurs, the
+ * first column (champs and acteur of the ligne) is wider. */
+export const cmpTableClass = (policy: Policy) =>
+  `tbl cmp stream${policy.lignes_par_acteur ? " par-acteur" : ""}${policy.colonne_parent ? "" : " sans-parent"}`
 
 export type Checkboxes = {
   isChecked: (id: string) => boolean
@@ -194,7 +205,7 @@ function GroupeHeaderRow({
       <td colSpan={2}>
         <div className="gh">
           <span className="mono muted">#{groupe.id}</span>
-          <span className="gname">{acteur.nom || "—"}</span>
+          <span className="gname">{groupe.libelle || acteur.nom || "—"}</span>
           {groupe.is_new && policy.badge && (
             <span className="pill p-accent">{policy.badge}</span>
           )}
@@ -203,21 +214,23 @@ function GroupeHeaderRow({
           <span className="mono faint">{acteur.identifiant_unique}</span>
           <span className="muted">{acteur.ville}</span>
         </div>
-        <div className="gmeta">
-          {MODAL_TABS.map(([tab, label]) => (
-            <WaButton
-              key={tab}
-              size="small"
-              appearance="outlined"
-              onClick={(event) => {
-                event.stopPropagation()
-                onOpen(groupe, tab)
-              }}
-            >
-              {label}
-            </WaButton>
-          ))}
-        </div>
+        {policy.onglets.length > 0 && (
+          <div className="gmeta">
+            {policy.onglets.map((tab) => (
+              <WaButton
+                key={tab}
+                size="small"
+                appearance="outlined"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onOpen(groupe, tab)
+                }}
+              >
+                {MODAL_TABS[tab]}
+              </WaButton>
+            ))}
+          </div>
+        )}
         <div className="glinks">
           {acteur.admin_urls.importe && (
             <a
@@ -260,9 +273,44 @@ function GroupeHeaderRow({
             </a>
           </div>
         ) : (
-          <span className="inherit">pas de correction existante</span>
+          // A groupe of several acteurs has no correction of its own
+          !policy.lignes_par_acteur && (
+            <span className="inherit">pas de correction existante</span>
+          )
         )}
       </td>
+      {policy.colonne_parent && (
+        <GroupeParentCells groupe={groupe} policy={policy} actions={actions} />
+      )}
+      <td>
+        <StatutPill
+          statut={groupe.statut}
+          decision={{ par: groupe.decision_par, le: groupe.decision_le }}
+        />
+        {WITH_PROGRESS.includes(groupe.statut) && <LignesProgress groupe={groupe} />}
+      </td>
+      <td className="c-act">
+        <div className="gact">
+          <GroupeActionsButtons groupe={groupe} actions={actions} />
+        </div>
+      </td>
+    </tr>
+  )
+}
+
+/** Parent cells of a groupe header row: report of all its lignes and links. */
+function GroupeParentCells({
+  groupe,
+  policy,
+  actions,
+}: {
+  groupe: Groupe
+  policy: Policy
+  actions: GroupeActions
+}) {
+  const { acteur } = groupe
+  return (
+    <>
       <td className="c-rep">
         {groupe.parent && (
           <ReportAll groupe={groupe} modele="ParentRevisionActeur" actions={actions} />
@@ -288,38 +336,38 @@ function GroupeHeaderRow({
             </span>
           </>
         ) : (
-          <span className="inherit">pas de parent</span>
+          // A groupe of several acteurs has no parent of its own
+          !policy.lignes_par_acteur && <span className="inherit">pas de parent</span>
         )}
       </td>
-      <td>
-        <StatutPill
-          statut={groupe.statut}
-          decision={{ par: groupe.decision_par, le: groupe.decision_le }}
-        />
-        <div className="lineprog">
-          <span className="stack">
-            <span
-              className="bg-ok"
-              style={{
-                width: `${groupe.lignes_total ? (groupe.lignes_validees / groupe.lignes_total) * 100 : 0}%`,
-              }}
-            />
-          </span>
-          {groupe.lignes_validees}/{groupe.lignes_total} lignes
-        </div>
-      </td>
-      <td className="c-act">
-        <div className="gact">
-          <GroupeActionsButtons groupe={groupe} actions={actions} />
-        </div>
-      </td>
-    </tr>
+    </>
+  )
+}
+
+/** Progress of the lignes of a groupe to validate or to process: validated (green), refused (red), still
+ * to validate (grey, background of the bar), and the count of decided lignes. */
+function LignesProgress({ groupe }: { groupe: Groupe }) {
+  const { lignes_validees, lignes_refusees, lignes_total } = groupe
+  const width = (count: number) => `${lignes_total ? (count / lignes_total) * 100 : 0}%`
+  const decided = lignes_validees + lignes_refusees
+  return (
+    <div
+      className="lineprog"
+      title={`${plural(lignes_validees, "ligne validée", "lignes validées")}, ${plural(lignes_refusees, "refusée", "refusées")}, ${plural(lignes_total - decided, "à valider", "à valider")}`}
+    >
+      <span className="stack">
+        <span className="bg-ok" style={{ width: width(lignes_validees) }} />
+        <span className="bg-danger" style={{ width: width(lignes_refusees) }} />
+      </span>
+      {decided}/{lignes_total}
+    </div>
   )
 }
 
 /** A ligne de suggestion: one row of the comparison table, as in the admin. */
 export function LigneRow({
   groupe,
+  policy,
   ligne,
   actions,
   cursor,
@@ -327,6 +375,7 @@ export function LigneRow({
   lead,
 }: {
   groupe: Groupe
+  policy: Policy
   ligne: Ligne
   actions: GroupeActions
   cursor?: string | null
@@ -367,22 +416,26 @@ export function LigneRow({
           actions={actions}
         />
       </td>
-      <td className="c-rep">
-        <ReportButton
-          groupe={groupe}
-          ligne={ligne}
-          modele="ParentRevisionActeur"
-          actions={actions}
-        />
-      </td>
-      <td className="c-tgt c-par">
-        <TargetCell
-          groupe={groupe}
-          ligne={ligne}
-          modele="ParentRevisionActeur"
-          actions={actions}
-        />
-      </td>
+      {policy.colonne_parent && (
+        <>
+          <td className="c-rep">
+            <ReportButton
+              groupe={groupe}
+              ligne={ligne}
+              modele="ParentRevisionActeur"
+              actions={actions}
+            />
+          </td>
+          <td className="c-tgt c-par">
+            <TargetCell
+              groupe={groupe}
+              ligne={ligne}
+              modele="ParentRevisionActeur"
+              actions={actions}
+            />
+          </td>
+        </>
+      )}
       <td>
         <StatutCell ligne={ligne} />
       </td>
@@ -463,14 +516,14 @@ export function GroupesView({
     )
   }
   return (
-    <table className="tbl cmp stream">
+    <table className={cmpTableClass(policy)}>
       <thead>
         <tr>
           <PageCheckbox
             label="Sélectionner les groupes de cette page"
             checkboxes={checkboxes}
           />
-          <LigneHead />
+          <LigneHead policy={policy} />
         </tr>
       </thead>
       {groupes.map((groupe) => (
@@ -491,6 +544,7 @@ export function GroupesView({
             <LigneRow
               key={ligne.key}
               groupe={groupe}
+              policy={policy}
               ligne={ligne}
               actions={actions}
               cursor={cursor}

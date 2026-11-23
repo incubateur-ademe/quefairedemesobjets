@@ -1,5 +1,6 @@
 """Review policy of each type_action: the front reads these capabilities and has
-no rule of its own for a type. Only the SOURCE policies exist for now."""
+no rule of its own for a type. A cohorte is reviewable in this screen only when
+its type_action has a policy (`REVUE_TYPE_ACTIONS`)."""
 
 from dataclasses import dataclass
 
@@ -8,6 +9,8 @@ from data.revue.errors import RevueApiError
 
 REVISION = "RevisionActeur"
 PARENT = "ParentRevisionActeur"
+LOCALISATION = "localisation"
+ANNUAIRE = "annuaire"
 
 
 @dataclass(frozen=True)
@@ -21,8 +24,17 @@ class ReviewPolicy:
     # Objects whose suggestions the reviewer may correct (never Acteur)
     editable_models: tuple[str, ...] = (REVISION, PARENT)
     shows_parent: bool = True
+    # The comparison table has the parent columns (⏩ and Parent)
+    colonne_parent: bool = True
     # Show the current acteur value next to the suggestion (no acteur for AJOUT)
     shows_acteur_diff: bool = True
+    # The correction may take back the current value of the acteur
+    can_restore: bool = True
+    # The groupe gathers several acteurs (1 SuggestionUnitaire per acteur, the
+    # acteur being on the SU, not on the groupe): a ligne is (acteur, champs)
+    lignes_par_acteur: bool = False
+    # Tabs of the modal of a groupe (and their buttons on the groupe header)
+    onglets: tuple[str, ...] = (LOCALISATION, ANNUAIRE)
     badge: str | None = None
 
     def describe(self) -> dict:
@@ -33,7 +45,11 @@ class ReviewPolicy:
             "can_reject_group": self.can_reject_group,
             "editable_models": list(self.editable_models),
             "shows_parent": self.shows_parent,
+            "colonne_parent": self.colonne_parent,
             "shows_acteur_diff": self.shows_acteur_diff,
+            "can_restore": self.can_restore,
+            "lignes_par_acteur": self.lignes_par_acteur,
+            "onglets": list(self.onglets),
             "badge": self.badge,
         }
 
@@ -50,10 +66,67 @@ SOURCE_AJOUT = ReviewPolicy(
     badge="Nouvel acteur",
 )
 
+# Closed SIRET (enrich DAG): 1 groupe per acteur, 1 SuggestionUnitaire per field
+# suggested on the correction (RevisionActeur); no suggestion on the Acteur, so
+# nothing to report, but the correction and the parent may be edited
+ENRICH_ACTEURS_CLOSED = ReviewPolicy(
+    SuggestionAction.ENRICH_ACTEURS_CLOSED.value, onglets=()
+)
+# RGPD anonymisation (enrich DAG): 1 groupe per acteur, the anonymised values
+# overwrite the Acteur and its RevisionActeur if it exists. The correction may be
+# edited, to reactivate the acteur with non personal information; restoring the
+# value of the acteur would bring back the personal data
+ENRICH_ACTEURS_RGPD = ReviewPolicy(
+    SuggestionAction.ENRICH_ACTEURS_RGPD.value,
+    editable_models=(REVISION,),
+    shows_parent=False,
+    can_restore=False,
+    onglets=(),
+)
+
+# Other enrich DAGs: 1 groupe per suggested value (villes, codes postaux, SIRET,
+# SIREN) or per acteur (lien de succession), the acteur being on each
+# SuggestionUnitaire. Each ligne is validated or refused on its own: the groupe
+# stays to validate while a ligne is to validate, and only its validated lignes
+# are applied. No correction for now: nothing to edit, report or restore. No
+# localisation; the Annuaire Entreprises only for the SIRET and SIREN cohortes.
+# No parent column for the codes postaux (DAG enrich_acteurs_normalize_codepostal).
+ENRICH_PAR_LIGNE = tuple(
+    ReviewPolicy(
+        type_action.value,
+        can_reject_line=True,
+        lignes_par_acteur=True,
+        editable_models=(),
+        can_restore=False,
+        onglets=onglets,
+        shows_parent=parent,
+        colonne_parent=parent,
+    )
+    for type_action, onglets, parent in (
+        (SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO, (), True),
+        (SuggestionAction.ENRICH_ACTEURS_VILLES_NEW, (), True),
+        (SuggestionAction.ENRICH_ACTEURS_CP_TYPO, (), False),
+        (SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO, (), False),
+        (SuggestionAction.ENRICH_ACTEURS_SIRET, (ANNUAIRE,), True),
+        (SuggestionAction.ENRICH_ACTEURS_SIREN, (ANNUAIRE,), True),
+        (SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION, (), True),
+    )
+)
+
 POLICIES = {
     policy.type_action: policy
-    for policy in (SOURCE_AJOUT, SOURCE_MODIFICATION, SOURCE_SUPPRESSION)
+    for policy in (
+        SOURCE_AJOUT,
+        SOURCE_MODIFICATION,
+        SOURCE_SUPPRESSION,
+        ENRICH_ACTEURS_CLOSED,
+        ENRICH_ACTEURS_RGPD,
+        *ENRICH_PAR_LIGNE,
+    )
 }
+
+# type_action of the cohortes listed and reviewed by this screen
+REVUE_TYPE_ACTIONS = list(POLICIES)
 
 
 def get_policy(type_action: str) -> ReviewPolicy:

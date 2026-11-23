@@ -104,18 +104,11 @@ def enrich_lien_succession_to_suggestion_groupes(
     cohorte.save()
 
     from django.db import transaction
-    from qfdmo.models import RevisionActeur
 
     for _, row in df.iterrows():
         identifiant_unique = row[COLS.IDENTIFIANT_UNIQUE]
         est_parent = est_parent_map.get(identifiant_unique, False)
-        parent_revision = None
-        suggestion_modele = "RevisionActeur"
-        if est_parent:
-            parent_revision = RevisionActeur.objects.get(
-                identifiant_unique=identifiant_unique
-            )
-            suggestion_modele = "ParentRevisionActeur"
+        suggestion_modele = "ParentRevisionActeur" if est_parent else "RevisionActeur"
 
         champs_a_suggerer = _champs_a_suggerer(row)
         if not champs_a_suggerer:
@@ -141,7 +134,11 @@ def enrich_lien_succession_to_suggestion_groupes(
                         if suggestion_modele == "RevisionActeur"
                         else None
                     ),
-                    parent_revision_acteur=parent_revision,
+                    parent_revision_acteur_id=(
+                        identifiant_unique
+                        if suggestion_modele == "ParentRevisionActeur"
+                        else None
+                    ),
                     suggestion_modele=suggestion_modele,
                     raison=cohort,
                     champs=[champ],

@@ -22,7 +22,13 @@ from data.models.suggestion import (
 )
 from data.revue.choix import normalize_codes
 from data.revue.errors import RevueApiError
-from data.revue.lignes import ACTEUR, field_values, groupes_queryset, serialize_groupe
+from data.revue.lignes import (
+    ACTEUR,
+    field_values,
+    groupes_queryset,
+    serialize_groupe,
+    sus_by_key,
+)
 from data.revue.policies import PARENT, REVISION, ReviewPolicy, get_policy
 from data.views import update_suggestion_groupe
 
@@ -68,7 +74,8 @@ def write_groupe(
             )
         current = serialize_groupe(groupe, policy)
         lignes = {tuple(ligne["champs"]): ligne for ligne in current["lignes"]}
-        write(groupe, policy, {"groupe": current, "lignes": lignes})
+        par_cle = {ligne["key"]: ligne for ligne in current["lignes"]}
+        write(groupe, policy, {"groupe": current, "lignes": lignes, "par_cle": par_cle})
         SuggestionGroupe.objects.filter(id=groupe_id).update(modifie_le=timezone.now())
         groupe.suggestion_cohorte.recompute_cohorte_statut()
     return serialize_groupe(groupes_queryset().get(id=groupe_id), policy)
@@ -112,15 +119,96 @@ def decide_groupe(groupe_id, action: str, user, expected_modifie_le) -> dict:
     return write_groupe(groupe_id, expected_modifie_le, write)
 
 
+def _lignes_by_key(state: dict, cles: list[str]) -> list[dict]:
+    lignes = []
+    for cle in cles:
+        ligne = state["par_cle"].get(cle)
+        if ligne is None:
+            raise RevueApiError(404, "not_found", f"Ligne « {cle} » introuvable")
+        lignes.append(ligne)
+    return lignes
+
+
+def _sync_groupe_statut(groupe: SuggestionGroupe, user) -> None:
+    """Statut of a groupe whose lignes are decided one by one: to validate while a
+    ligne is to validate, then validated when one of its lignes is validated,
+    refused when all of them are refused."""
+    statuts = set(groupe.suggestion_unitaires.values_list("statut", flat=True))
+    if statuts - {ATRAITER, REJETEE}:
+        statut = AVALIDER
+    elif ATRAITER in statuts:
+        statut = ATRAITER
+    else:
+        statut = REJETEE
+    current = SuggestionGroupe.objects.values_list("statut", flat=True).get(
+        id=groupe.id
+    )
+    if statut != current:
+        SuggestionGroupe.objects.filter(id=groupe.id).update(
+            **groupe._statut_fields(statut, None if statut == AVALIDER else user)
+        )
+
+
+def _decide_lignes_one_by_one(groupe, policy, lignes, action: str, user) -> None:
+    """Lignes validated or refused on their own (ReviewPolicy.can_reject_line)."""
+    capacity, statut, detail = {
+        "validate": ("valider", ATRAITER, "Cette ligne n'est plus à valider"),
+        "reject": ("refuser", REJETEE, "Cette ligne ne peut plus être refusée"),
+        "resubmit": (
+            "remettre_a_valider",
+            AVALIDER,
+            "Cette ligne ne peut pas être remise à valider",
+        ),
+    }[action]
+    if not all(ligne["capacites"][capacity] for ligne in lignes):
+        _refuse(groupe, policy, detail)
+    keys = {ligne["key"] for ligne in lignes}
+    su_ids = [
+        su.id
+        for key, sus in sus_by_key(groupe, policy).items()
+        if key in keys
+        for su in sus
+    ]
+    SuggestionUnitaire.objects.filter(id__in=su_ids).update(
+        **groupe._statut_fields(statut, None if statut == AVALIDER else user)
+    )
+    _sync_groupe_statut(groupe, user)
+
+
 def decide_lignes(
-    groupe_id, champs_list: list[list[str]], action: str, user, expected_modifie_le
+    groupe_id,
+    champs_list: list[list[str]] | None,
+    action: str,
+    user,
+    expected_modifie_le,
+    cles: list[str] | None = None,
 ) -> dict:
+    """Decision on lignes, identified by their key (`cles`) or, for a groupe of a
+    single acteur, by their champs."""
+
     def write(groupe, policy, state):
-        lignes = _lignes(state, champs_list, groupe, policy)
+        if cles:
+            lignes = _lignes_by_key(state, cles)
+        elif policy.lignes_par_acteur:
+            raise RevueApiError(
+                422, "invalid", "Lignes par acteur : désigner les lignes par leur clé"
+            )
+        else:
+            lignes = _lignes(state, champs_list or [], groupe, policy)
+        if not lignes:
+            raise RevueApiError(422, "invalid", "Aucune ligne désignée")
+        if policy.can_reject_line:
+            _decide_lignes_one_by_one(groupe, policy, lignes, action, user)
+            return
+        if action == "reject":
+            raise RevueApiError(
+                422, "invalid", "Une ligne ne peut pas être refusée : refuser le groupe"
+            )
+        champs_list_ = [ligne["champs"] for ligne in lignes]
         if action == "validate":
             if not all(ligne["capacites"]["valider"] for ligne in lignes):
                 _refuse(groupe, policy, "Cette ligne n'est plus à valider")
-            groupe.set_lignes_statut(champs_list, ATRAITER, user)
+            groupe.set_lignes_statut(champs_list_, ATRAITER, user)
             # The groupe is validated with its last ligne
             if not groupe.suggestion_unitaires.exclude(statut=ATRAITER).exists():
                 groupe.suggestion_cohorte.set_groupes_statut(
@@ -133,7 +221,7 @@ def decide_lignes(
                 return
             if not all(ligne["capacites"]["remettre_a_valider"] for ligne in lignes):
                 _refuse(groupe, policy, "Cette ligne ne peut pas être remise à valider")
-            groupe.set_lignes_statut(champs_list, AVALIDER)
+            groupe.set_lignes_statut(champs_list_, AVALIDER)
             if groupe.statut == ATRAITER:
                 SuggestionGroupe.objects.filter(id=groupe.id).update(
                     statut=AVALIDER, decision_par=None, decision_le=None

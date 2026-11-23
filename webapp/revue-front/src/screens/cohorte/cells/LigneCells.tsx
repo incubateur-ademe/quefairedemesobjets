@@ -21,12 +21,49 @@ const capacity = (modele: Modele, verb: "corriger" | "reporter" | "supprimer") =
 
 export function ChampsCell({ ligne }: { ligne: Ligne }) {
   return (
-    <span className="champs">
-      {ligne.champs.map((champ) => (
-        <span key={champ} className="champ">
-          {champ}
-        </span>
-      ))}
+    <>
+      <span className="champs">
+        {ligne.champs.map((champ) => (
+          <span key={champ} className="champ">
+            {champ}
+          </span>
+        ))}
+      </span>
+      {ligne.cible && <CibleInfo cible={ligne.cible} />}
+    </>
+  )
+}
+
+/** Acteur of a ligne, when the groupe gathers several acteurs. */
+export function CibleInfo({ cible }: { cible: NonNullable<Ligne["cible"]> }) {
+  const links: [string, string | null | undefined][] = [
+    ["importé", cible.admin_urls.importe],
+    ["affiché", cible.admin_urls.affiche],
+    ["corrigé", cible.admin_urls.corrige],
+    ["parent", cible.admin_urls.parent],
+  ]
+  return (
+    <span className="cible">
+      <span className="nom">{cible.nom || "—"}</span>
+      <span className="sub mono">{cible.identifiant_unique}</span>
+      {cible.ville && <span className="sub">{cible.ville}</span>}
+      <span className="glinks">
+        {links.map(
+          ([label, href]) =>
+            href && (
+              <a
+                key={label}
+                className="lk"
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {label}
+              </a>
+            ),
+        )}
+      </span>
     </span>
   )
 }
@@ -488,15 +525,28 @@ export function LigneActionCell({
   ligne: Ligne
   actions: GroupeActions
 }) {
-  const run = (action: "validate" | "resubmit") => (event: React.MouseEvent) => {
-    event.stopPropagation()
-    actions.decideLignes(groupe, [ligne.key], action).catch(() => {})
-  }
+  const run =
+    (action: "validate" | "reject" | "resubmit") => (event: React.MouseEvent) => {
+      event.stopPropagation()
+      actions.decideLignes(groupe, [ligne.key], action).catch(() => {})
+    }
   if (ligne.capacites.valider) {
     return (
-      <WaButton size="small" variant="success" onClick={run("validate")}>
-        Valider la ligne
-      </WaButton>
+      <span className="lact">
+        {ligne.capacites.refuser && (
+          <WaButton
+            size="small"
+            variant="danger"
+            appearance="outlined"
+            onClick={run("reject")}
+          >
+            Refuser la ligne
+          </WaButton>
+        )}
+        <WaButton size="small" variant="success" onClick={run("validate")}>
+          Valider la ligne
+        </WaButton>
+      </span>
     )
   }
   if (ligne.capacites.remettre_groupe_a_valider) {
