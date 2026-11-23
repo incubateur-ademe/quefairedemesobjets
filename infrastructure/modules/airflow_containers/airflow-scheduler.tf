@@ -56,6 +56,7 @@ resource "scaleway_container" "airflow_scheduler" {
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     AIRFLOW_CONN_SCALEWAYLOGS               = var.AIRFLOW_CONN_SCALEWAYLOGS
+    AIRFLOW_CONN_S3DATA                     = var.AIRFLOW_CONN_S3DATA
     AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
     AIRFLOW_METADATA_DB_URL                 = var.AIRFLOW_METADATA_DB_URL
     DATABASE_URL                            = var.DATABASE_URL

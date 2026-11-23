@@ -77,5 +77,6 @@ resource "scaleway_container" "airflow_webserver" {
     DB_WAREHOUSE                        = var.DB_WAREHOUSE
     AIRFLOW_CONN_WEBAPP_DB              = var.AIRFLOW_CONN_WEBAPP_DB
     AIRFLOW_CONN_SCALEWAYLOGS           = var.AIRFLOW_CONN_SCALEWAYLOGS
+    AIRFLOW_CONN_S3DATA                 = var.AIRFLOW_CONN_S3DATA
   }
 }

@@ -170,6 +170,16 @@ variable "AIRFLOW_CONN_SCALEWAYLOGS" {
   type      = string
   sensitive = true
 }
+variable "AIRFLOW_CONN_S3DATA" {
+  description = "Airflow connection `s3data`: buckets read and written by the DAGs (open data export, source files)"
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = var.AIRFLOW_CONN_S3DATA != ""
+    error_message = "AIRFLOW_CONN_S3DATA is empty: is it set in the secret of the stack?"
+  }
+}
 variable "AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP" {
   type = string
 }
