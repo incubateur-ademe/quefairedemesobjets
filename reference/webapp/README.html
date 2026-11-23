@@ -369,9 +369,9 @@
 <h2>Overall structure<a class="headerlink" href="#overall-structure" title="Lien vers cette rubrique">¶</a></h2>
 <section id="django-and-apps">
 <h3>Django and apps<a class="headerlink" href="#django-and-apps" title="Lien vers cette rubrique">¶</a></h3>
-<p>The backend is a <strong>Django</strong> project whose central configuration lives in <code class="docutils literal notranslate"><span class="pre">core/</span></code> (settings, URLs, templatetags, context processors). Business logic is split across several <strong>Django applications</strong>:</p>
+<p>The backend is a <strong>Django</strong> project whose settings live in <code class="docutils literal notranslate"><span class="pre">settings/</span></code> (<code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">airflow</span></code>). Shared URLs, WSGI, templatetags and context processors live in <code class="docutils literal notranslate"><span class="pre">core/</span></code>. Business logic is split across several <strong>Django applications</strong>:</p>
 <ul class="simple">
-<li><p><strong>core</strong> — Configuration, URLs, shared templatetags and context processors</p></li>
+<li><p><strong>core</strong> — URLs, WSGI, shared templatetags and context processors</p></li>
 <li><p><strong>qfdmo</strong> — Core business (models, views, forms of the main tool)</p></li>
 <li><p><strong>qfdmd</strong> — CMS and content (pages, middleware, multi‑site integration)</p></li>
 <li><p><strong>infotri</strong> — Infotri module (configurator, dedicated forms)</p></li>
@@ -435,7 +435,7 @@
 </ul>
 </li>
 </ul>
-<p>DAG / Airflow Python tests live in <strong><code class="docutils literal notranslate"><span class="pre">data-platform/</span></code></strong>: run <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--group</span> <span class="pre">dev</span> <span class="pre">--group</span> <span class="pre">notebook</span></code> from root, then <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">dags-test</span></code>.</p>
+<p>DAG / Airflow Python tests live in <strong><code class="docutils literal notranslate"><span class="pre">data-platform/dags/tests</span></code></strong>: from the repo root, run <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--all-packages</span> <span class="pre">--group</span> <span class="pre">dev</span></code>, then <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-C</span> <span class="pre">data-platform</span> <span class="pre">dags-test</span></code> (or <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">data-platform-dags-test</span></code>).</p>
 <section id="running-e2e-tests-locally">
 <h4>Running E2E tests locally<a class="headerlink" href="#running-e2e-tests-locally" title="Lien vers cette rubrique">¶</a></h4>
 <p>E2E tests run against a dedicated <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database (kept separate from your

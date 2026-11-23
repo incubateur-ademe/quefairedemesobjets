@@ -371,7 +371,6 @@
 <li><p>Installer et configurer le client Scalingo en suivant <a class="reference external" href="https://doc.scalingo.com/platform/cli/start">les instructions de Scalingo</a></p></li>
 <li><p><a class="reference external" href="https://opentofu.org/docs/intro/install/">OpenTofu</a> et <a class="reference external" href="https://terragrunt.gruntwork.io/docs/getting-started/install/">Terragrunt</a></p></li>
 </ul>
-<p>Conseil: utiliser <code class="docutils literal notranslate"><span class="pre">asdf</span></code> ou <code class="docutils literal notranslate"><span class="pre">mise</span></code> pour la gestion des environnements virtuel <code class="docutils literal notranslate"><span class="pre">node</span></code> et <code class="docutils literal notranslate"><span class="pre">python</span></code></p>
 <p>⚠️ L’accès à la plateforme Scaleway est nécessaire pour exécuter la copie de la base de données de production en local</p>
 <section id="specificite-d-installation-pour-les-processeurs-mx-de-mac">
 <h4>Spécificité d’installation pour les processeurs Mx de Mac<a class="headerlink" href="#specificite-d-installation-pour-les-processeurs-mx-de-mac" title="Lien vers cette rubrique">¶</a></h4>
@@ -389,8 +388,7 @@
 <li><p>Typescript</p></li>
 <li><p>Parcel</p></li>
 <li><p>DSFR</p></li>
-<li><p>Honcho</p></li>
-<li><p>Whitnoise</p></li>
+<li><p>Whitenoise</p></li>
 <li><p>Tailwind</p></li>
 <li><p>nginx</p></li>
 </ul>
@@ -438,7 +436,7 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">lvao-webapp-db</span></code> (PostGIS, port <code class="docutils literal notranslate"><span class="pre">WEBAPP_DB_PORT</span></code>, 6543 par défaut, à définir dans le <code class="docutils literal notranslate"><span class="pre">.env</span></code> racine), <code class="docutils literal notranslate"><span class="pre">lvao-warehouse-db</span></code> (8765), nginx local SSL (<code class="docutils literal notranslate"><span class="pre">nginx-local-only/</span></code> + mkcert, domaine <code class="docutils literal notranslate"><span class="pre">quefairedemesdechets.ademe.local</span></code>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">airflow</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">airflow-db</span></code> (7654), <code class="docutils literal notranslate"><span class="pre">airflow-webserver</span></code> (8080), <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> (12 G RAM), <code class="docutils literal notranslate"><span class="pre">airflow-dag-processor</span></code> (8082).</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lvao-webapp-db</span></code>, <code class="docutils literal notranslate"><span class="pre">lvao-warehouse-db</span></code> (8765), <code class="docutils literal notranslate"><span class="pre">airflow-db</span></code> (7654), <code class="docutils literal notranslate"><span class="pre">airflow-webserver</span></code> (8080), <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> (12 G RAM), <code class="docutils literal notranslate"><span class="pre">airflow-dag-processor</span></code> (8082).</p></td>
 </tr>
 </tbody>
 </table>
@@ -449,29 +447,33 @@
 </section>
 <section id="installation-rapide">
 <h2>Installation rapide<a class="headerlink" href="#installation-rapide" title="Lien vers cette rubrique">¶</a></h2>
-<p>la commande <code class="docutils literal notranslate"><span class="pre">init-dev</span></code> installe tout l’environnement Webapp et plateforme data</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>init-dev
-</pre></div>
-</div>
-<section id="lancement-de-la-webapp-et-de-la-plateforme-data">
-<h3>Lancement de la webapp et de la plateforme data<a class="headerlink" href="#lancement-de-la-webapp-et-de-la-plateforme-data" title="Lien vers cette rubrique">¶</a></h3>
-<p>Modifier le fichier <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>, ajouter les lignes</p>
+<p>Enchaîner les commandes suivantes depuis la <strong>racine du repo</strong> (détail dans les sections ci-dessous).</p>
+<p>Modifier <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> :</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0.0.1</span>       <span class="n">lvao</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
 <span class="mf">127.0.0.1</span>       <span class="n">quefairedemesdechets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
 <span class="mf">127.0.0.1</span>       <span class="n">quefairedemesobjets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
 </pre></div>
 </div>
-<p>Copier la base de données de prod</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>db-restore-local-from-prod
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>webapp/.env.template<span class="w"> </span>webapp/.env
+cp<span class="w"> </span>data-platform/dags/.env.template<span class="w"> </span>data-platform/dags/.env
+uv<span class="w"> </span>sync<span class="w"> </span>--all-packages<span class="w"> </span>--all-groups
+npm<span class="w"> </span>ci
+make<span class="w"> </span>init-certs
+docker<span class="w"> </span>compose<span class="w"> </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
+make<span class="w"> </span>run-airflow
+make<span class="w"> </span>db-restore-local-from-prod<span class="w">   </span><span class="c1"># optionnel, accès Scaleway requis</span>
 </pre></div>
 </div>
-<p>Lancer l’application</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>run-all
+<p>Puis, dans un terminal depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>runserver
 </pre></div>
 </div>
-<p>la webapp est accessible à l’adresse <a class="reference external" href="https://quefairedemesobjets.ademe.local/">quefairedemesobjets.ademe.local</a>
-la plateforme data est accessible à l’adresse <a class="reference external" href="http://localhost:8080">http://localhost:8080</a></p>
-</section>
+<p>Dans un autre terminal, toujours depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span>watch
+</pre></div>
+</div>
+<p>La webapp est accessible à <a class="reference external" href="https://quefairedemesobjets.ademe.local/">quefairedemesobjets.ademe.local</a> (derrière nginx local si le profil <code class="docutils literal notranslate"><span class="pre">lvao</span></code> est actif).
+La plateforme data est accessible à <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> (identifiant / mot de passe : airflow / airflow).</p>
 </section>
 <section id="installation-de-la-webapp-uniquement">
 <h2>Installation de la Webapp uniquement<a class="headerlink" href="#installation-de-la-webapp-uniquement" title="Lien vers cette rubrique">¶</a></h2>
@@ -486,20 +488,22 @@ la plateforme data est accessible à l’adresse <a class="reference external" h
 </section>
 <section id="installation-execution">
 <h3>Installation &amp; Exécution<a class="headerlink" href="#installation-execution" title="Lien vers cette rubrique">¶</a></h3>
-<p>Configuration des variables d’environnement: ajouter (ou mettre à jour si existant)</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>.env.template<span class="w"> </span>.env
+<p>Configuration des variables d’environnement (ajouter ou mettre à jour) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>webapp/.env.template<span class="w"> </span>webapp/.env
 </pre></div>
 </div>
-<p>Modifier les variables dans le fichier .env si nécessaire</p>
-<p>Générer les certificats utilisé par nginx</p>
-<p>make init-certs</p>
+<p>Modifier les variables dans <code class="docutils literal notranslate"><span class="pre">webapp/.env</span></code> si nécessaire.</p>
+<p>Générer les certificats utilisés par nginx (depuis la racine du repo) :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>init-certs
+</pre></div>
+</div>
 <p>Les bases de données <code class="docutils literal notranslate"><span class="pre">Postgres</span> <span class="pre">+</span> <span class="pre">Postgis</span></code> sont executées et mises à disposition par le gestionnaire de conteneur Docker</p>
 <p>Pour lancer uniquement les services utiliser par la webapp</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>compose<span class="w">  </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
 </pre></div>
 </div>
 <p>Installation des dépendances Python et JavaScript (depuis la racine du repo) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-groups
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>--group<span class="w"> </span>webapp-dev
 npm<span class="w"> </span>ci
 </pre></div>
 </div>
@@ -592,8 +596,8 @@ make<span class="w"> </span>e2e-test-ui
 <section id="tester-la-plateforme-data">
 <h3>Tester la plateforme Data<a class="headerlink" href="#tester-la-plateforme-data" title="Lien vers cette rubrique">¶</a></h3>
 <p>Tests Python des DAGs (pytest), depuis la racine du repo :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>--group<span class="w"> </span>notebook
-<span class="nb">cd</span><span class="w"> </span>data-platform<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>dags-test
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-packages<span class="w"> </span>--group<span class="w"> </span>dev
+make<span class="w"> </span>-C<span class="w"> </span>data-platform<span class="w"> </span>dags-test
 </pre></div>
 </div>
 </section>
@@ -665,10 +669,7 @@ make<span class="w"> </span>e2e-test-ui
 </ul>
 </li>
 <li><a class="reference internal" href="#profiles-docker-compose">Profiles Docker Compose</a></li>
-<li><a class="reference internal" href="#installation-rapide">Installation rapide</a><ul>
-<li><a class="reference internal" href="#lancement-de-la-webapp-et-de-la-plateforme-data">Lancement de la webapp et de la plateforme data</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#installation-rapide">Installation rapide</a></li>
 <li><a class="reference internal" href="#installation-de-la-webapp-uniquement">Installation de la Webapp uniquement</a><ul>
 <li><a class="reference internal" href="#configuration">Configuration</a></li>
 <li><a class="reference internal" href="#installation-execution">Installation &amp; Exécution</a></li>
