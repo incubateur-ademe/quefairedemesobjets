@@ -35,12 +35,11 @@ FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS scheduler
 
 USER root
 
-# unzip for Airflow DAG
-# upgrade: the base image ships outdated Debian packages and docker CLI (Trivy)
+# unzip and osm2pgsql for Airflow DAG
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
-    curl gdal-bin jq unzip \
+    curl gdal-bin jq unzip osm2pgsql \
     && rm -rf /var/lib/apt/lists/*
 
 # The base image installs its own Airflow in a venv at /home/airflow/.local.

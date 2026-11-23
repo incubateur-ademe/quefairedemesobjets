@@ -75,6 +75,7 @@ class TAGS:
     OCAD3E: str = "ocad3e"  # OCA
     OPENDATA: str = "opendata"
     ORDRE_PHARMACIENS: str = "ordre.pharmacien.fr"  # endpoint
+    OSM: str = "openstreetmap"
     PA: str = "PA"  # fillière Pile et Accumulateurs
     PCHIM: str = "PCHIM"  # Fillière PCHIM
     PHARMACIES: str = "pharmacies"  # fédération
