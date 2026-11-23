@@ -67,6 +67,7 @@ COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/search/ /opt/airflow/webapp/search/
 COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/settings/ /opt/airflow/webapp/settings/
 COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/stats/ /opt/airflow/webapp/stats/
 COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/assistant/ /opt/airflow/webapp/assistant/
+COPY --chown=${AIRFLOW_UID:-50000}:0 webapp/opendata/ /opt/airflow/webapp/opendata/
 
 WORKDIR /opt/airflow
 COPY ./data-platform/dags /opt/airflow/dags
