@@ -47,6 +47,7 @@ COPY webapp/search/ /webapp/search/
 COPY webapp/settings/ /webapp/settings/
 COPY webapp/stats/ /webapp/stats/
 COPY webapp/assistant/ /webapp/assistant/
+COPY webapp/opendata/ /webapp/opendata/
 COPY data-platform/dags/ /dags/
 COPY docs/reference/data-platform/ /docs/reference/data-platform/
 

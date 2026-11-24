@@ -26,8 +26,7 @@ Webapp:
 - Typescript
 - Parcel
 - DSFR
-- Honcho
-- Whitnoise
+- Whitenoise
 - Tailwind
 - nginx
 
@@ -194,6 +193,6 @@ accéder à l'interface d'Airflow en local [http://localhost:8080](http://localh
 Tests Python des DAGs (pytest), depuis la racine du repo :
 
 ```sh
-uv sync --group dev --group notebook
-cd data-platform && make dags-test
+uv sync --all-packages --group dev
+make -C data-platform dags-test
 ```
