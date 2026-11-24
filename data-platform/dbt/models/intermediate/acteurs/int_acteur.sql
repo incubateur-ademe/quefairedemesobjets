@@ -62,10 +62,11 @@ SELECT
         AS reprise,
     COALESCE(
         ra.exclusivite_de_reprisereparation,
-        a.exclusivite_de_reprisereparation
+        a.exclusivite_de_reprisereparation,
+        FALSE
     )
         AS exclusivite_de_reprisereparation,
-    COALESCE(ra.uniquement_sur_rdv, a.uniquement_sur_rdv)
+    COALESCE(ra.uniquement_sur_rdv, a.uniquement_sur_rdv, FALSE)
         AS uniquement_sur_rdv,
     {{ coalesce_empty('ra.consignes_dacces', 'a.consignes_dacces') }}
         AS consignes_dacces,
