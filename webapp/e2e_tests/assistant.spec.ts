@@ -8,24 +8,21 @@ import {
 } from "./helpers"
 
 test.describe("🤖 Assistant et Recherche", () => {
-  test("L'adresse sélectionnée est stockée dans le sessionStorage", async ({
-    page,
-  }) => {
-    // Navigate to the carte page
+  test("L'adresse sélectionnée est stockée dans le localStorage", async ({ page }) => {
     await navigateTo(page, `/dechet/lave-linge`)
     await searchOnProduitPage(page, "Auray")
 
-    // Wait for sessionStorage to be updated after selecting the address
-    // The address selection triggers an event chain: autocomplete -> state controller -> sessionStorage
+    // autocomplete -> state controller -> localStorage
     await page.waitForFunction(
-      () => window.sessionStorage.getItem("adresse") === "Auray",
-      { timeout: TIMEOUT.DEFAULT },
+      () => window.localStorage.getItem("adresse") === "Auray",
+      {
+        timeout: TIMEOUT.DEFAULT,
+      },
     )
 
-    const sessionStorage = await getSessionStorage(page)
-    expect(sessionStorage.adresse).toBe("Auray")
-    expect(sessionStorage.latitude).toContain("47.6")
-    expect(sessionStorage.longitude).toContain("-2.9")
+    const localStorage = await page.evaluate(() => ({ ...window.localStorage }))
+    expect(localStorage.latitude).toContain("47.6")
+    expect(localStorage.longitude).toContain("-2.9")
   })
 
   test("Le lien infotri pointe vers le bon URL", async ({ page }) => {

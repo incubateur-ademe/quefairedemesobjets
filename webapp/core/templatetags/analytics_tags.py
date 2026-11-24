@@ -4,11 +4,6 @@ from django.conf import settings
 register = template.Library()
 
 
-@register.inclusion_tag("ui/analytics/matomo.html")
-def matomo(id):
-    return {"matomo_url": "stats.beta.gouv.fr", "matomo_id": id}
-
-
 @register.inclusion_tag("ui/analytics/posthog_data_attributes.html", takes_context=True)
 def posthog_data_attributes(context, key):
     request = context.get("request")

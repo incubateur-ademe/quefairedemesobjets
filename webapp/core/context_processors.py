@@ -70,7 +70,6 @@ def global_context(request) -> dict:
         "assistant": {
             "is_home": request.path == reverse("qfdmd:home"),
             "POSTHOG_KEY": settings.ASSISTANT["POSTHOG_KEY"],
-            "MATOMO_ID": settings.ASSISTANT["MATOMO_ID"],
             "header_search_form": header_search_form,
             "homepage_search_form": homepage_search_form,
         },
@@ -78,7 +77,6 @@ def global_context(request) -> dict:
             "DECLARATION_ACCESSIBILITE_PAGE_ID": settings.CARTE[
                 "DECLARATION_ACCESSIBILITE_PAGE_ID"
             ],
-            "MATOMO_ID": settings.CARTE["MATOMO_ID"],
             **constants.CARTE,
         },
         "skiplinks": skiplinks,

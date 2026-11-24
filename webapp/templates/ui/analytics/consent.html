@@ -1,0 +1,52 @@
+{% load static %}
+{% if not iframe and settings.sites_conformes_content_manager.CustomScriptsSettings.use_tarteaucitron %}
+<link rel="stylesheet" href="{% static 'css/tac.css' %}">
+<script>var tarteaucitronForceExpire = 183;</script>
+<script src="{% static 'lib/tarteaucitronjs/tarteaucitron.js' %}"></script>
+<script src="{% static 'lib/tarteaucitronjs/lang/tarteaucitron.fr.js' %}"></script>
+<script>
+  {# Sec-Fetch-Dest is missing on some browsers, so the server can render this inside an iframe. #}
+  if (window.self === window.top) {
+    {# The analytics controller reacts to the posthogqf_allowed / posthogqf_disallowed events. #}
+    tarteaucitron.services.posthogqf = {
+      key: "posthogqf",
+      type: "analytic",
+      name: "PostHog",
+      uri: "https://posthog.com/privacy",
+      needConsent: true,
+      cookies: ["ph_{{ assistant.POSTHOG_KEY }}_posthog"],
+      js: function () {},
+      fallback: function () {},
+    };
+    tarteaucitron.init({
+      privacyUrl: "/donnees-personnelles/",
+      bodyPosition: "top",
+      hashtag: "#consentement",
+      cookieName: "tarteaucitron",
+      orientation: "bottom",
+      groupServices: false,
+      showDetailsOnClick: true,
+      serviceDefaultState: "wait",
+      showAlertSmall: false,
+      cookieslist: false,
+      closePopup: false,
+      showIcon: false,
+      adblocker: false,
+      DenyAllCta: true,
+      AcceptAllCta: true,
+      highPrivacy: true,
+      handleBrowserDNTRequest: false,
+      removeCredit: true,
+      moreInfoLink: true,
+      {# Both files are served with hashed names only: tarteaucitron must not inject them itself. #}
+      useExternalCss: true,
+      useExternalJs: true,
+      mandatory: true,
+      mandatoryCta: false,
+      googleConsentMode: false,
+      partnersList: false,
+    });
+    (tarteaucitron.job = tarteaucitron.job || []).push("posthogqf");
+  }
+</script>
+{% endif %}

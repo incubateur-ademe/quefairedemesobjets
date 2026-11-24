@@ -75,7 +75,7 @@ Les contrôles `pre-commit` sont la première barrière de qualité ; ils ne doi
 - Les modifications d'infrastructure passent par **OpenTofu/Terragrunt** ; relire les _plans_ avant `apply`.
 - Les variables sensibles vivent dans des `terraform.tfvars` **non versionnés** (`sensitive = true`).
 - Les secrets CI/CD vivent dans les **GitHub Environments** `preprod`/`prod` (protection sur `main`).
-- Ne **jamais** logguer un token, un secret ou une donnée personnelle en clair, ni dans Sentry, PostHog ou Matomo.
+- Ne **jamais** logguer un token, un secret ou une donnée personnelle en clair, ni dans Sentry ou PostHog.
 
 ### 8. Ne pas utiliser les données de production hors production
 
