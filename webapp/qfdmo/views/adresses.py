@@ -20,6 +20,7 @@ from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 from wagtail.query import Any
 
+from core.constants import FORMULAIRE_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 from qfdmd.models import Synonyme
 from qfdmo.constants import MAP_FORM_PREFIX
 from qfdmo.forms import MapForm, generate_form_prefix
@@ -30,7 +31,6 @@ from qfdmo.map_utils import (
 from qfdmo.models import Acteur, ActeurStatus, DisplayedActeur, RevisionActeur
 from qfdmo.models.action import get_reparer_action_id
 from qfdmo.models.geo import EPCI
-from core.constants import FORMULAIRE_MAP_CONTAINER_ID, MAP_CONTAINER_ID
 
 logger = logging.getLogger(__name__)
 
