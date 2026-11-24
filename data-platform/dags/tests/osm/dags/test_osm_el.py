@@ -62,3 +62,12 @@ class TestOsmExtractLoadDag:
         assert cleanup_task.downstream_task_ids == set()
         download_task = osm_extract_load_dag.get_task("download_osm_dataset_task")
         assert "osm_dataset_cleanup_task" not in (download_task.upstream_task_ids)
+
+    def test_cleanup_runs_even_if_upstream_fails(self):
+        # Le nettoyage doit s'exécuter même si le téléchargement ou le
+        # chargement a échoué pour ne pas laisser le dossier temporaire
+        # (créé avec delete=False) sur disque.
+        cleanup_task = osm_extract_load_dag.get_task("osm_dataset_cleanup_task")
+        # Dans Airflow 3, TriggerRule est un StrEnum : la comparaison
+        # avec sa valeur littérale tient.
+        assert cleanup_task.trigger_rule == "all_done"
