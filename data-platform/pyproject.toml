@@ -32,6 +32,7 @@ dependencies = [
 DJANGO_SETTINGS_MODULE = "settings.test"
 
 [tool.ruff]
+src = ["dags"]
 exclude = [
   ".bzr",
   ".direnv",

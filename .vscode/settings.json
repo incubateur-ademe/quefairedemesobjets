@@ -14,7 +14,7 @@
         "dbt/**/**/**/*.yml": "jinja-yaml",
     },
     "python.analysis.extraPaths": [
-        "./dags"
+        "./data-platform/dags"
     ],
     "python.analysis.typeCheckingMode": "basic",
     "[django-html]": {
