@@ -8,7 +8,7 @@ x-airflow-common: &airflow-common
   tmpfs:
     - /tmp
   env_file:
-    - ./data-platform/dags/.env
+    - ./data-platform/.env
   volumes:
     - ./data-platform/config:/opt/airflow/config
     - ./data-platform/dags:/opt/airflow/dags
@@ -140,7 +140,7 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     env_file:
-      - ./data-platform/dags/.env
+      - ./data-platform/.env
     build:
       context: .
       dockerfile: data-platform/airflow-scheduler.Dockerfile
@@ -149,7 +149,6 @@ services:
     deploy:
       resources:
         limits:
-          # TODO: read AIRFLOW_SCHEDULER_MEMORY_LIMIT from .env doesn't works
           memory: ${AIRFLOW_SCHEDULER_MEMORY_LIMIT:-12G}
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
@@ -166,7 +165,7 @@ services:
   airflow-dag-processor:
     <<: *airflow-common
     env_file:
-      - ./data-platform/dags/.env
+      - ./data-platform/.env
     build:
       context: .
       dockerfile: data-platform/airflow-dag-processor.Dockerfile

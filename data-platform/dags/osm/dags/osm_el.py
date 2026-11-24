@@ -4,9 +4,11 @@ and load a subset of the dataset into the datawarehouse.
 
 from airflow.sdk import Param, dag
 from decouple import config
-from osm.tasks.airflow_logic.config_create_task import (
+from osm.tasks.config_create import (
     osm_extract_load_config_create_task,
 )
+from osm.tasks.download_dataset import download_osm_dataset_task
+from osm.tasks.load_dataset_to_db import load_dataset_to_db_task
 from shared.config.schedules import SCHEDULES
 from shared.config.start_dates import START_DATES
 from shared.config.tags import TAGS
@@ -18,21 +20,16 @@ PARAMS = {
     "dry_run": Param(
         False,
         type="boolean",
-        description_md="""
-                🚱 Si coché, aucune tâche d'écriture ne sera effectuée.
+        description_md="""Si coché, aucune tâche d'écriture ne sera effectuée.
                 Ceci permet de tester le DAG rapidement sans peur de
                 casser quoi que ce soit (itérer plus vite)
                 (ex: pas d'écriture des suggestions en DB,
                 donc pas visible dans Django Admin).""",
     ),
-    "output_table": Param(
-        "public.osm_elements",
+    "osm_dataset_url": Param(
+        "https://download.geofabrik.de/europe/france/france-latest.osm.pbf",
         type="string",
-        description_md="""Base name of the DB table(s) to upload results to, in the
-            `public` schema of the warehouse DB. Clusters go to
-            `<output_table>_clusters`, candidate pairs to
-            `<output_table>_predictions`. Required for the post-inference
-            suggestion logic.""",
+        description_md="""URL du dataset sur le site [Geofabrik](https://download.geofabrik.de/europe/france/)""",
     ),
 }
 
@@ -52,7 +49,11 @@ PARAMS = {
 )
 def osm_extract_load():
 
-    osm_extract_load_config_create_task()
+    config = osm_extract_load_config_create_task()
+
+    osm_dataset_filepath = download_osm_dataset_task(config)
+
+    load_dataset_to_db_task(osm_dataset_filepath)
 
 
 osm_extract_load_dag = osm_extract_load()

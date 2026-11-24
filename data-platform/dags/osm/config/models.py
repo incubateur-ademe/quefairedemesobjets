@@ -1,10 +1,12 @@
 """Configuration model for OSM Extract and Load DAG"""
 
-from pydantic import field_validator, BaseModel
+from pydantic import AnyUrl, BaseModel, field_validator
 
 
 class OSMExtractLoadConfig(BaseModel):
     dry_run: bool
+
+    osm_dataset_url: AnyUrl
 
     # ---------------------------------------
     # Validation

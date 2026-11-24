@@ -22,7 +22,7 @@ local projection = 4326 -- EPSG:4326 (WGS 84 lat/lon)
 -- Table definition
 -- ---------------------------------------------------------------------------
 local t = osm2pgsql.define_table({
-    name    = "osm_elements",
+    name    = "base_osm",
     ids     = { type = "any", id_column = "osm_id", create_index = "unique", type_column = "node_type" },
     columns = {
         { column = "kind",          type = "text",  not_null = true },
