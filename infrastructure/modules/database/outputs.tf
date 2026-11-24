@@ -34,7 +34,7 @@ output "webapp_db_username" {
 
 output "webapp_db_password" {
   description = "Mot de passe de la base de données webapp"
-  value       = var.webapp_db_password
+  value       = random_password.db["webapp"].result
   sensitive   = true
 }
 
@@ -45,7 +45,7 @@ output "webapp_db_metabase_username" {
 
 output "webapp_db_metabase_password" {
   description = "Mot de passe Metabase de la base de données webapp"
-  value       = var.webapp_db_metabase_password
+  value       = random_password.db["webapp_metabase"].result
   sensitive   = true
 }
 
@@ -85,7 +85,7 @@ output "warehouse_db_username" {
 
 output "warehouse_db_password" {
   description = "Mot de passe de la base de données warehouse"
-  value       = var.warehouse_db_password
+  value       = random_password.db["warehouse"].result
   sensitive   = true
 }
 
@@ -97,7 +97,7 @@ output "warehouse_db_metabase_username" {
 
 output "warehouse_db_metabase_password" {
   description = "Mot de passe Metabase de la base de données warehouse"
-  value       = var.warehouse_db_metabase_password
+  value       = random_password.db["warehouse_metabase"].result
   sensitive   = true
 }
 
@@ -137,7 +137,7 @@ output "airflow_db_username" {
 
 output "airflow_db_password" {
   description = "Mot de passe de la base de données airflow"
-  value       = var.airflow_db_password
+  value       = random_password.db["airflow"].result
   sensitive   = true
 }
 
@@ -177,6 +177,6 @@ output "metabase_db_username" {
 
 output "metabase_db_password" {
   description = "Mot de passe de la base de données Metabase"
-  value       = var.metabase_db_password
+  value       = local.metabase_enabled ? random_password.db["metabase"].result : null
   sensitive   = true
 }
