@@ -53,7 +53,7 @@ resource "scaleway_container" "airflow_dag_processor" {
   }
   secret_environment_variables = {
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL = "https://${scaleway_container.airflow_webserver.domain_name}/execution/"
-    AIRFLOW__API_AUTH__JWT_SECRET           = var.AIRFLOW__API_AUTH__JWT_SECRET
+    AIRFLOW__API_AUTH__JWT_SECRET           = random_password.jwt_secret.result
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN     = var.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
     AIRFLOW_METADATA_DB_URL                 = var.AIRFLOW_METADATA_DB_URL
     AIRFLOW_CONN_WEBAPP_DB                  = var.AIRFLOW_CONN_WEBAPP_DB
@@ -70,7 +70,7 @@ resource "scaleway_container" "airflow_dag_processor" {
     SCW_DEFAULT_ORGANIZATION_ID             = var.organization_id
     SCW_DEFAULT_PROJECT_ID                  = var.project_id
     SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
-    SECRET_KEY                              = var.SECRET_KEY
+    SECRET_KEY                              = random_password.django_secret_key.result
     POSTHOG_PERSONAL_API_KEY                = var.POSTHOG_PERSONAL_API_KEY
   }
 }
