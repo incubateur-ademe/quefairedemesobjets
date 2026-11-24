@@ -16,6 +16,7 @@ locals {
 
 inputs = {
   critical_buckets = local.critical_buckets
+  state_bucket     = "lvao-terraform-state"
   other_buckets    = local.other_buckets
   # The open data files are published from this bucket.
   public_read_buckets = local.other_buckets

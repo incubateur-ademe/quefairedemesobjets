@@ -15,6 +15,10 @@ resource "scaleway_rdb_instance" "webapp" {
   volume_size_in_gb         = var.webapp_volume_size
   volume_type               = "sbs_15k"
   encryption_at_rest        = true
+
+  # Declared so that the endpoint is known after apply on a new instance:
+  # without it the outputs below cannot be planned from an empty state.
+  load_balancer {}
 }
 
 resource "scaleway_rdb_database" "webapp" {
@@ -108,6 +112,10 @@ resource "scaleway_rdb_instance" "warehouse" {
   volume_size_in_gb         = var.warehouse_volume_size
   volume_type               = "sbs_15k"
   encryption_at_rest        = true
+
+  # Declared so that the endpoint is known after apply on a new instance:
+  # without it the outputs below cannot be planned from an empty state.
+  load_balancer {}
 }
 
 resource "scaleway_rdb_database" "warehouse_database" {

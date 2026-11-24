@@ -51,7 +51,7 @@ dependencies {
 
 inputs = {
   # Scheduler
-  airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler:${get_env("IMAGE_TAG", "")}"
+  airflow_scheduler_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo${get_env("NAME_SUFFIX", "")}/airflow-scheduler:${get_env("IMAGE_TAG", "")}"
   airflow_scheduler_cpu_limit      = 4000
   airflow_scheduler_memory_limit   = 12288
   airflow_scheduler_min_scale      = 1
@@ -59,7 +59,7 @@ inputs = {
   airflow_scheduler_timeout        = 300
 
   # Webserver
-  airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver:${get_env("IMAGE_TAG", "")}"
+  airflow_webserver_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo${get_env("NAME_SUFFIX", "")}/airflow-webserver:${get_env("IMAGE_TAG", "")}"
   airflow_webserver_cpu_limit      = 1000
   airflow_webserver_memory_limit   = 2048
   airflow_webserver_min_scale      = 1
@@ -67,7 +67,7 @@ inputs = {
   airflow_webserver_timeout        = 300
 
   # DAG processor
-  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor:${get_env("IMAGE_TAG", "")}"
+  airflow_dag_processor_registry_image = "rg.fr-par.scw.cloud/ns-qfdmo${get_env("NAME_SUFFIX", "")}/airflow-dag-processor:${get_env("IMAGE_TAG", "")}"
   airflow_dag_processor_cpu_limit      = 1000
   airflow_dag_processor_memory_limit   = 1024
   airflow_dag_processor_min_scale      = 1
