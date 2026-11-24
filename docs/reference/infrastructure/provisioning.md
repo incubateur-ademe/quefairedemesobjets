@@ -114,12 +114,14 @@ For each command, the environment must be specified.
 
 #### Stacks deployed by the CI
 
-`airflow_containers` and `nginx_containers` are applied by the CI on every deployment, with the image tag passed as `IMAGE_TAG` (see [CI/CD](ci-cd.md)). To apply one by hand without changing the image, pass the tag running now, and check that no deployment is in progress:
+`airflow_containers` and `nginx_containers` are applied by the CI on every deployment, with the image tag passed as `IMAGE_TAG` (see [CI/CD](ci-cd.md)). To plan or apply one by hand without changing the image, check that no deployment is in progress, then:
 
 ```sh
-cd infrastructure/environments/<ENV>/airflow_containers
-IMAGE_TAG=$(terragrunt output -raw registry_image | sed 's/.*://') terragrunt apply
+make -C infrastructure live-plan ENV=<ENV> STACK=airflow_containers
+make -C infrastructure live-apply ENV=<ENV> STACK=airflow_containers
 ```
+
+These pass as `IMAGE_TAG` the tag of the container running now, read from Scaleway. The `registry_image` output comes from the state, which lags behind an image deployed outside Terragrunt.
 
 Without `IMAGE_TAG` the plan fails instead of deploying a placeholder image.
 
