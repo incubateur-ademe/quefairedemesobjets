@@ -911,7 +911,6 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "shapely" },
     { name = "shortuuid" },
-    { name = "tqdm" },
     { name = "unidecode" },
     { name = "webapp-quefairedemesobjetsetdechets" },
 ]
@@ -936,7 +935,6 @@ requires-dist = [
     { name = "scikit-learn", specifier = "==1.9.0" },
     { name = "shapely", specifier = ">=2.0.0" },
     { name = "shortuuid", specifier = ">=1.0.13,<2" },
-    { name = "tqdm", specifier = ">=4.69.0" },
     { name = "unidecode", specifier = ">=1.4.0,<2" },
     { name = "webapp-quefairedemesobjetsetdechets", editable = "webapp" },
 ]

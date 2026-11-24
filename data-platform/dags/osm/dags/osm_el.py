@@ -4,6 +4,7 @@ and load a subset of the dataset into the datawarehouse.
 
 from airflow.sdk import Param, dag
 from decouple import config
+from osm.tasks.cleanup import osm_dataset_cleanup_task
 from osm.tasks.config_create import (
     osm_extract_load_config_create_task,
 )
@@ -53,10 +54,17 @@ def osm_extract_load():
 
     osm_dataset_filepath = download_osm_dataset_task(config)
 
-    load_dataset_to_db_task(osm_dataset_filepath)
+    load_dataset_to_db_task(osm_dataset_filepath) >> osm_dataset_cleanup_task(
+        osm_dataset_filepath
+    )
 
 
 osm_extract_load_dag = osm_extract_load()
 
 if __name__ == "__main__":
-    osm_extract_load_dag.test()
+    osm_extract_load_dag.test(
+        run_conf={
+            "dry_run": False,
+            "osm_dataset_url": "https://download.geofabrik.de/europe/france/guyane/guyane-latest.osm.pbf",
+        }
+    )

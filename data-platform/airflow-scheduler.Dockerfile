@@ -36,10 +36,16 @@ FROM apache/airflow:slim-${AIRFLOW_VERSION}-python3.12 AS scheduler
 USER root
 
 # unzip and osm2pgsql for Airflow DAG
+# osm2pgsql >= 2.0 (needed for ids.create_index "unique") is backported to
+# Debian 12; bookworm main still ships 1.8.0.
 RUN apt-get update \
     && apt-get upgrade -y \
+    && echo "deb http://deb.debian.org/debian bookworm-backports main" \
+        > /etc/apt/sources.list.d/bookworm-backports.list \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
-    curl gdal-bin jq unzip osm2pgsql \
+        curl gdal-bin jq unzip \
+    && apt-get install -y --no-install-recommends -t bookworm-backports osm2pgsql \
     && rm -rf /var/lib/apt/lists/*
 
 # The base image installs its own Airflow in a venv at /home/airflow/.local.

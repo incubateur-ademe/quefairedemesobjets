@@ -13,8 +13,8 @@ def task_info_get():
 
 
 OSM2PGSQL_CONFIG_FILEPATH = (
-    Path(__file__).parent / "config" / "osm_2_pgsql.lua"
-).absolute()
+    Path(__file__).parent.parent / "config" / "osm_2_pgsql.lua"
+).absolute()  # The LUA file lives in the config path
 WAREHOUSE_CON_INFO = conninfo.conninfo_to_dict(os.environ["DB_WAREHOUSE"])
 
 
@@ -33,7 +33,7 @@ def load_dataset_to_db_task(
 ) -> str:
 
     bash_command = (
-        "osm2pgsql --create --output=flex --schema public -S "
+        "osm2pgsql --create --output=flex -S "
         f"{OSM2PGSQL_CONFIG_FILEPATH} {osm_filepath}"
     )
 
