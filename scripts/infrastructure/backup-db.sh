@@ -48,7 +48,8 @@ download_backup() {
 }
 
 # Récupérer l'ID de l'instance
-INSTANCE_ID=$(scw rdb instance list | grep "lvao-${ENV}-webapp" | awk '{print $1}')
+PROJECT_ID=$(scw account project list name=qfdmod-prod -o template='{{.ID}}')
+INSTANCE_ID=$(scw rdb instance list name=lvao-${ENV}-webapp project-id=$PROJECT_ID -o template='{{.ID}}')
 TODAY=$(date +%Y%m%d)
 EXISTING_BACKUPS=$(scw rdb backup list instance-id=$INSTANCE_ID | grep "$TODAY")
 
