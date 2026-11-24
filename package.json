@@ -11,7 +11,7 @@
     "webapp/revue-front"
   ],
   "devDependencies": {
-    "prettier": "^3.9.10"
+    "prettier": "^3.10.1"
   },
   "overrides": {
     "@swc/core": "1.16.2",
