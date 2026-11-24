@@ -16,8 +16,33 @@ concurrency:
   cancel-in-progress: ${{ github.run_attempt == '1' }}
 
 # Deployments do not wait for CI: a failed check must not stop preprod. The release
-# waits for all of it.
+# waits for all of it, except for a hotfix.
 jobs:
+  # A hotfix is a merged pull request labeled `hotfix` (or a run dispatched
+  # from a branch named after one): its draft release is written at once.
+  # When the pull request cannot be read, the run is not a hotfix.
+  hotfix:
+    name: 🚑 Hotfix?
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      hotfix: ${{ steps.label.outputs.hotfix }}
+    steps:
+      - name: Read the labels of the merged pull request
+        id: label
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          LABELS=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '.[].labels[].name') || LABELS=""
+          if grep -qx hotfix <<<"$LABELS" || [[ "$REF_NAME" == *hotfix* ]]; then
+            echo "hotfix=true" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Hotfix::the draft release is written without waiting for CI nor preprod"
+          fi
+
   ci_webapp:
     name: 🌐 Webapp
     uses: ./.github/workflows/ci-webapp.yml
@@ -68,6 +93,7 @@ jobs:
     # <<: *release_drafter
     needs:
       [
+        hotfix,
         ci_webapp,
         ci_data_platform,
         ci_revue,
@@ -87,12 +113,15 @@ jobs:
           config-name: release-config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    if: ${{ !contains( github.ref_name, 'hotfix') }}
+    if: ${{ needs.hotfix.outputs.hotfix != 'true' }}
     outputs:
       tag_name: ${{ steps.release-drafter.outputs.tag_name }}
 
-  # Hotfix-only release draft update
+  # Hotfix-only release draft update: neither CI nor the deployments to
+  # preprod are awaited, they go on in parallel. The job above is then skipped,
+  # so that it cannot open a new draft once the hotfix release is published.
   update_release_draft_for_hotfix:
+    needs: [hotfix]
     # Uncomment when anchor are supported in GitHub Actions
     # See : https://github.com/actions/runner/issues/1182
     # <<: *release_drafter
@@ -106,4 +135,4 @@ jobs:
           config-name: release-config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    if: ${{ contains( github.ref_name, 'hotfix') }}
+    if: ${{ needs.hotfix.outputs.hotfix == 'true' }}
