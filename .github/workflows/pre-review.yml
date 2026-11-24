@@ -1,0 +1,42 @@
+name: 🤖 Pre-review
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  pre_review:
+    name: 🤖 Pre-review
+    # Pull requests from forks get no secrets, so they are skipped.
+    if: >-
+      github.event.label.name == 'review' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Review with PR-Agent on Albert API
+        # Release tags of this image are immutable, the digest guards against a retag.
+        uses: docker://pragent/pr-agent:0.50.0-github_action@sha256:548e894a88071180832b2f4233f734d0acd0db1a879e2fcbaa70bac8b8372ebe
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OPENAI_KEY: ${{ secrets.ALBERT_API_KEY }}
+          OPENAI__API_BASE: https://albert.api.etalab.gouv.fr/v1
+          CONFIG__MODEL: openai/deepseek-v4-flash
+          CONFIG__FALLBACK_MODELS: '["openai/gpt-oss-120b"]'
+          # PR-Agent does not know these models: without this it cannot size its prompts.
+          CONFIG__CUSTOM_MODEL_MAX_TOKENS: 64000
+          CONFIG__MAX_MODEL_TOKENS: 64000
+          CONFIG__RESPONSE_LANGUAGE: fr-FR
+          GITHUB_ACTION_CONFIG__PR_ACTIONS: '["labeled"]'
+          GITHUB_ACTION_CONFIG__AUTO_REVIEW: "true"
+          # PR-Agent rewrites the pull request description by default.
+          GITHUB_ACTION_CONFIG__AUTO_DESCRIBE: "false"
+          GITHUB_ACTION_CONFIG__AUTO_IMPROVE: "false"
+          # PR-Agent creates and sets "Review effort" and security labels by default.
+          PR_REVIEWER__ENABLE_REVIEW_LABELS_EFFORT: "false"
+          PR_REVIEWER__ENABLE_REVIEW_LABELS_SECURITY: "false"
