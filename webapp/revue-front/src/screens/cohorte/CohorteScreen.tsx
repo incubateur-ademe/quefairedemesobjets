@@ -175,11 +175,11 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
   )
 
   // Tabs of the modal allowed by the policy, the first one being the default
-  const onglets = cohorte.data?.policy.onglets ?? []
-  const modalGroupeId = search.groupe && onglets.length ? Number(search.groupe) : null
-  const modalTab = onglets.find((tab) => tab === search.onglet) ?? onglets[0]
-  const ongletParam = (tab: ModalTab) => (tab === onglets[0] ? undefined : tab)
-  const openModal = (groupe: Groupe, tab: ModalTab = onglets[0]) => {
+  const tabs = cohorte.data?.policy.tabs ?? []
+  const modalGroupeId = search.groupe && tabs.length ? Number(search.groupe) : null
+  const modalTab = tabs.find((tab) => tab === search.onglet) ?? tabs[0]
+  const ongletParam = (tab: ModalTab) => (tab === tabs[0] ? undefined : tab)
+  const openModal = (groupe: Groupe, tab: ModalTab = tabs[0]) => {
     if (tab) {
       setSearch({ groupe: String(groupe.id), onglet: ongletParam(tab) })
     }
@@ -265,7 +265,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
               { value: "groupes", label: "Groupes", count: totaux?.groupes },
               { value: "lignes", label: "Lignes", count: totaux?.lignes },
             ]}
-            onChange={(vue) => setListSearch({ vue, par_page: undefined })}
+            onChange={(vue) => setListSearch({ vue, page_size: undefined })}
           />
           <Segmented
             label="Afficher"
@@ -305,7 +305,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
             unit={state.vue}
             sizes={PAGE_SIZES[state.vue]}
             value={state.pageSize}
-            onChange={(size) => setListSearch({ par_page: String(size) })}
+            onChange={(size) => setListSearch({ page_size: String(size) })}
           />
           <span className="spacer" />
           {(current.isFetching || stats.isFetching) && <WaSpinner />}

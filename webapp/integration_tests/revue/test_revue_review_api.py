@@ -599,7 +599,9 @@ class TestCorrections:
         assert "email" in error["errors"]
 
     def test_report_every_ligne_to_the_parent(self, client, groupe):
-        status, body = post(client, f"/groupes/{groupe.id}/report", {"cible": "parent"})
+        status, body = post(
+            client, f"/groupes/{groupe.id}/report", {"target": "parent"}
+        )
 
         assert status == 200
         for ligne in body["lignes"]:
@@ -627,7 +629,7 @@ class TestCorrections:
         status, body = post(
             client,
             f"/groupes/{groupe.id}/report",
-            {"cible": "correction", "champs": [["label_codes"], ["source_code"]]},
+            {"target": "correction", "champs": [["label_codes"], ["source_code"]]},
         )
 
         assert status == 200
@@ -660,7 +662,7 @@ class TestCorrections:
 
         for champ in ("nom_commercial", "adresse_complement"):
             status, body = post(
-                client, f"/groupes/{groupe.id}/restaurer", {"champs": [[champ]]}
+                client, f"/groupes/{groupe.id}/restore", {"champs": [[champ]]}
             )
             assert status == 200
 
@@ -671,13 +673,68 @@ class TestCorrections:
         assert lignes[("adresse_complement",)]["correction"]["propose"] == {
             "adresse_complement": "__empty__"
         }
-        assert lignes[("nom_commercial",)]["capacites"]["restaurer_correction"]
+        assert lignes[("nom_commercial",)]["capacites"]["restore_correction"]
+
+    def _suggest(self, groupe, champs, valeurs):
+        groupe.suggestion_unitaires.filter(champs=champs).delete()
+        SuggestionUnitaire.objects.create(
+            suggestion_groupe=groupe,
+            suggestion_modele="Acteur",
+            champs=champs,
+            valeurs=valeurs,
+            acteur_id=groupe.acteur_id,
+        )
+
+    def test_empty_the_correction_of_a_text_field(self, client, groupe):
+        """« ✕ »: correction « __empty__ » for the text fields only."""
+        self._suggest(groupe, ["nom_commercial"], ["suggéré"])
+        self._suggest(groupe, ["latitude", "longitude"], ["45.7", "4.8"])
+        _, body = get(client, f"/groupes/{groupe.id}")
+        lignes = {tuple(ligne["champs"]): ligne for ligne in body["lignes"]}
+        assert lignes[("nom_commercial",)]["capacites"]["empty_correction"]
+        assert not lignes[("latitude", "longitude")]["capacites"]["empty_correction"]
+
+        status, body = post(
+            client, f"/groupes/{groupe.id}/empty", {"champs": [["nom_commercial"]]}
+        )
+
+        assert status == 200
+        lignes = {tuple(ligne["champs"]): ligne for ligne in body["lignes"]}
+        ligne = lignes[("nom_commercial",)]
+        assert ligne["correction"]["propose"] == {"nom_commercial": "__empty__"}
+        # Already emptied
+        assert not ligne["capacites"]["empty_correction"]
+        assert groupe.suggestion_unitaires.get(
+            suggestion_modele="RevisionActeur", champs=["nom_commercial"]
+        ).valeurs == ["__empty__"]
+
+    def test_empty_every_correction_of_the_groupe(self, client, groupe):
+        self._suggest(groupe, ["latitude", "longitude"], ["45.7", "4.8"])
+        _, body = get(client, f"/groupes/{groupe.id}")
+        emptyable = [
+            tuple(ligne["champs"])
+            for ligne in body["lignes"]
+            if ligne["capacites"]["empty_correction"]
+        ]
+        assert emptyable
+
+        status, body = post(client, f"/groupes/{groupe.id}/empty", {})
+
+        assert status == 200
+        for ligne in body["lignes"]:
+            if tuple(ligne["champs"]) in emptyable:
+                assert set(ligne["correction"]["propose"].values()) == {"__empty__"}
+        assert not any(
+            ligne["capacites"]["empty_correction"] for ligne in body["lignes"]
+        )
+        status, _ = post(client, f"/groupes/{groupe.id}/empty", {})
+        assert status == 409
 
     def test_nothing_to_correct_once_validated(self, client, groupe):
         post(client, f"/groupes/{groupe.id}/decision", {"action": "validate"})
 
         status, error = post(
-            client, f"/groupes/{groupe.id}/report", {"cible": "correction"}
+            client, f"/groupes/{groupe.id}/report", {"target": "correction"}
         )
 
         assert status == 409

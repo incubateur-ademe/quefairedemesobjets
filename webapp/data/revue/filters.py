@@ -16,10 +16,9 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
+from data.revue.errors import RevueApiError
 from django.db.models import Expression, Q
 from django.db.models.fields.json import KT
-
-from data.revue.errors import RevueApiError
 
 MAX_DEPTH = 3
 MAX_CONDITIONS = 30
@@ -47,14 +46,14 @@ class FilterContext:
     - `related`: wrappers of the conditions on related rows, by name
       (ex: "ligne" → Exists(the SuggestionUnitaire of the ligne / of the groupe)).
       A wrapper receives the condition and the annotations it needs;
-    - `par_acteur`: the lignes are also split by acteur (ReviewPolicy).
+    - `by_acteur`: the lignes are also split by acteur (ReviewPolicy).
     """
 
     prefix: str = ""
     groupe_ref: str = "pk"
     related: dict[str, Callable[[Q, dict], Q]] = field(default_factory=dict)
-    # A ligne is (acteur, champs): see ReviewPolicy.lignes_par_acteur
-    par_acteur: bool = False
+    # A ligne is (acteur, champs): see ReviewPolicy.lignes_by_acteur
+    by_acteur: bool = False
 
 
 @dataclass(frozen=True)

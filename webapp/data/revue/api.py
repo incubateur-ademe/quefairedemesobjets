@@ -56,16 +56,18 @@ from data.revue.schemas import (
     PropositionDeleteQuery,
     PropositionIn,
     ReportIn,
-    RestaurerIn,
+    RestoreIn,
     StatsOut,
     StatsQuery,
     TacheOut,
     UserOut,
+    EmptyIn,
 )
 from data.revue.services import decide_groupe, decide_lignes
 from data.revue.services import delete_proposition as delete_proposition_service
 from data.revue.services import report as report_service
-from data.revue.services import restaurer as restaurer_service
+from data.revue.services import empty as empty_service
+from data.revue.services import restore as restore_service
 from data.revue.services import upsert_proposition as upsert_proposition_service
 from data.revue.taches import cohorte_taches
 from django.http import HttpRequest, HttpResponse
@@ -198,8 +200,8 @@ def list_lignes(request: HttpRequest, cohorte_id: int, query: Query[LignesQuery]
     groupes = list(groupes_queryset().filter(id__in=groupe_ids).order_by("id"))
     return {
         "items": [
-            {"groupe_id": groupe_id, "key": ligne_key(groupe_id, champs, cible)}
-            for groupe_id, cible, champs in keys
+            {"groupe_id": groupe_id, "key": ligne_key(groupe_id, champs, target)}
+            for groupe_id, target, champs in keys
         ],
         "groupes": serialize_groupes(groupes, get_policy(cohorte.type_action)),
         "total": total,
@@ -279,15 +281,22 @@ def delete_proposition(
 @router.post("/groupes/{groupe_id}/report", response=WRITE_RESPONSES)
 def report(request: HttpRequest, groupe_id: int, payload: ReportIn):
     return report_service(
-        groupe_id, payload.cible, payload.champs, payload.expected_modifie_le
+        groupe_id, payload.target, payload.champs, payload.expected_modifie_le
     )
 
 
-@router.post("/groupes/{groupe_id}/restaurer", response=WRITE_RESPONSES)
-def restaurer(request: HttpRequest, groupe_id: int, payload: RestaurerIn):
+@router.post("/groupes/{groupe_id}/restore", response=WRITE_RESPONSES)
+def restore(request: HttpRequest, groupe_id: int, payload: RestoreIn):
     """Correction with the current value of the acteur, cancelling the suggestion
     of the source."""
-    return restaurer_service(groupe_id, payload.champs, payload.expected_modifie_le)
+    return restore_service(groupe_id, payload.champs, payload.expected_modifie_le)
+
+
+@router.post("/groupes/{groupe_id}/empty", response=WRITE_RESPONSES)
+def empty(request: HttpRequest, groupe_id: int, payload: EmptyIn):
+    """Correction emptying the value (« __empty__ ») of the lignes of text
+    fields."""
+    return empty_service(groupe_id, payload.champs, payload.expected_modifie_le)
 
 
 @router.get(

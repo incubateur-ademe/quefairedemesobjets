@@ -19,7 +19,7 @@ SUGGEST_FIELD_UPDATES = [
 ]
 
 
-def _est_parent_par_acteur(identifiants: list[str]) -> dict[str, bool]:
+def _est_parent_by_acteur(identifiants: list[str]) -> dict[str, bool]:
     """Returns a {identifiant_unique: est_parent} map for the given acteurs."""
     from qfdmo.models import VueActeur
 
@@ -76,7 +76,7 @@ def enrich_lien_succession_to_suggestion_groupes(
         return False
 
     identifiants = list(df[COLS.IDENTIFIANT_UNIQUE].unique())
-    est_parent_map = _est_parent_par_acteur(identifiants)
+    est_parent_map = _est_parent_by_acteur(identifiants)
     df = df[df[COLS.IDENTIFIANT_UNIQUE].isin(est_parent_map.keys())]
     if df.empty:
         logger.info("Aucun acteur visible correspondant, rien à suggérer")

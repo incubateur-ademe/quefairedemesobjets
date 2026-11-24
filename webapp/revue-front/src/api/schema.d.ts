@@ -503,7 +503,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  "/api/suggestions/groupes/{groupe_id}/restaurer": {
+  "/api/suggestions/groupes/{groupe_id}/restore": {
     parameters: {
       query?: never
       header?: never
@@ -513,11 +513,32 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * Restaurer
+     * Restore
      * @description Correction with the current value of the acteur, cancelling the suggestion
      *     of the source.
      */
-    post: operations["data_revue_api_restaurer"]
+    post: operations["data_revue_api_restore"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/suggestions/groupes/{groupe_id}/empty": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Empty
+     * @description Correction emptying the value (« __empty__ ») of the lignes of text
+     *     fields.
+     */
+    post: operations["data_revue_api_empty"]
     delete?: never
     options?: never
     head?: never
@@ -1096,10 +1117,10 @@ export interface components {
       shows_acteur_diff: boolean
       /** Can Restore */
       can_restore: boolean
-      /** Lignes Par Acteur */
-      lignes_par_acteur: boolean
-      /** Onglets */
-      onglets: ("localisation" | "annuaire")[]
+      /** Lignes By Acteur */
+      lignes_by_acteur: boolean
+      /** Tabs */
+      tabs: ("localisation" | "annuaire")[]
       /** Badge */
       badge: string | null
     }
@@ -1168,21 +1189,6 @@ export interface components {
        * @enum {string}
        */
       etat: "valeur" | "vide" | "pas_de_correction"
-    }
-    /**
-     * CibleOut
-     * @description Acteur of a ligne, when the groupe gathers several acteurs.
-     */
-    CibleOut: {
-      /** Identifiant Unique */
-      identifiant_unique: string
-      /** Nom */
-      nom: string
-      /** Ville */
-      ville: string
-      /** Suggestion Modele */
-      suggestion_modele: string
-      admin_urls: components["schemas"]["AdminUrlsOut"]
     }
     /** GroupeCapacitesOut */
     GroupeCapacitesOut: {
@@ -1258,8 +1264,10 @@ export interface components {
       reporter_correction: boolean
       /** Reporter Parent */
       reporter_parent: boolean
-      /** Restaurer Correction */
-      restaurer_correction: boolean
+      /** Restore Correction */
+      restore_correction: boolean
+      /** Empty Correction */
+      empty_correction: boolean
       /** Supprimer Correction */
       supprimer_correction: boolean
       /** Supprimer Parent */
@@ -1271,7 +1279,7 @@ export interface components {
       key: string
       /** Champs */
       champs: string[]
-      cible: components["schemas"]["CibleOut"] | null
+      target: components["schemas"]["TargetOut"] | null
       /** Statut */
       statut: string
       decision_par: components["schemas"]["UserOut"] | null
@@ -1290,6 +1298,30 @@ export interface components {
       nom: string
       /** Nb Enfants */
       nb_enfants: number
+    }
+    /** TargetIdentifiantOut */
+    TargetIdentifiantOut: {
+      /** Champ */
+      champ: string
+      /** Valeur */
+      valeur: string
+    }
+    /**
+     * TargetOut
+     * @description Acteur of a ligne, when the groupe gathers several acteurs.
+     */
+    TargetOut: {
+      /** Identifiant Unique */
+      identifiant_unique: string
+      /** Nom */
+      nom: string
+      /** Ville */
+      ville: string
+      /** Identifiants */
+      identifiants: components["schemas"]["TargetIdentifiantOut"][]
+      /** Suggestion Modele */
+      suggestion_modele: string
+      admin_urls: components["schemas"]["AdminUrlsOut"]
     }
     /** LignesQuery */
     LignesQuery: {
@@ -1433,7 +1465,7 @@ export interface components {
        * Source
        * @enum {string}
        */
-      source: "corrige" | "parent" | "correction" | "acteur"
+      source: "corrige" | "parent" | "correction" | "acteur" | "target"
       /** Label */
       label: string
       /** Valeur */
@@ -1529,10 +1561,10 @@ export interface components {
     /** ReportIn */
     ReportIn: {
       /**
-       * Cible
+       * Target
        * @enum {string}
        */
-      cible: "correction" | "parent"
+      target: "correction" | "parent"
       /**
        * Champs
        * @description Lignes à reporter ; absent = toutes les lignes reportables
@@ -1541,8 +1573,21 @@ export interface components {
       /** Expected Modifie Le */
       expected_modifie_le?: string | null
     }
-    /** RestaurerIn */
-    RestaurerIn: {
+    /** RestoreIn */
+    RestoreIn: {
+      /**
+       * Champs
+       * @description Lignes à corriger ; absent = toutes les lignes possibles
+       */
+      champs?: string[][] | null
+      /** Expected Modifie Le */
+      expected_modifie_le?: string | null
+    }
+    /**
+     * EmptyIn
+     * @description Lignes whose correction is emptied.
+     */
+    EmptyIn: {
       /**
        * Champs
        * @description Lignes à corriger ; absent = toutes les lignes possibles
@@ -1719,8 +1764,8 @@ export interface components {
       groupes: number
       /** Affected */
       affected: number | null
-      /** Par */
-      par: string
+      /** By */
+      by: string
       /**
        * Lancee Le
        * Format: date-time
@@ -2593,7 +2638,7 @@ export interface operations {
       }
     }
   }
-  data_revue_api_restaurer: {
+  data_revue_api_restore: {
     parameters: {
       query?: never
       header?: never
@@ -2604,7 +2649,60 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RestaurerIn"]
+        "application/json": components["schemas"]["RestoreIn"]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["GroupeOut"]
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErrorOut"]
+        }
+      }
+    }
+  }
+  data_revue_api_empty: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        groupe_id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmptyIn"]
       }
     }
     responses: {

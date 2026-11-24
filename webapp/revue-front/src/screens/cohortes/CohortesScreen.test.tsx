@@ -112,7 +112,7 @@ describe("CohortesScreen", () => {
       conditions: [{ field: "id", operator: "eq", value: 1 }],
     })
     const api = setup(
-      `/data/revue/?page=2&par_page=25&filtre=${encodeURIComponent(filtre)}`,
+      `/data/revue/?page=2&page_size=25&filtre=${encodeURIComponent(filtre)}`,
     )
     await screen.findByText("dag_1")
 

@@ -2,7 +2,7 @@
 tab and the identifiers of the Annuaire Entreprises tab."""
 
 from data.models.suggestion import SuggestionGroupe
-from data.revue.annuaire import identifiants
+from data.revue.annuaire import identifiants, target_identifiants
 from data.revue.lignes import ACTEUR, serialize_groupe
 from data.revue.policies import PARENT, REVISION, ReviewPolicy
 from data.revue.services import can_create_localisation
@@ -100,5 +100,8 @@ def serialize_groupe_detail(groupe: SuggestionGroupe, policy: ReviewPolicy) -> d
     return {
         **serialized,
         "localisation": localisation(groupe, serialized, policy),
-        "annuaire": identifiants(groupe, _displayed_acteur(groupe)),
+        # With the identifiers of the acteurs of the lignes (first column)
+        "annuaire": target_identifiants(
+            serialized["lignes"], identifiants(groupe, _displayed_acteur(groupe))
+        ),
     }

@@ -72,19 +72,19 @@ export function GroupeModal({
             active={tab}
             onWaTabShow={(event) => onTab(event.detail.name as ModalTab)}
           >
-            {policy.onglets.map((name) => (
+            {policy.tabs.map((name) => (
               <WaTab key={name} slot="nav" panel={name}>
                 {MODAL_TABS[name]}
               </WaTab>
             ))}
-            {policy.onglets.includes("localisation") && (
+            {policy.tabs.includes("localisation") && (
               <WaTabPanel name="localisation">
                 {tab === "localisation" && (
                   <LocalisationTab groupe={groupe} actions={actions} />
                 )}
               </WaTabPanel>
             )}
-            {policy.onglets.includes("annuaire") && (
+            {policy.tabs.includes("annuaire") && (
               <WaTabPanel name="annuaire">
                 <AnnuaireTab groupe={groupe} />
               </WaTabPanel>

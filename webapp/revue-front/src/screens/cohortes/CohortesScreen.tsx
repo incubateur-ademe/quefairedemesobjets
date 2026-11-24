@@ -60,7 +60,7 @@ export function CohortesScreen() {
 
   const filter = useMemo(() => parseFilterParam(search.filtre), [search.filtre])
   const page = Number(search.page) || 1
-  const pageSize = Number(search.par_page) || DEFAULT_PAGE_SIZE
+  const pageSize = Number(search.page_size) || DEFAULT_PAGE_SIZE
   const params: CohortesParams = {
     filtre: serializeFilter(filter),
     type_action: typeActionsOf(search.type),
@@ -170,7 +170,7 @@ export function CohortesScreen() {
           unit="cohortes"
           sizes={PAGE_SIZES}
           value={pageSize}
-          onChange={(size) => setListSearch({ par_page: String(size) })}
+          onChange={(size) => setListSearch({ page_size: String(size) })}
         />
         <span className="spacer" />
         {cohortes.isFetching && <WaSpinner />}

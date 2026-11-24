@@ -124,7 +124,7 @@ describe("GroupeModal", () => {
   it("only offers the tabs of the policy (SIRET: Annuaire only)", async () => {
     setup("/data/revue/cohortes/7", detail(), {
       ...COHORTE,
-      policy: { ...COHORTE.policy, onglets: ["annuaire"] },
+      policy: { ...COHORTE.policy, tabs: ["annuaire"] },
     })
     await screen.findByText("Acteur 1")
 
@@ -145,7 +145,7 @@ describe("GroupeModal", () => {
   it("opens no modal when the policy has no tab", async () => {
     setup("/data/revue/cohortes/7", detail(), {
       ...COHORTE,
-      policy: { ...COHORTE.policy, onglets: [] },
+      policy: { ...COHORTE.policy, tabs: [] },
     })
     await screen.findByText("Acteur 1")
 

@@ -8,7 +8,8 @@ import {
   ChampsCell,
   LigneActionCell,
   ReportButton,
-  RestaurerButton,
+  RestoreButton,
+  EmptyButton,
   StatutCell,
   TargetCell,
 } from "./cells/LigneCells"
@@ -59,9 +60,9 @@ const PROCESSING = ["ENCOURS", "SUCCES", "ERREUR"]
 const WITH_PROGRESS = ["AVALIDER", "ATRAITER"]
 
 /** Correction with the value of the acteur on every restorable ligne. */
-function RestaurerAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActions }) {
+function RestoreAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActions }) {
   const count = groupe.lignes.filter(
-    (ligne) => ligne.capacites.restaurer_correction,
+    (ligne) => ligne.capacites.restore_correction,
   ).length
   if (!count) {
     return null
@@ -73,11 +74,32 @@ function RestaurerAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActi
       title={`Corriger ${plural(count, "ligne")} avec la valeur initiale`}
       onClick={(event) => {
         event.stopPropagation()
-        actions.restaurer(groupe).catch(() => {})
+        actions.restore(groupe).catch(() => {})
       }}
     >
-      ↩︎
+      ‹‹
       <small>tout</small>
+    </button>
+  )
+}
+
+/** Correction emptying the value on every ligne of text fields. */
+function EmptyAll({ groupe, actions }: { groupe: Groupe; actions: GroupeActions }) {
+  const count = groupe.lignes.filter((ligne) => ligne.capacites.empty_correction).length
+  if (!count) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      className="rep all"
+      title={`Vider la correction de ${plural(count, "ligne")}`}
+      onClick={(event) => {
+        event.stopPropagation()
+        actions.empty(groupe).catch(() => {})
+      }}
+    >
+      ✕<small>tout</small>
     </button>
   )
 }
@@ -113,7 +135,7 @@ function ReportAll({
   )
 }
 
-export type ModalTab = Policy["onglets"][number]
+export type ModalTab = Policy["tabs"][number]
 
 export const MODAL_TABS: Record<ModalTab, string> = {
   localisation: "Localisation",
@@ -123,7 +145,7 @@ export const MODAL_TABS: Record<ModalTab, string> = {
 /** Class of the comparison table: when a groupe gathers several acteurs, the
  * first column (champs and acteur of the ligne) is wider. */
 export const cmpTableClass = (policy: Policy) =>
-  `tbl cmp stream${policy.lignes_par_acteur ? " par-acteur" : ""}${policy.colonne_parent ? "" : " sans-parent"}`
+  `tbl cmp stream${policy.lignes_by_acteur ? " by-acteur" : ""}${policy.colonne_parent ? "" : " sans-parent"}`
 
 export type Checkboxes = {
   isChecked: (id: string) => boolean
@@ -214,9 +236,9 @@ function GroupeHeaderRow({
           <span className="mono faint">{acteur.identifiant_unique}</span>
           <span className="muted">{acteur.ville}</span>
         </div>
-        {policy.onglets.length > 0 && (
+        {policy.tabs.length > 0 && (
           <div className="gmeta">
-            {policy.onglets.map((tab) => (
+            {policy.tabs.map((tab) => (
               <WaButton
                 key={tab}
                 size="small"
@@ -257,7 +279,8 @@ function GroupeHeaderRow({
       <td className="c-rep">
         <div className="reps reps--col">
           <ReportAll groupe={groupe} modele="RevisionActeur" actions={actions} />
-          <RestaurerAll groupe={groupe} actions={actions} />
+          <RestoreAll groupe={groupe} actions={actions} />
+          <EmptyAll groupe={groupe} actions={actions} />
         </div>
       </td>
       <td>
@@ -274,7 +297,7 @@ function GroupeHeaderRow({
           </div>
         ) : (
           // A groupe of several acteurs has no correction of its own
-          !policy.lignes_par_acteur && (
+          !policy.lignes_by_acteur && (
             <span className="inherit">pas de correction existante</span>
           )
         )}
@@ -337,7 +360,7 @@ function GroupeParentCells({
           </>
         ) : (
           // A groupe of several acteurs has no parent of its own
-          !policy.lignes_par_acteur && <span className="inherit">pas de parent</span>
+          !policy.lignes_by_acteur && <span className="inherit">pas de parent</span>
         )}
       </td>
     </>
@@ -399,7 +422,8 @@ export function LigneRow({
       </td>
       <td className="c-rep">
         <div className="reps">
-          <RestaurerButton groupe={groupe} ligne={ligne} actions={actions} />
+          <RestoreButton groupe={groupe} ligne={ligne} actions={actions} />
+          <EmptyButton groupe={groupe} ligne={ligne} actions={actions} />
           <ReportButton
             groupe={groupe}
             ligne={ligne}

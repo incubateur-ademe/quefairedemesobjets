@@ -32,9 +32,12 @@ class ReviewPolicy:
     can_restore: bool = True
     # The groupe gathers several acteurs (1 SuggestionUnitaire per acteur, the
     # acteur being on the SU, not on the groupe): a ligne is (acteur, champs)
-    lignes_par_acteur: bool = False
+    lignes_by_acteur: bool = False
     # Tabs of the modal of a groupe (and their buttons on the groupe header)
-    onglets: tuple[str, ...] = (LOCALISATION, ANNUAIRE)
+    tabs: tuple[str, ...] = (LOCALISATION, ANNUAIRE)
+    # Identifiers shown with the acteur of a ligne par acteur (ex: its SIREN
+    # when a SIRET is proposed)
+    identifiants_target: tuple[str, ...] = ()
     badge: str | None = None
 
     def describe(self) -> dict:
@@ -48,8 +51,8 @@ class ReviewPolicy:
             "colonne_parent": self.colonne_parent,
             "shows_acteur_diff": self.shows_acteur_diff,
             "can_restore": self.can_restore,
-            "lignes_par_acteur": self.lignes_par_acteur,
-            "onglets": list(self.onglets),
+            "lignes_by_acteur": self.lignes_by_acteur,
+            "tabs": list(self.tabs),
             "badge": self.badge,
         }
 
@@ -70,7 +73,7 @@ SOURCE_AJOUT = ReviewPolicy(
 # suggested on the correction (RevisionActeur); no suggestion on the Acteur, so
 # nothing to report, but the correction and the parent may be edited
 ENRICH_ACTEURS_CLOSED = ReviewPolicy(
-    SuggestionAction.ENRICH_ACTEURS_CLOSED.value, onglets=()
+    SuggestionAction.ENRICH_ACTEURS_CLOSED.value, tabs=()
 )
 # RGPD anonymisation (enrich DAG): 1 groupe per acteur, the anonymised values
 # overwrite the Acteur and its RevisionActeur if it exists. The correction may be
@@ -81,7 +84,7 @@ ENRICH_ACTEURS_RGPD = ReviewPolicy(
     editable_models=(REVISION,),
     shows_parent=False,
     can_restore=False,
-    onglets=(),
+    tabs=(),
 )
 
 # Other enrich DAGs: 1 groupe per suggested value (villes, codes postaux, SIRET,
@@ -95,21 +98,23 @@ ENRICH_PAR_LIGNE = tuple(
     ReviewPolicy(
         type_action.value,
         can_reject_line=True,
-        lignes_par_acteur=True,
+        lignes_by_acteur=True,
         editable_models=(),
         can_restore=False,
-        onglets=onglets,
+        tabs=tabs,
         shows_parent=parent,
         colonne_parent=parent,
+        identifiants_target=identifiants,
     )
-    for type_action, onglets, parent in (
-        (SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO, (), True),
-        (SuggestionAction.ENRICH_ACTEURS_VILLES_NEW, (), True),
-        (SuggestionAction.ENRICH_ACTEURS_CP_TYPO, (), False),
-        (SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO, (), False),
-        (SuggestionAction.ENRICH_ACTEURS_SIRET, (ANNUAIRE,), True),
-        (SuggestionAction.ENRICH_ACTEURS_SIREN, (ANNUAIRE,), True),
-        (SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION, (), True),
+    for type_action, tabs, parent, identifiants in (
+        (SuggestionAction.ENRICH_ACTEURS_VILLES_TYPO, (), True, ()),
+        (SuggestionAction.ENRICH_ACTEURS_VILLES_NEW, (), True, ()),
+        (SuggestionAction.ENRICH_ACTEURS_CP_TYPO, (), False, ()),
+        (SuggestionAction.ENRICH_REVISION_ACTEURS_CP_TYPO, (), False, ()),
+        # SIRET proposed from the known SIREN, and vice versa
+        (SuggestionAction.ENRICH_ACTEURS_SIRET, (ANNUAIRE,), True, ("siren",)),
+        (SuggestionAction.ENRICH_ACTEURS_SIREN, (ANNUAIRE,), True, ("siret",)),
+        (SuggestionAction.ENRICH_ACTEURS_LIEN_SUCCESSION, (), True, ()),
     )
 )
 

@@ -23,7 +23,7 @@ export function AnnuaireTab({ groupe }: { groupe: GroupeDetail }) {
           ) : (
             groupe.annuaire[champ].map((identifiant) => (
               <IdentifiantCard
-                key={identifiant.source}
+                key={`${identifiant.source}:${identifiant.valeur}`}
                 champ={champ}
                 identifiant={identifiant}
               />

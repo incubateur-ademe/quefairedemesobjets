@@ -5,10 +5,7 @@ acteurs, a ligne is (acteur, champs)."""
 import json
 
 import pytest
-from data.models.suggestion import (
-    SuggestionAction,
-    SuggestionStatut,
-)
+from data.models.suggestion import SuggestionAction, SuggestionStatut
 from django.contrib.auth.models import User
 from qfdmo.models.acteur import RevisionActeur
 from unit_tests.data.models.suggestion_factory import (
@@ -83,7 +80,7 @@ def decide(client, groupe, action, *identifiants):
 
 def statuts(body):
     return {
-        ligne["cible"]["identifiant_unique"]: ligne["statut"]
+        ligne["target"]["identifiant_unique"]: ligne["statut"]
         for ligne in body["lignes"]
     }
 
@@ -102,8 +99,8 @@ class TestSerialization:
             key(groupe, i) for i in ACTEURS
         ]
         a1, _, a3 = item["lignes"]
-        assert a1["cible"]["nom"] == "Nom A1"
-        assert a1["cible"]["admin_urls"]["importe"]
+        assert a1["target"]["nom"] == "Nom A1"
+        assert a1["target"]["admin_urls"]["importe"]
         assert a1["acteur"]["actuel"] == {"ville": "PARIS"}
         assert a1["correction"] == {
             "actuel": None,
@@ -117,17 +114,104 @@ class TestSerialization:
         # Nothing to edit for these cohortes
         assert not a1["capacites"]["corriger_correction"]
 
+    @pytest.mark.parametrize(
+        "type_action,champ,identifiant",
+        [
+            # SIRET proposed from the known SIREN: the SIREN of the acteur
+            (SuggestionAction.ENRICH_ACTEURS_SIRET, "siret", "siren"),
+            # SIREN proposed from the known SIRET: its SIRET
+            (SuggestionAction.ENRICH_ACTEURS_SIREN, "siren", "siret"),
+        ],
+    )
+    def test_identifiants_of_the_acteur(self, client, type_action, champ, identifiant):
+        cohorte = SuggestionCohorteFactory(type_action=type_action)
+        groupe = SuggestionGroupeFactory(suggestion_cohorte=cohorte)
+        ActeurFactory(identifiant_unique="A1", siren="123456789", siret="")
+        ActeurFactory(identifiant_unique="A2", siren="", siret="98765432100012")
+        # The correction takes precedence over the acteur
+        RevisionActeurFactory(
+            identifiant_unique="A2", siren="111111111", siret="22222222200022"
+        )
+        for identifiant_unique in ("A1", "A2"):
+            SuggestionUnitaireFactory(
+                suggestion_groupe=groupe,
+                suggestion_modele="RevisionActeur",
+                revision_acteur_id=identifiant_unique,
+                champs=[champ],
+                valeurs=["0"],
+            )
+
+        _, body = get(client, f"/cohortes/{cohorte.id}/groupes", afficher="tout")
+
+        expected = {
+            "siren": {"A1": "123456789", "A2": "111111111"},
+            "siret": {"A1": "", "A2": "22222222200022"},
+        }[identifiant]
+        assert {
+            ligne["target"]["identifiant_unique"]: ligne["target"]["identifiants"]
+            for ligne in body["items"][0]["lignes"]
+        } == {
+            target: [{"champ": identifiant, "valeur": valeur}]
+            for target, valeur in expected.items()
+        }
+
+    def test_annuaire_has_the_identifiants_of_the_acteurs(self, client):
+        cohorte = SuggestionCohorteFactory(
+            type_action=SuggestionAction.ENRICH_ACTEURS_SIRET
+        )
+        groupe = SuggestionGroupeFactory(suggestion_cohorte=cohorte)
+        sirens = {"A1": "123456789", "A2": "123456789", "A3": "987654321"}
+        for identifiant_unique, siren in sirens.items():
+            ActeurFactory(
+                identifiant_unique=identifiant_unique,
+                nom=f"Nom {identifiant_unique}",
+                siren=siren,
+            )
+            SuggestionUnitaireFactory(
+                suggestion_groupe=groupe,
+                suggestion_modele="RevisionActeur",
+                revision_acteur_id=identifiant_unique,
+                champs=["siret"],
+                valeurs=["12345678900012"],
+            )
+
+        _, body = get(client, f"/groupes/{groupe.id}")
+
+        # 1 entry per SIREN, with its acteurs
+        assert body["annuaire"]["siren"] == [
+            {
+                "source": "target",
+                "label": "Acteurs Nom A1, Nom A2",
+                "valeur": "123456789",
+                "propose": False,
+            },
+            {
+                "source": "target",
+                "label": "Acteur Nom A3",
+                "valeur": "987654321",
+                "propose": False,
+            },
+        ]
+        # The proposed SIRET stays
+        assert [i["valeur"] for i in body["annuaire"]["siret"]] == ["12345678900012"]
+
+    def test_no_identifiant_for_the_villes(self, client, villes):
+        cohorte, _ = villes
+        _, body = get(client, f"/cohortes/{cohorte.id}/groupes", afficher="tout")
+
+        assert body["items"][0]["lignes"][0]["target"]["identifiants"] == []
+
     def test_policy(self, client, villes):
         cohorte, _ = villes
         _, body = get(client, f"/cohortes/{cohorte.id}")
 
         assert body["policy"]["can_reject_line"]
-        assert body["policy"]["lignes_par_acteur"]
+        assert body["policy"]["lignes_by_acteur"]
         # No localisation nor Annuaire Entreprises for the villes
-        assert body["policy"]["onglets"] == []
+        assert body["policy"]["tabs"] == []
 
     @pytest.mark.parametrize(
-        "type_action,onglets",
+        "type_action,tabs",
         [
             (SuggestionAction.ENRICH_ACTEURS_SIRET, ["annuaire"]),
             (SuggestionAction.ENRICH_ACTEURS_SIREN, ["annuaire"]),
@@ -138,12 +222,12 @@ class TestSerialization:
             (SuggestionAction.SOURCE_MODIFICATION, ["localisation", "annuaire"]),
         ],
     )
-    def test_onglets(self, client, type_action, onglets):
+    def test_tabs(self, client, type_action, tabs):
         cohorte = SuggestionCohorteFactory(type_action=type_action)
         SuggestionGroupeFactory(suggestion_cohorte=cohorte)
         _, body = get(client, f"/cohortes/{cohorte.id}")
 
-        assert body["policy"]["onglets"] == onglets
+        assert body["policy"]["tabs"] == tabs
 
     @pytest.mark.parametrize(
         "type_action,colonne_parent",

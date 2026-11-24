@@ -41,6 +41,35 @@ describe("CohorteScreen", () => {
     expect(within(headerOf(1)).getByText("0/2")).toBeInTheDocument()
   })
 
+  it("empties the correction of a ligne and of the whole groupe with ✕", async () => {
+    const emptyable = (champs: string[]) =>
+      ligne(1, champs, {
+        capacites: { ...ligne(1, champs).capacites, empty_correction: true },
+      })
+    const groupe1 = () =>
+      groupe(1, { lignes: [emptyable(["nom"]), emptyable(["url"])] })
+    const api = setup(groupe1, undefined, [groupe1(), groupe(2)])
+    await screen.findByText("Acteur 1")
+
+    fireEvent.click(screen.getByLabelText("Vider la correction de url"))
+    await waitFor(() =>
+      expect(api.POST).toHaveBeenCalledWith(
+        "/api/suggestions/groupes/{groupe_id}/empty",
+        {
+          params: { path: { groupe_id: 1 } },
+          body: { champs: [["url"]], expected_modifie_le: "2026-10-09T10:00:00.000Z" },
+        },
+      ),
+    )
+
+    fireEvent.click(within(headerOf(1)).getByTitle("Vider la correction de 2 lignes"))
+    await waitFor(() =>
+      expect(api.POST.mock.calls.at(-1)![1].body).toMatchObject({ champs: null }),
+    )
+    // No ✕ for the groupe without text field to empty
+    expect(within(headerOf(2)).queryByTitle(/Vider la correction/)).toBeNull()
+  })
+
   it("shows the progress of the lignes only for a groupe to validate or to process", async () => {
     setup(undefined, undefined, [
       groupe(1),

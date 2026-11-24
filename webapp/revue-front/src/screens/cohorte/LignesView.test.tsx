@@ -130,10 +130,12 @@ describe("LignesView", () => {
   })
 
   describe("lignes par acteur", () => {
-    const cible = (id: string) => ({
+    const target = (id: string) => ({
       identifiant_unique: id,
       nom: `Nom ${id}`,
       ville: "PARIS",
+      // The SIREN of A3, as for a SIRET proposed from the known SIREN
+      identifiants: id === "A3" ? [{ champ: "siren", valeur: "123456789" }] : [],
       suggestion_modele: "RevisionActeur",
       admin_urls: {
         importe: `/admin/qfdmo/acteur/${id}/change/`,
@@ -145,7 +147,7 @@ describe("LignesView", () => {
     const villeLigne = (id: string) =>
       ligne(5, ["ville"], {
         key: `5:${id}:ville`,
-        cible: cible(id),
+        target: target(id),
         capacites: { ...ligne(5, ["ville"]).capacites, refuser: true },
       })
     const VILLES = groupe(5, {
@@ -162,9 +164,9 @@ describe("LignesView", () => {
         ...COHORTE.policy,
         type_action: "ENRICH_ACTEURS_VILLES_TYPO",
         can_reject_line: true,
-        lignes_par_acteur: true,
+        lignes_by_acteur: true,
         editable_models: [],
-        onglets: [],
+        tabs: [],
       },
     }
 
@@ -228,6 +230,19 @@ describe("LignesView", () => {
       expect(row("5:A2:ville")).toHaveClass("cur")
     })
 
+    it("shows the identifiers of the acteur on the line of its city", async () => {
+      setupVilles("groupes")
+      await waitFor(() => expect(row("5:A3:ville")).toBeInTheDocument())
+
+      expect(
+        within(row("5:A3:ville")).getByText(/^PARIS · SIREN 123456789/),
+      ).toHaveClass("sub")
+      expect(
+        within(row("5:A3:ville")).getByTitle(/SIREN 123456789 dans l’Annuaire/),
+      ).toBeInTheDocument()
+      expect(within(row("5:A2:ville")).queryByText(/SIREN/)).toBeNull()
+    })
+
     it("hides the parent columns when the policy has none (codes postaux)", async () => {
       setupVilles("groupes", { colonne_parent: false })
       await waitFor(() => expect(row("5:A2:ville")).toBeInTheDocument())
@@ -246,7 +261,7 @@ describe("LignesView", () => {
       // No modal for these cohortes; the champs column (with the acteur) is wider
       expect(screen.queryByText("Localisation")).not.toBeInTheDocument()
       expect(screen.queryByText("Annuaire entreprise")).not.toBeInTheDocument()
-      expect(document.querySelector("table.cmp")).toHaveClass("par-acteur")
+      expect(document.querySelector("table.cmp")).toHaveClass("by-acteur")
       // No correction nor parent of its own for a groupe of several acteurs
       const header = document.querySelector('[data-cursor="g:5"]') as HTMLElement
       expect(within(header).queryByText("pas de correction existante")).toBeNull()

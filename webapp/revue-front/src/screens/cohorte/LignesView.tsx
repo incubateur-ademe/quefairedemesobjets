@@ -3,10 +3,10 @@ import type { Groupe, LignePage, Policy } from "../../api/types"
 import {
   type Checkboxes,
   cmpTableClass,
-  type ModalTab,
+  ligneCursor,
   LigneHead,
   LigneRow,
-  ligneCursor,
+  type ModalTab,
   PageCheckbox,
   RowCheckbox,
 } from "./GroupesView"
@@ -79,7 +79,7 @@ export function LignesView({
                     checkboxes={checkboxes}
                   />
                   <td className="num">
-                    {policy.onglets.length > 0 ? (
+                    {policy.tabs.length > 0 ? (
                       <button
                         type="button"
                         className="lk mono"
@@ -98,10 +98,10 @@ export function LignesView({
                   </td>
                   <td>
                     <span className="nom">
-                      {ligne.cible?.nom || groupe.acteur.nom || "—"}
+                      {ligne.target?.nom || groupe.acteur.nom || "—"}
                     </span>
                     <span className="sub">
-                      {ligne.cible?.identifiant_unique ??
+                      {ligne.target?.identifiant_unique ??
                         groupe.acteur.identifiant_unique}
                     </span>
                   </td>

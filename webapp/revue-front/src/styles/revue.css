@@ -1105,12 +1105,12 @@ wa-select wa-option {
 }
 
 /* acteur of a ligne, when the groupe gathers several acteurs */
-.cible {
+.target {
   display: block;
   margin-top: 4px;
 }
 
-.cible .glinks {
+.target .glinks {
   display: flex;
   gap: 6px;
 }
@@ -1494,11 +1494,11 @@ input[type="checkbox"] {
 
 /* groupes of several acteurs: the first column (champs and acteur of the ligne)
    is wider than each comparison column */
-.cmp.par-acteur th.c-champs {
+.cmp.by-acteur th.c-champs {
   width: 34%;
 }
 
-.cmp.par-acteur th.c-cmp {
+.cmp.by-acteur th.c-cmp {
   width: 22%;
 }
 
@@ -1507,6 +1507,6 @@ input[type="checkbox"] {
   width: 50%;
 }
 
-.cmp.par-acteur.sans-parent th.c-cmp {
+.cmp.by-acteur.sans-parent th.c-cmp {
   width: 33%;
 }

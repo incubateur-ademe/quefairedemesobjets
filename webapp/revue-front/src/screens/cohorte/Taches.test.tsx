@@ -13,7 +13,7 @@ function tache(id: string, patch: Partial<Tache> = {}): Tache {
     action: "report_correction",
     groupes: 1200,
     affected: 1150,
-    par: "admin",
+    by: "admin",
     lancee_le: "2026-10-09T10:00:00Z",
     debut: "2026-10-09T10:00:01Z",
     fin: "2026-10-09T10:02:00Z",

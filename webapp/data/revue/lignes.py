@@ -3,8 +3,8 @@
 A ligne is, for a groupe, the set of SuggestionUnitaire sharing the same tuple of
 `champs`, whatever their `suggestion_modele` (Acteur, RevisionActeur,
 ParentRevisionActeur). When the groupe gathers several acteurs
-(`ReviewPolicy.lignes_par_acteur`), a ligne is also restricted to one acteur, its
-« cible »: the acteur of its SU (`cible_of`).
+(`ReviewPolicy.lignes_by_acteur`), a ligne is also restricted to one acteur, its
+« target »: the acteur of its SU (`target_of`).
 
 Its statut is derived from its SU and its groupe: refused when all its SU are
 refused (or its groupe is), otherwise the groupe statut once the groupe is not
@@ -14,10 +14,7 @@ AVALIDER anymore, otherwise ATRAITER when all its SU are validated.
 from collections import defaultdict
 from collections.abc import Iterable
 
-from django.contrib.admin.utils import quote
-from django.db.models import Count, Prefetch, QuerySet
-from django.urls import reverse
-
+from core.models.constants import EMPTY_ACTEUR_FIELD
 from data.models.suggestion import (
     SuggestionGroupe,
     SuggestionStatut,
@@ -26,6 +23,10 @@ from data.models.suggestion import (
 from data.models.suggestions.source import SuggestionSourceModel
 from data.revue.choix import EDITABLE
 from data.revue.policies import PARENT, REVISION, ReviewPolicy
+from django.contrib.admin.utils import quote
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import CharField, Count, Prefetch, QuerySet, TextField
+from django.urls import reverse
 from qfdmo.models.acteur import Acteur, RevisionActeur
 
 ACTEUR = "Acteur"
@@ -40,29 +41,45 @@ ORDERED_FIELDS = SuggestionSourceModel.get_ordered_fields()
 IDENTITY_FIELDS = ["identifiant_unique", "identifiant_externe", "nom", "ville"]
 
 
-def cible_of(su: SuggestionUnitaire) -> str:
-    """Acteur targeted by a SU (same order as `revue.CIBLE` in SQL)."""
+def is_text_field(champ: str) -> bool:
+    """Free text field of the acteur (no choices), which may be emptied with
+    « __empty__ »."""
+    try:
+        field = RevisionActeur._meta.get_field(champ)
+    except FieldDoesNotExist:
+        return False
+    return (
+        isinstance(field, CharField | TextField)
+        and not field.choices
+        and not field.primary_key
+    )
+
+
+def target_of(su: SuggestionUnitaire) -> str:
+    """Acteur targeted by a SU (same order as `revue.TARGET` in SQL)."""
     return su.acteur_id or su.revision_acteur_id or su.parent_revision_acteur_id or ""
 
 
-def ligne_cible(su: SuggestionUnitaire, policy: ReviewPolicy) -> str | None:
-    """Cible of the ligne of a SU: None when the groupe is a single acteur."""
-    return cible_of(su) if policy.lignes_par_acteur else None
+def ligne_target(su: SuggestionUnitaire, policy: ReviewPolicy) -> str | None:
+    """target of the ligne of a SU: None when the groupe is a single acteur."""
+    return target_of(su) if policy.lignes_by_acteur else None
 
 
-def ligne_key(groupe_id: int, champs: Iterable[str], cible: str | None = None) -> str:
-    """`groupe:champs`, or `groupe:cible:champs` for the lignes par acteur."""
+def ligne_key(groupe_id: int, champs: Iterable[str], target: str | None = None) -> str:
+    """`groupe:champs`, or `groupe:target:champs` for the lignes par acteur."""
     champs = ",".join(champs)
-    return f"{groupe_id}:{champs}" if cible is None else f"{groupe_id}:{cible}:{champs}"
+    return (
+        f"{groupe_id}:{champs}" if target is None else f"{groupe_id}:{target}:{champs}"
+    )
 
 
 def parse_ligne_key(key: str) -> tuple[int, str | None, list[str]]:
-    """(groupe id, cible or None, champs). The champs never contain « : »."""
+    """(groupe id, target or None, champs). The champs never contain « : »."""
     groupe_id, _, rest = key.partition(":")
-    cible, separator, champs = rest.rpartition(":")
+    target, separator, champs = rest.rpartition(":")
     return (
         int(groupe_id),
-        cible if separator else None,
+        target if separator else None,
         champs.split(",") if champs else [],
     )
 
@@ -107,7 +124,7 @@ def field_values(instance, champs: list[str]) -> dict[str, str]:
     return {champ: getattr(model, champ, None) or "" for champ in champs}
 
 
-class _Objets:
+class _Objects:
     """Acteur, correction and parent of a ligne, with their current values."""
 
     def __init__(self, acteur, revision, parent, champs: list[str]):
@@ -136,49 +153,49 @@ class _GroupeContext:
         self.parent = groupe.get_parent_revision_acteur_or_none()
         self.nb_enfants = nb_enfants
         champs = sorted({champ for su in self.sus for champ in su.champs})
-        self.objets = _Objets(self.acteur, self.revision, self.parent, champs)
-        self.objets_par_cible: dict[str, _Objets] = {}
-        if policy.lignes_par_acteur:
-            self._load_cibles(champs)
+        self.objects = _Objects(self.acteur, self.revision, self.parent, champs)
+        self.objects_by_target: dict[str, _Objects] = {}
+        if policy.lignes_by_acteur:
+            self._load_targets(champs)
 
-    def _load_cibles(self, champs: list[str]):
+    def _load_targets(self, champs: list[str]):
         """One acteur per ligne: its Acteur and RevisionActeur, loaded at once.
         A SU on the parent targets an acteur which is itself a parent."""
-        cibles = {cible_of(su) for su in self.sus} - {""}
-        acteurs = Acteur.objects.in_bulk(list(cibles))
-        revisions = RevisionActeur.objects.in_bulk(list(cibles))
-        parents = {cible_of(su) for su in self.sus if su.suggestion_modele == PARENT}
-        for cible in cibles:
-            revision = revisions.get(cible)
-            is_parent = cible in parents
-            self.objets_par_cible[cible] = _Objets(
-                acteurs.get(cible),
+        targets = {target_of(su) for su in self.sus} - {""}
+        acteurs = Acteur.objects.in_bulk(list(targets))
+        revisions = RevisionActeur.objects.in_bulk(list(targets))
+        parents = {target_of(su) for su in self.sus if su.suggestion_modele == PARENT}
+        for target in targets:
+            revision = revisions.get(target)
+            is_parent = target in parents
+            self.objects_by_target[target] = _Objects(
+                acteurs.get(target),
                 None if is_parent else revision,
                 revision if is_parent else None,
                 champs,
             )
 
-    def objets_of(self, cible: str | None) -> _Objets:
-        if cible is None:
-            return self.objets
-        return self.objets_par_cible.get(cible) or _Objets(None, None, None, [])
+    def objects_of(self, target: str | None) -> _Objects:
+        if target is None:
+            return self.objects
+        return self.objects_by_target.get(target) or _Objects(None, None, None, [])
 
     def lignes(self) -> list[tuple[str | None, tuple[str, ...]]]:
-        """(cible, champs) of the lignes: by acteur, then in the admin order."""
-        cles = {(ligne_cible(su, self.policy), tuple(su.champs)) for su in self.sus}
+        """(target, champs) of the lignes: by acteur, then in the admin order."""
+        keys = {(ligne_target(su, self.policy), tuple(su.champs)) for su in self.sus}
         order = {fields: index for index, fields in enumerate(ORDERED_FIELDS)}
         return sorted(
-            cles,
+            keys,
             key=lambda c: (c[0] or "", order.get(c[1], len(order)), c[1]),
         )
 
     def sus_of(
-        self, champs: tuple[str, ...], cible: str | None = None
+        self, champs: tuple[str, ...], target: str | None = None
     ) -> list[SuggestionUnitaire]:
         return [
             su
             for su in self.sus
-            if tuple(su.champs) == champs and ligne_cible(su, self.policy) == cible
+            if tuple(su.champs) == champs and ligne_target(su, self.policy) == target
         ]
 
     def suggested(self, modele: str, champs: list[str]) -> str | None:
@@ -214,14 +231,14 @@ def _serialize_ligne(
     context: _GroupeContext,
     champs: tuple[str, ...],
     policy: ReviewPolicy,
-    cible: str | None = None,
+    target: str | None = None,
 ) -> dict:
     groupe = context.groupe
-    sus = context.sus_of(champs, cible)
-    objets = context.objets_of(cible)
+    sus = context.sus_of(champs, target)
+    objects = context.objects_of(target)
     parent_id = (
-        objets.parent.identifiant_unique
-        if cible is not None and objets.parent
+        objects.parent.identifiant_unique
+        if target is not None and objects.parent
         else groupe.parent_revision_acteur_id
     )
     by_modele = {su.suggestion_modele: su for su in sus}
@@ -267,24 +284,28 @@ def _serialize_ligne(
         else (SuggestionStatut.AVALIDER, SuggestionStatut.ATRAITER)
     )
     return {
-        "key": ligne_key(groupe.id, champs, cible),
+        "key": ligne_key(groupe.id, champs, target),
         "champs": list(champs),
-        "cible": _cible_identity(cible, objets, sus) if cible is not None else None,
+        "target": (
+            _target_identity(target, objects, sus, policy)
+            if target is not None
+            else None
+        ),
         "statut": statut,
         "decision_par": _user(decided.decision_par) if decided else None,
         "decision_le": decided.decision_le if decided else None,
         "acteur": _cell(
-            pick(objets.acteur_values) if policy.shows_acteur_diff else None,
+            pick(objects.acteur_values) if policy.shows_acteur_diff else None,
             by_modele.get(ACTEUR),
             "vide",
         ),
         "correction": _cell(
-            pick(objets.revision_values),
+            pick(objects.revision_values),
             by_modele.get(REVISION),
             "pas_de_correction",
         ),
         "parent": (
-            _cell(pick(objets.parent_values), by_modele.get(PARENT), "vide")
+            _cell(pick(objects.parent_values), by_modele.get(PARENT), "vide")
             if has_parent
             else None
         ),
@@ -302,10 +323,20 @@ def _serialize_ligne(
             and reportable(PARENT)
             and ACTEUR in by_modele,
             # Correction with the value of the acteur, cancelling the suggestion
-            "restaurer_correction": policy.can_restore
+            "restore_correction": policy.can_restore
             and reportable(REVISION)
             and ACTEUR in by_modele
-            and objets.acteur is not None,
+            and objects.acteur is not None,
+            # Correction emptying the value (« __empty__ »), for text fields only
+            "empty_correction": editable(REVISION)
+            and all(is_text_field(champ) for champ in champs)
+            and not (
+                REVISION in by_modele
+                and all(
+                    valeur == EMPTY_ACTEUR_FIELD
+                    for valeur in by_modele[REVISION].valeurs
+                )
+            ),
             # A reported value may be removed, even when it cannot be typed
             "supprimer_correction": reportable(REVISION) and REVISION in by_modele,
             "supprimer_parent": has_parent
@@ -315,24 +346,36 @@ def _serialize_ligne(
     }
 
 
-def _cible_identity(cible: str, objets: _Objets, sus: list[SuggestionUnitaire]) -> dict:
-    """Acteur of a ligne par acteur: its identity and its admin pages."""
-    instance = objets.revision or objets.parent or objets.acteur
+def _target_identity(
+    target: str,
+    objects: _Objects,
+    sus: list[SuggestionUnitaire],
+    policy: ReviewPolicy,
+) -> dict:
+    """Acteur of a ligne by acteur: its identity (current values, the correction
+    taking precedence over the acteur) and its admin pages."""
+    instance = objects.revision or objects.parent or objects.acteur
     modele = sus[0].suggestion_modele if sus else ""
-    return {
-        "identifiant_unique": cible,
-        "nom": (getattr(instance, "nom", None) or getattr(objets.acteur, "nom", None))
-        or "",
-        "ville": (
-            getattr(instance, "ville", None) or getattr(objets.acteur, "ville", None)
+
+    def current(champ: str) -> str:
+        return str(
+            getattr(instance, champ, None) or getattr(objects.acteur, champ, None) or ""
         )
-        or "",
+
+    return {
+        "identifiant_unique": target,
+        "nom": current("nom"),
+        "ville": current("ville"),
+        "identifiants": [
+            {"champ": champ, "valeur": current(champ)}
+            for champ in policy.identifiants_target
+        ],
         "suggestion_modele": modele,
         "admin_urls": {
-            "importe": _admin_url("acteur", objets.acteur and cible),
-            "affiche": _admin_url("displayedacteur", cible),
-            "corrige": _admin_url("revisionacteur", objets.revision and cible),
-            "parent": _admin_url("revisionacteur", objets.parent and cible),
+            "importe": _admin_url("acteur", objects.acteur and target),
+            "affiche": _admin_url("displayedacteur", target),
+            "corrige": _admin_url("revisionacteur", objects.revision and target),
+            "parent": _admin_url("revisionacteur", objects.parent and target),
         },
     }
 
@@ -383,8 +426,8 @@ def serialize_groupe(
         nb_enfants = count_enfants([groupe])
     context = _GroupeContext(groupe, nb_enfants, policy)
     lignes = [
-        _serialize_ligne(context, champs, policy, cible)
-        for cible, champs in context.lignes()
+        _serialize_ligne(context, champs, policy, target)
+        for target, champs in context.lignes()
     ]
     actionable = groupe.statut == SuggestionStatut.AVALIDER
     parent = None
@@ -401,7 +444,7 @@ def serialize_groupe(
         "decision_par": _user(groupe.decision_par),
         "decision_le": groupe.decision_le,
         "acteur": _identity(context),
-        "libelle": _libelle(groupe) if policy.lignes_par_acteur else None,
+        "libelle": _libelle(groupe) if policy.lignes_by_acteur else None,
         "is_new": policy.badge is not None and context.acteur is None,
         "has_correction": context.revision is not None,
         "parent": parent,
@@ -466,5 +509,5 @@ def sus_by_key(groupe: SuggestionGroupe, policy: ReviewPolicy) -> dict[str, list
     """SuggestionUnitaire of the groupe by ligne key."""
     lignes = defaultdict(list)
     for su in groupe.suggestion_unitaires.all():
-        lignes[ligne_key(groupe.id, su.champs, ligne_cible(su, policy))].append(su)
+        lignes[ligne_key(groupe.id, su.champs, ligne_target(su, policy))].append(su)
     return lignes

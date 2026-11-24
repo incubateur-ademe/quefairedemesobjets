@@ -6,31 +6,10 @@ the groupe (and its acteur) or the ligne de suggestion:
   one ligne matching it (two ET conditions may match two different lignes);
 - in the Lignes view, a condition on the groupe applies to the groupe of the ligne.
 Lignes are rows of SuggestionUnitaire grouped by (groupe, champs), and by acteur
-(`CIBLE`) when the groupe gathers several acteurs (ReviewPolicy.lignes_par_acteur).
+(`TARGET`) when the groupe gathers several acteurs (ReviewPolicy.lignes_by_acteur).
 """
 
 from typing import Literal
-
-from django.db.models import (
-    BooleanField,
-    Case,
-    Expression,
-    IntegerField,
-    When,
-    CharField,
-    Count,
-    Exists,
-    ExpressionWrapper,
-    F,
-    Func,
-    OuterRef,
-    Q,
-    QuerySet,
-    Subquery,
-    TextField,
-    Value,
-)
-from django.db.models.functions import Cast, Coalesce, Concat
 
 from data.models.suggestion import (
     SuggestionCohorte,
@@ -51,6 +30,26 @@ from data.revue.filters import (
 )
 from data.revue.lignes import ACTEUR, ORDERED_FIELDS, ordered_champs
 from data.revue.policies import PARENT, REVISION, get_policy
+from django.db.models import (
+    BooleanField,
+    Case,
+    CharField,
+    Count,
+    Exists,
+    Expression,
+    ExpressionWrapper,
+    F,
+    Func,
+    IntegerField,
+    OuterRef,
+    Q,
+    QuerySet,
+    Subquery,
+    TextField,
+    Value,
+    When,
+)
+from django.db.models.functions import Cast, Coalesce, Concat
 
 Vue = Literal["groupes", "lignes"]
 Afficher = Literal["avalider", "tout"]
@@ -66,15 +65,15 @@ COLONNES = {"correction": REVISION, "parent": PARENT}
 AVALIDER = SuggestionStatut.AVALIDER
 ATRAITER = SuggestionStatut.ATRAITER
 REJETEE = SuggestionStatut.REJETEE
-# Acteur targeted by a SU (same order as `lignes.cible_of`)
-CIBLE = Coalesce(
+# Acteur targeted by a SU (same order as `lignes.target_of`)
+TARGET = Coalesce(
     F("acteur_id"),
     F("revision_acteur_id"),
     F("parent_revision_acteur_id"),
     Value(""),
     output_field=CharField(),
 )
-OUTER_CIBLE = Coalesce(
+OUTER_TARGET = Coalesce(
     OuterRef("acteur_id"),
     OuterRef("revision_acteur_id"),
     OuterRef("parent_revision_acteur_id"),
@@ -83,44 +82,44 @@ OUTER_CIBLE = Coalesce(
 )
 
 
-def is_par_acteur(cohorte: SuggestionCohorte) -> bool:
-    return get_policy(cohorte.type_action).lignes_par_acteur
+def is_by_acteur(cohorte: SuggestionCohorte) -> bool:
+    return get_policy(cohorte.type_action).lignes_by_acteur
 
 
-def same_ligne_sus(par_acteur: bool) -> QuerySet[SuggestionUnitaire]:
+def same_ligne_sus(by_acteur: bool) -> QuerySet[SuggestionUnitaire]:
     """SuggestionUnitaire of the ligne of the outer SU row."""
     sus = SuggestionUnitaire.objects.filter(
         suggestion_groupe_id=OuterRef("suggestion_groupe_id"),
         champs=OuterRef("champs"),
     )
-    if par_acteur:
-        sus = sus.alias(_cible=CIBLE).filter(_cible=OUTER_CIBLE)
+    if by_acteur:
+        sus = sus.alias(_target=TARGET).filter(_target=OUTER_TARGET)
     return sus
 
 
 # --- Contexts of the two views ---
 
 
-def _sus_of(context_view: Vue, par_acteur: bool = False) -> QuerySet:
+def _sus_of(context_view: Vue, by_acteur: bool = False) -> QuerySet:
     """SuggestionUnitaire of the outer row: of the groupe, or of the ligne."""
     if context_view == "groupes":
         return SuggestionUnitaire.objects.filter(suggestion_groupe_id=OuterRef("pk"))
-    return same_ligne_sus(par_acteur)
+    return same_ligne_sus(by_acteur)
 
 
-def filter_context(vue: Vue, par_acteur: bool = False) -> FilterContext:
+def filter_context(vue: Vue, by_acteur: bool = False) -> FilterContext:
     def ligne(q: Q, annotations: dict) -> Q:
-        return Q(Exists(_sus_of(vue, par_acteur).alias(**annotations).filter(q)))
+        return Q(Exists(_sus_of(vue, by_acteur).alias(**annotations).filter(q)))
 
     if vue == "groupes":
         return FilterContext(
-            prefix="", groupe_ref="pk", related={"ligne": ligne}, par_acteur=par_acteur
+            prefix="", groupe_ref="pk", related={"ligne": ligne}, by_acteur=by_acteur
         )
     return FilterContext(
         prefix="suggestion_groupe__",
         groupe_ref="suggestion_groupe_id",
         related={"ligne": ligne},
-        par_acteur=par_acteur,
+        by_acteur=by_acteur,
     )
 
 
@@ -131,14 +130,14 @@ def _vue_of(context: FilterContext) -> Vue:
 # --- Ligne statut (derived) ---
 
 
-def ligne_statut_q(vue: Vue, statut: str, prefix: str, par_acteur: bool = False) -> Q:
+def ligne_statut_q(vue: Vue, statut: str, prefix: str, by_acteur: bool = False) -> Q:
     """Rows (groupes: having at least one ligne / lignes) whose ligne statut is…
 
     A ligne is refused when all its SU are refused (or its groupe is); the SU of
     a ligne share their statut, so in the Groupes view a refused SU is a refused
     ligne."""
     groupe_statut = f"{prefix}statut"
-    sus = _sus_of(vue, par_acteur)
+    sus = _sus_of(vue, by_acteur)
     not_refused = Q(Exists(sus.exclude(statut=REJETEE)))
     if statut == REJETEE:
         if vue == "groupes":
@@ -153,7 +152,7 @@ def ligne_statut_q(vue: Vue, statut: str, prefix: str, par_acteur: bool = False)
             # A ligne all of whose SU are validated
             fully_validated = SuggestionUnitaire.objects.filter(
                 suggestion_groupe_id=OuterRef("pk"), statut=ATRAITER
-            ).exclude(Exists(same_ligne_sus(par_acteur).exclude(statut=ATRAITER)))
+            ).exclude(Exists(same_ligne_sus(by_acteur).exclude(statut=ATRAITER)))
             validated_ligne = Q(Exists(fully_validated))
         else:
             validated_ligne = ~Q(Exists(sus.exclude(statut=ATRAITER)))
@@ -177,7 +176,7 @@ def _ligne_statut_builder(context: FilterContext, spec, operator, value) -> Q:
     vue = _vue_of(context)
     q = Q(pk__in=[])
     for item in values:
-        q |= ligne_statut_q(vue, item, context.prefix, context.par_acteur)
+        q |= ligne_statut_q(vue, item, context.prefix, context.by_acteur)
     return q
 
 
@@ -234,8 +233,8 @@ def _nb_lignes(context: FilterContext):
         .values("suggestion_groupe_id")
         .annotate(
             n=(
-                Count(ligne_key_expression(context.par_acteur), distinct=True)
-                if context.par_acteur
+                Count(ligne_key_expression(context.by_acteur), distinct=True)
+                if context.by_acteur
                 else Count("champs", distinct=True)
             )
         )
@@ -300,7 +299,7 @@ def _escape_like(value: str) -> str:
 def _acteur_value_builder(context: FilterContext, spec, operator, value) -> Q:
     """Current value of the acteur (Acteur importé, before the suggestion): the
     acteur of the groupe, or the acteur of the ligne (lignes par acteur)."""
-    acteur = CIBLE if context.par_acteur else None
+    acteur = TARGET if context.by_acteur else None
     if operator in ("is_empty", "is_not_empty"):
         q = context.related["ligne"](
             Q(ActeurValueMatches("is_empty", acteur=acteur)), {}
@@ -522,7 +521,7 @@ def filtered_groupes(
         cohorte.suggestion_groupes.all(),
         filtre,
         registry,
-        filter_context("groupes", is_par_acteur(cohorte)),
+        filter_context("groupes", is_by_acteur(cohorte)),
     ).filter(_tuples_q(tuples, "groupes"))
     if afficher == "avalider":
         queryset = queryset.filter(statut=SuggestionStatut.AVALIDER)
@@ -541,18 +540,18 @@ def filtered_ligne_rows(
     champs)."""
     if filtre and registry is None:
         registry = review_registry(cohorte)
-    par_acteur = is_par_acteur(cohorte)
+    by_acteur = is_by_acteur(cohorte)
     queryset = apply_filter(
         SuggestionUnitaire.objects.filter(
             suggestion_groupe__suggestion_cohorte=cohorte
         ),
         filtre,
         registry,
-        filter_context("lignes", par_acteur),
+        filter_context("lignes", by_acteur),
     ).filter(_tuples_q(tuples, "lignes"))
     if afficher == "avalider":
         queryset = queryset.filter(
-            ligne_statut_q("lignes", AVALIDER, "suggestion_groupe__", par_acteur)
+            ligne_statut_q("lignes", AVALIDER, "suggestion_groupe__", by_acteur)
         )
     return queryset
 
@@ -565,9 +564,9 @@ def lignes_page(
     page: int,
     page_size: int,
 ) -> tuple[list[tuple[int, str | None, list[str]]], int]:
-    """(groupe id, cible, champs) of the lignes of a page, ordered by groupe (then
+    """(groupe id, target, champs) of the lignes of a page, ordered by groupe (then
     acteur) then as the admin orders the champs, and the total number of lignes.
-    The cible is None when the groupe is a single acteur."""
+    The target is None when the groupe is a single acteur."""
     order = Case(
         *(
             When(champs=list(fields), then=Value(i))
@@ -576,22 +575,22 @@ def lignes_page(
         default=Value(len(ORDERED_FIELDS)),
         output_field=IntegerField(),
     )
-    par_acteur = is_par_acteur(cohorte)
+    by_acteur = is_by_acteur(cohorte)
     lignes = (
         filtered_ligne_rows(cohorte, filtre, tuples, afficher)
         .order_by()
-        .annotate(cible=CIBLE if par_acteur else Value("", output_field=CharField()))
-        .values("suggestion_groupe_id", "cible", "champs")
+        .annotate(target=TARGET if by_acteur else Value("", output_field=CharField()))
+        .values("suggestion_groupe_id", "target", "champs")
         .distinct()
         .annotate(rang=order)
-        .order_by("suggestion_groupe_id", "cible", "rang", "champs")
+        .order_by("suggestion_groupe_id", "target", "rang", "champs")
     )
     total = lignes.count()
     offset = (page - 1) * page_size
     keys = [
         (
             row["suggestion_groupe_id"],
-            row["cible"] if par_acteur else None,
+            row["target"] if by_acteur else None,
             row["champs"],
         )
         for row in lignes[offset : offset + page_size]
@@ -599,12 +598,12 @@ def lignes_page(
     return keys, total
 
 
-def ligne_key_expression(par_acteur: bool = False):
+def ligne_key_expression(by_acteur: bool = False):
     """`lignes.ligne_key` in SQL, on SuggestionUnitaire rows."""
     return Concat(
         Cast("suggestion_groupe_id", TextField()),
         Value(":"),
-        *((CIBLE, Value(":")) if par_acteur else ()),
+        *((TARGET, Value(":")) if by_acteur else ()),
         Func(
             F("champs"),
             Value(","),
@@ -616,11 +615,11 @@ def ligne_key_expression(par_acteur: bool = False):
 
 
 def count_lignes_by_statut(
-    rows: QuerySet[SuggestionUnitaire], par_acteur: bool = False
+    rows: QuerySet[SuggestionUnitaire], by_acteur: bool = False
 ) -> dict[str, int]:
     """Lignes per (derived) statut, without loading them (the SU of a ligne share
     their statut)."""
-    key = ligne_key_expression(par_acteur)
+    key = ligne_key_expression(by_acteur)
     counts = {statut: 0 for statut in SuggestionStatut.values}
     for row in (
         rows.order_by()
@@ -654,8 +653,8 @@ def stats(
     """Counters of the header (unit of the view, all statuts, ignoring
     « afficher »), size of each view, and counts per tuple."""
     registry = review_registry(cohorte) if filtre else None
-    par_acteur = is_par_acteur(cohorte)
-    key = ligne_key_expression(par_acteur)
+    by_acteur = is_by_acteur(cohorte)
+    key = ligne_key_expression(by_acteur)
     if vue == "groupes":
         counts = {statut: 0 for statut in SuggestionStatut.values}
         for row in (
@@ -667,7 +666,7 @@ def stats(
             counts[row["statut"]] = row["n"]
     else:
         counts = count_lignes_by_statut(
-            filtered_ligne_rows(cohorte, filtre, tuples, None, registry), par_acteur
+            filtered_ligne_rows(cohorte, filtre, tuples, None, registry), by_acteur
         )
 
     nb_groupes = filtered_groupes(cohorte, filtre, tuples, afficher, registry).count()

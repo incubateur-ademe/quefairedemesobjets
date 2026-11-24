@@ -98,7 +98,7 @@ export function TachesDrawer({
               <tr key={tache.id}>
                 <td>
                   {formatDateTime(tache.lancee_le)}
-                  {tache.par && <span className="sub">par {tache.par}</span>}
+                  {tache.by && <span className="sub">par {tache.by}</span>}
                 </td>
                 <td>{ACTIONS[tache.action]}</td>
                 <td className="mono">{tache.groupes}</td>

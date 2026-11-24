@@ -136,7 +136,7 @@ class TestReviewClosedCohorte:
         assert statut["capacites"]["corriger_parent"]
         # No suggestion on the Acteur: nothing to report nor to restore
         assert not statut["capacites"]["reporter_correction"]
-        assert not statut["capacites"]["restaurer_correction"]
+        assert not statut["capacites"]["restore_correction"]
 
     def test_validate_groupe(self, client, closed):
         _, groupe = closed
@@ -222,7 +222,7 @@ class TestReviewRgpdCohorte:
         assert capacites["corriger_correction"]
         assert capacites["supprimer_correction"]
         # Restoring the value of the acteur would bring back the personal data
-        assert not capacites["restaurer_correction"]
+        assert not capacites["restore_correction"]
         assert not capacites["corriger_parent"]
         assert item["capacites"]["refuser"]
 
@@ -249,7 +249,7 @@ class TestReviewRgpdCohorte:
     def test_restore_refused(self, client, rgpd):
         _, groupe = rgpd
         response = client.post(
-            f"{API}/groupes/{groupe.id}/restaurer",
+            f"{API}/groupes/{groupe.id}/restore",
             json.dumps({}),
             content_type="application/json",
         )

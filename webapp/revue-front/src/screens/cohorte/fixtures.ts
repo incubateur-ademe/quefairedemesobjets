@@ -9,7 +9,8 @@ const NONE = {
   corriger_parent: false,
   reporter_correction: false,
   reporter_parent: false,
-  restaurer_correction: false,
+  restore_correction: false,
+  empty_correction: false,
   supprimer_correction: false,
   supprimer_parent: false,
 }
@@ -22,7 +23,7 @@ export function ligne(
   return {
     key: `${groupeId}:${champs.join(",")}`,
     champs,
-    cible: null,
+    target: null,
     statut: "AVALIDER",
     decision_par: null,
     decision_le: null,
@@ -112,8 +113,8 @@ export const COHORTE: CohorteDetail = {
     colonne_parent: true,
     shows_acteur_diff: true,
     can_restore: true,
-    lignes_par_acteur: false,
-    onglets: ["localisation", "annuaire"],
+    lignes_by_acteur: false,
+    tabs: ["localisation", "annuaire"],
     badge: null,
   },
 }
