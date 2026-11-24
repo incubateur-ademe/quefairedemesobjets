@@ -5,14 +5,6 @@
 -- PostgreSQL table (osm_elements) with columns: osm_id, kind, tags (jsonb),
 -- osm_version, osm_timestamp, osm_user, and geometry.
 --
--- Usage
--- ─────
---   osm2pgsql --create \
---       --output flex \
---       --style src/osm_2_pgsql.lua \
---       --schema osm \
---       --number-processes 4 \
---       osm-ds/datasets/france-261108.osm.pbf
 -- ============================================================================
 
 -- Configuration
