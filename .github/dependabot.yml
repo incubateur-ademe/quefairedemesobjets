@@ -150,3 +150,32 @@ updates:
       terraform-all:
         patterns:
           - "*"
+
+  # data-platform/*.Dockerfile are left out: their FROM takes its tag from
+  # ARG AIRFLOW_VERSION, which Dependabot does not resolve. The Airflow image
+  # follows apache-airflow in data-platform/pyproject.toml (uv entry above).
+  - package-ecosystem: "docker"
+    directories:
+      - "/webapp"
+      - "/webapp/nginx"
+      - "/nginx"
+      - "/ml_deduplication"
+    open-pull-requests-limit: 100
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "07:00" # UTC
+    cooldown:
+      default-days: 7
+    ignore:
+      # The Python minor follows requires-python, and Node stays on its LTS
+      # line: these bumps are made by hand.
+      - dependency-name: "python"
+        update-types:
+          ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+    groups:
+      docker-all:
+        patterns:
+          - "*"
