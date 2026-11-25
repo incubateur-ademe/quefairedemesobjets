@@ -1,0 +1,77 @@
+# The build-time scan (.github/actions/trivy-scan-and-push) sees an image
+# once: this one rescans the images running in prod every week, for the
+# vulnerabilities published since. Same Trivy action, thresholds and
+# .trivyignore. A finding fails the run.
+name: 🔍 Trivy scan of the prod images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1" # Monday, UTC
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: 🔍 ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # deploy.yml deploys these under the tag of the release (empty tag:
+          # the latest release)
+          - name: airflow-scheduler
+            repository: rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler
+          - name: airflow-webserver
+            repository: rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver
+          - name: airflow-dag-processor
+            repository: rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor
+          - name: nginx-gateway
+            repository: rg.fr-par.scw.cloud/ns-qfdmo/nginx-gateway
+          # The prod DAG runs prod-latest
+          - name: ml-deduplication-inference
+            repository: rg.fr-par.scw.cloud/ns-ml-deduplication-inference/ml-deduplication-inference
+            tag: prod-latest
+          - name: metabase
+            repository: metabase/metabase
+            tag-from: infrastructure/environments/prod/metabase_containers/terragrunt.hcl
+    steps:
+      # For .trivyignore, which Trivy reads from the working directory
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Image reference
+        id: ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ matrix.repository }}
+          TAG: ${{ matrix.tag }}
+          TAG_FROM: ${{ matrix.tag-from }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$TAG_FROM" ]]; then
+            TAG=$(sed -n 's/^ *tag_docker *= *"\([^"]*\)".*/\1/p' "$TAG_FROM")
+          elif [[ -z "$TAG" ]]; then
+            TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)
+          fi
+          [[ -n "$TAG" ]] || { echo "::error::no tag for $REPOSITORY"; exit 1; }
+          echo "ref=$REPOSITORY:$TAG" >> "$GITHUB_OUTPUT"
+          echo "Scanning $REPOSITORY:$TAG"
+
+      - name: "[🟣 Scaleway] Log in to the Scaleway Container registry"
+        if: startsWith(matrix.repository, 'rg.fr-par.scw.cloud/')
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: rg.fr-par.scw.cloud
+          username: nologin
+          password: ${{ secrets.SCALEWAY_DOCKER_SECRET }}
+
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.ref.outputs.ref }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
