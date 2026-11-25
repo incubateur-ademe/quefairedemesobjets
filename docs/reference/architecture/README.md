@@ -179,6 +179,7 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 | Plan de continuité d'activité (PCA)            | [`security/pca.md`](../security/pca.md)                       |
 | Plan de reprise d'activité (PRA)               | [`security/pra.md`](../security/pra.md)                       |
 | Maintien en conditions de sécurité (MCO / MCS) | [`security/mco-mcs.md`](../security/mco-mcs.md)               |
+| Gestion des incidents de sécurité              | [`security/incidents.md`](../security/incidents.md)           |
 | Revues régulières                              | [`security/reviews.md`](../security/reviews.md)               |
 
 ```{toctree}

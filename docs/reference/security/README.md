@@ -4,6 +4,8 @@
 
 The security policy is available here: [SECURITY.md](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/SECURITY.md)
 
+Incident handling, from detection to post-incident analysis: see [Gestion des incidents de sécurité](incidents.md).
+
 ## Monitoring
 
 ### Security monitoring
@@ -44,5 +46,6 @@ backups.md
 pca.md
 pra.md
 mco-mcs.md
+incidents.md
 reviews.md
 ```

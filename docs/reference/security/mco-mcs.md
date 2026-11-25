@@ -2,7 +2,7 @@
 
 Détection des vulnérabilités, délais de correction selon la sévérité, répartition des rôles et suivi des fins de vie des composants.
 
-> **Voir aussi** : [Revues régulières](reviews.md), [Inventaire des actifs](inventory.md), [Plan de continuité d'activité (PCA)](pca.md), [CI/CD](../infrastructure/ci-cd.md), [Monitoring](../infrastructure/monitoring.md), [Dépendances](../../how-to/development/dependencies.md), [Déploiement](../../how-to/deployment/deployment.md).
+> **Voir aussi** : [Revues régulières](reviews.md), [Gestion des incidents de sécurité](incidents.md), [Inventaire des actifs](inventory.md), [Plan de continuité d'activité (PCA)](pca.md), [CI/CD](../infrastructure/ci-cd.md), [Monitoring](../infrastructure/monitoring.md), [Dépendances](../../how-to/development/dependencies.md), [Déploiement](../../how-to/deployment/deployment.md).
 
 ## Détection des vulnérabilités
 
@@ -31,7 +31,7 @@ Une vulnérabilité sans correctif applicable dans l'immédiat peut être ignor�
 2. Évalue l'exposition : composant accessible depuis internet (webapp, API, gateway nginx) ou interne (Airflow, outils de build).
 3. Recherche une exploitation active (alerte CERT-FR, catalogue [KEV de la CISA](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)).
 4. Fixe la sévérité selon le tableau ci-dessous et le délai qui en découle.
-5. Si la vulnérabilité est exploitée, ou laisse craindre une compromission, ouvre la procédure d'incident.
+5. Si la vulnérabilité est exploitée, ou laisse craindre une compromission, ouvre la [procédure d'incident](incidents.md).
 
 ## Délais de correction
 
