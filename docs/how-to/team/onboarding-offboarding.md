@@ -93,25 +93,35 @@ Pour chaque ligne de la matrice où le rôle a un accès `Read` / `Write` / `Adm
 
 ## Procédure d'offboarding
 
-À réaliser par un **administrateur de la plateforme** **dans les 48 h** suivant le départ effectif.
+À réaliser par un **administrateur de la plateforme**, dans les délais suivants à compter du départ effectif :
 
-> ⚠️ **Priorité** : révoquer en premier les accès aux ressources critiques (GitHub, Scaleway, Scalingo, bases de données, coffre de secrets).
+| Périmètre                                                                                                                                                                               | Délai                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| **Accès critiques** : GitHub (organisation et Environments), Scaleway, Scalingo, coffre de secrets (Vaultwarden), comptes superuser Django / Wagtail, Airflow, bases de données de prod | **Le jour du départ**       |
+| **Autres accès** : Sentry, PostHog, Matomo, Cockpit, Mattermost, Notion, Tally, comptes Django / Wagtail non superuser                                                                  | **Sous 7 jours**            |
+| **Secrets partagés** connus de la personne                                                                                                                                              | **Renouvelés sous 7 jours** |
+
+Pour un départ planifié, les accès critiques sont retirés en fin de dernière journée. Pour un départ non planifié ou conflictuel, ils sont retirés dès que le départ est connu.
 
 ### 1. Inventorier les accès du membre sortant
 
 - [ ] Récupérer la matrice du rôle dans la section ci-dessus pour disposer de la liste exhaustive.
 - [ ] Identifier d'éventuels accès supplémentaires ouverts hors profil par défaut.
 
-### 2. Révoquer les comptes
-
-Pour chaque ligne de la matrice où le rôle avait un accès :
+### 2. Révoquer les accès critiques (le jour du départ)
 
 - [ ] **GitHub** : retirer de l'organisation `incubateur-ademe`. Vérifier qu'aucune branche / PR ouverte ne dépend exclusivement du membre.
 - [ ] **GitHub Environments** : retirer des reviewers / approbateurs `preprod`, `prod`.
-- [ ] **Scalingo** : retirer comme collaborateur.
 - [ ] **Scaleway** : supprimer le compte IAM et révoquer les clés API actives.
-- [ ] **Django Admin / Wagtail CMS / `/data/`** : désactiver l'utilisateur (`is_active = False`) — préférer la désactivation à la suppression pour conserver l'historique d'audit.
+- [ ] **Scalingo** : retirer comme collaborateur.
+- [ ] **Coffre de secrets (Vaultwarden)** : retirer le membre des collections partagées.
+- [ ] **Django Admin / Wagtail CMS / `/data/`** (comptes superuser) : désactiver l'utilisateur (`is_active = False`) — préférer la désactivation à la suppression pour conserver l'historique d'audit.
 - [ ] **Airflow** : désactiver l'utilisateur FAB.
+- [ ] **Bases de données de prod** : supprimer tout accès direct nominatif (rôle PostgreSQL, adresse IP autorisée). Les identifiants partagés sont traités à l'étape 4.
+
+### 3. Révoquer les autres accès (sous 7 jours)
+
+- [ ] **Django Admin / Wagtail CMS / `/data/`** (comptes non superuser) : désactiver l'utilisateur (`is_active = False`).
 - [ ] **Sentry** : retirer du projet.
 - [ ] **PostHog** : retirer du workspace.
 - [ ] **Matomo** : retirer.
@@ -119,26 +129,24 @@ Pour chaque ligne de la matrice où le rôle avait un accès :
 - [ ] **Mattermost** : retirer des canaux internes (le canal `lvao-tour-de-controle` doit être nettoyé même si la personne reste sur l'instance).
 - [ ] **Notion** : retirer du workspace, transférer la propriété des pages partagées.
 - [ ] **Tally** : retirer.
-- [ ] **Coffre de secrets** : retirer le membre.
 
-### 3. Faire tourner les secrets exposés
+### 4. Renouveler les secrets partagés (sous 7 jours)
 
-Pour tout secret auquel le membre avait accès :
+Pour tout secret partagé que le membre connaissait ou avait pu manipuler en clair, suivre la procédure de [Gestion des secrets](../../reference/security/secrets.md) :
 
-- [ ] **Rotation immédiate** des secrets qu'il avait pu manipuler en clair (selon procédure de [`secrets.md`](../../reference/security/secrets.md)) :
-  - `DATABASE_URL`, `SENTRY_DSN`, clés API Scaleway / Scalingo, tokens Mattermost / Notion / PostHog…
-  - Mettre à jour les variables Scalingo, Terragrunt (`secret_environment_variables` Airflow) et GitHub Environments.
-  - Redéployer la webapp et les containers Airflow.
+- [ ] Renouveler les secrets : `DATABASE_URL` et mots de passe PostgreSQL ([Rotating database passwords](../infrastructure/rotate_db_passwords.md)), `SENTRY_DSN`, clés API Scaleway / Scalingo, tokens Mattermost / Notion / PostHog…
+- [ ] Mettre à jour les variables Scalingo, les secrets des stacks dans Scaleway Secret Manager (`make -C infrastructure secrets-push`), les GitHub Environments et le coffre Vaultwarden.
+- [ ] Redéployer la webapp et les containers Airflow.
 - [ ] Vérifier l'absence d'activité suspecte post-départ via Sentry / logs Scaleway / journaux GitHub.
 
-### 4. Transférer les responsabilités
+### 5. Transférer les responsabilités
 
 - [ ] Réattribuer les PR ouvertes, issues assignées, pages Notion / Wagtail dont le membre était auteur.
 - [ ] Mettre à jour les éventuelles mentions du membre dans la documentation ou les fichiers `CODEOWNERS`.
 - [ ] Documenter dans le registre interne (date de départ, accès révoqués, secrets renouvelés, point bloquant éventuel).
 
-### 5. Confirmer
+### 6. Confirmer
 
-- [ ] Tous les accès listés dans la matrice du rôle sont effectivement révoqués.
-- [ ] Les secrets exposés ont été rotés.
+- [ ] Les accès critiques ont été révoqués le jour du départ, les autres accès sous 7 jours.
+- [ ] Les secrets partagés ont été renouvelés sous 7 jours.
 - [ ] Le registre interne est à jour.
