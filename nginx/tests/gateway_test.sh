@@ -213,6 +213,22 @@ check "preview upstream without {pr}: container stopped" "exited 1" \
   "$(docker inspect -f '{{.State.Status}} {{.State.ExitCode}}' "$P-badpreview")"
 check "preview upstream without {pr}: reason logged" "WEBAPP_PREVIEW_UPSTREAM must be" \
   "$(docker logs "$P-badpreview" 2>&1)"
+burst() { # count, path, X-Forwarded-For: status codes of as many quick requests
+  docker exec "$P-gateway" sh -c 'for i in $(seq "$1"); do
+    curl -s -o /dev/null -w "%{http_code} " -H "Host: site.test" \
+      -H "X-Forwarded-For: $3" "http://127.0.0.1:8080$2"
+  done' sh "$@"
+}
+check "login: rate limited per client IP" "429" "$(burst 12 /admin/login/ 203.0.113.1)"
+check "login: forged first X-Forwarded-For entry ignored" "429" \
+  "$(burst 1 /admin/login/ '198.51.100.7, 203.0.113.1')"
+check "login: another client IP not limited" "200" "$(burst 1 /admin/login/ 203.0.113.2)"
+check "cms login: rate limited" "429" "$(burst 12 /cms/login/ 203.0.113.3)"
+check "api: rate limited beyond the burst" "429" "$(burst 100 /api/v1/x 203.0.113.4)"
+case "$(burst 100 /page.html 203.0.113.5)" in
+  *429*) echo "FAILED  pages: not rate limited"; fail=1 ;;
+  *) echo "ok      pages: not rate limited" ;;
+esac
 logs="$(docker logs "$P-gateway" 2>&1)"
 check "log_format: cache status and timings" "cache=HIT" "$logs"
 check "log_format: upstream connect time" "uct=" "$logs"
