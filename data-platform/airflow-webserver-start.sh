@@ -14,8 +14,8 @@ if [[ "${should_create_user}" == "true" || "${should_create_user}" == "1" || "${
   echo "Creating admin user..."
   airflow users create \
     --role Admin \
-    --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow} \
-    --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow} \
+    --username "${_AIRFLOW_WWW_USER_USERNAME:?_AIRFLOW_WWW_USER_USERNAME is required}" \
+    --password "${_AIRFLOW_WWW_USER_PASSWORD:?_AIRFLOW_WWW_USER_PASSWORD is required}" \
     --email ${_AIRFLOW_WWW_USER_EMAIL:-admin@example.com} \
     --firstname Admin \
     --lastname Admin || true

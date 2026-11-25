@@ -31,3 +31,11 @@ Les comptes Django Admin, Wagtail CMS et back-office `/data/` partagent le même
 4. **Privilèges** : vérifier que `is_superuser` est réservé aux DEV ; retirer les droits superflus (groupes, permissions explicites) des comptes non superuser.
 5. **Comptes techniques** : S'assurer que tous les comptes sont reliés à un utilisateur réel (pas de compte technique ou de test).
 6. Consigner la revue dans [`reviews.md`](reviews.md) §Comptes Django Admin.
+
+## Modification d'un compte d'administration
+
+À chaque ajout ou retrait de droits, ou changement de rôle, sur un compte d'administration (Django, Wagtail, Airflow, Scaleway, Scalingo, GitHub), la personne qui fait la modification revoit l'ensemble des droits du compte au regard de la [matrice d'accès](../../how-to/team/onboarding-offboarding.md) et retire ce qui n'est plus nécessaire.
+
+## Tentatives de connexion répétées
+
+Le nginx placé devant la webapp limite `/admin/login/` et `/cms/login/` à 5 requêtes par minute et par adresse IP, avec une rafale de 10 (réponse 429), voir [Sécurité réseau](network.md). La connexion à Airflow n'est pas limitée.

@@ -102,6 +102,26 @@ map $http_x_forwarded_proto $forwarded_proto {
     ""      $scheme;
 }
 
+# Rate limits key on the client IP: the last X-Forwarded-For entry, appended
+# by the platform's edge (Scalingo, Scaleway). Earlier entries come from the
+# client and can be forged.
+map $http_x_forwarded_for $client_ip {
+    default                 $remote_addr;
+    "~(?<last>[^,\s]+)\s*$" $last;
+}
+# An empty key is not counted: each zone only limits its own routes.
+map $uri $login_client {
+    default                    "";
+    "~^/(?:admin|cms)/login/"  $client_ip;
+}
+map $uri $api_client {
+    default   "";
+    "~^/api/" $client_ip;
+}
+limit_req_zone $login_client zone=login:10m rate=5r/m;
+limit_req_zone $api_client zone=api:10m rate=10r/s;
+limit_req_status 429;
+
 upstream gunicorn {
 <% if upstream_tls %>
     # resolve: follow the platform's IP changes without dropping the
@@ -129,6 +149,10 @@ server {
     listen <%= ENV["PORT"] %>;
 <% end %>
     server_name <%= env.call("NGINX_SERVER_NAMES", "_") %>;
+
+    # Inherited by every location, none sets its own limit_req.
+    limit_req zone=login burst=10 nodelay;
+    limit_req zone=api burst=50 nodelay;
 <% if env.call("NGINX_GZIP") == "1" %>
 
     # Requests come through the Scaleway proxy, hence `gzip_proxied any`.
