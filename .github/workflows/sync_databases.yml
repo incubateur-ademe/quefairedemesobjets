@@ -58,6 +58,9 @@ jobs:
           USE_LATEST_BACKUP: ${{ inputs.use_latest_backup }}
         run: |
           DB_URL=${PREPROD_DB_WEBAPP_DSN} make -e db-restore-preprod-from-prod
+      - name: Anonymise personal data
+        run: |
+          psql -d "${PREPROD_DB_WEBAPP_DSN}" -v ON_ERROR_STOP=1 -f scripts/sql/anonymise_personal_data.sql
       - name: Run post-restore Django commands
         run: |
           scalingo --app ${PREPROD_APP} run "cd webapp && python manage.py migrate && python manage.py reinitialize_suggestions && python manage.py create_remote_db_server"

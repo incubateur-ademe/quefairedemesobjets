@@ -107,6 +107,7 @@ The `sync_databases.yml` workflow synchronizes production data to preproduction.
 **Actions performed**:
 
 - Restore the production database to preproduction
+- Empty sessions and contact form submissions (`scripts/sql/anonymise_personal_data.sql`)
 - Run migrations in a one-off container
 - Reset the suggestions table
 - Create the remote database server between webapp and warehouse

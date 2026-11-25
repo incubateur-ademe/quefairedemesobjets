@@ -15,9 +15,10 @@ Stratégies de sauvegarde des données applicatives, des bases et de l'état d'i
 
 ## Synchronisation prod → preprod
 
-| Élément           | Stratégie                                                 |
-| ----------------- | --------------------------------------------------------- |
-| Sync hebdomadaire | Hebdo dimanche minuit via `sync_databases.yml` (DB + S3). |
+| Élément              | Stratégie                                                                                    |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| Sync hebdomadaire    | Hebdo dimanche minuit via `sync_databases.yml` (DB + S3).                                    |
+| Données personnelles | Juste après la copie, les sessions et les réponses au formulaire de contact sont supprimées. |
 
 Voir [CI/CD — Database synchronization](../infrastructure/ci-cd.md#database-synchronization) pour le détail du workflow.
 
