@@ -168,17 +168,19 @@ Pour le détail de chaque brique, suivre le lien correspondant.
 
 ### Sécurité
 
-| Sujet                                | Référence                                                     |
-| ------------------------------------ | ------------------------------------------------------------- |
-| Inventaire des actifs à protéger     | [`security/inventory.md`](../security/inventory.md)           |
-| Prestataires & exigences de sécurité | [`security/providers.md`](../security/providers.md)           |
-| Authentification & autorisations     | [`security/authentication.md`](../security/authentication.md) |
-| Sécurité réseau                      | [`security/network.md`](../security/network.md)               |
-| Gestion des secrets                  | [`security/secrets.md`](../security/secrets.md)               |
-| Sauvegardes                          | [`security/backups.md`](../security/backups.md)               |
-| Plan de continuité d'activité (PCA)  | [`security/pca.md`](../security/pca.md)                       |
-| Plan de reprise d'activité (PRA)     | [`security/pra.md`](../security/pra.md)                       |
-| Revues régulières                    | [`security/reviews.md`](../security/reviews.md)               |
+| Sujet                                          | Référence                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------- |
+| Inventaire des actifs à protéger               | [`security/inventory.md`](../security/inventory.md)           |
+| Prestataires & exigences de sécurité           | [`security/providers.md`](../security/providers.md)           |
+| Authentification & autorisations               | [`security/authentication.md`](../security/authentication.md) |
+| Sécurité réseau                                | [`security/network.md`](../security/network.md)               |
+| Gestion des secrets                            | [`security/secrets.md`](../security/secrets.md)               |
+| Sauvegardes                                    | [`security/backups.md`](../security/backups.md)               |
+| Plan de continuité d'activité (PCA)            | [`security/pca.md`](../security/pca.md)                       |
+| Plan de reprise d'activité (PRA)               | [`security/pra.md`](../security/pra.md)                       |
+| Maintien en conditions de sécurité (MCO / MCS) | [`security/mco-mcs.md`](../security/mco-mcs.md)               |
+| Gestion des incidents de sécurité              | [`security/incidents.md`](../security/incidents.md)           |
+| Revues régulières                              | [`security/reviews.md`](../security/reviews.md)               |
 
 ```{toctree}
 :maxdepth: 2

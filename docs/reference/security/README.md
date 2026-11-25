@@ -4,6 +4,8 @@
 
 The security policy is available here: [SECURITY.md](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/SECURITY.md)
 
+Incident handling, from detection to post-incident analysis: see [Gestion des incidents de sécurité](incidents.md).
+
 ## Monitoring
 
 ### Security monitoring
@@ -17,6 +19,10 @@ The following bots are configured in CI to inspect the code:
 - CodeQL: code quality checks
 - GitGuardian: secret and password detection
 - Dependabot: dependency updates (once a week)
+- Trivy: scan of the Docker images at build time, blocking fixable CRITICAL and HIGH vulnerabilities
+
+Patch delays by severity and end-of-life tracking: see [Maintien en conditions opérationnelles et de sécurité](mco-mcs.md).
+
 - ruff: enforcement of Python code standards
 - prettier, black: code formatting
 
@@ -39,5 +45,7 @@ secrets.md
 backups.md
 pca.md
 pra.md
+mco-mcs.md
+incidents.md
 reviews.md
 ```
