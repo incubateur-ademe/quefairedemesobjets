@@ -6,12 +6,12 @@ Stratégies de sauvegarde des données applicatives, des bases et de l'état d'i
 
 ## Backups automatiques
 
-| Élément                                    | Stratégie                                                                                         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| DB Webapp / Warehouse / Airflow (Scaleway) | Backups natifs RDB — rétention point-in-time 24 h + dumps quotidiens 7 j, **copie cross-region**. |
-| Bucket `qfdmo-interface`                   | Versioning S3 Scaleway.                                                                           |
-| Bucket `lvao-opendata`                     | Snapshots horodatés compilés par le DAG `export_opendata_dag` en plus du `acteurs.csv` courant.   |
-| État Terraform                             | Bucket `lvao-terraform-state` (versionné, chiffré).                                               |
+| Élément                                    | Stratégie                                                                                                                                                                   |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB Webapp / Warehouse / Airflow (Scaleway) | Backups natifs RDB — rétention point-in-time 24 h + dumps quotidiens conservés 30 j (webapp) et 7 j (warehouse, qui héberge aussi la base Airflow), **copie cross-region**. |
+| Bucket `qfdmo-interface`                   | Versioning S3 Scaleway.                                                                                                                                                     |
+| Bucket `lvao-opendata`                     | Snapshots horodatés compilés par le DAG `export_opendata_dag` en plus du `acteurs.csv` courant.                                                                             |
+| État Terraform                             | Bucket `lvao-terraform-state` (versionné, chiffré).                                                                                                                         |
 
 ## Synchronisation prod → preprod
 

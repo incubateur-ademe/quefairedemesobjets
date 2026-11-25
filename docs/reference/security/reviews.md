@@ -14,6 +14,8 @@ Plusieurs éléments du périmètre sécurité & conformité doivent être **rev
 - L'**accessibilité numérique (RGAA)** : pour respecter l'obligation légale de conformité au Référentiel Général d'Amélioration de l'Accessibilité (audit, déclaration, schéma pluriannuel).
 - Les **exigences de sécurité des prestataires** : pour vérifier le maintien des SLA, certifications (ISO 27001, HDS, SecNumCloud…) et DPA RGPD des fournisseurs critiques.
 - Les **comptes Django Admin** (`/admin/`) et les **comptes Aiflow** : pour s'assurer que seuls les membres actifs de l'équipe disposent des droits attendus (staff, superuser, groupes/permissions).
+- Les **règles de filtrage** : pour vérifier que seuls les flux nécessaires restent autorisés.
+- La **configuration** des applicatifs et des hébergeurs : pour vérifier qu'elle suit toujours les recommandations de sécurité.
 
 Ce document centralise :
 
@@ -40,6 +42,8 @@ Ce document centralise :
 | **Exigences de sécurité des prestataires**                    | Annuelle                   | [`providers.md`](providers.md) §Procédure de revue annuelle                                                                                                                                                                      | —              | 2027-06-11         |
 | **Comptes Django Admin** (`/admin/`)                          | Semestrielle               | [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et Airflow                                                                                                                                 | —              | 2026-12-11         |
 | **Comptes Airflow**                                           | Semestrielle               | [`authentication.md`](authentication.md) §Procédure de revue des comptes Django Admin et Airflow                                                                                                                                 | —              | 2026-12-11         |
+| **Règles de filtrage**                                        | Annuelle                   | [`network.md`](network.md) §Revue des règles de filtrage                                                                                                                                                                         | —              | 2027-06-11         |
+| **Configuration des applicatifs et hébergeurs**               | Annuelle                   | §Configuration des applicatifs et hébergeurs ci-dessous                                                                                                                                                                          | —              | 2027-06-11         |
 
 ## Journaux
 
@@ -114,6 +118,27 @@ Le projet est soumis à l'obligation légale d'accessibilité numérique (RGAA, 
 | ---------- | -------------- | ------------- | ------------- | ------------ |
 | 18/06/2026 | Nicolas Oudard | prod          | tous          | —            |
 | —          | —              | prod          | —             | —            |
+
+### Règles de filtrage
+
+À chaque revue : appliquer la procédure décrite dans [`network.md`](network.md) §Revue des règles de filtrage puis consigner ci-dessous.
+
+| Date | Auteur | Périmètre vérifié | Observations |
+| ---- | ------ | ----------------- | ------------ |
+| —    | —      | —                 | —            |
+
+### Configuration des applicatifs et hébergeurs
+
+À chaque revue :
+
+1. Lancer `uv run python manage.py check --deploy` depuis `webapp/` avec les variables de prod, et justifier ou corriger chaque avertissement (`X_FRAME_OPTIONS = "ALLOWALL"` est voulu pour les iframes).
+2. Vérifier les en-têtes HTTP du site en prod (HSTS, `X-Content-Type-Options`, `Referrer-Policy`, cookies `Secure`).
+3. Vérifier la configuration des bases (TLS obligatoire, chiffrement au repos, sauvegardes) et des hébergeurs (accès, rôles IAM) par rapport à l'[inventaire](inventory.md).
+4. Consigner la revue ci-dessous.
+
+| Date | Auteur | Périmètre vérifié | Observations |
+| ---- | ------ | ----------------- | ------------ |
+| —    | —      | —                 | —            |
 
 ## Ajouter une nouvelle revue récurrente
 
