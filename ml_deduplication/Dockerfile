@@ -1,7 +1,7 @@
 ############################################
 # Single-stage: Python 3.13 GPU-capable inference image
 ############################################
-FROM python:3.13-slim-bookworm
+FROM python:3.13.18-slim-bookworm
 
 # Path (relative to the build context) of the directory containing the trained
 # model artifacts (model.json, calibrator.pkl, training_results.json). These are

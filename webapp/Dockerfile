@@ -1,7 +1,7 @@
 ############################################
 # Stage 1: build frontend assets (Node)
 ############################################
-FROM node:24-slim AS node_build
+FROM node:24.22.3-slim AS node_build
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ RUN npm -w webapp/revue-front run build
 ############################################
 # Stage 2: system packages needed at runtime
 ############################################
-FROM python:3.12-slim-bookworm AS runtime_base
+FROM python:3.12.16-slim-bookworm AS runtime_base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
