@@ -16,6 +16,7 @@ dependencies = [
   "numpy>=1.26.0,<2",
   "pandas<2.2",
   "pyarrow>=23.0.1",
+  "pydantic>=2.13.4",
   "python-decouple~=3.8",
   "python-levenshtein>=0.27.1,<0.28",
   "scikit-learn==1.9.0",
@@ -31,6 +32,7 @@ dependencies = [
 DJANGO_SETTINGS_MODULE = "settings.test"
 
 [tool.ruff]
+src = ["dags"]
 exclude = [
   ".bzr",
   ".direnv",

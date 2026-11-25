@@ -19,6 +19,12 @@ package = false
 [tool.uv.sources]
 webapp-quefairedemesobjetsetdechets = { workspace = true }
 
+[tool.ty.environment]
+# First-party modules of the data platform live in data-platform/dags and are
+# not installed as a package in the venv, so expose them to ty's module
+# resolution. "dags" comes first: it holds the osm/shared/utils/... packages.
+root = ["./data-platform/dags", "./data-platform"]
+
 [dependency-groups]
 lint = [
     "black>=26.5.1,<27",

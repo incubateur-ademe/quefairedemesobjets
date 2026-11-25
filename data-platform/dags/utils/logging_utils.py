@@ -90,12 +90,12 @@ def preview(value_name: str, value: Any) -> None:
             .sort_values(by="Column", ascending=True)
             .to_string(index=False)
         )
-        log.info("Première ligne:")
+        log.info("Première ligne :")
         log.info(json_dumps(value.head(1).to_dict(orient="records")))
-        log.info("Dernière ligne:")
+        log.info("Dernière ligne :")
         log.info(json_dumps(value.tail(1).to_dict(orient="records")))
     elif isinstance(value, list):
-        log.info("3 premières entrées:")
+        log.info("3 premières entrées :")
         log.info(json_dumps(value[:3]))
     elif isinstance(value, dict):
         log.info(json_dumps(value))
@@ -126,24 +126,30 @@ def preview_dict_subsets(d: dict, key_pattern: str) -> None:
 def preview_df_as_markdown(label: str, df: pd.DataFrame, groupby=None) -> None:
     """Variation de la preview pour une dataframe de manière à
     obtenir une table lisible. On ne filtre pas la df ici, c'est
-    à l'appelant de décider (ex: this("me",df.head(10))
+    à l'appelant de décider (ex: preview_df_as_markdown("me",df.head(10))
 
-    groupby: permet par exemple de grouper la df en sous df pour
+    Parameters
+    ----------
+        groupby: permet par exemple de grouper la df en sous df pour
     l'affichage du clustering
     """
     # On convertit les types numpy en structures JSON-compatibles
     # pour éviter les soucis avec tabulate/to_markdown
     df = df_convert_numpy_to_jsonify(df.copy())
     size = size_info_get(df)
-    log = logger_get()
-    log.info(f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽")
+    logger = logger_get()
+    logger.info(
+        f"::group::📦 {label}: taille={size}, 🔽 Cliquer pour révéler la table 🔽"
+    )
     # Displaying 1 markdown table per group
     if groupby:
         cols_groupby = [groupby] if isinstance(groupby, str) else groupby
         cols_other = [col for col in df.columns if col not in cols_groupby]
         for group, group_df in df.groupby(cols_groupby):
             df_md = group_df[cols_other].to_markdown(index=False)
-            log.info(f"\n\n📦 GROUP: {lst(cols_groupby)}={lst(group)}\n\n{df_md}\n\n")
+            logger.info(
+                f"\n\n📦 GROUP: {lst(cols_groupby)}={lst(group)}\n\n{df_md}\n\n"
+            )
     else:
         # No grouping, display the whole dataframe
         # But if more than 1K line need to split or it causes big
@@ -151,12 +157,14 @@ def preview_df_as_markdown(label: str, df: pd.DataFrame, groupby=None) -> None:
         limit = 500
         split = int(limit / 2)
         if len(df) > limit:
-            log.info(f"> {limit} lignes: affichage des {split} lignes de début/fin")
-            log.info(f"\n {split} début:\n" + df.head(split).to_markdown(index=False))
-            log.info(f"\n {split} fin:\n" + df.tail(split).to_markdown(index=False))
+            logger.info(f"> {limit} lignes: affichage des {split} lignes de début/fin")
+            logger.info(
+                f"\n {split} début:\n" + df.head(split).to_markdown(index=False)
+            )
+            logger.info(f"\n {split} fin:\n" + df.tail(split).to_markdown(index=False))
         else:
-            log.info("\n" + df.to_markdown(index=False))
-    log.info("::endgroup::")
+            logger.info("\n" + df.to_markdown(index=False))
+    logger.info("::endgroup::")
 
 
 def banner_string(message: str) -> str:
@@ -165,9 +173,9 @@ def banner_string(message: str) -> str:
     (et pas en fin de ligne)"""
     return f"""
 
-{'=' * 80}
+{"=" * 80}
 {message}
-{'=' * 80}
+{"=" * 80}
     """
 
 
