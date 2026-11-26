@@ -192,7 +192,7 @@ services:
   webapp-db:
     # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
     platform: ${POSTGIS_IMAGE_PLATFORM:-}
-    image: imresamu/postgis:16-3.5-alpine # The official PostGIS image ships no ARM build
+    image: imresamu/postgis:18-3.5-alpine # The official PostGIS image ships no ARM build
     environment:
       - POSTGRES_USER=webapp
       - POSTGRES_PASSWORD=webapp # pragma: allowlist secret
@@ -211,7 +211,7 @@ services:
   warehouse-db:
     # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
     platform: ${POSTGIS_IMAGE_PLATFORM:-}
-    image: imresamu/postgis:16-3.5-alpine # The official PostGIS image ships no ARM build
+    image: imresamu/postgis:18-3.5-alpine # The official PostGIS image ships no ARM build
     environment:
       - POSTGRES_USER=warehouse
       - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
