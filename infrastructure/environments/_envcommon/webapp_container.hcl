@@ -53,19 +53,17 @@ inputs = {
   # call its generated domain (.functions.fnc.fr-par.scw.cloud) with the
   # X-Forwarded-Host of their choice. Domains declared in env.hcl. The probes
   # go through HealthzMiddleware, whatever the host.
-  ALLOWED_HOSTS = join(",", concat(
+  ALLOWED_HOSTS = join(",", distinct(concat(
     [local.env.webapp_base_domain, local.env.webapp_gateway_domain],
     local.env.webapp_alias_domains,
     [".functions.fnc.fr-par.scw.cloud"],
-  ))
+  )))
   BASE_URL = "https://${local.env.webapp_base_domain}"
 
   AWS_S3_REGION_NAME  = "fr-par"
   AWS_S3_ENDPOINT_URL = "https://s3.fr-par.scw.cloud"
 
   extra_environment_variables = {
-    # bin/post_deploy runs in CI before the rollout, not at container start.
-    RUN_MIGRATIONS_ON_START = "false"
     # templates/admin/base.html and servers.conf.erb test this exact value.
     ENVIRONMENT                = local.env.webapp_environment
     BASE_DOMAIN                = local.env.webapp_base_domain
@@ -86,7 +84,9 @@ inputs = {
     dependency.database.outputs.webapp_database_name,
   )
 
-  extra_secret_environment_variables = {
+  # A preview has no warehouse: without DB_WAREHOUSE, bin/post_deploy skips
+  # the schemas dbt needs.
+  extra_secret_environment_variables = local.env.warehouse_enabled ? {
     DB_WAREHOUSE = format(
       "postgresql://%s:%s@%s:%s/%s?sslmode=require", # pragma: allowlist secret
       dependency.database.outputs.warehouse_db_username,
@@ -95,5 +95,5 @@ inputs = {
       dependency.database.outputs.warehouse_endpoint_port,
       dependency.database.outputs.warehouse_database_name,
     )
-  }
+  } : {}
 }

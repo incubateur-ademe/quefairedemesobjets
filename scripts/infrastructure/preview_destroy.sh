@@ -5,6 +5,8 @@
 #   database   preview_pr_<n>       on the lvao-preprod-webapp RDB instance
 #   user       preview_pr_<n>       idem
 #   bucket     lvao-pr-<n>-media
+#   domain     pr-<n>.<preview domain> on the lvao-nginx container of
+#              lvao-preprod-gateway
 #   tf state   s3://lvao-terraform-state/preview/pr-<n>/
 #
 # Usage: preview_destroy.sh [--dry-run] <pr_number> [<pr_number> ...]
@@ -24,6 +26,14 @@ NAMESPACE_ID=$(scw container namespace list name=qfdmod-preview region="$REGION"
 INSTANCE_ID=$(scw rdb instance list name=lvao-preprod-webapp region="$REGION" -o json | jq -r '.[0].id')
 [[ "$NAMESPACE_ID" != "null" && "$INSTANCE_ID" != "null" ]] \
   || { echo "ERROR: preview namespace or preprod RDB instance not found" >&2; exit 1; }
+# The preprod gateway, which holds the preview domains; empty if it is not there
+GATEWAY_ID=""
+GATEWAY_NAMESPACE_ID=$(scw container namespace list name=lvao-preprod-gateway region="$REGION" -o json \
+  | jq -r '[.[] | select(.name == "lvao-preprod-gateway")][0].id // empty')
+if [[ -n "$GATEWAY_NAMESPACE_ID" ]]; then
+  GATEWAY_ID=$(scw container container list namespace-id="$GATEWAY_NAMESPACE_ID" name=lvao-nginx region="$REGION" -o json \
+    | jq -r '[.[] | select(.name == "lvao-nginx")][0].id // empty')
+fi
 
 run() {
   if $DRY_RUN; then echo "    [dry-run] $*"; else "$@" > /dev/null; fi
@@ -32,6 +42,15 @@ run() {
 for pr in "$@"; do
   [[ "$pr" =~ ^[0-9]+$ ]] || { echo "ERROR: invalid PR number '$pr'" >&2; exit 2; }
   echo "→ pr-$pr"
+
+  if [[ -n "$GATEWAY_ID" ]]; then
+    scw container domain list container-id="$GATEWAY_ID" region="$REGION" -o json \
+      | jq -r --arg p "pr-$pr." '.[] | select(.hostname | startswith($p)) | "\(.id) \(.hostname)"' \
+      | while read -r domain_id hostname; do
+          echo "  domain $hostname on the preprod gateway"
+          run scw container domain delete "$domain_id" region="$REGION"
+        done
+  fi
 
   container_id=$(scw container container list namespace-id="$NAMESPACE_ID" name="lvao-pr-$pr-webapp" region="$REGION" -o json \
     | jq -r '.[0].id // empty')

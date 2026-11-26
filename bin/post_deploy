@@ -20,7 +20,10 @@ python manage.py enable_trigram
 
 python manage.py clearsessions
 python manage.py clear_cache --all
-python manage.py create_remote_db_server
+# Schemas dbt reads across the two databases: a preview has no warehouse.
+if [[ -n "${DB_WAREHOUSE:-}" ]]; then
+  python manage.py create_remote_db_server
+fi
 
 # Purge orphan base SearchTerm index entries (django-modelsearch #58). Idempotent.
 python manage.py purge_orphan_searchterm_index

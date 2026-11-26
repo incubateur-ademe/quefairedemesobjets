@@ -13,6 +13,9 @@ locals {
   # servers.conf.erb test.
   webapp_environment = "production"
 
+  # The webapp reads the warehouse (DB_WAREHOUSE); a preview has none.
+  warehouse_enabled = true
+
   # Host names of the webapp, the only ones Django accepts (ALLOWED_HOSTS).
   # base: canonical domain (BASE_URL). gateway: served by the gateway until
   # the DNS switch, under the existing wildcard CNAME. aliases: other domains
