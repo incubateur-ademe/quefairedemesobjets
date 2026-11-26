@@ -1,10 +1,20 @@
 -- ============================================================================
--- osm2pgsql v2 flex style — unified nodes + ways with tags
+-- osm2pgsql v2 flex style — ingestion of QFDMO-relevant OSM elements
 --
--- Imports OSM nodes and ways that carry at least one tag into a single
--- PostgreSQL table (osm_elements) with columns: osm_id, kind, tags (jsonb),
+-- Imports OSM nodes and ways carrying at least one QFDMO-relevant tag into a
+-- single PostgreSQL table (base_osm) with columns: osm_id, tags (jsonb),
 -- osm_version, osm_timestamp, osm_user, and geometry.
 --
+-- Filter philosophy:
+--   - The filter is deliberately GENEROUS: an element is kept as soon as at
+--     least one of its tags (key=value, lowercased) is in the whitelist
+--     `relevant_tag_values` below (QFDMO scope: drop-off/recycling, repair,
+--     second-hand/reuse, rental).
+--   - The strict mapping to the acteur schema (actions, proposition
+--     services, acteur types, ...) is done DOWNSTREAM (base_osm -> acteur
+--     candidates), not here. We prefer to import a bit too wide rather than
+--     being forced to re-run osm2pgsql on the full France PBF to recover a
+--     wrongly excluded category.
 -- ============================================================================
 
 -- Configuration
@@ -49,23 +59,72 @@ local function has_tags(tags)
 end
 
 -- ---------------------------------------------------------------------------
--- Helper: Filter the nodes to avoid non useful data
+-- Whitelist of QFDMO-relevant tags, as "key=value" strings (lowercase).
+--
+-- All tags of an element are inspected: a node/way is kept as soon as ONE of
+-- its tags matches an entry. An element with several tags (e.g. building=yes
+-- + shop=bicycle) is thus imported through its relevant tag.
 -- ---------------------------------------------------------------------------
-local relevant_tags = {
-    amenity = true,
-    building = true,
-    craft = true,
-    healthcare = true,
-    landuse = true,
-    leisure = true,
-    office = true,
-    shop = true,
-    telecom = true,
-    tourism = true
+local relevant_tag_values = {
+    -- 1. Drop-off / recycling / donation (broad: déchèteries, recyclings
+    --    points, give boxes; accepted materials are detailed by the
+    --    recycling:*=yes subkeys on the object itself)
+    ["amenity=recycling"] = true,       -- déchèterie (recycling_type=centre)
+                                        -- or recycling point
+                                        -- (recycling_type=container)
+    ["amenity=givebox"] = true,         -- boîte à dons
+
+    -- 2. Shops: repair / second-hand / reuse
+    ["shop=bicycle"] = true,            -- bike sales and/or repair
+    ["shop=second_hand"] = true,        -- dépôt-vente, second-hand, ressourcerie
+    ["shop=charity"] = true,            -- charity / reuse shop
+    ["shop=antiques"] = true,           -- antiques / flea market
+    ["shop=electronics"] = true,        -- electronics / electrical appliances
+    ["shop=mobile_phone"] = true,
+    ["shop=computer"] = true,
+    ["shop=appliance"] = true,          -- large appliances (repair)
+    ["shop=furniture"] = true,          -- furniture
+    ["shop=books"] = true,              -- books (second-hand)
+    ["shop=clothes"] = true,
+    ["shop=clothing"] = true,
+    ["shop=footwear"] = true,
+    ["shop=shoes"] = true,
+    ["shop=musical_instrument"] = true, -- musical instruments
+    ["shop=jewelry"] = true,
+    ["shop=jewellery"] = true,
+    ["shop=optician"] = true,           -- optician (repair)
+    ["shop=tools"] = true,              -- tools
+
+    -- 3. Craftspeople / specialists (repair)
+    ["craft=shoe_repair"] = true,
+    ["craft=shoemaker"] = true,
+    ["craft=tailor"] = true,
+    ["craft=seamstress"] = true,
+    ["craft=watch_repair"] = true,
+    ["craft=key_cutter"] = true,
+    ["craft=locksmith"] = true,
+    ["craft=electronics_repair"] = true,
+    ["craft=bicycle_repair"] = true,
+    ["craft=upholsterer"] = true,
+    ["craft=jeweller"] = true,
+    ["craft=jewelry"] = true,
+
+    -- 4. Rental / sharing
+    ["amenity=bicycle_rental"] = true,  -- bike rental
 }
+
+-- Deliberately excluded (not in QFDMO scope of object repair/reuse/
+-- recycling): building trades (craft=plumber, craft=electrician, ...),
+-- food & hospitality, health, tourism, leisure, offices, telecom,
+-- landuse, and standalone `building=*` tags.
+
+-- ---------------------------------------------------------------------------
+-- Helper: return true if at least one tag is in the whitelist
+-- ---------------------------------------------------------------------------
 local function has_relevant_tags(tags)
     for k, v in pairs(tags) do
-        if relevant_tags[k] then
+        local tag = string.lower(tostring(k)) .. "=" .. string.lower(tostring(v))
+        if relevant_tag_values[tag] then
             return true
         end
     end
