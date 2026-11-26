@@ -410,6 +410,10 @@ uv<span class="w"> </span>add<span class="w"> </span>--package<span class="w"> <
 uv<span class="w"> </span>add<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>&lt;package&gt;
 </pre></div>
 </div>
+<p>Cooldown : <code class="docutils literal notranslate"><span class="pre">exclude-newer</span> <span class="pre">=</span> <span class="pre">&quot;7</span> <span class="pre">days&quot;</span></code> dans le <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> racine empêche uv de choisir une version publiée depuis moins de 7 jours, afin de se prémunir des supply chain attacks. La CI installe avec <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--locked</span></code> : un <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> généré en contournant ce réglage la fait échouer. Pour un correctif de sécurité urgent, ajouter une exception ciblée dans <code class="docutils literal notranslate"><span class="pre">[tool.uv]</span></code> :</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">exclude-newer-package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">&lt;</span><span class="n">package</span><span class="err">&gt;</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
 <section id="deploiement-scalingo-webapp">
 <h3>Déploiement Scalingo (webapp)<a class="headerlink" href="#deploiement-scalingo-webapp" title="Lien vers cette rubrique">¶</a></h3>
 <p>Le déploiement se fait <strong>depuis la racine du monorepo</strong> (pas de <code class="docutils literal notranslate"><span class="pre">PROJECT_DIR</span></code>). Le buildpack Python voit le <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> racine et exécute <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">sync</span> <span class="pre">--locked</span> <span class="pre">--no-default-groups</span></code>, ce qui installe le membre webapp via la dépendance déclarée dans le <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> racine.</p>
@@ -425,11 +429,11 @@ uv<span class="w"> </span>add<span class="w"> </span>--group<span class="w"> </s
 </pre></div>
 </div>
 <p>Pour ajouter une dépendance (depuis la racine du repo) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>install<span class="w"> </span>&lt;package&gt;<span class="w"> </span>--workspace<span class="w"> </span>webapp<span class="w"> </span>--before<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>-v<span class="w"> </span>-7d<span class="w"> </span>+%Y-%m-%d<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="c1"># testé sur MacOS et Debian</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>install<span class="w"> </span>&lt;package&gt;<span class="w"> </span>--workspace<span class="w"> </span>webapp
 </pre></div>
 </div>
-<p>option <code class="docutils literal notranslate"><span class="pre">--dev</span></code> pour les dépendances de développement
-Note : on recommande un cooldown de 7 jours pour les nouvelles dépendances afin de se prémunir des supply chain attacks.</p>
+<p>option <code class="docutils literal notranslate"><span class="pre">--dev</span></code> pour les dépendances de développement</p>
+<p>Cooldown : <code class="docutils literal notranslate"><span class="pre">min-release-age=7</span></code> dans le <code class="docutils literal notranslate"><span class="pre">.npmrc</span></code> empêche npm de choisir une version publiée depuis moins de 7 jours (npm 11.10 minimum, ignoré par npm 10). <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">ci</span></code> ne vérifie pas l’âge des versions déjà présentes dans le <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code>.</p>
 </section>
 </section>
 
