@@ -142,7 +142,9 @@ PARAMS = {
         # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
         examples=dropdown_sources,
         description_md="""**➕ INCLUSION ACTEURS**: seuls ceux qui proviennent
-                de ces sources (opérateur **OU/OR**)
+                de ces sources (opérateur **OU/OR**) seront considérés comme candidats.
+                Attention, les candidats ainsi considérés seront comparés
+                avec toutes les sources.
 
                 ℹ️ Si aucune valeur spécifiée =  tous les acteurs sont inclus
                 """,
@@ -154,11 +156,11 @@ PARAMS = {
         # mais "examples" est bien la façon de faire des dropdowns
         # voir https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/params.html
         examples=dropdown_sources,
-        description_md="""**➕ EXCLUSION ACTEURS**: exclusion de ceux qui proviennent
-                de ces sources (opérateur **OU/OR**)
+        description_md="""**➕ EXCLUSION ACTEURS**: Exclut les acteurs de l'ensemble des
+        acteurs qui seront considérés pour le clustering.
 
-                ℹ️ Si aucune valeur spécifiée, aucun filtrage n'est effectué
-                """,
+        ℹ️ Si aucune valeur spécifiée, aucun filtrage n'est effectué
+        """,
     ),
     "include_acteur_types": Param(
         [],
@@ -269,7 +271,13 @@ PARAMS = {
     "linkage_column": Param(
         None,
         type=["null", "string"],
-        description_md="Column holding the dataset id for cross-dataset linkage.",
+        description_md="""🧷 Column holding the dataset id for cross-dataset
+            linkage (only cross-dataset pairs are considered at blocking).
+
+            ⚙️ Usable only when providing an already-built `acteurs_table`:
+            when the acteurs pool is built by the selection task, the linkage
+            column is `_linkage` automatically and is driven by
+            `include_sources` (no need to set this param).""",
     ),
     "use_gpu": Param(
         USE_GPU,
@@ -351,7 +359,16 @@ def ml_deduplication_inference():
         ),
         "ML_DEDUPLICATION_IMAGE": "{{ params.image_ref }}",
         "ML_DEDUPLICATION_MODEL_THRESHOLD": "{{ params.model_threshold or '' }}",
-        "ML_DEDUPLICATION_LINKAGE_COLUMN": "{{ params.linkage_column or '' }}",
+        # Effective linkage column for the inference: pushed by the acteurs
+        # selection ("_linkage" when include_sources restricts candidates to
+        # some sources, "" otherwise so classic dedup keeps all pairs). Falls
+        # back to the user-provided param (used when giving a ready-made
+        # acteurs_table with its own linkage column through params.acteurs_table).
+        "ML_DEDUPLICATION_LINKAGE_COLUMN": (
+            "{{ ti.xcom_pull(task_ids='"
+            + TASKS.SELECTION
+            + "', key='linkage_column') or params.linkage_column or '' }}"
+        ),
         # Local mode: when "1"/"true", create/wait/destroy become no-ops and
         # run_inference runs the image locally with docker instead of on a
         # Scaleway instance.
@@ -429,11 +446,11 @@ if __name__ == "__main__":
     ml_deduplication_inference_dag.test(
         run_conf={
             "dry_run": False,
-            "image_ref": DEFAULT_IMAGE,
+            "image_ref": "ml_deduplication_inference:dev",
             "output_table": "ml_deduplication",
             "acteurs_table": None,
             "linkage_column": None,
-            "include_sources": [],
+            "include_sources": ["ecopae (id=252)"],
             "model_threshold": None,
             "dedup_enrich_fields": [
                 "acteur_type",
@@ -468,7 +485,9 @@ if __name__ == "__main__":
             "dedup_enrich_exclude_sources": [],
             "dedup_enrich_priority_sources": [],
             "dedup_enrich_keep_parent_data_by_default": True,
-            "run_locally": False,
+            "run_locally": True,
             "limit_acteurs": 60000,
+            "use_gpu": False,
+            "skip_cleanup": True,
         }
     )

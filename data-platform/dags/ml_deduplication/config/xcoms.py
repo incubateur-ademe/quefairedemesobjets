@@ -14,6 +14,7 @@ class XCOMS:
     CONFIG: str = "config"
     RUN_ID: str = "run_id"
     ACTEURS_VIEW: str = "acteurs_view"
+    LINKAGE_COLUMN: str = "linkage_column"
     DF_CLUSTERS_SELECT: str = "df_clusters_select"
     DF_PARENTS_CHOOSE_NEW: str = "df_parents_choose_new"
     DF_PARENTS_CHOOSE_DATA: str = "df_parents_choose_data"
@@ -27,6 +28,10 @@ XCOM_SOURCES: dict[str, XComSource] = {
     XCOMS.ACTEURS_VIEW: {
         "task_id": TASKS.SELECTION,
         "xcom_key": XCOMS.ACTEURS_VIEW,
+    },
+    XCOMS.LINKAGE_COLUMN: {
+        "task_id": TASKS.SELECTION,
+        "xcom_key": XCOMS.LINKAGE_COLUMN,
     },
     XCOMS.DF_CLUSTERS_SELECT: {
         "task_id": TASKS.CLUSTERS_SELECT,
