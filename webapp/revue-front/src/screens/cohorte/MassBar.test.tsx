@@ -13,7 +13,7 @@ const COUNTS = {
   report_parent: 0,
 }
 
-function setup(total = 2) {
+function setup(total = 2, cohorte = COHORTE) {
   const api = fakeApi((path, options, method) => {
     if (path.endsWith("/actions/apercu")) return { compteurs: COUNTS }
     if (path.endsWith("/actions")) return { affected: 2, skipped: 0 }
@@ -34,7 +34,7 @@ function setup(total = 2) {
       }
       return { ...page([groupe(1), groupe(2)]), total }
     }
-    return COHORTE
+    return cohorte
   })
   renderApp(<CohorteScreen cohorteId={7} />, { api, url: "/data/revue/cohortes/7" })
   return api
@@ -148,5 +148,21 @@ describe("MassBar", () => {
     fireEvent.click(within(bar()).getByText(/Refuser/))
 
     expect(document.querySelector("wa-dialog.confirm-dialog")).toHaveAttribute("open")
+  })
+
+  it("hides the restore action when the policy forbids it (RGPD)", async () => {
+    setup(2, {
+      ...COHORTE,
+      policy: {
+        ...COHORTE.policy,
+        editable_models: ["RevisionActeur"],
+        can_restore: false,
+      },
+    })
+    await screen.findByText("Acteur 1")
+    fireEvent.click(within(header(1)).getByLabelText("Sélectionner le groupe 1"))
+
+    expect(await within(bar()).findByText(/Reporter vers la correction/)).toBeTruthy()
+    expect(within(bar()).queryByText(/valeur initiale/)).toBeNull()
   })
 })

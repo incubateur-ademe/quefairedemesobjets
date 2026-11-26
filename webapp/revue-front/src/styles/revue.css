@@ -1096,11 +1096,23 @@ wa-select wa-option {
   font-weight: 500;
 }
 
-.gact {
+.gact,
+.lact {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
+}
+
+/* acteur of a ligne, when the groupe gathers several acteurs */
+.target {
+  display: block;
+  margin-top: 4px;
+}
+
+.target .glinks {
+  display: flex;
+  gap: 6px;
 }
 
 /* decision and modal buttons of the rows: compact, for denser rows */
@@ -1478,4 +1490,23 @@ input[type="checkbox"] {
   background: none;
   cursor: pointer;
   font: inherit;
+}
+
+/* groupes of several acteurs: the first column (champs and acteur of the ligne)
+   is wider than each comparison column */
+.cmp.by-acteur th.c-champs {
+  width: 34%;
+}
+
+.cmp.by-acteur th.c-cmp {
+  width: 22%;
+}
+
+/* no parent column: the 2 comparison columns share the width */
+.cmp.sans-parent th.c-cmp {
+  width: 50%;
+}
+
+.cmp.by-acteur.sans-parent th.c-cmp {
+  width: 33%;
 }

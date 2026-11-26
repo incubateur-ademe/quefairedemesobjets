@@ -6,12 +6,11 @@ import logging
 import re
 
 import requests
-from django.core.cache import cache
-
 from data.models.suggestion import SuggestionGroupe
 from data.revue.errors import RevueApiError
 from data.revue.lignes import ACTEUR
 from data.revue.policies import PARENT, REVISION
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +74,49 @@ def identifiants(groupe: SuggestionGroupe, displayed) -> dict[str, list[dict]]:
                     }
                 )
         result[champ] = candidates
+    return result
+
+
+# Acteurs named in the label of an identifier shared by several acteurs
+MAX_ACTEURS_IN_LABEL = 3
+
+
+def target_identifiants(
+    lignes: list[dict], annuaire: dict[str, list[dict]]
+) -> dict[str, list[dict]]:
+    """Adds to the identifiers of a groupe the ones of the acteurs of its lignes
+    (groupe of several acteurs, ex: SIREN of each acteur when a SIRET is
+    proposed), as shown in the first column: 1 entry per value, labelled with its
+    acteurs."""
+    acteurs_by_value: dict[tuple[str, str], list[str]] = {}
+    for ligne in lignes:
+        target = ligne.get("target")
+        if not target:
+            continue
+        for identifiant in target["identifiants"]:
+            champ, valeur = identifiant["champ"], _clean(identifiant["valeur"])
+            if champ not in IDENTIFIANTS or not valeur:
+                continue
+            acteurs = acteurs_by_value.setdefault((champ, valeur), [])
+            nom = target["nom"] or target["identifiant_unique"]
+            if nom not in acteurs:
+                acteurs.append(nom)
+
+    result = {champ: list(candidates) for champ, candidates in annuaire.items()}
+    for (champ, valeur), acteurs in acteurs_by_value.items():
+        if any(candidate["valeur"] == valeur for candidate in result[champ]):
+            continue
+        names = ", ".join(acteurs[:MAX_ACTEURS_IN_LABEL])
+        if len(acteurs) > MAX_ACTEURS_IN_LABEL:
+            names += f" et {len(acteurs) - MAX_ACTEURS_IN_LABEL} autre(s)"
+        result[champ].append(
+            {
+                "source": "target",
+                "label": f"{'Acteurs' if len(acteurs) > 1 else 'Acteur'} {names}",
+                "valeur": valeur,
+                "propose": False,
+            }
+        )
     return result
 
 

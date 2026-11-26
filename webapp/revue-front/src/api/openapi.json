@@ -1646,10 +1646,10 @@
         ]
       }
     },
-    "/api/suggestions/groupes/{groupe_id}/restaurer": {
+    "/api/suggestions/groupes/{groupe_id}/restore": {
       "post": {
-        "operationId": "data_revue_api_restaurer",
-        "summary": "Restaurer",
+        "operationId": "data_revue_api_restore",
+        "summary": "Restore",
         "parameters": [
           {
             "in": "path",
@@ -1709,7 +1709,83 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RestaurerIn"
+                "$ref": "#/components/schemas/RestoreIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SuperuserSessionAuth": []
+          }
+        ]
+      }
+    },
+    "/api/suggestions/groupes/{groupe_id}/empty": {
+      "post": {
+        "operationId": "data_revue_api_empty",
+        "summary": "Empty",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupe_id",
+            "schema": {
+              "title": "Groupe Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        },
+        "description": "Correction emptying the value (« __empty__ ») of the lignes of text\nfields.",
+        "tags": ["Revue suggestions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyIn"
               }
             }
           },
@@ -3177,9 +3253,29 @@
             "title": "Shows Parent",
             "type": "boolean"
           },
+          "colonne_parent": {
+            "title": "Colonne Parent",
+            "type": "boolean"
+          },
           "shows_acteur_diff": {
             "title": "Shows Acteur Diff",
             "type": "boolean"
+          },
+          "can_restore": {
+            "title": "Can Restore",
+            "type": "boolean"
+          },
+          "lignes_by_acteur": {
+            "title": "Lignes By Acteur",
+            "type": "boolean"
+          },
+          "tabs": {
+            "items": {
+              "enum": ["localisation", "annuaire"],
+              "type": "string"
+            },
+            "title": "Tabs",
+            "type": "array"
           },
           "badge": {
             "anyOf": [
@@ -3200,7 +3296,11 @@
           "can_reject_group",
           "editable_models",
           "shows_parent",
+          "colonne_parent",
           "shows_acteur_diff",
+          "can_restore",
+          "lignes_by_acteur",
+          "tabs",
           "badge"
         ],
         "title": "PolicyOut",
@@ -3447,6 +3547,17 @@
           "acteur": {
             "$ref": "#/components/schemas/ActeurIdentiteOut"
           },
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
           "is_new": {
             "title": "Is New",
             "type": "boolean"
@@ -3476,6 +3587,10 @@
             "title": "Lignes Validees",
             "type": "integer"
           },
+          "lignes_refusees": {
+            "title": "Lignes Refusees",
+            "type": "integer"
+          },
           "lignes_total": {
             "title": "Lignes Total",
             "type": "integer"
@@ -3491,11 +3606,13 @@
           "decision_par",
           "decision_le",
           "acteur",
+          "libelle",
           "is_new",
           "has_correction",
           "parent",
           "lignes",
           "lignes_validees",
+          "lignes_refusees",
           "lignes_total",
           "capacites"
         ],
@@ -3534,6 +3651,10 @@
             "title": "Valider",
             "type": "boolean"
           },
+          "refuser": {
+            "title": "Refuser",
+            "type": "boolean"
+          },
           "remettre_a_valider": {
             "title": "Remettre A Valider",
             "type": "boolean"
@@ -3558,8 +3679,12 @@
             "title": "Reporter Parent",
             "type": "boolean"
           },
-          "restaurer_correction": {
-            "title": "Restaurer Correction",
+          "restore_correction": {
+            "title": "Restore Correction",
+            "type": "boolean"
+          },
+          "empty_correction": {
+            "title": "Empty Correction",
             "type": "boolean"
           },
           "supprimer_correction": {
@@ -3573,13 +3698,15 @@
         },
         "required": [
           "valider",
+          "refuser",
           "remettre_a_valider",
           "remettre_groupe_a_valider",
           "corriger_correction",
           "corriger_parent",
           "reporter_correction",
           "reporter_parent",
-          "restaurer_correction",
+          "restore_correction",
+          "empty_correction",
           "supprimer_correction",
           "supprimer_parent"
         ],
@@ -3598,6 +3725,16 @@
             },
             "title": "Champs",
             "type": "array"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "statut": {
             "title": "Statut",
@@ -3648,6 +3785,7 @@
         "required": [
           "key",
           "champs",
+          "target",
           "statut",
           "decision_par",
           "decision_le",
@@ -3676,6 +3814,62 @@
         },
         "required": ["identifiant_unique", "nom", "nb_enfants"],
         "title": "ParentOut",
+        "type": "object"
+      },
+      "TargetIdentifiantOut": {
+        "properties": {
+          "champ": {
+            "title": "Champ",
+            "type": "string"
+          },
+          "valeur": {
+            "title": "Valeur",
+            "type": "string"
+          }
+        },
+        "required": ["champ", "valeur"],
+        "title": "TargetIdentifiantOut",
+        "type": "object"
+      },
+      "TargetOut": {
+        "description": "Acteur of a ligne, when the groupe gathers several acteurs.",
+        "properties": {
+          "identifiant_unique": {
+            "title": "Identifiant Unique",
+            "type": "string"
+          },
+          "nom": {
+            "title": "Nom",
+            "type": "string"
+          },
+          "ville": {
+            "title": "Ville",
+            "type": "string"
+          },
+          "identifiants": {
+            "items": {
+              "$ref": "#/components/schemas/TargetIdentifiantOut"
+            },
+            "title": "Identifiants",
+            "type": "array"
+          },
+          "suggestion_modele": {
+            "title": "Suggestion Modele",
+            "type": "string"
+          },
+          "admin_urls": {
+            "$ref": "#/components/schemas/AdminUrlsOut"
+          }
+        },
+        "required": [
+          "identifiant_unique",
+          "nom",
+          "ville",
+          "identifiants",
+          "suggestion_modele",
+          "admin_urls"
+        ],
+        "title": "TargetOut",
         "type": "object"
       },
       "LignesQuery": {
@@ -3924,6 +4118,17 @@
           "acteur": {
             "$ref": "#/components/schemas/ActeurIdentiteOut"
           },
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
           "is_new": {
             "title": "Is New",
             "type": "boolean"
@@ -3953,6 +4158,10 @@
             "title": "Lignes Validees",
             "type": "integer"
           },
+          "lignes_refusees": {
+            "title": "Lignes Refusees",
+            "type": "integer"
+          },
           "lignes_total": {
             "title": "Lignes Total",
             "type": "integer"
@@ -3974,11 +4183,13 @@
           "decision_par",
           "decision_le",
           "acteur",
+          "libelle",
           "is_new",
           "has_correction",
           "parent",
           "lignes",
           "lignes_validees",
+          "lignes_refusees",
           "lignes_total",
           "capacites",
           "localisation",
@@ -3990,7 +4201,7 @@
       "IdentifiantOut": {
         "properties": {
           "source": {
-            "enum": ["corrige", "parent", "correction", "acteur"],
+            "enum": ["corrige", "parent", "correction", "acteur", "target"],
             "title": "Source",
             "type": "string"
           },
@@ -4094,19 +4305,41 @@
       },
       "LignesDecisionIn": {
         "properties": {
-          "champs": {
-            "items": {
-              "items": {
-                "type": "string"
+          "cles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
               },
-              "type": "array"
-            },
-            "minItems": 1,
-            "title": "Champs",
-            "type": "array"
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cles"
+          },
+          "champs": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Champs"
           },
           "action": {
-            "enum": ["validate", "resubmit"],
+            "enum": ["validate", "reject", "resubmit"],
             "title": "Action",
             "type": "string"
           },
@@ -4123,7 +4356,7 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["champs", "action"],
+        "required": ["action"],
         "title": "LignesDecisionIn",
         "type": "object"
       },
@@ -4200,9 +4433,9 @@
       },
       "ReportIn": {
         "properties": {
-          "cible": {
+          "target": {
             "enum": ["correction", "parent"],
-            "title": "Cible",
+            "title": "Target",
             "type": "string"
           },
           "champs": {
@@ -4236,11 +4469,11 @@
             "title": "Expected Modifie Le"
           }
         },
-        "required": ["cible"],
+        "required": ["target"],
         "title": "ReportIn",
         "type": "object"
       },
-      "RestaurerIn": {
+      "RestoreIn": {
         "properties": {
           "champs": {
             "anyOf": [
@@ -4273,7 +4506,44 @@
             "title": "Expected Modifie Le"
           }
         },
-        "title": "RestaurerIn",
+        "title": "RestoreIn",
+        "type": "object"
+      },
+      "EmptyIn": {
+        "description": "Lignes whose correction is emptied.",
+        "properties": {
+          "champs": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Lignes à corriger ; absent = toutes les lignes possibles",
+            "title": "Champs"
+          },
+          "expected_modifie_le": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Modifie Le"
+          }
+        },
+        "title": "EmptyIn",
         "type": "object"
       },
       "AnnuaireQuery": {
@@ -4643,8 +4913,8 @@
             ],
             "title": "Affected"
           },
-          "par": {
-            "title": "Par",
+          "by": {
+            "title": "By",
             "type": "string"
           },
           "lancee_le": {
@@ -4687,7 +4957,7 @@
           "action",
           "groupes",
           "affected",
-          "par",
+          "by",
           "lancee_le",
           "debut",
           "fin",

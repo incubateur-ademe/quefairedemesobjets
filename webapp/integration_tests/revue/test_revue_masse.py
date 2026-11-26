@@ -320,7 +320,7 @@ class TestTaches:
         assert tache["statut"] == "pending"
         assert tache["action"] == "report_correction"
         assert tache["groupes"] > 1
-        assert tache["par"] == "admin"
+        assert tache["by"] == "admin"
         assert tache["affected"] is None
 
     def test_finished_task(self, client, cohorte, queued):

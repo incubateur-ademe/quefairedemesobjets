@@ -69,13 +69,15 @@ const EMPTY_VALUE = "__empty__"
 
 const NO_LIGNE_ACTION: Ligne["capacites"] = {
   valider: false,
+  refuser: false,
   remettre_a_valider: false,
   remettre_groupe_a_valider: false,
   corriger_correction: false,
   corriger_parent: false,
   reporter_correction: false,
   reporter_parent: false,
-  restaurer_correction: false,
+  restore_correction: false,
+  empty_correction: false,
   supprimer_correction: false,
   supprimer_parent: false,
 }
@@ -91,6 +93,7 @@ export function withStatut(groupe: Groupe, statut: string, lignes?: string[]): G
     statut: lignes ? groupe.statut : statut,
     lignes: nextLignes,
     lignes_validees: nextLignes.filter((ligne) => ligne.statut === "ATRAITER").length,
+    lignes_refusees: nextLignes.filter((ligne) => ligne.statut === "REJETEE").length,
     capacites: lignes ? groupe.capacites : NO_GROUPE_ACTION,
   }
 }
@@ -134,11 +137,11 @@ export function withReport(
 
 /** Optimistic correction with the current value of the acteur (« __empty__ »
  * when empty) on the restorable lignes whose value is known. */
-export function withRestauration(groupe: Groupe, ligneKeys?: string[]): Groupe {
+export function withRestore(groupe: Groupe, ligneKeys?: string[]): Groupe {
   return groupe.lignes
     .filter(
       (ligne) =>
-        ligne.capacites.restaurer_correction &&
+        ligne.capacites.restore_correction &&
         ligne.acteur.actuel &&
         (!ligneKeys || ligneKeys.includes(ligne.key)),
     )
@@ -154,6 +157,26 @@ export function withRestauration(groupe: Groupe, ligneKeys?: string[]): Groupe {
               valeur || EMPTY_VALUE,
             ]),
           ),
+        ),
+      groupe,
+    )
+}
+
+/** Optimistic emptied correction (« __empty__ ») on the lignes of text fields. */
+export function withEmpty(groupe: Groupe, ligneKeys?: string[]): Groupe {
+  return groupe.lignes
+    .filter(
+      (ligne) =>
+        ligne.capacites.empty_correction &&
+        (!ligneKeys || ligneKeys.includes(ligne.key)),
+    )
+    .reduce(
+      (current, ligne) =>
+        withProposition(
+          current,
+          ligne.key,
+          "RevisionActeur",
+          Object.fromEntries(ligne.champs.map((champ) => [champ, EMPTY_VALUE])),
         ),
       groupe,
     )
@@ -287,18 +310,34 @@ export function useGroupeActions(cohorteId: number) {
             }),
           ),
       }),
-    decideLignes: (groupe: Groupe, keys: string[], action: "validate" | "resubmit") =>
+    decideLignes: (
+      groupe: Groupe,
+      keys: string[],
+      action: "validate" | "reject" | "resubmit",
+    ) =>
       write.mutateAsync({
         groupe,
         optimistic: (g) =>
-          action === "resubmit" && g.statut === "REJETEE"
+          action === "resubmit" &&
+          g.statut === "REJETEE" &&
+          // Lignes refused one by one go back to validate on their own
+          !g.lignes.some((ligne) => ligne.capacites.remettre_a_valider)
             ? withStatut(g, "AVALIDER")
-            : withStatut(g, action === "validate" ? "ATRAITER" : "AVALIDER", keys),
+            : withStatut(
+                g,
+                action === "validate"
+                  ? "ATRAITER"
+                  : action === "reject"
+                    ? "REJETEE"
+                    : "AVALIDER",
+                keys,
+              ),
+        // Designated by their key: a ligne may also be split by acteur
         request: (modifieLe) =>
           unwrap(
             api.POST("/api/suggestions/groupes/{groupe_id}/lignes/decision", {
               params: path(groupe),
-              body: { champs: champsOf(groupe, keys), action, ...expected(modifieLe) },
+              body: { cles: keys, action, ...expected(modifieLe) },
             }),
           ),
       }),
@@ -352,20 +391,35 @@ export function useGroupeActions(cohorteId: number) {
             api.POST("/api/suggestions/groupes/{groupe_id}/report", {
               params: path(groupe),
               body: {
-                cible: modele === "RevisionActeur" ? "correction" : "parent",
+                target: modele === "RevisionActeur" ? "correction" : "parent",
                 champs: keys ? champsOf(groupe, keys) : null,
                 ...expected(modifieLe),
               },
             }),
           ),
       }),
-    restaurer: (groupe: Groupe, keys?: string[]) =>
+    restore: (groupe: Groupe, keys?: string[]) =>
       write.mutateAsync({
         groupe,
-        optimistic: (g) => withRestauration(g, keys),
+        optimistic: (g) => withRestore(g, keys),
         request: (modifieLe) =>
           unwrap(
-            api.POST("/api/suggestions/groupes/{groupe_id}/restaurer", {
+            api.POST("/api/suggestions/groupes/{groupe_id}/restore", {
+              params: path(groupe),
+              body: {
+                champs: keys ? champsOf(groupe, keys) : null,
+                ...expected(modifieLe),
+              },
+            }),
+          ),
+      }),
+    empty: (groupe: Groupe, keys?: string[]) =>
+      write.mutateAsync({
+        groupe,
+        optimistic: (g) => withEmpty(g, keys),
+        request: (modifieLe) =>
+          unwrap(
+            api.POST("/api/suggestions/groupes/{groupe_id}/empty", {
               params: path(groupe),
               body: {
                 champs: keys ? champsOf(groupe, keys) : null,

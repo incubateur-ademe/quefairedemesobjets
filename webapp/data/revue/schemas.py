@@ -138,7 +138,11 @@ class PolicyOut(Schema):
     can_reject_group: bool
     editable_models: list[str]
     shows_parent: bool
+    colonne_parent: bool
     shows_acteur_diff: bool
+    can_restore: bool
+    lignes_by_acteur: bool
+    tabs: list[Literal["localisation", "annuaire"]]
     badge: str | None
 
 
@@ -154,27 +158,17 @@ class CellOut(Schema):
 
 class LigneCapacitesOut(Schema):
     valider: bool
+    refuser: bool
     remettre_a_valider: bool
     remettre_groupe_a_valider: bool
     corriger_correction: bool
     corriger_parent: bool
     reporter_correction: bool
     reporter_parent: bool
-    restaurer_correction: bool
+    restore_correction: bool
+    empty_correction: bool
     supprimer_correction: bool
     supprimer_parent: bool
-
-
-class LigneOut(Schema):
-    key: str
-    champs: list[str]
-    statut: str
-    decision_par: UserOut | None
-    decision_le: datetime | None
-    acteur: CellOut
-    correction: CellOut
-    parent: CellOut | None
-    capacites: LigneCapacitesOut
 
 
 class AdminUrlsOut(Schema):
@@ -182,6 +176,37 @@ class AdminUrlsOut(Schema):
     affiche: str | None
     corrige: str | None
     parent: str | None
+
+
+class TargetIdentifiantOut(Schema):
+    champ: str
+    valeur: str
+
+
+class TargetOut(Schema):
+    """Acteur of a ligne, when the groupe gathers several acteurs."""
+
+    identifiant_unique: str
+    nom: str
+    ville: str
+    # Current identifiers of the acteur useful to the review (ex: its SIREN when
+    # a SIRET is proposed)
+    identifiants: list[TargetIdentifiantOut]
+    suggestion_modele: str
+    admin_urls: AdminUrlsOut
+
+
+class LigneOut(Schema):
+    key: str
+    champs: list[str]
+    target: TargetOut | None
+    statut: str
+    decision_par: UserOut | None
+    decision_le: datetime | None
+    acteur: CellOut
+    correction: CellOut
+    parent: CellOut | None
+    capacites: LigneCapacitesOut
 
 
 class ActeurIdentiteOut(Schema):
@@ -213,11 +238,14 @@ class GroupeOut(Schema):
     decision_par: UserOut | None
     decision_le: datetime | None
     acteur: ActeurIdentiteOut
+    # Groupe of several acteurs: its contexte (ex: the suggested value)
+    libelle: str | None
     is_new: bool
     has_correction: bool
     parent: ParentOut | None
     lignes: list[LigneOut]
     lignes_validees: int
+    lignes_refusees: int
     lignes_total: int
     capacites: GroupeCapacitesOut
 
@@ -271,8 +299,10 @@ class GroupeDecisionIn(Schema):
 
 
 class LignesDecisionIn(Schema):
-    champs: list[list[str]] = Field(..., min_length=1)
-    action: Literal["validate", "resubmit"]
+    # Lignes designated by their key, or by their champs (groupe of one acteur)
+    cles: list[str] | None = Field(None, min_length=1)
+    champs: list[list[str]] | None = Field(None, min_length=1)
+    action: Literal["validate", "reject", "resubmit"]
     expected_modifie_le: datetime | None = None
 
 
@@ -290,18 +320,22 @@ class PropositionDeleteQuery(Schema):
 
 
 class ReportIn(Schema):
-    cible: Literal["correction", "parent"]
+    target: Literal["correction", "parent"]
     champs: list[list[str]] | None = Field(
         None, description="Lignes à reporter ; absent = toutes les lignes reportables"
     )
     expected_modifie_le: datetime | None = None
 
 
-class RestaurerIn(Schema):
+class RestoreIn(Schema):
     champs: list[list[str]] | None = Field(
         None, description="Lignes à corriger ; absent = toutes les lignes possibles"
     )
     expected_modifie_le: datetime | None = None
+
+
+class EmptyIn(RestoreIn):
+    """Lignes whose correction is emptied."""
 
 
 # --- Detail of a groupe (modal) ---
@@ -327,7 +361,7 @@ class LocalisationOut(Schema):
 
 
 class IdentifiantOut(Schema):
-    source: Literal["corrige", "parent", "correction", "acteur"]
+    source: Literal["corrige", "parent", "correction", "acteur", "target"]
     label: str
     valeur: str
     propose: bool = Field(..., description="Valeur proposée (et non actuelle)")
@@ -454,7 +488,7 @@ class TacheOut(Schema):
     action: Literal["report_correction", "report_parent", "restore_correction"]
     groupes: int
     affected: int | None
-    par: str
+    by: str
     lancee_le: datetime
     debut: datetime | None
     fin: datetime | None

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 import pytest
+from data.models.changes.acteur_rgpd_anonymize import ACTEUR_FIELDS_TO_ANONYMIZE
 from enrich.config.cohorts import COHORTS
 from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_dbt_model_to_suggestion_groupes import (
@@ -10,8 +11,6 @@ from enrich.tasks.business_logic.enrich_dbt_model_to_suggestion_groupes import (
     enrich_dbt_model_to_suggestion_groupes,
     suggestion_groupes_prepare,
 )
-
-from data.models.changes.acteur_rgpd_anonymize import ACTEUR_FIELDS_TO_ANONYMIZE
 
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -216,7 +215,7 @@ class TestEnrichSuggestionGroupesRgpd:
         # 1 groupe per acteur, 1 unitaire per field and per model
         assert len(groupes) == 2
         champs_anonymises = sorted([*ACTEUR_FIELDS_TO_ANONYMIZE, "commentaires"])
-        unitaires_par_acteur = {
+        unitaires_by_acteur = {
             groupe.contexte["identifiant_unique"]: groupe.suggestion_unitaires.all()
             for groupe in groupes
         }
@@ -224,7 +223,7 @@ class TestEnrichSuggestionGroupesRgpd:
             ("rgpd1", ["Acteur"]),
             ("rgpd2", ["Acteur", "RevisionActeur"]),
         ]:
-            unitaires = unitaires_par_acteur[identifiant_unique]
+            unitaires = unitaires_by_acteur[identifiant_unique]
             assert all(len(u.champs) == 1 for u in unitaires)
             for modele in modeles:
                 assert (

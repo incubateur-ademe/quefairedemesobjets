@@ -60,7 +60,8 @@ const SHORTCUTS: Shortcut[] = [
   },
   {
     keys: ["R"],
-    label: "refuser le groupe courant (vue Groupes ; en vue Lignes, depuis le détail)",
+    label:
+      "refuser la ligne courante si le type le permet, sinon le groupe courant (vue Groupes ; en vue Lignes, depuis le détail)",
   },
   {
     keys: ["U"],
@@ -173,13 +174,16 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
     (page) => setSearch({ page: String(page) }),
   )
 
-  const modalGroupeId = search.groupe ? Number(search.groupe) : null
-  const modalTab = (search.onglet as ModalTab) || "localisation"
-  const openModal = (groupe: Groupe, tab: ModalTab) =>
-    setSearch({
-      groupe: String(groupe.id),
-      onglet: tab === "localisation" ? undefined : tab,
-    })
+  // Tabs of the modal allowed by the policy, the first one being the default
+  const tabs = cohorte.data?.policy.tabs ?? []
+  const modalGroupeId = search.groupe && tabs.length ? Number(search.groupe) : null
+  const modalTab = tabs.find((tab) => tab === search.onglet) ?? tabs[0]
+  const ongletParam = (tab: ModalTab) => (tab === tabs[0] ? undefined : tab)
+  const openModal = (groupe: Groupe, tab: ModalTab = tabs[0]) => {
+    if (tab) {
+      setSearch({ groupe: String(groupe.id), onglet: ongletParam(tab) })
+    }
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -212,16 +216,12 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         }
       } else if (key === "u") {
         resubmitAtCursor(cursor, actions)
-      } else if (key === "r" && state.vue === "groupes") {
-        const groupe = cursor.groupe()
-        if (groupe?.capacites.refuser) {
-          actions.decideGroupe(groupe, "reject").catch(() => {})
-          cursor.nextGroupe(true)
-        }
+      } else if (key === "r") {
+        rejectAtCursor(cursor, actions, state.vue)
       } else if (key === "enter") {
         const groupe = cursor.groupe()
         if (groupe) {
-          openModal(groupe, "localisation")
+          openModal(groupe)
         }
       } else if (event.key === "/") {
         event.preventDefault()
@@ -265,7 +265,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
               { value: "groupes", label: "Groupes", count: totaux?.groupes },
               { value: "lignes", label: "Lignes", count: totaux?.lignes },
             ]}
-            onChange={(vue) => setListSearch({ vue, par_page: undefined })}
+            onChange={(vue) => setListSearch({ vue, page_size: undefined })}
           />
           <Segmented
             label="Afficher"
@@ -305,7 +305,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
             unit={state.vue}
             sizes={PAGE_SIZES[state.vue]}
             value={state.pageSize}
-            onChange={(size) => setListSearch({ par_page: String(size) })}
+            onChange={(size) => setListSearch({ page_size: String(size) })}
           />
           <span className="spacer" />
           {(current.isFetching || stats.isFetching) && <WaSpinner />}
@@ -377,6 +377,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
           : lignes.data && (
               <LignesView
                 page={lignes.data}
+                policy={cohorte.data.policy}
                 actions={actions}
                 cursor={cursor.current}
                 onCursor={cursor.set}
@@ -406,12 +407,7 @@ export function CohorteScreen({ cohorteId }: { cohorteId: number }) {
         tab={modalTab}
         policy={cohorte.data.policy}
         actions={actions}
-        onTab={(tab) =>
-          setSearch(
-            { onglet: tab === "localisation" ? undefined : tab },
-            { replace: true },
-          )
-        }
+        onTab={(tab) => setSearch({ onglet: ongletParam(tab) }, { replace: true })}
         onClose={() => setSearch({ groupe: undefined, onglet: undefined })}
       />
       <LogsDrawer
@@ -521,6 +517,32 @@ function validateAtCursor(
   if (ligne?.capacites.valider) {
     actions.decideLignes(groupe, [key], "validate").catch(() => {})
     cursor.move(1, true)
+  }
+}
+
+/** « R »: refuses the ligne under the cursor when lignes are refused one by one,
+ * otherwise the groupe (view Groupes), then moves on. */
+function rejectAtCursor(
+  cursor: Cursor,
+  actions: ReturnType<typeof useGroupeActions>,
+  vue: string,
+) {
+  const groupe = cursor.groupe()
+  if (!groupe || !cursor.current) {
+    return
+  }
+  if (cursor.current.startsWith("l:")) {
+    const key = cursor.current.slice(2)
+    const ligne = groupe.lignes.find((l) => l.key === key)
+    if (ligne?.capacites.refuser) {
+      actions.decideLignes(groupe, [key], "reject").catch(() => {})
+      cursor.move(1, true)
+      return
+    }
+  }
+  if (vue === "groupes" && groupe.capacites.refuser) {
+    actions.decideGroupe(groupe, "reject").catch(() => {})
+    cursor.nextGroupe(true)
   }
 }
 

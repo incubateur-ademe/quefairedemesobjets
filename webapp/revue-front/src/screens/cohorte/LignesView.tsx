@@ -1,20 +1,23 @@
 import type { GroupeActions } from "../../api/mutations"
-import type { Groupe, LignePage } from "../../api/types"
+import type { Groupe, LignePage, Policy } from "../../api/types"
 import {
   type Checkboxes,
-  type ModalTab,
+  cmpTableClass,
+  ligneCursor,
   LigneHead,
   LigneRow,
-  ligneCursor,
+  type ModalTab,
   PageCheckbox,
   RowCheckbox,
 } from "./GroupesView"
 
 /** View « Lignes » (focus mode): one row per ligne de suggestion, with its groupe
- * and acteur for context. No refusal here: a refusal is a decision on the whole
+ * and acteur for context. A ligne is refused here only when the policy allows it
+ * (lignes decided one by one); otherwise a refusal is a decision on the whole
  * groupe, taken from the detail of the groupe. */
 export function LignesView({
   page,
+  policy,
   actions,
   cursor,
   onCursor,
@@ -22,10 +25,11 @@ export function LignesView({
   checkboxes,
 }: {
   page: LignePage
+  policy: Policy
   actions: GroupeActions
   cursor: string | null
   onCursor: (cursor: string) => void
-  onOpen: (groupe: Groupe, tab: ModalTab) => void
+  onOpen: (groupe: Groupe, tab?: ModalTab) => void
   checkboxes: Checkboxes
 }) {
   const groupes = new Map(page.groupes.map((groupe) => [groupe.id, groupe]))
@@ -39,7 +43,7 @@ export function LignesView({
     )
   }
   return (
-    <table className="tbl cmp stream lignes">
+    <table className={`${cmpTableClass(policy)} lignes`}>
       <thead>
         <tr>
           <PageCheckbox
@@ -48,7 +52,7 @@ export function LignesView({
           />
           <th className="num">Groupe</th>
           <th>Acteur</th>
-          <LigneHead />
+          <LigneHead policy={policy} />
         </tr>
       </thead>
       <tbody>
@@ -62,6 +66,7 @@ export function LignesView({
             <LigneRow
               key={item.key}
               groupe={groupe}
+              policy={policy}
               ligne={ligne}
               actions={actions}
               cursor={cursor}
@@ -74,22 +79,31 @@ export function LignesView({
                     checkboxes={checkboxes}
                   />
                   <td className="num">
-                    <button
-                      type="button"
-                      className="lk mono"
-                      title="Détail du groupe"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        onCursor(ligneCursor(ligne.key))
-                        onOpen(groupe, "localisation")
-                      }}
-                    >
-                      {groupe.id}
-                    </button>
+                    {policy.tabs.length > 0 ? (
+                      <button
+                        type="button"
+                        className="lk mono"
+                        title="Détail du groupe"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          onCursor(ligneCursor(ligne.key))
+                          onOpen(groupe)
+                        }}
+                      >
+                        {groupe.id}
+                      </button>
+                    ) : (
+                      <span className="mono">{groupe.id}</span>
+                    )}
                   </td>
                   <td>
-                    <span className="nom">{groupe.acteur.nom || "—"}</span>
-                    <span className="sub">{groupe.acteur.identifiant_unique}</span>
+                    <span className="nom">
+                      {ligne.target?.nom || groupe.acteur.nom || "—"}
+                    </span>
+                    <span className="sub">
+                      {ligne.target?.identifiant_unique ??
+                        groupe.acteur.identifiant_unique}
+                    </span>
                   </td>
                 </>
               }

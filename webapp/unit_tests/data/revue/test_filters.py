@@ -2,6 +2,7 @@ import pytest
 from data.models.suggestion import SuggestionAction, SuggestionCohorte
 from data.revue.cohortes import COHORTE_FIELDS
 from data.revue.errors import RevueApiError
+from data.revue.policies import REVUE_TYPE_ACTIONS
 from data.revue.filters import (
     MAX_CONDITIONS,
     apply_filter,
@@ -152,8 +153,5 @@ def test_metadata_lists_json_keys():
     keys = [champ["key"] for champ in champs]
     assert "metadata.source_code" in keys
     type_action = next(champ for champ in champs if champ["key"] == "type_action")
-    assert {choix["value"] for choix in type_action["choix"]} == {
-        "SOURCE_AJOUT",
-        "SOURCE_MODIFICATION",
-        "SOURCE_SUPRESSION",
-    }
+    assert {choix["value"] for choix in type_action["choix"]} == set(REVUE_TYPE_ACTIONS)
+    assert "ENRICH_ACTEURS_SIRET" in REVUE_TYPE_ACTIONS

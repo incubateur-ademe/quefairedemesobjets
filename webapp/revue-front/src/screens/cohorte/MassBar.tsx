@@ -73,12 +73,20 @@ export function MassBar({
   const [confirming, setConfirming] = useState<MassAction | null>(null)
   const actions: MassAction[] = [
     "validate",
-    ...(vue === "groupes" && policy.can_reject_group ? (["reject"] as const) : []),
+    ...((vue === "groupes" && policy.can_reject_group) ||
+    (vue === "lignes" && policy.can_reject_line)
+      ? (["reject"] as const)
+      : []),
     "resubmit",
     ...(policy.editable_models.includes("RevisionActeur")
-      ? (["report_correction", "restore_correction"] as const)
+      ? (["report_correction"] as const)
       : []),
-    ...(policy.shows_parent ? (["report_parent"] as const) : []),
+    ...(policy.editable_models.includes("RevisionActeur") && policy.can_restore
+      ? (["restore_correction"] as const)
+      : []),
+    ...(policy.shows_parent && policy.editable_models.includes("ParentRevisionActeur")
+      ? (["report_parent"] as const)
+      : []),
   ]
   const start = (action: MassAction) => {
     if (needsConfirmation(action, counts?.[action] ?? 0, filterMode)) {

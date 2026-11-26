@@ -39,8 +39,8 @@ def cohorte_taches(cohorte: SuggestionCohorte) -> list[dict]:
             "groupes",
             "exception_class_path",
             modele=F("args_kwargs__args__1"),
-            par=F("args_kwargs__kwargs__par"),
-            restaurer=F("args_kwargs__kwargs__restaurer"),
+            by=F("args_kwargs__kwargs__by"),
+            restore=F("args_kwargs__kwargs__restore"),
             affected=F("return_value__affected"),
         )[:LIMIT]
     )
@@ -49,11 +49,11 @@ def cohorte_taches(cohorte: SuggestionCohorte) -> list[dict]:
             "id": str(row["id"]),
             "statut": TASK_STATUTS.get(row["status"], "pending"),
             "action": (
-                "restore_correction" if row["restaurer"] else ACTIONS[row["modele"]]
+                "restore_correction" if row["restore"] else ACTIONS[row["modele"]]
             ),
             "groupes": row["groupes"],
             "affected": row["affected"],
-            "par": row["par"] or "",
+            "by": row["by"] or "",
             "lancee_le": row["enqueued_at"],
             "debut": row["started_at"],
             "fin": row["finished_at"],

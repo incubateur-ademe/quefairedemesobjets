@@ -5,7 +5,7 @@ import type { GroupeActions } from "../../../api/mutations"
 import { useChampsChoix } from "../../../api/queries"
 import type { ChampChoix, Groupe, Ligne, Modele, Policy } from "../../../api/types"
 import { StatutPill } from "../../../components/common/Pill"
-import { ChampsValues, DiffValue } from "../../../components/common/Value"
+import { ChampsValues, DiffValue, ExternalLink } from "../../../components/common/Value"
 import { WaButton, WaInput, WaOption, WaSelect } from "../../../wa"
 
 const TARGETS: Record<
@@ -21,12 +21,66 @@ const capacity = (modele: Modele, verb: "corriger" | "reporter" | "supprimer") =
 
 export function ChampsCell({ ligne }: { ligne: Ligne }) {
   return (
-    <span className="champs">
-      {ligne.champs.map((champ) => (
-        <span key={champ} className="champ">
-          {champ}
+    <>
+      <span className="champs">
+        {ligne.champs.map((champ) => (
+          <span key={champ} className="champ">
+            {champ}
+          </span>
+        ))}
+      </span>
+      {ligne.target && <TargetInfo target={ligne.target} />}
+    </>
+  )
+}
+
+/** Acteur of a ligne, when the groupe gathers several acteurs. */
+export function TargetInfo({ target }: { target: NonNullable<Ligne["target"]> }) {
+  const links: [string, string | null | undefined][] = [
+    ["importé", target.admin_urls.importe],
+    ["affiché", target.admin_urls.affiche],
+    ["corrigé", target.admin_urls.corrige],
+    ["parent", target.admin_urls.parent],
+  ]
+  const identifiants = target.identifiants.filter(({ valeur }) => valeur)
+  return (
+    <span className="target">
+      <span className="nom">{target.nom || "—"}</span>
+      <span className="sub mono">{target.identifiant_unique}</span>
+      {(target.ville || identifiants.length > 0) && (
+        // City and identifiers on the same line (ex: SIREN of the acteur when a
+        // SIRET is proposed)
+        <span className="sub">
+          {[
+            target.ville,
+            ...identifiants.map(
+              ({ champ, valeur }) => `${champ.toUpperCase()} ${valeur}`,
+            ),
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+          {identifiants.map(({ champ, valeur }) => (
+            <ExternalLink key={champ} value={valeur} />
+          ))}
         </span>
-      ))}
+      )}
+      <span className="glinks">
+        {links.map(
+          ([label, href]) =>
+            href && (
+              <a
+                key={label}
+                className="lk"
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {label}
+              </a>
+            ),
+        )}
+      </span>
     </span>
   )
 }
@@ -79,7 +133,7 @@ export function ReportButton({
 }
 
 /** Correction with the current value of the acteur: cancels the suggestion. */
-export function RestaurerButton({
+export function RestoreButton({
   groupe,
   ligne,
   actions,
@@ -88,7 +142,7 @@ export function RestaurerButton({
   ligne: Ligne
   actions: GroupeActions
 }) {
-  if (!ligne.capacites.restaurer_correction) {
+  if (!ligne.capacites.restore_correction) {
     return null
   }
   return (
@@ -99,16 +153,45 @@ export function RestaurerButton({
       aria-label={`Corriger ${ligne.champs.join(", ")} avec la valeur initiale`}
       onClick={(event) => {
         event.stopPropagation()
-        actions.restaurer(groupe, [ligne.key]).catch(() => {})
+        actions.restore(groupe, [ligne.key]).catch(() => {})
       }}
     >
-      ↩︎
+      ‹‹
+    </button>
+  )
+}
+
+/** Correction emptying the value (« __empty__ »): text fields only. */
+export function EmptyButton({
+  groupe,
+  ligne,
+  actions,
+}: {
+  groupe: Groupe
+  ligne: Ligne
+  actions: GroupeActions
+}) {
+  if (!ligne.capacites.empty_correction) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      className="rep"
+      title="Vider la correction"
+      aria-label={`Vider la correction de ${ligne.champs.join(", ")}`}
+      onClick={(event) => {
+        event.stopPropagation()
+        actions.empty(groupe, [ligne.key]).catch(() => {})
+      }}
+    >
+      ✕
     </button>
   )
 }
 
 /** Correction (RevisionActeur) or Parent (ParentRevisionActeur): current value
- * and proposition, editable (✎) and removable (✕). */
+ * and proposition, editable (✎) and removable (🗑️). */
 export function TargetCell({
   groupe,
   ligne,
@@ -183,7 +266,7 @@ export function TargetCell({
                 actions.deleteProposition(groupe, ligne, modele).catch(() => {})
               }}
             >
-              ✕
+              🗑️
             </button>
           )}
         </span>
@@ -382,7 +465,7 @@ function PropositionsInput({
               title={`Supprimer l’action ${index + 1}`}
               onClick={() => set(rows.filter((_, i) => i !== index))}
             >
-              ✕
+              🗑️
             </WaButton>
           </div>
         )
@@ -488,15 +571,28 @@ export function LigneActionCell({
   ligne: Ligne
   actions: GroupeActions
 }) {
-  const run = (action: "validate" | "resubmit") => (event: React.MouseEvent) => {
-    event.stopPropagation()
-    actions.decideLignes(groupe, [ligne.key], action).catch(() => {})
-  }
+  const run =
+    (action: "validate" | "reject" | "resubmit") => (event: React.MouseEvent) => {
+      event.stopPropagation()
+      actions.decideLignes(groupe, [ligne.key], action).catch(() => {})
+    }
   if (ligne.capacites.valider) {
     return (
-      <WaButton size="small" variant="success" onClick={run("validate")}>
-        Valider la ligne
-      </WaButton>
+      <span className="lact">
+        {ligne.capacites.refuser && (
+          <WaButton
+            size="small"
+            variant="danger"
+            appearance="outlined"
+            onClick={run("reject")}
+          >
+            Refuser la ligne
+          </WaButton>
+        )}
+        <WaButton size="small" variant="success" onClick={run("validate")}>
+          Valider la ligne
+        </WaButton>
+      </span>
     )
   }
   if (ligne.capacites.remettre_groupe_a_valider) {

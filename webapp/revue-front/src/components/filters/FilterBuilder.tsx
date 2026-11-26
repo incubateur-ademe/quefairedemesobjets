@@ -120,7 +120,7 @@ function GroupEditor({
             aria-label="Supprimer le groupe"
             onClick={() => onChange((root) => removeNode(root, path))}
           >
-            ✕
+            🗑️
           </WaButton>
         )}
       </div>
@@ -244,7 +244,7 @@ function ConditionRow({
         aria-label="Supprimer la condition"
         onClick={() => onChange((root) => removeNode(root, path))}
       >
-        ✕
+        🗑️
       </WaButton>
     </div>
   )

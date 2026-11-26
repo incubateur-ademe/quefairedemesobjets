@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-
 from enrich.config.columns import COLS
 from enrich.tasks.business_logic.enrich_lien_succession_suggest import (
     _champs_a_suggerer,
@@ -129,7 +128,7 @@ class TestEnrichLienSuccessionSuggest:
 
         mocker.patch("utils.django.django_setup_full")
         mocker.patch(
-            "enrich.tasks.business_logic.enrich_lien_succession_suggest._est_parent_par_acteur",
+            "enrich.tasks.business_logic.enrich_lien_succession_suggest._est_parent_by_acteur",
             return_value={"acteur-a": False},
         )
 

@@ -1,5 +1,11 @@
 import { groupe, ligne } from "../screens/cohorte/fixtures"
-import { withProposition, withReport, withRestauration, withStatut } from "./mutations"
+import {
+  withProposition,
+  withReport,
+  withRestore,
+  withStatut,
+  withEmpty,
+} from "./mutations"
 
 describe("optimistic updates", () => {
   it("decides the whole groupe and disables its actions", () => {
@@ -47,7 +53,7 @@ describe("optimistic updates", () => {
   })
 
   it("restores the value of the acteur, « __empty__ » when it is empty", () => {
-    const restorable = { ...ligne(1, ["x"]).capacites, restaurer_correction: true }
+    const restorable = { ...ligne(1, ["x"]).capacites, restore_correction: true }
     const base = groupe(1, {
       lignes: [
         ligne(1, ["nom"], { capacites: restorable }),
@@ -63,11 +69,29 @@ describe("optimistic updates", () => {
       ],
     })
 
-    const next = withRestauration(base)
+    const next = withRestore(base)
 
     expect(next.lignes[0].correction.propose).toEqual({ nom: "nom actuel" })
     expect(next.lignes[1].correction.propose).toEqual({ url: "__empty__" })
     expect(next.lignes[2].correction.propose).toBeNull()
-    expect(withRestauration(base, ["1:url"]).lignes[0].correction.propose).toBeNull()
+    expect(withRestore(base, ["1:url"]).lignes[0].correction.propose).toBeNull()
+  })
+
+  it("empties the correction of the lignes of text fields", () => {
+    const emptyable = { ...ligne(1, ["x"]).capacites, empty_correction: true }
+    const base = groupe(1, {
+      lignes: [
+        ligne(1, ["nom"], { capacites: emptyable }),
+        ligne(1, ["url"], { capacites: emptyable }),
+        ligne(1, ["latitude", "longitude"]),
+      ],
+    })
+
+    const next = withEmpty(base)
+
+    expect(next.lignes[0].correction.propose).toEqual({ nom: "__empty__" })
+    expect(next.lignes[1].correction.propose).toEqual({ url: "__empty__" })
+    expect(next.lignes[2].correction.propose).toBeNull()
+    expect(withEmpty(base, ["1:url"]).lignes[0].correction.propose).toBeNull()
   })
 })

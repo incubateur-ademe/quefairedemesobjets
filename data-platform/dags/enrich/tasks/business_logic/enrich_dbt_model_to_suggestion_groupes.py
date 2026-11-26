@@ -21,9 +21,7 @@ from enrich.tasks.business_logic.enrich_dbt_model_to_suggestions import (
     COHORTS_TO_PREPARE_CHANGES,
     cohort_to_suggestion_action,
 )
-from enrich.tasks.business_logic.enrich_siret_siren_suggest import (
-    _est_parent_par_acteur,
-)
+from enrich.tasks.business_logic.enrich_siret_siren_suggest import _est_parent_by_acteur
 from utils import logging_utils as log
 
 logger = logging.getLogger(__name__)
@@ -237,7 +235,7 @@ def enrich_dbt_model_to_suggestion_groupes(
         msg = f"Problème cohorte: obtenu {cohorts=} vs. attendu {cohort=}"
         raise ValueError(msg)
 
-    est_parent_map = _est_parent_par_acteur(list(df[COLS.ACTEUR_ID].unique()))
+    est_parent_map = _est_parent_by_acteur(list(df[COLS.ACTEUR_ID].unique()))
     groupes = suggestion_groupes_prepare(df, cohort, est_parent_map)
 
     # we need some working suggestions, can't have it all fail

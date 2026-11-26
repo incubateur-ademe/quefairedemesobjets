@@ -46,14 +46,16 @@ describe("CohortesScreen", () => {
       "/data/revue/cohortes/2",
     )
     expect(screen.getAllByText("25 %")).toHaveLength(2)
-    expect(screen.getByText("2 cohortes SOURCE")).toBeInTheDocument()
+    expect(screen.getByText("2 cohortes")).toBeInTheDocument()
   })
 
   it("sends quick filters and sort to the API, and keeps them in the URL", async () => {
     const api = setup()
     await screen.findByText("dag_1")
 
-    fireEvent.click(screen.getByText("Suppression"))
+    fireEvent.change(screen.getByLabelText("Type de cohorte"), {
+      target: { value: "SOURCE_SUPRESSION" },
+    })
     fireEvent.click(screen.getByText("Type", { selector: "th" }))
 
     await waitFor(() =>
@@ -66,13 +68,51 @@ describe("CohortesScreen", () => {
     expect(window.location.search).toBe("?type=SOURCE_SUPRESSION&tri=type_action")
   })
 
+  it.each([
+    ["SOURCE", ["SOURCE_AJOUT", "SOURCE_MODIFICATION", "SOURCE_SUPRESSION"]],
+    [
+      "ENRICH",
+      [
+        "ENRICH_ACTEURS_CLOSED",
+        "ENRICH_ACTEURS_RGPD",
+        "ENRICH_ACTEURS_VILLES_TYPO",
+        "ENRICH_ACTEURS_VILLES_NEW",
+        "ENRICH_ACTEURS_CP_TYPO",
+        "ENRICH_REVISION_ACTEURS_CP_TYPO",
+        "ENRICH_ACTEURS_SIRET",
+        "ENRICH_ACTEURS_SIREN",
+        "ENRICH_ACTEURS_LIEN_SUCCESSION",
+      ],
+    ],
+    ["ENRICH_ACTEURS_CLOSED", ["ENRICH_ACTEURS_CLOSED"]],
+    ["ENRICH_ACTEURS_RGPD", ["ENRICH_ACTEURS_RGPD"]],
+  ])("filters on the type %s", async (type, typeActions) => {
+    const api = setup()
+    await screen.findByText("dag_1")
+
+    fireEvent.change(screen.getByLabelText("Type de cohorte"), {
+      target: { value: type },
+    })
+
+    await waitFor(() =>
+      expect(lastCohortesQuery(api)).toMatchObject({ type_action: typeActions }),
+    )
+    expect(window.location.search).toBe(`?type=${type}`)
+
+    fireEvent.change(screen.getByLabelText("Type de cohorte"), {
+      target: { value: "" },
+    })
+    await waitFor(() => expect(lastCohortesQuery(api).type_action).toBeUndefined())
+    expect(window.location.search).toBe("")
+  })
+
   it("restores its state from the URL", async () => {
     const filtre = JSON.stringify({
       op: "and",
       conditions: [{ field: "id", operator: "eq", value: 1 }],
     })
     const api = setup(
-      `/data/revue/?page=2&par_page=25&filtre=${encodeURIComponent(filtre)}`,
+      `/data/revue/?page=2&page_size=25&filtre=${encodeURIComponent(filtre)}`,
     )
     await screen.findByText("dag_1")
 

@@ -23,7 +23,7 @@ export const TUPLES_SEPARATOR = "|"
 
 export function readReviewState(search: Record<string, string>): ReviewState {
   const vue: Vue = search.vue === "lignes" ? "lignes" : "groupes"
-  const pageSize = Number(search.par_page)
+  const pageSize = Number(search.page_size)
   return {
     vue,
     afficher: search.afficher === "tout" ? "tout" : "avalider",

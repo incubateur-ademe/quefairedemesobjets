@@ -11,11 +11,6 @@ followed in the « Tâches » panel (data.revue.taches).
 
 from dataclasses import dataclass
 
-from django.db import transaction
-from django.db.models import Exists, OuterRef, Q, QuerySet
-from django.utils import timezone
-from django_tasks import TaskResultStatus, task
-
 from data.models.suggestion import (
     SuggestionCohorte,
     SuggestionGroupe,
@@ -33,11 +28,17 @@ from data.revue.lignes import (
 )
 from data.revue.policies import PARENT, REVISION, get_policy
 from data.revue.revue import (
-    _ligne_key_expression,
+    TARGET,
     filtered_groupes,
     filtered_ligne_rows,
+    ligne_key_expression,
     parse_tuples,
+    same_ligne_sus,
 )
+from django.db import transaction
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet
+from django.utils import timezone
+from django_tasks import TaskResultStatus, task
 from qfdmo.models.acteur import Acteur
 
 SUGGESTION_TASK_ASYNC_THRESHOLD = 1000
@@ -69,10 +70,19 @@ class Selection:
     groupes: QuerySet[SuggestionGroupe] | None = None
     rows: QuerySet[SuggestionUnitaire] | None = None
 
+    @property
+    def policy(self):
+        return get_policy(self.cohorte.type_action)
+
+    @property
+    def by_acteur(self) -> bool:
+        return self.policy.lignes_by_acteur
+
 
 def resolve(cohorte: SuggestionCohorte, payload: dict) -> Selection:
     vue = payload["vue"]
     selection = payload["selection"]
+    by_acteur = get_policy(cohorte.type_action).lignes_by_acteur
     if selection["mode"] == "ids":
         ids = selection["ids"]
         if vue == "groupes":
@@ -80,11 +90,15 @@ def resolve(cohorte: SuggestionCohorte, payload: dict) -> Selection:
             return Selection(cohorte, vue, groupes=groupes)
         q = Q(pk__in=[])
         for key in ids:
-            groupe_id, champs = parse_ligne_key(str(key))
-            q |= Q(suggestion_groupe_id=groupe_id, champs=champs)
-        rows = SuggestionUnitaire.objects.filter(
+            groupe_id, target, champs = parse_ligne_key(str(key))
+            ligne = Q(suggestion_groupe_id=groupe_id, champs=champs)
+            if by_acteur:
+                ligne &= Q(_target=target or "")
+            q |= ligne
+        rows = SuggestionUnitaire.objects.alias(_target=TARGET).filter(
             q, suggestion_groupe__suggestion_cohorte=cohorte
         )
+        rows = SuggestionUnitaire.objects.filter(pk__in=rows.values("pk"))
         return Selection(cohorte, vue, rows=rows)
 
     filtre = parse_filter(selection.get("filtre"))
@@ -98,8 +112,8 @@ def resolve(cohorte: SuggestionCohorte, payload: dict) -> Selection:
         return Selection(cohorte, vue, groupes=groupes)
     rows = filtered_ligne_rows(cohorte, filtre, tuples, afficher)
     if exclus:
-        rows = rows.alias(_cle=_ligne_key_expression()).exclude(
-            _cle__in=[str(k) for k in exclus]
+        rows = rows.alias(_key=ligne_key_expression(by_acteur)).exclude(
+            _key__in=[str(k) for k in exclus]
         )
     # Plain queryset on the ids: updatable, and reusable in subqueries
     rows = SuggestionUnitaire.objects.filter(pk__in=rows.values("pk"))
@@ -139,6 +153,8 @@ def _reportable_acteur_rows(selection: Selection, modele: str):
 def _restorable_acteur_rows(selection: Selection):
     """SU Acteur of the lignes whose correction may take the value of the acteur:
     reportable to the correction, and the acteur exists (not an AJOUT)."""
+    if not get_policy(selection.cohorte.type_action).can_restore:
+        return SuggestionUnitaire.objects.none()
     acteur = Acteur.objects.filter(
         identifiant_unique=OuterRef("suggestion_groupe__acteur_id")
     )
@@ -151,8 +167,10 @@ def _plan_rows(selection: Selection, action: str):
     return _reportable_acteur_rows(selection, REPORT_TARGETS[action])
 
 
-def _count_lignes(rows: QuerySet[SuggestionUnitaire]) -> int:
-    return rows.order_by().values("suggestion_groupe_id", "champs").distinct().count()
+def _count_lignes(rows: QuerySet[SuggestionUnitaire], by_acteur: bool) -> int:
+    return rows.order_by().aggregate(
+        n=Count(ligne_key_expression(by_acteur), distinct=True)
+    )["n"]
 
 
 def preview(selection: Selection) -> dict[str, int]:
@@ -179,33 +197,38 @@ def preview(selection: Selection) -> dict[str, int]:
         return counts
 
     rows = selection.rows
+    by_acteur = selection.by_acteur
+    to_validate = _count_lignes(_lignes_to_validate(rows, by_acteur), by_acteur)
     return {
-        "validate": _count_lignes(_lignes_to_validate(rows)),
-        "reject": 0,
-        "resubmit": _count_lignes(_lignes_to_resubmit(rows)),
+        "validate": to_validate,
+        "reject": to_validate if policy.can_reject_line else 0,
+        "resubmit": _count_lignes(
+            _lignes_to_resubmit(rows, policy.can_reject_line, by_acteur), by_acteur
+        ),
         **{
-            action: _count_lignes(_plan_rows(selection, action))
+            action: _count_lignes(_plan_rows(selection, action), by_acteur)
             for action in [*REPORT_TARGETS, RESTORE]
         },
     }
 
 
-def _lignes_to_validate(rows):
-    """Rows of the lignes to validate: groupe to validate, not all SU validated."""
-    not_validated = SuggestionUnitaire.objects.filter(
-        suggestion_groupe_id=OuterRef("suggestion_groupe_id"),
-        champs=OuterRef("champs"),
-    ).exclude(statut=ATRAITER)
-    return rows.filter(suggestion_groupe__statut=AVALIDER).filter(Exists(not_validated))
+def _lignes_to_validate(rows, by_acteur: bool):
+    """Rows of the lignes to decide: groupe to validate, ligne neither validated
+    nor refused."""
+    open_sus = same_ligne_sus(by_acteur).exclude(statut__in=[ATRAITER, REJETEE])
+    return rows.filter(suggestion_groupe__statut=AVALIDER).filter(Exists(open_sus))
 
 
-def _lignes_to_resubmit(rows):
+def _lignes_to_resubmit(rows, per_ligne: bool, by_acteur: bool):
     """Rows of validated lignes (groupe not processed yet), and of lignes of
-    refused groupes (which reopen their whole groupe)."""
-    open_not_validated = SuggestionUnitaire.objects.filter(
-        suggestion_groupe_id=OuterRef("suggestion_groupe_id"),
-        champs=OuterRef("champs"),
-    ).exclude(statut=ATRAITER)
+    refused groupes (which reopen their whole groupe). When lignes are refused one
+    by one (`per_ligne`), refused lignes go back to validate on their own."""
+    if per_ligne:
+        return rows.filter(
+            suggestion_groupe__statut__in=[AVALIDER, ATRAITER, REJETEE],
+            statut__in=[ATRAITER, REJETEE],
+        )
+    open_not_validated = same_ligne_sus(by_acteur).exclude(statut=ATRAITER)
     validated = rows.filter(suggestion_groupe__statut=ATRAITER) | rows.filter(
         suggestion_groupe__statut=AVALIDER
     ).exclude(Exists(open_not_validated))
@@ -223,12 +246,16 @@ def _batches(ids: list[int]):
 def run(selection: Selection, action: str, user) -> dict:
     if action not in ACTIONS:
         raise RevueApiError(422, "invalid", f"Action inconnue : « {action} »")
-    if action == "reject" and selection.vue == "lignes":
+    policy = get_policy(selection.cohorte.type_action)
+    if action == "reject" and selection.vue == "lignes" and not policy.can_reject_line:
         raise RevueApiError(
             422, "invalid", "Une ligne ne peut pas être refusée : refuser le groupe"
         )
-    policy = get_policy(selection.cohorte.type_action)
-    if action == "reject" and not policy.can_reject_group:
+    if (
+        action == "reject"
+        and selection.vue == "groupes"
+        and not policy.can_reject_group
+    ):
         raise RevueApiError(422, "invalid", "Refus impossible pour ce type")
     total = preview(selection)[action]
     if action in REPORT_TARGETS or action == RESTORE:
@@ -244,10 +271,10 @@ def run(selection: Selection, action: str, user) -> dict:
 
 def _groupes_to_resubmit(groupes: QuerySet[SuggestionGroupe]):
     """Decided groupes (validated or refused, not processed yet), and groupes to
-    validate having validated lignes: all their lignes go back to validate."""
+    validate having decided lignes: all their lignes go back to validate."""
     with_validated_lignes = Exists(
         SuggestionUnitaire.objects.filter(
-            suggestion_groupe_id=OuterRef("pk"), statut=ATRAITER
+            suggestion_groupe_id=OuterRef("pk"), statut__in=[ATRAITER, REJETEE]
         )
     )
     return groupes.filter(
@@ -273,37 +300,67 @@ def _decide_groupes(selection: Selection, action: str, user) -> int:
     return len(ids)
 
 
+def close_decided_groupes(groupe_ids: list[int], user, now) -> None:
+    """A groupe to validate is decided with its last ligne: validated when one of
+    its lignes is validated, refused when all its lignes are refused."""
+    decided = SuggestionGroupe.objects.filter(
+        id__in=groupe_ids, statut=AVALIDER
+    ).exclude(
+        Exists(
+            SuggestionUnitaire.objects.filter(
+                suggestion_groupe_id=OuterRef("pk")
+            ).exclude(statut__in=[ATRAITER, REJETEE])
+        )
+    )
+    with_validated = Exists(
+        SuggestionUnitaire.objects.filter(
+            suggestion_groupe_id=OuterRef("pk"), statut=ATRAITER
+        )
+    )
+    fields = {"decision_par": user, "decision_le": now, "modifie_le": now}
+    decided.filter(with_validated).update(statut=ATRAITER, **fields)
+    decided.exclude(with_validated).update(statut=REJETEE, **fields)
+
+
 def _decide_lignes(selection: Selection, action: str, user) -> int:
     now = timezone.now()
     rows = selection.rows
-    if action == "validate":
-        lignes = _lignes_to_validate(rows)
-        affected = _count_lignes(lignes)
+    by_acteur = selection.by_acteur
+    per_ligne = selection.policy.can_reject_line
+    if action in ("validate", "reject"):
+        lignes = _lignes_to_validate(rows, by_acteur)
+        affected = _count_lignes(lignes, by_acteur)
         groupe_ids = list(
             lignes.values_list("suggestion_groupe_id", flat=True).distinct()
         )
         SuggestionUnitaire.objects.filter(
             pk__in=list(lignes.values_list("pk", flat=True))
-        ).update(statut=ATRAITER, decision_par=user, decision_le=now, modifie_le=now)
-        # A groupe is validated with its last ligne
-        complete = SuggestionGroupe.objects.filter(
-            id__in=groupe_ids, statut=AVALIDER
-        ).exclude(
-            Exists(
-                SuggestionUnitaire.objects.filter(
-                    suggestion_groupe_id=OuterRef("pk")
-                ).exclude(statut=ATRAITER)
-            )
+        ).update(
+            statut=ATRAITER if action == "validate" else REJETEE,
+            decision_par=user,
+            decision_le=now,
+            modifie_le=now,
         )
-        complete.update(
-            statut=ATRAITER, decision_par=user, decision_le=now, modifie_le=now
-        )
+        close_decided_groupes(groupe_ids, user, now)
         SuggestionGroupe.objects.filter(id__in=groupe_ids).update(modifie_le=now)
         return affected
 
     # resubmit
-    lignes = _lignes_to_resubmit(rows)
-    affected = _count_lignes(lignes)
+    lignes = _lignes_to_resubmit(rows, per_ligne, by_acteur)
+    affected = _count_lignes(lignes, by_acteur)
+    if per_ligne:
+        # Each ligne goes back to validate on its own, its groupe with it
+        groupe_ids = list(
+            lignes.values_list("suggestion_groupe_id", flat=True).distinct()
+        )
+        SuggestionUnitaire.objects.filter(
+            pk__in=list(lignes.values_list("pk", flat=True))
+        ).update(statut=AVALIDER, decision_par=None, decision_le=None, modifie_le=now)
+        SuggestionGroupe.objects.filter(id__in=groupe_ids).exclude(
+            statut=AVALIDER
+        ).update(statut=AVALIDER, decision_par=None, decision_le=None)
+        SuggestionGroupe.objects.filter(id__in=groupe_ids).update(modifie_le=now)
+        return affected
     # Refusal is a decision on the groupe: its lignes reopen the whole groupe
     refused = list(
         lignes.filter(suggestion_groupe__statut=REJETEE)
@@ -342,12 +399,12 @@ def _report_plan(selection: Selection, action: str) -> dict[int, list[list[str]]
 
 
 def report_plan(
-    cohorte_id: int, modele: str, plan: dict, restaurer: bool = False
+    cohorte_id: int, modele: str, plan: dict, restore: bool = False
 ) -> dict:
     """Copies the suggestion of the source to the target of each ligne of the
-    plan, or restores the value of the acteur in the correction (`restaurer`),
+    plan, or restores the value of the acteur in the correction (`restore`),
     groupe by groupe (each groupe in its own transaction)."""
-    from data.revue.services import report_lignes, restaurer_lignes
+    from data.revue.services import report_lignes, restore_lignes
 
     cohorte = SuggestionCohorte.objects.get(id=cohorte_id)
     policy = get_policy(cohorte.type_action)
@@ -369,8 +426,8 @@ def report_plan(
                 if tuple(ligne["champs"]) in wanted
             ]
             written = (
-                restaurer_lignes(groupe, lignes)
-                if restaurer
+                restore_lignes(groupe, lignes)
+                if restore
                 else report_lignes(groupe, modele, lignes)
             )
             if written:
@@ -383,13 +440,13 @@ def report_plan(
 
 @task()
 def report_task(
-    cohorte_id: int, modele: str, plan: dict, par: str = "", restaurer: bool = False
+    cohorte_id: int, modele: str, plan: dict, by: str = "", restore: bool = False
 ) -> dict:
     """The cohorte comes first: the « Tâches » panel finds the tasks of a cohorte by
-    this argument (data.revue.taches). `par` is only kept for the panel."""
+    this argument (data.revue.taches). `by` is the username shown in the panel."""
     # JSON keys are strings
     return report_plan(
-        cohorte_id, modele, {int(k): v for k, v in plan.items()}, restaurer
+        cohorte_id, modele, {int(k): v for k, v in plan.items()}, restore
     )
 
 
@@ -402,18 +459,18 @@ TASK_STATUTS = {
 
 
 def _report(selection: Selection, action: str, total: int, user) -> dict:
-    restaurer = action == RESTORE
-    modele = REVISION if restaurer else REPORT_TARGETS[action]
+    restore = action == RESTORE
+    modele = REVISION if restore else REPORT_TARGETS[action]
     plan = _report_plan(selection, action)
     if len(plan) <= SUGGESTION_TASK_ASYNC_THRESHOLD:
-        result = report_plan(selection.cohorte.id, modele, plan, restaurer)
+        result = report_plan(selection.cohorte.id, modele, plan, restore)
         return {"affected": result["affected"], "skipped": total - result["affected"]}
     task_result = report_task.enqueue(
         selection.cohorte.id,
         modele,
         {str(k): v for k, v in plan.items()},
-        par=user.get_username() if user else "",
-        restaurer=restaurer,
+        by=user.get_username() if user else "",
+        restore=restore,
     )
     if task_result.status == TaskResultStatus.SUCCESSFUL:
         # Immediate backend (tests, local): already done

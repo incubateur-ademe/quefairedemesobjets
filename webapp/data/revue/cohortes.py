@@ -1,4 +1,5 @@
-"""Screen 1: list of the SOURCE cohortes, and their logs."""
+"""Screen 1: list of the reviewable cohortes (SOURCE, closed acteurs…), and their
+logs."""
 
 from datetime import date
 
@@ -6,7 +7,6 @@ from django.db.models import Count, Func, TextField
 from django.shortcuts import get_object_or_404
 
 from data.models.suggestion import (
-    SOURCE_TYPE_ACTIONS,
     SUGGESTION_LOG_LEVELS_BY_GRAVITY,
     SuggestionAction,
     SuggestionCohorte,
@@ -24,11 +24,12 @@ from data.revue.filters import (
     registry_metadata,
 )
 from data.revue.pagination import paginate
+from data.revue.policies import REVUE_TYPE_ACTIONS
 
-SOURCE_TYPE_ACTION_CHOICES = tuple(
+REVUE_TYPE_ACTION_CHOICES = tuple(
     (value, label)
     for value, label in SuggestionAction.choices
-    if value in SOURCE_TYPE_ACTIONS
+    if value in REVUE_TYPE_ACTIONS
 )
 
 COHORTE_FIELDS = FieldRegistry(
@@ -43,7 +44,7 @@ COHORTE_FIELDS = FieldRegistry(
             "Type d'action",
             "choice",
             "cohorte",
-            choices=SOURCE_TYPE_ACTION_CHOICES,
+            choices=REVUE_TYPE_ACTION_CHOICES,
         ),
         FieldSpec(
             "statut",
@@ -70,9 +71,14 @@ SORTS = {
 DEFAULT_SORT = "-cree_le"
 
 
-def get_source_cohorte(cohorte_id: int) -> SuggestionCohorte:
+def revue_cohortes():
+    """Reviewable cohortes having at least one groupe."""
+    return SuggestionCohorte.objects.cohortes_with_groupes(REVUE_TYPE_ACTIONS)
+
+
+def get_revue_cohorte(cohorte_id: int) -> SuggestionCohorte:
     return get_object_or_404(
-        SuggestionCohorte, id=cohorte_id, type_action__in=SOURCE_TYPE_ACTIONS
+        SuggestionCohorte, id=cohorte_id, type_action__in=REVUE_TYPE_ACTIONS
     )
 
 
@@ -97,9 +103,7 @@ def cohortes_page(
     page: int,
     page_size: int,
 ) -> dict:
-    queryset = apply_filter(
-        SuggestionCohorte.objects.source_cohortes(), filtre, COHORTE_FIELDS
-    )
+    queryset = apply_filter(revue_cohortes(), filtre, COHORTE_FIELDS)
     if type_action:
         queryset = queryset.filter(type_action__in=type_action)
     if statut:
@@ -145,7 +149,7 @@ def attach_counts(cohortes: list[SuggestionCohorte]) -> None:
 
 def cohortes_filter_metadata() -> list[dict]:
     metadata_keys = (
-        SuggestionCohorte.objects.filter(type_action__in=SOURCE_TYPE_ACTIONS)
+        SuggestionCohorte.objects.filter(type_action__in=REVUE_TYPE_ACTIONS)
         .annotate(
             json_type=Func(
                 "metadata", function="jsonb_typeof", output_field=TextField()

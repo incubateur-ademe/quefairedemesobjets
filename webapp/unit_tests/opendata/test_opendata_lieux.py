@@ -3,7 +3,6 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.urls import reverse
-
 from opendata.lieux import open_data
 from qfdmo.models.acteur import DataLicense, DisplayedActeur
 from qfdmo.models.action import GroupeAction
