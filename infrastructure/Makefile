@@ -99,3 +99,19 @@ secrets-push: check-stack
 	  id=$$(scw secret secret list project-id=$$project path=/terraform/$(ENV) name=$(STACK) -o json | jq -r --arg n "$(STACK)" '[.[] | select(.name == $$n)][0].id // empty'); \
 	  [ -n "$$id" ] || id=$$(scw secret secret create path=/terraform/$(ENV) name=$(STACK) -o json | jq -er '.id'); \
 	  scw secret version create "$$id" data=@$(FILE) disable-previous=true -o json | jq -r '"/terraform/$(ENV)/$(STACK): revision \(.revision)"'
+
+# Plan or apply a stack the CI deploys (airflow_containers, nginx_containers)
+# without changing its image: IMAGE_TAG is the tag of the container running
+# now, read from Scaleway. The state can lag behind it. The Airflow containers
+# share one tag: the webserver's is read.
+# Usage: make live-plan ENV=prod STACK=airflow_containers
+#        make live-apply ENV=prod STACK=nginx_containers
+.PHONY: live-plan live-apply
+live-plan live-apply:
+	@case "$(STACK)" in airflow_containers|nginx_containers) ;; *) echo "usage: make $@ ENV=<env> STACK=airflow_containers|nginx_containers"; exit 1;; esac
+	@[ -d "$(STACK_DIR)" ] || { echo "$(STACK_DIR): no such stack"; exit 1; }
+	@cd $(STACK_DIR) && \
+	  id=$$(terragrunt output -raw container_id | sed 's|.*/||') && \
+	  tag=$$(scw container container get "$$id" region=$${SCW_DEFAULT_REGION:-fr-par} -o json | jq -er '.registry_image // .image' | sed 's/.*://') && \
+	  echo "IMAGE_TAG=$$tag (running now)" && \
+	  IMAGE_TAG=$$tag terragrunt $(@:live-%=%)

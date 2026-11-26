@@ -13,6 +13,14 @@ on:
         required: false
         default: ""
 
+# The S3 state backend has no locking: two applies of the stack must never
+# overlap. The group holds the build too, so an older run cannot apply after a
+# newer one. Deployments queue: a newer pending one replaces an older pending
+# one, the one in flight finishes.
+concurrency:
+  group: deploy-airflow-${{ inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   airflow_docker:
     name: 🐳 Images
@@ -23,56 +31,19 @@ jobs:
       source_tag: ${{ inputs.source_tag }}
       environment: ${{ inputs.environment }}
 
-  # Job which retrieves the container IDs from the environment
-  # Approbation is done once here
-  get_container_ids:
-    name: 🔑 Read container IDs
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    outputs:
-      scheduler_id: ${{ steps.get_ids.outputs.scheduler_id }}
-      webserver_id: ${{ steps.get_ids.outputs.webserver_id }}
-      dag_processor_id: ${{ steps.get_ids.outputs.dag_processor_id }}
-    steps:
-      - name: Get container IDs from environment
-        id: get_ids
-        run: |
-          echo "scheduler_id=${{ vars.SCALEWAY_AIRFLOW_SCHEDULER_CONTAINER_ID }}" >> $GITHUB_OUTPUT
-          echo "webserver_id=${{ vars.SCALEWAY_AIRFLOW_WEBSERVER_CONTAINER_ID }}" >> $GITHUB_OUTPUT
-          echo "dag_processor_id=${{ vars.SCALEWAY_AIRFLOW_DAG_PROCESSOR_CONTAINER_ID }}" >> $GITHUB_OUTPUT
-
-  deploy_scaleway_scheduler:
-    name: 🟣 Scheduler
+  # The three containers share the tag: one apply rolls them out together,
+  # with whatever else changed in the stack.
+  deploy_scaleway_airflow:
+    name: 🟣 Scaleway Airflow
+    needs: [airflow_docker]
+    uses: ./.github/workflows/_terragrunt-apply-stack.yml
     secrets: inherit # pragma: allowlist secret`
-    uses: ./.github/workflows/_scaleway-container-deploy.yml
-    needs: [airflow_docker, get_container_ids]
     with:
-      component: scheduler
-      container_id: ${{ needs.get_container_ids.outputs.scheduler_id }}
-      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-scheduler', inputs.tag_name) }}
-
-  deploy_scaleway_webserver:
-    secrets: inherit # pragma: allowlist secret`
-    name: 🟣 Webserver
-    needs: [airflow_docker, get_container_ids]
-    uses: ./.github/workflows/_scaleway-container-deploy.yml
-    with:
-      component: webserver
-      container_id: ${{ needs.get_container_ids.outputs.webserver_id }}
-      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-webserver', inputs.tag_name) }}
-
-  deploy_scaleway_dag_processor:
-    secrets: inherit # pragma: allowlist secret`
-    name: 🟣 Dag processor
-    needs: [airflow_docker, get_container_ids]
-    uses: ./.github/workflows/_scaleway-container-deploy.yml
-    with:
-      component: dag processor
-      container_id: ${{ needs.get_container_ids.outputs.dag_processor_id }}
-      registry_image: ${{ format('{0}:{1}', 'rg.fr-par.scw.cloud/ns-qfdmo/airflow-dag-processor', inputs.tag_name) }}
+      environment: ${{ inputs.environment }}
+      stack: airflow_containers
+      image_tag: ${{ inputs.tag_name }}
 
 # Address actions/missing-workflow-permissions rule in
 # code scanning alerts
 permissions:
   contents: read
-

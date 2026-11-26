@@ -9,30 +9,41 @@ permissions:
   contents: write
   pull-requests: write
 
-# A new commit replaces the run in progress: only the last one gets deployed.
-# A re-run waits instead: it could be an older commit cancelling a newer one.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.run_attempt == '1' }}
-
+# No run-level concurrency: cancelling a run would cancel a deployment in
+# progress with it, and the Terraform state has no lock. A new commit cancels
+# only the checks of the previous one (a re-run waits instead: it could be an
+# older commit cancelling a newer one). Each _deploy-*.yml queues its own
+# deployments per environment.
 # Deployments do not wait for CI: a failed check must not stop preprod. The release
 # waits for all of it.
 jobs:
   ci_webapp:
     name: 🌐 Webapp
     uses: ./.github/workflows/ci-webapp.yml
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-ci_webapp
+      cancel-in-progress: ${{ github.run_attempt == '1' }}
 
   ci_data_platform:
     name: 📊 Data platform
     uses: ./.github/workflows/ci-data-platform.yml
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-ci_data_platform
+      cancel-in-progress: ${{ github.run_attempt == '1' }}
 
   ci_revue:
     name: 🧐 Revue
     uses: ./.github/workflows/ci-revue.yml
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-ci_revue
+      cancel-in-progress: ${{ github.run_attempt == '1' }}
 
   ci_infrastructure:
     name: 🏗️ Infrastructure
     uses: ./.github/workflows/ci-infrastructure.yml
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-ci_infrastructure
+      cancel-in-progress: ${{ github.run_attempt == '1' }}
 
   webapp:
     name: 🟠 Deploy webapp
@@ -60,6 +71,9 @@ jobs:
   e2e:
     name: 🪤 E2E
     uses: ./.github/workflows/e2e.yml
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-e2e
+      cancel-in-progress: ${{ github.run_attempt == '1' }}
     secrets: inherit #pragma: allowlist secret
 
   update_release_draft:
