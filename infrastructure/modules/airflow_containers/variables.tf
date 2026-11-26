@@ -97,10 +97,6 @@ variable "DB_WEBAPP_SAMPLE" {
   type      = string
   sensitive = true
 }
-variable "ENVIRONMENT" {
-  type      = string
-  sensitive = true
-}
 variable "POSTGRES_DB" {
   type      = string
   sensitive = true
