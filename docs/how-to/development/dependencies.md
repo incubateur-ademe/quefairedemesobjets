@@ -38,6 +38,12 @@ uv add --group lint <package>
 uv add --group dev <package>
 ```
 
+Cooldown : `exclude-newer = "7 days"` dans le `pyproject.toml` racine empêche uv de choisir une version publiée depuis moins de 7 jours, afin de se prémunir des supply chain attacks. La CI installe avec `uv sync --locked` : un `uv.lock` généré en contournant ce réglage la fait échouer. Pour un correctif de sécurité urgent, ajouter une exception ciblée dans `[tool.uv]` :
+
+```toml
+exclude-newer-package = { <package> = false }
+```
+
 ### Déploiement Scalingo (webapp)
 
 Le déploiement se fait **depuis la racine du monorepo** (pas de `PROJECT_DIR`). Le buildpack Python voit le `uv.lock` racine et exécute `uv sync --locked --no-default-groups`, ce qui installe le membre webapp via la dépendance déclarée dans le `pyproject.toml` racine.
@@ -59,8 +65,9 @@ npm ci
 Pour ajouter une dépendance (depuis la racine du repo) :
 
 ```sh
-npm install <package> --workspace webapp --before="$(date -v -7d +%Y-%m-%d)" # testé sur MacOS et Debian
+npm install <package> --workspace webapp
 ```
 
 option `--dev` pour les dépendances de développement
-Note : on recommande un cooldown de 7 jours pour les nouvelles dépendances afin de se prémunir des supply chain attacks.
+
+Cooldown : `min-release-age=7` dans le `.npmrc` empêche npm de choisir une version publiée depuis moins de 7 jours (npm 11.10 minimum, ignoré par npm 10). `npm ci` ne vérifie pas l'âge des versions déjà présentes dans le `package-lock.json`.

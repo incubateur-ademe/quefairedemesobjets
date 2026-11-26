@@ -31,4 +31,4 @@ runs:
     - name: Install Python dependencies
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: uv sync ${{ inputs.uv-groups }}
+      run: uv sync --locked ${{ inputs.uv-groups }}
