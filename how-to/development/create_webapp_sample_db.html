@@ -465,12 +465,13 @@ recherche <code class="docutils literal notranslate"><span class="pre">wagtail_f
 <h2>En CI<a class="headerlink" href="#en-ci" title="Lien vers cette rubrique">¶</a></h2>
 <p>La CI ne dispose pas de stack Airflow : elle restaure un dump de la base
 d’échantillon de preprod via le secret <code class="docutils literal notranslate"><span class="pre">SAMPLE_DB_URI</span></code>
-(<code class="docutils literal notranslate"><span class="pre">.github/actions/prepare-django-db</span></code>). Ce chemin distant ne concerne que la CI ;
-en local, l’échantillon est toujours reconstruit par le DAG.</p>
+(<code class="docutils literal notranslate"><span class="pre">.github/actions/prepare-django-db</span></code>). En local, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">setup</span></code> peut
+restaurer ce même dump dans <code class="docutils literal notranslate"><span class="pre">webapp</span></code> (<code class="docutils literal notranslate"><span class="pre">SAMPLE_DB_URI</span></code> dans <code class="docutils literal notranslate"><span class="pre">.env</span></code>), mais
+<code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code>, la base des tests e2e, est toujours reconstruite par le DAG.</p>
 </section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Lien vers cette rubrique">¶</a></h2>
-<p>La connexion est définie par <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code> (voir <code class="docutils literal notranslate"><span class="pre">webapp/.env.template</span></code>)
+<p>La connexion est définie par <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code> (voir <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>)
 et consommée dans <code class="docutils literal notranslate"><span class="pre">webapp/settings/base.py</span></code> ainsi que par
 <code class="docutils literal notranslate"><span class="pre">webapp/playwright.config.ts</span></code>, qui la passe en <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> au serveur de
 test.</p>

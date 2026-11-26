@@ -441,7 +441,7 @@
 <p>E2E tests run against a dedicated <code class="docutils literal notranslate"><span class="pre">webapp_sample</span></code> database (kept separate from your
 dev <code class="docutils literal notranslate"><span class="pre">webapp</span></code> database) on the same Postgres container, so you don’t have to mutate
 the dev data you’re working with. The connection is configured by <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code>
-in <code class="docutils literal notranslate"><span class="pre">.env</span></code> (see <code class="docutils literal notranslate"><span class="pre">.env.template</span></code>); the dev <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is left untouched.</p>
+in <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>; the dev <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is left untouched.</p>
 <p>The sample is built entirely locally by the Airflow DAG <code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code>,
 from your restored <code class="docutils literal notranslate"><span class="pre">webapp</span></code> database. No remote sample database is copied.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># from repo root — checks prerequisites, runs the DAG, prepares the webapp</span>

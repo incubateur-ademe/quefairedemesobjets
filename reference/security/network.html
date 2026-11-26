@@ -366,7 +366,7 @@
 <li><p><strong>Registry privé</strong> (<code class="docutils literal notranslate"><span class="pre">ns-qfdmo</span></code>) avec pull authentifié par les Serverless Containers.</p></li>
 <li><p><strong>CORS</strong> géré par <code class="docutils literal notranslate"><span class="pre">django-cors-headers</span></code> côté webapp (origins configurés par environnement).</p></li>
 <li><p><strong>Embeds iframe</strong> : détection par header <code class="docutils literal notranslate"><span class="pre">Sec-Fetch-Dest:</span> <span class="pre">iframe</span></code>, header <code class="docutils literal notranslate"><span class="pre">Vary:</span> <span class="pre">Sec-Fetch-Dest</span></code> pour différencier les caches. Backlinks contrôlés via <code class="docutils literal notranslate"><span class="pre">EmbedSettings</span></code> (Wagtail).</p></li>
-<li><p><strong>TLS</strong> : terminé par Scalingo (Let’s Encrypt) côté webapp, par Scaleway côté Airflow. En local, mkcert + nginx (<code class="docutils literal notranslate"><span class="pre">webapp/nginx/</span></code>).</p></li>
+<li><p><strong>TLS</strong> : terminé par Scalingo (Let’s Encrypt) côté webapp, par Scaleway côté Airflow. En local, nginx (<code class="docutils literal notranslate"><span class="pre">webapp/nginx/</span></code>) sert en HTTP sur un domaine <code class="docutils literal notranslate"><span class="pre">.localhost</span></code>, que les navigateurs traitent comme un contexte sécurisé.</p></li>
 </ul>
 </section>
 

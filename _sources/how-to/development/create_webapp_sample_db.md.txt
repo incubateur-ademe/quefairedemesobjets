@@ -99,12 +99,13 @@ cd webapp && uv run python manage.py create_webapp_sample_db
 
 La CI ne dispose pas de stack Airflow : elle restaure un dump de la base
 d'échantillon de preprod via le secret `SAMPLE_DB_URI`
-(`.github/actions/prepare-django-db`). Ce chemin distant ne concerne que la CI ;
-en local, l'échantillon est toujours reconstruit par le DAG.
+(`.github/actions/prepare-django-db`). En local, `make setup` peut
+restaurer ce même dump dans `webapp` (`SAMPLE_DB_URI` dans `.env`), mais
+`webapp_sample`, la base des tests e2e, est toujours reconstruite par le DAG.
 
 ## Configuration
 
-La connexion est définie par `DB_WEBAPP_SAMPLE` (voir `webapp/.env.template`)
+La connexion est définie par `DB_WEBAPP_SAMPLE` (voir `docker-compose.yml`)
 et consommée dans `webapp/settings/base.py` ainsi que par
 `webapp/playwright.config.ts`, qui la passe en `DATABASE_URL` au serveur de
 test.

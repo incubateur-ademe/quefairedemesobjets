@@ -485,7 +485,7 @@
 <p>Toutes les ressources suivent la nomenclature <code class="docutils literal notranslate"><span class="pre">lvao-{env}-{nom}</span></code> où <code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">∈</span> <span class="pre">{prod,</span> <span class="pre">preprod,</span> <span class="pre">preview}</span></code>.</p>
 <section id="container-as-a-service-caas">
 <h4>Container as a Service (CaaS)<a class="headerlink" href="#container-as-a-service-caas" title="Lien vers cette rubrique">¶</a></h4>
-<p>Trois Serverless Containers distincts pour Airflow 3 (<code class="docutils literal notranslate"><span class="pre">apache/airflow:slim-&lt;version&gt;-python3.12</span></code>, version de <code class="docutils literal notranslate"><span class="pre">apache-airflow</span></code> dans <code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code>), construits via Dockerfiles dédiés, plus un gateway nginx par environnement :</p>
+<p>Trois Serverless Containers distincts pour Airflow 3 (<code class="docutils literal notranslate"><span class="pre">apache/airflow:slim-&lt;version&gt;-python3.12</span></code>, version de <code class="docutils literal notranslate"><span class="pre">apache-airflow</span></code> dans <code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code>), construits depuis <code class="docutils literal notranslate"><span class="pre">data-platform/Dockerfile</span></code> (une cible par image), plus un gateway nginx par environnement :</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -496,15 +496,15 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lvao-airflow-webserver</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">airflow-webserver.Dockerfile</span></code></p></td>
+<td><p>cible <code class="docutils literal notranslate"><span class="pre">webserver</span></code></p></td>
 <td><p>Interface UI/API Airflow (<code class="docutils literal notranslate"><span class="pre">airflow</span> <span class="pre">api-server</span></code>, port 8080). Création du compte admin au premier démarrage via <code class="docutils literal notranslate"><span class="pre">_AIRFLOW_WWW_USER_*</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lvao-airflow-scheduler</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">airflow-scheduler.Dockerfile</span></code></p></td>
+<td><p>cible <code class="docutils literal notranslate"><span class="pre">scheduler</span></code></p></td>
 <td><p>Orchestrateur (<code class="docutils literal notranslate"><span class="pre">LocalExecutor</span></code>). Embarque le runtime <strong>dbt</strong> (<code class="docutils literal notranslate"><span class="pre">dbt</span> <span class="pre">deps</span></code>), <code class="docutils literal notranslate"><span class="pre">gdal-bin</span></code>, le CLI Scaleway, <code class="docutils literal notranslate"><span class="pre">jq</span></code>, <code class="docutils literal notranslate"><span class="pre">unzip</span></code> pour les pipelines ETL.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lvao-airflow-dag-processor</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">airflow-dag-processor.Dockerfile</span></code></p></td>
+<td><p>cible <code class="docutils literal notranslate"><span class="pre">dag-processor</span></code></p></td>
 <td><p>Parsing isolé des DAGs avec nginx en façade pour le healthcheck.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lvao-nginx</span></code></p></td>

@@ -389,39 +389,15 @@ git<span class="w"> </span>rebase<span class="w"> </span>--continue
 </section>
 <section id="mise-en-place-du-poste-developpeur">
 <h2>Mise en place du poste developpeur<a class="headerlink" href="#mise-en-place-du-poste-developpeur" title="Lien vers cette rubrique">¶</a></h2>
-<section id="je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-local">
-<h3>Je n’arrive pas a accéder à l’interface via une url *.local<a class="headerlink" href="#je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-local" title="Lien vers cette rubrique">¶</a></h3>
-<p>L’interface sur un poste développeur doit-être accessible via les URLs:</p>
+<section id="je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-localhost">
+<h3>Je n’arrive pas a accéder à l’interface via une url *.localhost<a class="headerlink" href="#je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-localhost" title="Lien vers cette rubrique">¶</a></h3>
+<p>L’interface sur un poste développeur est accessible sur <a class="reference external" href="http://quefairedemesdechets.localhost">http://quefairedemesdechets.localhost</a>, sans configuration de <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>.</p>
+<p>Si tel n’est pas le cas :</p>
 <ul class="simple">
-<li><p>http://quefairedemesdechets.ademe.local/</p></li>
-<li><p>http://quefairedemesobjets.ademe.local/</p></li>
-<li><p>http://lvao.ademe.local/ : redirigé vers le site institutionnel</p></li>
+<li><p>vérifier que la stack est démarrée et saine : <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">ps</span></code></p></li>
+<li><p>vérifier que le port 80 n’est pas déjà pris sur la machine ; sinon, définir <code class="docutils literal notranslate"><span class="pre">HTTP_PORT</span></code> dans <code class="docutils literal notranslate"><span class="pre">.env</span></code></p></li>
+<li><p>Django répond aussi directement sur <a class="reference external" href="http://localhost:8000">http://localhost:8000</a></p></li>
 </ul>
-<p>Si tel n’est pas le cas, voici quelques configuration à vérifier</p>
-<section id="etc-hosts">
-<h4>/etc/hosts<a class="headerlink" href="#etc-hosts" title="Lien vers cette rubrique">¶</a></h4>
-<p>Dans la configuration <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>, vérifier la présence des lignes</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0.0.1</span>       <span class="n">lvao</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesdechets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesobjets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-</pre></div>
-</div>
-</section>
-<section id="verifier-la-presence-des-certificats-ssl">
-<h4>Vérifier la présence des certificats ssl<a class="headerlink" href="#verifier-la-presence-des-certificats-ssl" title="Lien vers cette rubrique">¶</a></h4>
-<p>Si les certificats ne sont pas présents, les logs du serveur nginx affichent une erreur type</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lvao</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="mi">1</span>  <span class="o">|</span> <span class="mi">2025</span><span class="o">/</span><span class="mi">05</span><span class="o">/</span><span class="mi">20</span> <span class="mi">10</span><span class="p">:</span><span class="mi">47</span><span class="p">:</span><span class="mi">25</span> <span class="p">[</span><span class="n">emerg</span><span class="p">]</span> <span class="mi">1</span><span class="c1">#1: cannot load certificate &quot;/etc/nginx/ssl/lvao.ademe.local+1.pem&quot;: BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/ssl/lvao.ademe.local+1.pem, r) error:10000080:BIO routines::no such file)</span>
-</pre></div>
-</div>
-<p>Dans ce cas, (re-)générer les certificats</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">init</span><span class="o">-</span><span class="n">certs</span>
-</pre></div>
-</div>
-</section>
-<section id="env">
-<h4>.env<a class="headerlink" href="#env" title="Lien vers cette rubrique">¶</a></h4>
-<p>Enfin, vérifier les variables d’environnement en prenant exemple sur le fichier <code class="docutils literal notranslate"><span class="pre">.env.template</span></code></p>
-</section>
 </section>
 </section>
 <section id="bases-de-donnees-postgres-fdw">
@@ -460,8 +436,8 @@ Sur Scalingo : <code class="docutils literal notranslate"><span class="pre">scal
 <p><strong>Solution</strong> :</p>
 <ol class="arabic simple">
 <li><p>Générer une nouvelle clé secrète avec <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">secrets;</span> <span class="pre">print(secrets.token_urlsafe(32))&quot;</span></code></p></li>
-<li><p>Remplacer la clé dans <code class="docutils literal notranslate"><span class="pre">data-platform/dags/.env</span></code> en localisant la ligne <code class="docutils literal notranslate"><span class="pre">AIRFLOW__API_AUTH__JWT_SECRET</span></code> et en la remplaçant avec la clé générée</p></li>
-<li><p>Redémarrer Airflow avec <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">--profile</span> <span class="pre">airflow</span> <span class="pre">down</span></code> puis <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">--profile</span> <span class="pre">airflow</span> <span class="pre">up</span> <span class="pre">-d</span></code></p></li>
+<li><p>Définir <code class="docutils literal notranslate"><span class="pre">AIRFLOW__API_AUTH__JWT_SECRET</span></code> avec la clé générée dans le <code class="docutils literal notranslate"><span class="pre">.env</span></code> à la racine du dépôt</p></li>
+<li><p>Redémarrer Airflow avec <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">down</span></code> puis <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run-airflow</span></code></p></li>
 </ol>
 </section>
 <section id="visualiser-les-logs-d-un-dag-en-echec">
@@ -555,7 +531,7 @@ docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">ex
 <h2>Inspecter une image docker<a class="headerlink" href="#inspecter-une-image-docker" title="Lien vers cette rubrique">¶</a></h2>
 <p>Si une image docker ne démarre pas, par exemple si elle ne trouve pas ses librairies. il est possible de la construire et de la parcourrir avec les commandes suivantes:</p>
 <p>Build:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--no-cache<span class="w"> </span>-f<span class="w"> </span>airflow-webserver.Dockerfile<span class="w"> </span>-t<span class="w"> </span>airflow-webserver<span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--no-cache<span class="w"> </span><span class="k">$(</span>make<span class="w"> </span>-s<span class="w"> </span>versions<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^/--build-arg /&#39;</span><span class="k">)</span><span class="w"> </span>-f<span class="w"> </span>data-platform/Dockerfile<span class="w"> </span>--target<span class="w"> </span>webserver<span class="w"> </span>-t<span class="w"> </span>airflow-webserver<span class="w"> </span>.
 </pre></div>
 </div>
 <p>Executer un shell sur l’image:</p>
@@ -596,8 +572,6 @@ Si ce n’est pas le cas suivre <a class="reference external" href="https://gith
 <span class="nv">SCALEWAY_NAMESPACE</span><span class="o">=</span><span class="s2">&quot;ns-qfdmo&quot;</span>
 <span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;hotfix-vX.Y.Z&quot;</span>
 <span class="nv">SCALEWAY_DOCKER_SECRET</span><span class="o">=</span><span class="k">$(</span>scw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>secret-key<span class="k">)</span>
-<span class="c1"># Version de apache-airflow dans data-platform/pyproject.toml, requise par les Dockerfiles</span>
-<span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="k">$(</span>make<span class="w"> </span>-s<span class="w"> </span>airflow-version<span class="k">)</span>
 </pre></div>
 </div>
 </section>
@@ -610,21 +584,21 @@ Si ce n’est pas le cas suivre <a class="reference external" href="https://gith
 </section>
 <section id="construction-et-push-de-l-image-airflow-scheduler">
 <h3>2. Construction et push de l’image airflow-scheduler<a class="headerlink" href="#construction-et-push-de-l-image-airflow-scheduler" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="nv">$AIRFLOW_VERSION</span><span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-scheduler.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span><span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span><span class="k">$(</span>make<span class="w"> </span>-s<span class="w"> </span>versions<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^/--build-arg /&#39;</span><span class="k">)</span><span class="w"> </span>-f<span class="w"> </span>data-platform/Dockerfile<span class="w"> </span>--target<span class="w"> </span>scheduler<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span><span class="w"> </span>.
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-scheduler:<span class="nv">$TAG</span>
 </pre></div>
 </div>
 </section>
 <section id="construction-et-push-de-l-image-airflow-webserver">
 <h3>3. Construction et push de l’image airflow-webserver<a class="headerlink" href="#construction-et-push-de-l-image-airflow-webserver" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="nv">$AIRFLOW_VERSION</span><span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-webserver.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span><span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span><span class="k">$(</span>make<span class="w"> </span>-s<span class="w"> </span>versions<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^/--build-arg /&#39;</span><span class="k">)</span><span class="w"> </span>-f<span class="w"> </span>data-platform/Dockerfile<span class="w"> </span>--target<span class="w"> </span>webserver<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span><span class="w"> </span>.
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-webserver:<span class="nv">$TAG</span>
 </pre></div>
 </div>
 </section>
 <section id="construction-et-push-de-l-image-airflow-dag-processor">
 <h3>4. Construction et push de l’image airflow-dag-processor<a class="headerlink" href="#construction-et-push-de-l-image-airflow-dag-processor" title="Lien vers cette rubrique">¶</a></h3>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">AIRFLOW_VERSION</span><span class="o">=</span><span class="nv">$AIRFLOW_VERSION</span><span class="w"> </span>-f<span class="w"> </span>./data-platform/airflow-dag-processor.Dockerfile<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span><span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>--platform<span class="o">=</span>linux/amd64<span class="w"> </span><span class="k">$(</span>make<span class="w"> </span>-s<span class="w"> </span>versions<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/^/--build-arg /&#39;</span><span class="k">)</span><span class="w"> </span>-f<span class="w"> </span>data-platform/Dockerfile<span class="w"> </span>--target<span class="w"> </span>dag-processor<span class="w"> </span>-t<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span><span class="w"> </span>.
 docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCALEWAY_REGISTRY</span>/<span class="nv">$SCALEWAY_NAMESPACE</span>/airflow-dag-processor:<span class="nv">$TAG</span>
 </pre></div>
 </div>
@@ -703,12 +677,7 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$SCAL
 </ul>
 </li>
 <li><a class="reference internal" href="#mise-en-place-du-poste-developpeur">Mise en place du poste developpeur</a><ul>
-<li><a class="reference internal" href="#je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-local">Je n’arrive pas a accéder à l’interface via une url *.local</a><ul>
-<li><a class="reference internal" href="#etc-hosts">/etc/hosts</a></li>
-<li><a class="reference internal" href="#verifier-la-presence-des-certificats-ssl">Vérifier la présence des certificats ssl</a></li>
-<li><a class="reference internal" href="#env">.env</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#je-n-arrive-pas-a-acceder-a-l-interface-via-une-url-localhost">Je n’arrive pas a accéder à l’interface via une url *.localhost</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#bases-de-donnees-postgres-fdw">Bases de données / postgres_fdw</a><ul>

@@ -364,7 +364,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">data-platform/pyproject.toml</span></code> : définition des dépendances (les dépendances de dev sont dans le <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> racine)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">./dags</span></code> répertoire dans lequels sont stockés tous les dags executés sur le cluster Airflow</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data-platform/dags/airflow-scheduler.Dockerfile</span></code> et <code class="docutils literal notranslate"><span class="pre">data-platform/dags/airflow-webserver.Dockerfile</span></code>, fichiers de configuration Docker exécutés dans tous les environnements</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data-platform/Dockerfile</span></code>, une cible par image (<code class="docutils literal notranslate"><span class="pre">webserver</span></code>, <code class="docutils literal notranslate"><span class="pre">scheduler</span></code>, <code class="docutils literal notranslate"><span class="pre">dag-processor</span></code>), utilisé dans tous les environnements</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> orchestre les conteneurs en environnement de développement</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data-platform/dags/tests</span></code> répertoire qui contient les tests des dags</p></li>
 </ul>
@@ -404,7 +404,7 @@
 <section id="variable-d-environnement-du-cluster-airflow">
 <h4>Variable d’environnement du cluster Airflow<a class="headerlink" href="#variable-d-environnement-du-cluster-airflow" title="Lien vers cette rubrique">¶</a></h4>
 <p>Les variables d’environnement sont déployées lors de l’exécution des recettes Terraform.</p>
-<p>Un exemple à adapter selon l’environnement est disponible dans le fichier <a class="reference download internal" download="" href="../../_downloads/95c1cc2a3cf369594f0f2533889e0ba5/.env.template"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">data-platform/dags/.env.template</span></code></span></a></p>
+<p>En local, ces variables sont définies dans le bloc <code class="docutils literal notranslate"><span class="pre">x-airflow-common</span></code> du fichier <a class="reference download internal" download="" href="../../_downloads/f0f45a183f8765773a1d775882cc3b53/docker-compose.yml"><span class="xref download myst"><code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code></span></a></p>
 </section>
 <section id="gestion-des-logs">
 <h4>Gestion des logs<a class="headerlink" href="#gestion-des-logs" title="Lien vers cette rubrique">¶</a></h4>

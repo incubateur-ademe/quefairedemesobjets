@@ -1,14 +1,66 @@
 ---
-# Exported by the Makefile from data-platform/pyproject.toml. Without make:
-# AIRFLOW_VERSION=$(make -s airflow-version) docker compose --profile airflow build
+# The versions are exported by the Makefile, from .tool-versions and from
+# data-platform/pyproject.toml for Airflow: build the images with make.
 x-airflow-build-args: &airflow-build-args
   AIRFLOW_VERSION: ${AIRFLOW_VERSION:-}
+  PYTHON_VERSION: ${PYTHON_VERSION:-}
+  UV_VERSION: ${UV_VERSION:-}
 
 x-airflow-common: &airflow-common
   tmpfs:
     - /tmp
+  # Secrets only (Scaleway keys…), cf. .env.template
   env_file:
-    - ./data-platform/dags/.env
+    - path: ./.env
+      required: false
+  environment:
+    ENVIRONMENT: development
+    SECRET_KEY: ${SECRET_KEY:-local-development-only} # pragma: allowlist secret
+    _AIRFLOW_DB_MIGRATE: "true"
+    _AIRFLOW_WWW_USER_CREATE: "true"
+    _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+    _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-webserver:8080/execution/
+    # Project classes (Pydantic configs…) pushed to XCom; Airflow 3 handles
+    # DataFrames, BaseModel and numpy types natively
+    AIRFLOW__CORE__ALLOWED_DESERIALIZATION_CLASSES_REGEXP: 'airflow\..* acteurs\..* clone\..* cluster\..* crawl\..* enrich\..* shared\..* sources\..* stats\..* suggestions\..* tools\..* utils\..*'
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-local-development-only} # pragma: allowlist secret
+    # Widens the dialogs (trigger DAG…) to 95% of the screen
+    AIRFLOW__API__THEME: '{"globalCss":{"[data-scope=\"dialog\"][data-part=\"content\"]":{"max-width":"95vw !important"}}}'
+    AIRFLOW__API__WORKERS: "2"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: "false"
+    AIRFLOW__WEBSERVER__X_FRAME_ENABLED: "false"
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
+    AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: "false"
+    AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "30"
+    AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES: "1"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db/airflow # pragma: allowlist secret
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONNECT_ARGS: airflow_local_settings.keepalive_kwargs
+    # Read by data-platform/scripts/db_cleanup.sh
+    AIRFLOW_METADATA_DB_URL: postgresql+psycopg2://airflow:airflow@airflow-db/airflow # pragma: allowlist secret
+    AIRFLOW_CONN_WEBAPP_DB: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
+    DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
+    DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample} # pragma: allowlist secret
+    DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@warehouse-db:5432/warehouse} # pragma: allowlist secret
+    # API calls from the DAGs (acteur model metadata when parsing them)
+    WEBAPP_URL: http://webapp:8000
+    # dbt
+    POSTGRES_HOST: warehouse-db
+    POSTGRES_PORT: "5432"
+    POSTGRES_USER: warehouse
+    POSTGRES_PASSWORD: warehouse # pragma: allowlist secret
+    POSTGRES_DB: warehouse
+    POSTGRES_SCHEMA: public
+    # The ml_deduplication DAG runs the inference with the local Docker
+    # instead of a Scaleway instance
+    ML_DEDUPLICATION_RUN_LOCAL: "1"
   volumes:
     - ./data-platform/config:/opt/airflow/config
     - ./data-platform/dags:/opt/airflow/dags
@@ -24,9 +76,7 @@ x-airflow-common: &airflow-common
     # de la fusionner : une entrée sur le scheduler seul supprimerait tous les
     # autres montages (dont /opt/airflow/dags).
     - /var/run/docker.sock:/var/run/docker.sock
-  # Voir la doc et s'assurer que AIRFLOW_UID est
-  # définit dans le .env pour correspondre à votre UID
-  # sed -i '/^AIRFLOW_UID=/d' .env && echo "AIRFLOW_UID=$(id -u)" >> .env
+  # The images own their files as 50000: another user breaks the dag-processor
   user: "${AIRFLOW_UID:-50000}:0"
   extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -34,60 +84,146 @@ x-airflow-common: &airflow-common
     airflow-db:
       condition: service_healthy
 
+# Every variable below has a default that works on the Compose network: a fresh
+# clone needs no .env. The root .env only holds secrets and overrides, for
+# example DATABASE_URL to work against another Postgres.
+x-webapp-common: &webapp-common
+  build:
+    context: .
+    dockerfile: webapp/Dockerfile
+    target: dev
+    args:
+      NODE_VERSION: ${NODE_VERSION:-}
+      PYTHON_VERSION: ${PYTHON_VERSION:-}
+      UV_VERSION: ${UV_VERSION:-}
+  # The host user, so that files written in the bind mount belong to it
+  user: "${HOST_UID:-0}:0"
+  volumes:
+    - .:/app
+  env_file:
+    - path: ./.env
+      required: false
+  environment:
+    DJANGO_SETTINGS_MODULE: settings.dev
+    SECRET_KEY: ${SECRET_KEY:-local-development-only} # pragma: allowlist secret
+    DEBUG: ${DEBUG:-True}
+    WITH_DJANGO_DEBUG_TOOLBAR: ${WITH_DJANGO_DEBUG_TOOLBAR:-True}
+    BASE_URL: ${BASE_URL:-http://quefairedemesdechets.localhost}
+    # gunicorn: the upstream name nginx sends as Host for iframe.js and carte.js
+    ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,webapp,gunicorn,host.docker.internal}
+    DATABASE_URL: ${DATABASE_URL:-postgres://webapp:webapp@webapp-db:5432/webapp} # pragma: allowlist secret
+    DB_WEBAPP_SAMPLE: ${DB_WEBAPP_SAMPLE:-postgres://webapp_sample:webapp_sample@webapp-db:5432/webapp_sample} # pragma: allowlist secret
+    DB_WAREHOUSE: ${DB_WAREHOUSE:-postgres://warehouse:warehouse@warehouse-db:5432/warehouse} # pragma: allowlist secret
+  depends_on:
+    webapp-db:
+      condition: service_healthy
+
 services:
-  lvao-proxy:
+  webapp:
+    <<: *webapp-common
+    # Migrations first: a git pull that brings new ones cannot leave the
+    # database behind the code.
+    command: >
+      sh -c "python manage.py migrate --noinput
+      && python manage.py createcachetable
+      && exec python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - ${WEBAPP_PORT:-8000}:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8000), 2)"]
+      interval: 5s
+      retries: 5
+      # First start on an empty database: every migration runs
+      start_period: 600s
+
+  # Processes the background tasks (django-tasks) enqueued by the webapp
+  worker:
+    <<: *webapp-common
+    command: python manage.py db_worker
+    depends_on:
+      webapp:
+        condition: service_healthy
+
+  # Installs the JS dependencies and rebuilds the assets on change
+  assets:
+    build:
+      context: .
+      dockerfile: webapp/Dockerfile
+      target: node_base
+      args:
+        NODE_VERSION: ${NODE_VERSION:-}
+        PYTHON_VERSION: ${PYTHON_VERSION:-}
+        UV_VERSION: ${UV_VERSION:-}
+    user: "${HOST_UID:-0}:0"
+    working_dir: /app
+    command: webapp/bin/dev-assets.sh
+    volumes:
+      - .:/app
+      # Linux binaries, kept apart from the node_modules of the host
+      - node_modules:/app/node_modules
+      - webapp_node_modules:/app/webapp/node_modules
+      - revue_node_modules:/app/webapp/revue-front/node_modules
+    environment:
+      BASE_URL: ${BASE_URL:-http://quefairedemesdechets.localhost}
+    healthcheck:
+      test: ["CMD-SHELL", "ls webapp/static/compiled/*.js"]
+      interval: 5s
+      retries: 5
+      start_period: 600s
+
+  proxy:
     build:
       context: .
       dockerfile: webapp/nginx/Dockerfile
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./webapp/nginx/certs:/etc/nginx/ssl
-      - ./webapp/staticfiles:/app/staticfiles
-    env_file:
-      - path: ./webapp/.env
-        required: false
+      - ${HTTP_PORT:-80}:80
     environment:
-      - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.ademe.local}
+      - BASE_DOMAIN=${BASE_DOMAIN:-quefairedemesdechets.localhost}
       - PORT=80
+      # The local stack serves plain HTTP; deployed, the template defaults to https
+      - BASE_SCHEME=http
+      - DEBUG=${DEBUG:-True}
       - NGINX_DISABLE_CACHE=${NGINX_DISABLE_CACHE:-0}
-      - UPSTREAM_HOST=host.docker.internal:8000
-      - SSL_CERT_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}.pem
-      - SSL_CERT_KEY_PATH=/etc/nginx/ssl/${BASE_DOMAIN:-quefairedemesdechets.ademe.local}-key.pem
-    profiles: [lvao]
+      - UPSTREAM_HOST=webapp:8000
+    depends_on:
+      webapp:
+        condition: service_healthy
 
-  lvao-webapp-db:
-    platform: ${POSTGIS_IMAGE_PLATFORM:-linux/amd64}
-    image: imresamu/postgis:16-3.5-alpine # We use imresamu image because official Postgis image does not ship ARM builds
+  webapp-db:
+    # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
+    platform: ${POSTGIS_IMAGE_PLATFORM:-}
+    image: imresamu/postgis:16-3.5-alpine # The official PostGIS image ships no ARM build
     environment:
       - POSTGRES_USER=webapp
       - POSTGRES_PASSWORD=webapp # pragma: allowlist secret
       - POSTGRES_DB=webapp
     volumes:
-      - webapp_dbdata:/var/lib/postgresql/data:delegated
-    expose:
-      - 5432
+      - webapp_dbdata:/var/lib/postgresql/data
     ports:
-      - ${WEBAPP_DB_PORT:-6543}:5432
-    profiles: [lvao, airflow]
+      # On the loopback, on a free port picked by Docker unless the variable
+      # sets one: `make ports` shows it
+      - 127.0.0.1:${WEBAPP_DB_PORT:-}:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "webapp"]
+      interval: 2s
+      retries: 30
 
-  lvao-warehouse-db:
-    platform: ${POSTGIS_IMAGE_PLATFORM:-linux/amd64}
-    image: imresamu/postgis:15-3.3-alpine # We use imresamu image because official Postgis image does not ship ARM builds
+  warehouse-db:
+    # Native architecture by default; POSTGIS_IMAGE_PLATFORM=linux/amd64 forces emulation
+    platform: ${POSTGIS_IMAGE_PLATFORM:-}
+    image: imresamu/postgis:16-3.5-alpine # The official PostGIS image ships no ARM build
     environment:
       - POSTGRES_USER=warehouse
       - POSTGRES_PASSWORD=warehouse # pragma: allowlist secret
       - POSTGRES_DB=warehouse
-      - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     volumes:
-      - warehouse_dbdata:/var/lib/postgresql/data:delegated
-    expose:
-      - 5432
+      - warehouse16_dbdata:/var/lib/postgresql/data
     ports:
-      - 8765:5432
+      - 127.0.0.1:${WAREHOUSE_DB_PORT:-}:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "warehouse"]
+      interval: 2s
+      retries: 30
     profiles: [airflow]
 
   airflow-db:
@@ -99,7 +235,7 @@ services:
     volumes:
       - airflow_dbdata:/var/lib/postgresql/data
     ports:
-      - 7654:5432
+      - 127.0.0.1:${AIRFLOW_DB_PORT:-}:5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -109,16 +245,11 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
-    environment:
-      _AIRFLOW_DB_MIGRATE: "true"
-      _AIRFLOW_WWW_USER_CREATE: "true"
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
-      _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
     build:
       context: .
-      dockerfile: data-platform/airflow-webserver.Dockerfile
+      dockerfile: data-platform/Dockerfile
+      target: webserver
       args:
         <<: *airflow-build-args
     deploy:
@@ -126,7 +257,7 @@ services:
         limits:
           memory: 2G
     ports:
-      - "8080:8080"
+      - ${AIRFLOW_PORT:-8080}:8080
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/version"]
       interval: 30s
@@ -139,11 +270,10 @@ services:
 
   airflow-scheduler:
     <<: *airflow-common
-    env_file:
-      - ./data-platform/dags/.env
     build:
       context: .
-      dockerfile: data-platform/airflow-scheduler.Dockerfile
+      dockerfile: data-platform/Dockerfile
+      target: scheduler
       args:
         <<: *airflow-build-args
     deploy:
@@ -165,15 +295,12 @@ services:
 
   airflow-dag-processor:
     <<: *airflow-common
-    env_file:
-      - ./data-platform/dags/.env
     build:
       context: .
-      dockerfile: data-platform/airflow-dag-processor.Dockerfile
+      dockerfile: data-platform/Dockerfile
+      target: dag-processor
       args:
         <<: *airflow-build-args
-    ports:
-      - "8082:80"
     healthcheck:
       test:
         [
@@ -193,5 +320,9 @@ services:
 
 volumes:
   webapp_dbdata:
-  warehouse_dbdata:
+  # Renamed with the move to Postgres 16: a 15 data directory does not start on 16
+  warehouse16_dbdata:
   airflow_dbdata:
+  node_modules:
+  webapp_node_modules:
+  revue_node_modules:

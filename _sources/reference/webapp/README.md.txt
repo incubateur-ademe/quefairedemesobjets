@@ -85,7 +85,7 @@ DAG / Airflow Python tests live in **`data-platform/dags/tests`**: from the repo
 E2E tests run against a dedicated `webapp_sample` database (kept separate from your
 dev `webapp` database) on the same Postgres container, so you don't have to mutate
 the dev data you're working with. The connection is configured by `DB_WEBAPP_SAMPLE`
-in `.env` (see `.env.template`); the dev `DATABASE_URL` is left untouched.
+in `docker-compose.yml`; the dev `DATABASE_URL` is left untouched.
 
 The sample is built entirely locally by the Airflow DAG `compute_sample_acteur`,
 from your restored `webapp` database. No remote sample database is copied.

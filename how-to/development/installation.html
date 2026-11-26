@@ -362,20 +362,16 @@
 <section id="prerequis">
 <h3>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique">¶</a></h3>
 <ul class="simple">
-<li><p>docker &amp; docker-compose</p></li>
-<li><p>python 3.12</p></li>
-<li><p>node 20</p></li>
-<li><p>mkcert (optionnel : utilisé pour la génération de certificats pour le développement frontend de la carte et assistant)</p></li>
-<li><p>gdal (librairie nécessaire à l’utilisation de GeoDjango)</p></li>
-<li><p>Installer et configurer le client Scaleway en suivant <a class="reference external" href="https://www.scaleway.com/en/docs/scaleway-cli/quickstart/">les instructions de Scaleway</a></p></li>
-<li><p>Installer et configurer le client Scalingo en suivant <a class="reference external" href="https://doc.scalingo.com/platform/cli/start">les instructions de Scalingo</a></p></li>
-<li><p><a class="reference external" href="https://opentofu.org/docs/intro/install/">OpenTofu</a> et <a class="reference external" href="https://terragrunt.gruntwork.io/docs/getting-started/install/">Terragrunt</a></p></li>
+<li><p>Docker et Docker Compose : c’est le seul prérequis pour lancer l’application. Python, Node, GDAL et Postgres tournent dans les conteneurs, aux mêmes versions qu’en CI et en production.</p></li>
 </ul>
-<p>⚠️ L’accès à la plateforme Scaleway est nécessaire pour exécuter la copie de la base de données de production en local</p>
-<section id="specificite-d-installation-pour-les-processeurs-mx-de-mac">
-<h4>Spécificité d’installation pour les processeurs Mx de Mac<a class="headerlink" href="#specificite-d-installation-pour-les-processeurs-mx-de-mac" title="Lien vers cette rubrique">¶</a></h4>
-<p><a class="reference external" href="https://gist.github.com/codingjoe/a31405952ec936beba99b059e665491e">https://gist.github.com/codingjoe/a31405952ec936beba99b059e665491e</a></p>
-</section>
+<p>Optionnel, selon ce que vous faites :</p>
+<ul class="simple">
+<li><p>node 24 sur la machine, pour lancer les tests end-to-end Playwright (<code class="docutils literal notranslate"><span class="pre">mise</span></code> ou <code class="docutils literal notranslate"><span class="pre">asdf</span></code> lisent <code class="docutils literal notranslate"><span class="pre">.tool-versions</span></code>)</p></li>
+<li><p><a class="reference external" href="https://docs.astral.sh/uv/">uv</a> sur la machine, pour les hooks de pre-commit et l’autocomplétion de l’éditeur</p></li>
+<li><p>Le client Scaleway, en suivant <a class="reference external" href="https://www.scaleway.com/en/docs/scaleway-cli/quickstart/">les instructions de Scaleway</a>, pour copier la base de production</p></li>
+<li><p>Le client Scalingo, en suivant <a class="reference external" href="https://doc.scalingo.com/platform/cli/start">les instructions de Scalingo</a></p></li>
+<li><p><a class="reference external" href="https://opentofu.org/docs/intro/install/">OpenTofu</a> et <a class="reference external" href="https://terragrunt.gruntwork.io/docs/getting-started/install/">Terragrunt</a>, pour l’infrastructure</p></li>
+</ul>
 </section>
 <section id="technologies">
 <h3>Technologies<a class="headerlink" href="#technologies" title="Lien vers cette rubrique">¶</a></h3>
@@ -421,131 +417,94 @@
 </ul>
 </section>
 </section>
-<section id="profiles-docker-compose">
-<h2>Profiles Docker Compose<a class="headerlink" href="#profiles-docker-compose" title="Lien vers cette rubrique">¶</a></h2>
-<p>Le <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> à la racine expose deux profiles indépendants :</p>
+<section id="installation-rapide">
+<h2>Installation rapide<a class="headerlink" href="#installation-rapide" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>setup
+</pre></div>
+</div>
+<p>Cette commande construit les images, démarre la stack, applique les migrations et crée un superutilisateur d’exemple (<code class="docutils literal notranslate"><span class="pre">admin</span></code> / <code class="docutils literal notranslate"><span class="pre">admin</span></code>). Elle peut être relancée sans risque.</p>
+<p>L’application est ensuite accessible sur <a class="reference external" href="http://quefairedemesdechets.localhost">http://quefairedemesdechets.localhost</a> (derrière nginx, comme en production) ou sur <a class="reference external" href="http://localhost:8000">http://localhost:8000</a> (Django directement). Les domaines en <code class="docutils literal notranslate"><span class="pre">.localhost</span></code> pointent sur la machine sans modifier <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>.</p>
+<p>Quand la base est vide, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">setup</span></code> la peuple :</p>
+<ul class="simple">
+<li><p>avec la base d’échantillon (environ 2 000 acteurs, rapide) si <code class="docutils literal notranslate"><span class="pre">SAMPLE_DB_URI</span></code> est défini dans <code class="docutils literal notranslate"><span class="pre">.env</span></code> ;</p></li>
+<li><p>sinon avec le dernier backup de production (environ 10 Go) si le client Scaleway (<code class="docutils literal notranslate"><span class="pre">scw</span></code>) est configuré ;</p></li>
+<li><p>sinon elle reste vide, et la commande indique quoi configurer.</p></li>
+</ul>
+<p>Pour restaurer la production à la demande, cf. <a class="reference internal" href="useful_command.html#copier-la-base-de-donnees-de-prod-en-local"><span class="std std-ref">Copier la base de données de prod en local</span></a>.</p>
+</section>
+<section id="services-docker-compose">
+<h2>Services Docker Compose<a class="headerlink" href="#services-docker-compose" title="Lien vers cette rubrique">¶</a></h2>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Profile</p></th>
-<th class="head"><p>Services</p></th>
+<tr class="row-odd"><th class="head"><p>Service</p></th>
+<th class="head"><p>Rôle</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lvao</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">lvao-webapp-db</span></code> (PostGIS, port <code class="docutils literal notranslate"><span class="pre">WEBAPP_DB_PORT</span></code>, 6543 par défaut, à définir dans le <code class="docutils literal notranslate"><span class="pre">.env</span></code> racine), <code class="docutils literal notranslate"><span class="pre">lvao-warehouse-db</span></code> (8765), nginx local SSL (<code class="docutils literal notranslate"><span class="pre">nginx-local-only/</span></code> + mkcert, domaine <code class="docutils literal notranslate"><span class="pre">quefairedemesdechets.ademe.local</span></code>).</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">webapp</span></code></p></td>
+<td><p>Django : migrations au démarrage, puis <code class="docutils literal notranslate"><span class="pre">runserver</span></code> (port 8000)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">airflow</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">lvao-webapp-db</span></code>, <code class="docutils literal notranslate"><span class="pre">lvao-warehouse-db</span></code> (8765), <code class="docutils literal notranslate"><span class="pre">airflow-db</span></code> (7654), <code class="docutils literal notranslate"><span class="pre">airflow-webserver</span></code> (8080), <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> (12 G RAM), <code class="docutils literal notranslate"><span class="pre">airflow-dag-processor</span></code> (8082).</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">worker</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">db_worker</span></code>, qui traite les tâches de fond (django-tasks), par exemple les actions admin lourdes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">assets</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">ci</span></code> si <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code> a changé, puis <code class="docutils literal notranslate"><span class="pre">parcel</span> <span class="pre">watch</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">proxy</span></code></p></td>
+<td><p>nginx local, avec la même configuration que la production (port 80)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">webapp-db</span></code></p></td>
+<td><p>PostGIS (port libre choisi par Docker)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>Le profile <code class="docutils literal notranslate"><span class="pre">airflow</span></code> (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run-airflow</span></code>) ajoute <code class="docutils literal notranslate"><span class="pre">warehouse-db</span></code>, <code class="docutils literal notranslate"><span class="pre">airflow-db</span></code>, <code class="docutils literal notranslate"><span class="pre">airflow-webserver</span></code> (8080), <code class="docutils literal notranslate"><span class="pre">airflow-scheduler</span></code> (12 G RAM) et <code class="docutils literal notranslate"><span class="pre">airflow-dag-processor</span></code>.</p>
+<p>Les bases écoutent sur un port libre de la machine, différent à chaque démarrage, pour ne jamais entrer en conflit avec un autre projet : <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">ports</span></code> les affiche, et <code class="docutils literal notranslate"><span class="pre">WEBAPP_DB_PORT</span></code> (ou <code class="docutils literal notranslate"><span class="pre">WAREHOUSE_DB_PORT</span></code>, <code class="docutils literal notranslate"><span class="pre">AIRFLOW_DB_PORT</span></code>) dans <code class="docutils literal notranslate"><span class="pre">.env</span></code> en fixe un, pour un client graphique par exemple. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">psql</span></code> ouvre une console sans connaître le port.</p>
 <blockquote>
 <div><p>Pas de <strong>Redis</strong> ni de <strong>mailcatcher</strong> en local : le cache Django est stocké en base (<code class="docutils literal notranslate"><span class="pre">django.core.cache.backends.db.DatabaseCache</span></code>, table <code class="docutils literal notranslate"><span class="pre">qf_django_cache</span></code>).</p>
 </div></blockquote>
 </section>
-<section id="installation-rapide">
-<h2>Installation rapide<a class="headerlink" href="#installation-rapide" title="Lien vers cette rubrique">¶</a></h2>
-<p>Enchaîner les commandes suivantes depuis la <strong>racine du repo</strong> (détail dans les sections ci-dessous).</p>
-<p>Modifier <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> :</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0.0.1</span>       <span class="n">lvao</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesdechets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesobjets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
+<section id="commandes-du-quotidien">
+<h2>Commandes du quotidien<a class="headerlink" href="#commandes-du-quotidien" title="Lien vers cette rubrique">¶</a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>up<span class="w">                       </span><span class="c1"># démarrer, après un git pull par exemple</span>
+make<span class="w"> </span>down<span class="w">                     </span><span class="c1"># arrêter</span>
+make<span class="w"> </span>logs<span class="w">                     </span><span class="c1"># suivre les logs</span>
+make<span class="w"> </span>add<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>requests<span class="w">         </span><span class="c1"># ajouter une dépendance Python (group=dev pour un groupe)</span>
+make<span class="w"> </span>add-js<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>lodash<span class="w">        </span><span class="c1"># ajouter une dépendance JavaScript</span>
+make<span class="w"> </span>-C<span class="w"> </span>webapp<span class="w"> </span>shell<span class="w">          </span><span class="c1"># shell Django</span>
+make<span class="w"> </span>-C<span class="w"> </span>webapp<span class="w"> </span>makemigrations
+make<span class="w"> </span>-C<span class="w"> </span>webapp<span class="w"> </span>createsuperuser
 </pre></div>
 </div>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>webapp/.env.template<span class="w"> </span>webapp/.env
-cp<span class="w"> </span>data-platform/dags/.env.template<span class="w"> </span>data-platform/dags/.env
-uv<span class="w"> </span>sync<span class="w"> </span>--all-packages<span class="w"> </span>--all-groups
-npm<span class="w"> </span>ci
-make<span class="w"> </span>init-certs
-docker<span class="w"> </span>compose<span class="w"> </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
-make<span class="w"> </span>run-airflow
-make<span class="w"> </span>db-restore-local-from-prod<span class="w">   </span><span class="c1"># optionnel, accès Scaleway requis</span>
-</pre></div>
-</div>
-<p>Puis, dans un terminal depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>runserver
-</pre></div>
-</div>
-<p>Dans un autre terminal, toujours depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span>watch
-</pre></div>
-</div>
-<p>La webapp est accessible à <a class="reference external" href="https://quefairedemesobjets.ademe.local/">quefairedemesobjets.ademe.local</a> (derrière nginx local si le profil <code class="docutils literal notranslate"><span class="pre">lvao</span></code> est actif).
-La plateforme data est accessible à <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> (identifiant / mot de passe : airflow / airflow).</p>
+<p>Les cibles de <code class="docutils literal notranslate"><span class="pre">webapp/Makefile</span></code> s’exécutent dans les conteneurs. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">DOCKER=</span> <span class="pre">NPM_DOCKER=</span> <span class="pre">&lt;cible&gt;</span></code> les exécute sur la machine, ce qui suppose d’y avoir installé Python, Node et GDAL : ce mode n’est pas maintenu.</p>
+<section id="versions-de-python-node-et-uv">
+<h3>Versions de Python, Node et uv<a class="headerlink" href="#versions-de-python-node-et-uv" title="Lien vers cette rubrique">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">.tool-versions</span></code>, à la racine, est le seul endroit où elles sont écrites. <code class="docutils literal notranslate"><span class="pre">make</span></code> les lit et les passe à la construction des images, la CI fait de même. Les images se construisent donc avec <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">up</span></code>, pas avec <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span> <span class="pre">build</span></code> seul.</p>
+<p>Pour changer de version : modifier <code class="docutils literal notranslate"><span class="pre">.tool-versions</span></code> (et <code class="docutils literal notranslate"><span class="pre">.python-version</span></code> tant que Scalingo, seul à le lire encore, est en service), puis <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">up</span></code>.</p>
 </section>
-<section id="installation-de-la-webapp-uniquement">
-<h2>Installation de la Webapp uniquement<a class="headerlink" href="#installation-de-la-webapp-uniquement" title="Lien vers cette rubrique">¶</a></h2>
-<section id="configuration">
-<h3>Configuration<a class="headerlink" href="#configuration" title="Lien vers cette rubrique">¶</a></h3>
-<p>Modifier le fichier <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>, ajouter les lignes</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">127.0.0.1</span>       <span class="n">lvao</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesdechets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-<span class="mf">127.0.0.1</span>       <span class="n">quefairedemesobjets</span><span class="o">.</span><span class="n">ademe</span><span class="o">.</span><span class="n">local</span>
-</pre></div>
-</div>
+<section id="dependances-a-jour">
+<h3>Dépendances à jour<a class="headerlink" href="#dependances-a-jour" title="Lien vers cette rubrique">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">up</span></code> reconstruit les images quand <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code>, <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code> ou un Dockerfile a changé. En plus, à chaque démarrage, <code class="docutils literal notranslate"><span class="pre">webapp</span></code> resynchronise son virtualenv sur <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> et <code class="docutils literal notranslate"><span class="pre">assets</span></code> réinstalle <code class="docutils literal notranslate"><span class="pre">node_modules</span></code> si <code class="docutils literal notranslate"><span class="pre">package-lock.json</span></code> a changé. Un <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> qui apporte de nouvelles dépendances ou migrations est donc pris en compte par un simple <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">up</span></code>.</p>
 </section>
-<section id="installation-execution">
-<h3>Installation &amp; Exécution<a class="headerlink" href="#installation-execution" title="Lien vers cette rubrique">¶</a></h3>
-<p>Configuration des variables d’environnement (ajouter ou mettre à jour) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>webapp/.env.template<span class="w"> </span>webapp/.env
-</pre></div>
-</div>
-<p>Modifier les variables dans <code class="docutils literal notranslate"><span class="pre">webapp/.env</span></code> si nécessaire.</p>
-<p>Générer les certificats utilisés par nginx (depuis la racine du repo) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>init-certs
-</pre></div>
-</div>
-<p>Les bases de données <code class="docutils literal notranslate"><span class="pre">Postgres</span> <span class="pre">+</span> <span class="pre">Postgis</span></code> sont executées et mises à disposition par le gestionnaire de conteneur Docker</p>
-<p>Pour lancer uniquement les services utiliser par la webapp</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>compose<span class="w">  </span>--profile<span class="w"> </span>lvao<span class="w"> </span>up<span class="w"> </span>-d
-</pre></div>
-</div>
-<p>Installation des dépendances Python et JavaScript (depuis la racine du repo) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev<span class="w"> </span>--group<span class="w"> </span>webapp-dev
-npm<span class="w"> </span>ci
-</pre></div>
-</div>
-<p>Migrations Django (toujours depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>migrate
-</pre></div>
-</div>
-<p>Créer la table de cache (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>createcachetable
-</pre></div>
-</div>
-<p>Pour peupler la base de données <code class="docutils literal notranslate"><span class="pre">webapp</span></code> le plus simple est de copier la base de données de production, cf. <a class="reference internal" href="useful_command.html#copier-la-base-de-donnees-de-prod-en-local"><span class="std std-ref">Copier la base de données de prod en local</span></a></p>
-<p>Sinon, utiliser la commande de peuplement ci-dessous (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>seed-database
-</pre></div>
-</div>
 </section>
-<section id="creer-un-superutilisatteur">
-<h3>Créer un superutilisatteur<a class="headerlink" href="#creer-un-superutilisatteur" title="Lien vers cette rubrique">¶</a></h3>
-<p>Si vous n’en avez pas déjà un (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>manage.py<span class="w"> </span>createsuperuser
+<section id="variables-d-environnement">
+<h2>Variables d’environnement<a class="headerlink" href="#variables-d-environnement" title="Lien vers cette rubrique">¶</a></h2>
+<p>Aucun fichier <code class="docutils literal notranslate"><span class="pre">.env</span></code> n’est nécessaire : <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> porte les valeurs par défaut de tout ce qui n’est pas un secret, y compris les adresses des bases sur le réseau Docker.</p>
+<p>Le fichier <code class="docutils literal notranslate"><span class="pre">.env</span></code> à la racine sert uniquement aux secrets et aux surcharges, cf. <code class="docutils literal notranslate"><span class="pre">.env.template</span></code>. Par exemple, pour travailler avec un autre Postgres que celui de Compose :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">DATABASE_URL</span><span class="o">=</span>postgres://user:password@host.docker.internal:5432/webapp<span class="w"> </span><span class="c1"># pragma: allowlist secret</span>
 </pre></div>
 </div>
-</section>
-<section id="lancement">
-<h3>Lancement<a class="headerlink" href="#lancement" title="Lien vers cette rubrique">¶</a></h3>
-<p>Depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>runserver
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">runserver</span></code> démarre le serveur Django <strong>et</strong> le worker <code class="docutils literal notranslate"><span class="pre">db_worker</span></code> en arrière-plan. Ce worker est nécessaire pour traiter les actions admin lourdes (≥ 1 000 <code class="docutils literal notranslate"><span class="pre">SuggestionGroupe</span></code> sélectionnés) qui passent par django-tasks. Voir <a class="reference internal" href="../../reference/webapp/django.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">reference/webapp/django.md</span></code></span></a>.</p>
-<p>Une fois le serveur démarré, l’application est accessible à l’adresse <a class="reference external" href="https://quefairedemesobjets.ademe.local/">quefairedemesobjets.ademe.local</a>, écoutant sur le port 8000 (derrière nginx local si le profile <code class="docutils literal notranslate"><span class="pre">lvao</span></code> Docker est actif).</p>
+<p><code class="docutils literal notranslate"><span class="pre">webapp/.env.template</span></code> reste utilisé par pytest et par les tests JS.</p>
+<p>Si vous aviez une installation précédente : supprimez <code class="docutils literal notranslate"><span class="pre">webapp/.env</span></code>, et retirez du <code class="docutils literal notranslate"><span class="pre">.env</span></code> racine les adresses de base en <code class="docutils literal notranslate"><span class="pre">localhost</span></code> (<code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_WEBAPP_SAMPLE</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_WAREHOUSE</span></code>), qui ne sont pas joignables depuis les conteneurs.</p>
 </section>
 <section id="tester-l-application">
-<h3>Tester l’application<a class="headerlink" href="#tester-l-application" title="Lien vers cette rubrique">¶</a></h3>
-<p>Tests Python (pytest), depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
+<h2>Tester l’application<a class="headerlink" href="#tester-l-application" title="Lien vers cette rubrique">¶</a></h2>
+<p>Tests Python (pytest) et tests JS unitaires, depuis le dossier <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong> :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>unit-test
 make<span class="w"> </span>integration-test
-</pre></div>
-</div>
-<p>Tests JS unitaires</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
+make<span class="w"> </span>js-test
 </pre></div>
 </div>
 <p>End-to-end avec Playwright.
@@ -553,10 +512,12 @@ Ces tests nécessitent une base de données incluant un échantillon d’acteurs
 Celle-ci peut être générée en local facilement, via une commande à lancer depuis la racine du dépôt.
 (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">e2e-prepare</span></code> construit l’échantillon via le DAG <code class="docutils literal notranslate"><span class="pre">compute_sample_acteur</span></code>,
 voir <a class="reference internal" href="create_webapp_sample_db.html"><span class="std std-doc">create_webapp_sample_db.md</span></a>) :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-C<span class="w"> </span>webapp<span class="w"> </span>init-playwright
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>npm<span class="w"> </span>ci<span class="w">                          </span><span class="c1"># Playwright tourne sur la machine</span>
+make<span class="w"> </span>-C<span class="w"> </span>webapp<span class="w"> </span>init-playwright
 make<span class="w"> </span>e2e<span class="w">            </span><span class="c1"># préparation + tests</span>
 </pre></div>
 </div>
+<p>Le navigateur tourne sur la machine, et Playwright démarre lui-même le serveur testé dans le service <code class="docutils literal notranslate"><span class="pre">webapp</span></code>, sur le port 8888.</p>
 <p>Pour relancer seulement les tests (depuis <strong><code class="docutils literal notranslate"><span class="pre">webapp/</span></code></strong>) :</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>e2e-test
 make<span class="w"> </span>e2e-test-ui
@@ -568,30 +529,20 @@ make<span class="w"> </span>e2e-test-ui
 </div>
 </section>
 <section id="installer-les-hooks-de-pre-commit">
-<h3>Installer les hooks de pre-commit<a class="headerlink" href="#installer-les-hooks-de-pre-commit" title="Lien vers cette rubrique">¶</a></h3>
-<p>Pour installer les git hook de pre-commit, installer le package precommit et installer les hooks en executant pre-commit</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+<h2>Installer les hooks de pre-commit<a class="headerlink" href="#installer-les-hooks-de-pre-commit" title="Lien vers cette rubrique">¶</a></h2>
+<p>Les hooks tournent sur la machine, avec uv :</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev
+uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>install
 </pre></div>
 </div>
-</section>
 </section>
 <section id="installation-de-la-plateforme-data">
 <h2>Installation de la plateforme DATA<a class="headerlink" href="#installation-de-la-plateforme-data" title="Lien vers cette rubrique">¶</a></h2>
-<p>Copier les variables d’environnement <code class="docutils literal notranslate"><span class="pre">data-platform/dags/.env.template</span></code> vers <code class="docutils literal notranslate"><span class="pre">data-platform/dags/.env</span></code> :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>data-platform/dags/.env.template<span class="w"> </span>data-platform/dags/.env
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>run-airflow
 </pre></div>
 </div>
-<p>Lancer les containers docker avec docker compose:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>compose<span class="w"> </span>--profile<span class="w"> </span>airflow<span class="w"> </span>up
-</pre></div>
-</div>
-<p>docker compose lancera :</p>
-<ul class="simple">
-<li><p>la base de données postgres nécessaire à la webapp de la carte</p></li>
-<li><p>la base de données postgres nécessaire à Airflow</p></li>
-<li><p>un webserver airflow</p></li>
-<li><p>un scheduler airflow en mode LocalExecutor</p></li>
-</ul>
+<p>Cette commande ajoute à la stack le profile <code class="docutils literal notranslate"><span class="pre">airflow</span></code> : l’entrepôt de données, la base d’Airflow, son webserver, son scheduler (LocalExecutor) et son dag-processor.</p>
+<p>Comme pour la webapp, aucun fichier d’environnement n’est nécessaire : la configuration d’Airflow est dans <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code>. Les secrets dont certains DAGs ont besoin (clés Scaleway par exemple) se mettent dans le <code class="docutils literal notranslate"><span class="pre">.env</span></code> racine, cf. <code class="docutils literal notranslate"><span class="pre">.env.template</span></code>. Si vous aviez un <code class="docutils literal notranslate"><span class="pre">data-platform/dags/.env</span></code>, il n’est plus lu : reportez-y vos secrets puis supprimez-le.</p>
 <p>accéder à l’interface d’Airflow en local <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> ; identifiant/mot de passe : airflow / airflow</p>
 <section id="tester-la-plateforme-data">
 <h3>Tester la plateforme Data<a class="headerlink" href="#tester-la-plateforme-data" title="Lien vers cette rubrique">¶</a></h3>
@@ -661,24 +612,20 @@ make<span class="w"> </span>-C<span class="w"> </span>data-platform<span class="
             <ul>
 <li><a class="reference internal" href="#">Installation de l’application en local</a><ul>
 <li><a class="reference internal" href="#environnement-de-developpement">Environnement de développement</a><ul>
-<li><a class="reference internal" href="#prerequis">Prérequis</a><ul>
-<li><a class="reference internal" href="#specificite-d-installation-pour-les-processeurs-mx-de-mac">Spécificité d’installation pour les processeurs Mx de Mac</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#prerequis">Prérequis</a></li>
 <li><a class="reference internal" href="#technologies">Technologies</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#profiles-docker-compose">Profiles Docker Compose</a></li>
 <li><a class="reference internal" href="#installation-rapide">Installation rapide</a></li>
-<li><a class="reference internal" href="#installation-de-la-webapp-uniquement">Installation de la Webapp uniquement</a><ul>
-<li><a class="reference internal" href="#configuration">Configuration</a></li>
-<li><a class="reference internal" href="#installation-execution">Installation &amp; Exécution</a></li>
-<li><a class="reference internal" href="#creer-un-superutilisatteur">Créer un superutilisatteur</a></li>
-<li><a class="reference internal" href="#lancement">Lancement</a></li>
-<li><a class="reference internal" href="#tester-l-application">Tester l’application</a></li>
-<li><a class="reference internal" href="#installer-les-hooks-de-pre-commit">Installer les hooks de pre-commit</a></li>
+<li><a class="reference internal" href="#services-docker-compose">Services Docker Compose</a></li>
+<li><a class="reference internal" href="#commandes-du-quotidien">Commandes du quotidien</a><ul>
+<li><a class="reference internal" href="#versions-de-python-node-et-uv">Versions de Python, Node et uv</a></li>
+<li><a class="reference internal" href="#dependances-a-jour">Dépendances à jour</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#variables-d-environnement">Variables d’environnement</a></li>
+<li><a class="reference internal" href="#tester-l-application">Tester l’application</a></li>
+<li><a class="reference internal" href="#installer-les-hooks-de-pre-commit">Installer les hooks de pre-commit</a></li>
 <li><a class="reference internal" href="#installation-de-la-plateforme-data">Installation de la plateforme DATA</a><ul>
 <li><a class="reference internal" href="#tester-la-plateforme-data">Tester la plateforme Data</a></li>
 </ul>

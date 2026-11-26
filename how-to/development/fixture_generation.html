@@ -361,7 +361,7 @@
 Celles-ci sont basées sur de la donnée issue de la base de production afin de tester l’application sur des situations <em>de la vraie vie</em>.</p>
 <section id="generer-des-fixtures-cas-general">
 <h2>Générer des fixtures, cas général<a class="headerlink" href="#generer-des-fixtures-cas-general" title="Lien vers cette rubrique">¶</a></h2>
-<p>Toutes les fixtures à l’exception des <code class="docutils literal notranslate"><span class="pre">DisplayedActeur</span></code> (acteurs affichés) et <code class="docutils literal notranslate"><span class="pre">DisplayedPropositionService</span></code> (proposition de service de ces acteurs) peuvent être générées à partir d’une commande <code class="docutils literal notranslate"><span class="pre">make</span></code> :</p>
+<p>Les fixtures peuvent être générées à partir d’une commande <code class="docutils literal notranslate"><span class="pre">make</span></code>. Il n’y a pas de fixtures d’acteurs : les tests end-to-end utilisent la base d’échantillon, cf. <a class="reference internal" href="create_webapp_sample_db.html"><span class="std std-doc">create_webapp_sample_db.md</span></a>.</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>generate-fixtures
 
 <span class="c1"># il est conseillé de conserver dans git les fixtures à jour, et d&#39;embarquer</span>
@@ -371,62 +371,8 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 </pre></div>
 </div>
 </section>
-<section id="generer-des-fixtures-pour-les-acteurs-et-propositions-de-service">
-<h2>Générer des fixtures pour les acteurs et propositions de service<a class="headerlink" href="#generer-des-fixtures-pour-les-acteurs-et-propositions-de-service" title="Lien vers cette rubrique">¶</a></h2>
-<p>Le volume de données de la table des Acteurs étant gigantesque, les fixtures de cette table sont générées manuellement, lorsque le modèle de données évolue et empêche leur installation ou lorsqu’il est nécessaire d’ajouter des données de test pour couvrir plus exhaustivement le contexte d’utilisation réel de l’application.</p>
-<p>Pour ce faire, sont listées dans le <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> une liste de <code class="docutils literal notranslate"><span class="pre">pk</span></code> d’acteurs (champ <code class="docutils literal notranslate"><span class="pre">identifiant_unique</span></code>).
-Ces identifiants ont été récupérés à la main, depuis le frontend de la carte :</p>
-<ol class="arabic simple">
-<li><p>Faire une recherche pour la zone souhaitée</p></li>
-<li><p>Récupérer le lien de l’acteur dans la fiche détaillée (en cliquant sur le lien de partage par exemple) –&gt; https://quefairedemesdechets.ademe.fr/adresse_details/3kQK86DEWA3ZrcirdzzBez l’id est 3kQK86DEWA3ZrcirdzzBez</p></li>
-<li><p>Chercher cet id dans l’admin Django : https://quefairedemesdechets.ademe.fr/admin/qfdmo/displayedacteur/?q=eYKxBYDMDoMXTr8iiw69Ek</p></li>
-<li><p>Récupérer le champ <code class="docutils literal notranslate"><span class="pre">identifiant_unique</span></code> : il peut être un uuid ou un assemblage de chaînes de caractères mentionnant la source, par exemple <code class="docutils literal notranslate"><span class="pre">ocad3e_SGS-02069</span></code></p></li>
-<li><p>Ajouter cet identifiant dans le <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> à la suite des autres, derrière le flag <code class="docutils literal notranslate"><span class="pre">--pk</span></code> dans la commande <code class="docutils literal notranslate"><span class="pre">generate-fixtures-acteurs</span></code></p></li>
-<li><p>Une fois cela fait, il faut récupérer les <em>primary key</em> des propositions de service associées.
-Cela peut-être fait depuis le shell <code class="docutils literal notranslate"><span class="pre">django</span></code> :</p></li>
-</ol>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>shell
-</pre></div>
-</div>
-<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. importer le modèle Django</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qfdmo.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">DisplayedActeur</span>
-
-<span class="c1"># 2. Stocker les pks dans une variable. Les pks peuvent être copiées-collées depuis le Makefile</span>
-<span class="n">pks</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;uuid-dun-acteur&quot;</span><span class="p">,</span> <span class="s2">&quot;identifiant-dun-autre-acteur&quot;</span><span class="p">]</span>
-
-<span class="c1"># 3. Filtrer les acteurs par pks et en récupérer les pks de propositions de services associées</span>
-<span class="nb">list</span><span class="p">(</span><span class="n">DisplayedActeur</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk__in</span><span class="o">=</span><span class="n">pks</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s2">&quot;proposition_services__pk&quot;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-
-<span class="c1"># Sortie attendue: [2163243, 2163244, 2163245, 243160, 435885, 1699381, 738371, 738372, 719100]</span>
-</pre></div>
-</div>
-<ol class="arabic simple" start="7">
-<li><p>Cette liste de <code class="docutils literal notranslate"><span class="pre">pk</span></code> peut alors être collées dans le <code class="docutils literal notranslate"><span class="pre">Makefile</span></code></p></li>
-<li><p>Les fixtures peuvent être re-générées</p></li>
-</ol>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>generate-fixtures-acteurs
-
-<span class="c1"># il est conseillé de conserver dans git les fixtures à jour, et d&#39;embarquer</span>
-<span class="c1"># ces mises à jour dans les pull request.</span>
-git<span class="w"> </span>add<span class="w"> </span>qfdmo/fixtures
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;mise à jour des fixtures&quot;</span>
-</pre></div>
-</div>
-</section>
 <section id="id2">
 <h2>Utiliser les fixtures<a class="headerlink" href="#id2" title="Lien vers cette rubrique">¶</a></h2>
-<p>Les fixtures peuvent être utilisées de plusieurs manières :</p>
-<ul class="simple">
-<li><p>Dans les tests</p></li>
-<li><p>En local</p></li>
-<li><p>Dans la CI</p></li>
-</ul>
-<p>En local, on utilise généralement une base de production mais il peut être intéressant d’installer les fixtures afin d’avoir un environnement <em>iso-CI</em>.
-Pour ce faire :</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># ⚠️ Cette commande va supprimer les données locales, elle est donc à executer en conscience</span>
-make<span class="w"> </span>db-restore-local-for-tests
-</pre></div>
-</div>
 <p>Dans les tests, les fixtures peuvent être importées en utilisant la fonction <code class="docutils literal notranslate"><span class="pre">callcommand</span></code> de Django :</p>
 <div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.core.management</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_command</span>
 <span class="n">call_command</span><span class="p">(</span><span class="s1">&#39;loaddata&#39;</span><span class="p">,</span> <span class="s1">&#39;synonymes&#39;</span><span class="p">,</span> <span class="s1">&#39;produits&#39;</span><span class="p">)</span>
@@ -501,7 +447,6 @@ Django se charge de découvrir automatiquement la fixture correspondante.</p>
             <ul>
 <li><a class="reference internal" href="#">Utiliser les fixtures</a><ul>
 <li><a class="reference internal" href="#generer-des-fixtures-cas-general">Générer des fixtures, cas général</a></li>
-<li><a class="reference internal" href="#generer-des-fixtures-pour-les-acteurs-et-propositions-de-service">Générer des fixtures pour les acteurs et propositions de service</a></li>
 <li><a class="reference internal" href="#id2">Utiliser les fixtures</a></li>
 </ul>
 </li>
