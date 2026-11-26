@@ -10,11 +10,13 @@ on:
 
 # The S3 state backend has no locking: two applies of the stack must never
 # overlap. The group holds the build too, so an older run cannot apply after a
-# newer one. Deployments queue: a newer pending one replaces an older pending
-# one, the one in flight finishes.
+# newer one. queue: max keeps every pending run, where the default keeps only
+# the newest: the cache purge of a webapp deploy (_deploy-webapp-scaleway.yml)
+# shares this group and must not replace a pending new image.
 concurrency:
   group: deploy-nginx-${{ inputs.environment }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   nginx_docker:

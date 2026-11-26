@@ -8,7 +8,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+        <meta name="robots" content="{% block robots %}{% if BLOCK_ROBOTS %}noindex, nofollow{% else %}index, follow{% endif %}{% endblock %}">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         {# Meta for linkedin #}

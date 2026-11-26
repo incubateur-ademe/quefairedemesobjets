@@ -333,6 +333,17 @@ fmt-infra:
 	tofu fmt -recursive infrastructure
 	terragrunt hcl fmt infrastructure
 
+# Render servers.conf.erb in each mode (Scalingo, local, preview, gateway) and
+# run nginx -t on each rendering in docker without network
+.PHONY: nginx-check
+nginx-check:
+	./scripts/nginx_check.sh
+
+# Build the gateway image and test it against a fake Scaleway edge, offline
+.PHONY: nginx-gateway-test
+nginx-gateway-test:
+	./nginx/tests/gateway_test.sh
+
 .PHONY: dbt-generate-docs
 dbt-generate-docs:
 	make -C data-platform/dbt generate-docs

@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
-# Container entrypoint for preview environments.
+# Container entrypoint, shared by the webapp and worker containers.
 #
-# Nginx listens on the Scaleway container port (8000) and proxies to
-# gunicorn on 127.0.0.1:8001, matching production's two-tier setup.
+# CONTAINER_ROLE=worker  → django-tasks worker, next to an HTTP listener
+#                          (Scaleway needs one on the port for its probe)
+# anything else (default) → gunicorn on :$PORT, behind the nginx gateway
 set -euo pipefail
 
+if [[ "${CONTAINER_ROLE:-web}" == "worker" ]]; then
+  # db_worker stays in the foreground so that if it dies the container exits
+  # and Scaleway restarts it. The listener answers 200 with an empty listing;
+  # stderr kept, so that a failed bind shows in the logs.
+  python -m http.server "${PORT:-8000}" --bind 0.0.0.0 \
+    --directory "$(mktemp -d)" >/dev/null &
+  exec python manage.py db_worker
+fi
 
+# Previews only: preprod and prod run bin/post_deploy as a CI step before the
+# image is rolled out (RUN_MIGRATIONS_ON_START=false).
 if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
   echo "Applying database migrations..."
   python manage.py migrate --noinput
@@ -18,14 +29,15 @@ if [ "${RUN_MIGRATIONS_ON_START:-true}" = "true" ]; then
   python manage.py generate_consignes || echo "generate_consignes failed, starting anyway" >&2
 fi
 
-# Start nginx in the background (proxies :8000 → :8001).
-# If nginx dies, the liveness probe on :8000 will fail and Scaleway
-# restarts the container.
-nginx -g 'daemon off;' &
-
+# Same settings as bin/start on Scalingo. Keep-alive: 75 s, the default of
+# the nginx that faced the Scaleway edge before (gunicorn's is 2 s).
 exec gunicorn core.wsgi \
-  --bind "127.0.0.1:8001" \
-  --timeout 120 \
+  --bind "0.0.0.0:${PORT:-8000}" \
+  --worker-class gthread \
+  --preload \
+  --timeout "${GUNICORN_TIMEOUT:-120}" \
   --workers "${GUNICORN_WORKERS:-2}" \
-  --max-requests 1000 \
-  --max-requests-jitter 100
+  --threads "${GUNICORN_THREADS:-4}" \
+  --max-requests 10000 \
+  --max-requests-jitter 2500 \
+  --keep-alive "${GUNICORN_KEEPALIVE:-75}"
