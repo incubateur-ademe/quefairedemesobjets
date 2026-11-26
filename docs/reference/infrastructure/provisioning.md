@@ -92,6 +92,20 @@ output of the stack that creates the resource.
 
 ⚠️ The Terraform state is stored in a Scaleway S3 bucket: `s3://lvao-terraform-state`.
 
+The states of `preprod` and `prod`, and the plans saved with `-out`, are
+encrypted by OpenTofu before they leave the machine (AES-GCM, key derived from
+a passphrase). The passphrase of an environment is the secret
+`state-passphrase` at path `/terraform/<ENV>` in Scaleway Secret Manager:
+`root.hcl` reads it on every run, nothing has to be exported. The states of
+the preview stacks are not encrypted.
+
+⚠️ A state cannot be read without its passphrase: never delete this secret nor
+its versions, and keep a copy in the team's password manager.
+
+A state written before the encryption stays readable, and is encrypted by the
+next `terragrunt apply` of its stack, even one that changes nothing. To check
+a stack, its state object in the bucket must hold an `encrypted_data` key.
+
 #### Per environment
 
 The `preview` environment is used to test our IaC project. We intentionally destroy the infrastructure created in this environment once the Terraform configuration has been tested.
