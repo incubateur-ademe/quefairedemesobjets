@@ -29,10 +29,11 @@ Make sure you have administration rights on the project targeted by this infrast
 ```
 infrastructure/
 ├── environments/
+│   ├── root.hcl
 │   ├── prod/
-│   │   ├── terragrunt.hcl
-│   │   ├── terraform.tfvars.example
-│   │   └── terraform.tfvars -> not versioned
+│   │   └── database/
+│   │       ├── terragrunt.hcl
+│   │       └── secrets.example.json -> keys of the stack's secret
 │   ├── preprod/
 │   └── preview/
 └── modules/
@@ -45,12 +46,40 @@ infrastructure/
 
 #### Configuration
 
-1. Copy `environments/<ENV>/terraform.tfvars.example` to `terraform.tfvars`.
-2. Edit the values in `terraform.tfvars` with your information:
-   - `project_id`: Scaleway project ID
-   - `organization_id`: Scaleway organization ID
-   - `db_password`: secure password for the database
-   - …
+No local `terraform.tfvars` is needed.
+
+1. Export the Scaleway credentials, in your shell or in the repo root `.env`:
+   `SCW_ACCESS_KEY`, `SCW_SECRET_KEY`, `SCW_DEFAULT_PROJECT_ID`,
+   `SCW_DEFAULT_ORGANIZATION_ID`. `root.hcl` passes them to every stack.
+2. The other secrets of a stack live in Scaleway Secret Manager: one secret
+   per stack, named after it at path `/terraform/<ENV>`, holding a JSON object
+   with the keys of the stack's `secrets.example.json`. `root.hcl` reads it on
+   every `terragrunt` run, through `scripts/infrastructure/stack_secrets.sh`
+   (needs the `scw` CLI and `jq`). A stack without a `secrets.example.json`
+   has no secret.
+
+Your API key needs `SecretManagerReadOnly` and `SecretManagerSecretAccess` to
+plan or apply, and `SecretManagerFullAccess` to change a secret.
+
+To read or change the secret of a stack:
+
+```sh
+make -C infrastructure secrets-show ENV=preprod STACK=database > infrastructure/environments/preprod/database/secrets.json
+# edit secrets.json (gitignored), then
+make -C infrastructure secrets-push ENV=preprod STACK=database
+rm infrastructure/environments/preprod/database/secrets.json
+```
+
+`secrets-push` creates the secret if needed, adds a version and disables the
+previous one. It refuses a file whose keys differ from `secrets.example.json`:
+a new secret input is added there first.
+
+An input set in a stack's `terragrunt.hcl` wins over its secret, and a local
+`terraform.tfvars` wins over both.
+
+Only secrets go there. A value that is not one (a user name, a database name,
+an image tag) is written in the stack's `terragrunt.hcl`, or read from the
+output of the stack that creates the resource.
 
 ### Execution
 

@@ -70,8 +70,8 @@ resource "scaleway_container" "airflow_scheduler" {
     POSTGRES_USER                           = var.POSTGRES_USER
     POSTHOG_PERSONAL_API_KEY                = var.POSTHOG_PERSONAL_API_KEY
     SCW_ACCESS_KEY                          = var.SCW_ACCESS_KEY
-    SCW_DEFAULT_ORGANIZATION_ID             = var.SCW_DEFAULT_ORGANIZATION_ID
-    SCW_DEFAULT_PROJECT_ID                  = var.SCW_DEFAULT_PROJECT_ID
+    SCW_DEFAULT_ORGANIZATION_ID             = var.organization_id
+    SCW_DEFAULT_PROJECT_ID                  = var.project_id
     SCW_SECRET_KEY                          = var.SCW_SECRET_KEY
     SCW_SECRET_KEY_INFRA                    = var.SCW_SECRET_KEY_INFRA
     SECRET_KEY                              = var.SECRET_KEY

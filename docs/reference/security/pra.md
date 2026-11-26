@@ -54,7 +54,7 @@ Le détail des stratégies est dans [`backups.md`](backups.md). Synthèse :
    - Healthcheck (`HEALTHCHECK_URLS`).
    - Smoke tests manuels (recherche carte, assistant, Django Admin).
 6. Communication Mattermost `lvao-tour-de-controle`.
-7. **Post-mortem** : renommer / supprimer l'ancienne instance, mettre à jour Terragrunt (`terraform.tfvars` si endpoint changé), `terragrunt apply --all`.
+7. **Post-mortem** : renommer / supprimer l'ancienne instance, mettre à jour Terragrunt (inputs des stacks si endpoint changé), `terragrunt apply --all`.
 
 ### Scénario 2 — Perte d'une base secondaire (Warehouse ou Airflow)
 
@@ -88,7 +88,7 @@ Le détail des stratégies est dans [`backups.md`](backups.md). Synthèse :
 **Procédure** (PRA cross-region — perte de données ≤ 7 j)
 
 1. Provisionner de nouvelles bases RDB dans une **autre région Scaleway** à partir des copies cross-region (dumps quotidiens 7 j).
-2. Adapter `infrastructure/environments/prod/terraform.tfvars` (région, endpoints) et appliquer Terragrunt.
+2. Adapter `infrastructure/environments/root.hcl` (région, endpoints) et appliquer Terragrunt.
 3. Re-pousser les images Airflow vers un nouveau Container Registry de la région de secours.
 4. Reprovisionner les buckets S3 et restaurer les contenus depuis le dernier export disponible (snapshots horodatés pour `lvao-opendata`).
 5. Mettre à jour `DATABASE_URL` et `AWS_*` côté Scalingo + secrets Airflow.
@@ -106,7 +106,7 @@ Procédure de rotation détaillée dans [`secrets.md`](secrets.md). Pour les mot
    - Variables Scalingo (webapp).
    - `secret_environment_variables` Terragrunt + `terragrunt apply` (Airflow).
    - GitHub Environments `preprod` / `prod` (CI/CD).
-   - `terraform.tfvars` local (OpenTofu).
+   - Secrets des stacks dans Scaleway Secret Manager (`make -C infrastructure secrets-push`).
 4. Redéployer la webapp et les containers Airflow.
 5. Audit Sentry / logs pour détecter une exploitation.
 6. Notifier conformément à la politique [SECURITY.md](https://github.com/incubateur-ademe/quefairedemesobjets/blob/main/SECURITY.md) si nécessaire.
@@ -137,7 +137,7 @@ En cas d'incident **sur la prod uniquement** et si la preprod est en bon état, 
 | Console **Scaleway**                   | Restauration RDB, gestion CaaS, S3, Registry         | Admins projet `longuevieauxobjets` |
 | CLI **Scaleway** (`scw`)               | Scripts et automatisation                            | Équipe dev                         |
 | Console **Scalingo**                   | Redémarrage, scale, variables d'environnement webapp | Équipe dev (token + clé SSH)       |
-| **OpenTofu / Terragrunt**              | Re-provisionnement infrastructure                    | Équipe dev (`terraform.tfvars`)    |
+| **OpenTofu / Terragrunt**              | Re-provisionnement infrastructure                    | Équipe dev (Secret Manager)        |
 | **GitHub**                             | Code, Actions CI/CD, gestion des Environments        | Équipe dev                         |
 | **Mattermost** `lvao-tour-de-controle` | Communication incident                               | Équipe                             |
 | **Sentry**                             | Diagnostic erreurs applicatives                      | Équipe dev                         |

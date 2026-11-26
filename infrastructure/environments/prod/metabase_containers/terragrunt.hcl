@@ -29,16 +29,15 @@ inputs = {
   prefix = "qfdmod"
 
   metabase_registry_image = "metabase/metabase"
-  tag_docker              = "[tag_docker]"
+  tag_docker              = "v0.64.7.x"
   metabase_cpu_limit      = 1000
   metabase_memory_limit   = 2048
   metabase_min_scale      = 1
   metabase_max_scale      = 1
   metabase_timeout        = 300
 
-  MB_SITE_NAME             = "QFDMOD"
-  MB_ENCRYPTION_SECRET_KEY = "[MB_ENCRYPTION_SECRET_KEY]"
-  MB_DB_CONNECTION_URI     = "postgres://${dependency.database.outputs.metabase_db_username}:${dependency.database.outputs.metabase_db_password}@${dependency.database.outputs.metabase_endpoint_ip}:${dependency.database.outputs.metabase_endpoint_port}/${dependency.database.outputs.metabase_database_name}?sslmode=require"
+  MB_SITE_NAME         = "QFDMOD"
+  MB_DB_CONNECTION_URI = "postgres://${dependency.database.outputs.metabase_db_username}:${dependency.database.outputs.metabase_db_password}@${dependency.database.outputs.metabase_endpoint_ip}:${dependency.database.outputs.metabase_endpoint_port}/${dependency.database.outputs.metabase_database_name}?sslmode=require"
 
   # Public hostname routed by nginx_containers (wildcard CNAME).
   custom_domain = "metabase.quefairedemesobjets.ademe.fr"
