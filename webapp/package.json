@@ -30,7 +30,7 @@
   "devDependencies": {
     "@parcel/transformer-inline-string": "^2.16.4",
     "@playwright/test": "^1.65.0",
-    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/jest-dom": "^8.0.0",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.27",
     "@types/node": "^26.6.6",
