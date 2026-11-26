@@ -11,45 +11,45 @@
 | `data-platform/`             | Data platform (Airflow, dbt, notebooks)                    | Airflow, dbt, Python, pytest                                                |
 | `docs/`                      | Technical documentation                                    | Sphinx, Markdown                                                            |
 | `infrastructure/`            | Infrastructure deployment and management                   | OpenTofu, Terragrunt, Scaleway                                              |
-| `docker-compose.yml`         | Local databases, nginx proxy, Airflow                      | Docker Compose (`lvao` / `airflow` profiles)                                |
-| `webapp/nginx/`              | Local nginx (TLS via mkcert)                               | nginx                                                                       |
+| `docker-compose.yml`         | Local stack: webapp, worker, assets, nginx, DBs, Airflow   | Docker Compose (`airflow` profile)                                          |
+| `webapp/nginx/`              | Local nginx (HTTP on `.localhost`)                         | nginx                                                                       |
 | `Makefile`                   | Root command aliases (delegates to subprojects)            | Make                                                                        |
 | `scripts/`                   | Scripts outside the webapp (DB restore, backups)           | bash, SQL                                                                   |
 | `pyproject.toml` / `uv.lock` | uv workspace (Python 3.12)                                 | uv                                                                          |
 
 **Python:** uv workspace at the repo root (`members = ["webapp", "data-platform"]`), single `uv.lock`. The root project depends only on the webapp member (Scalingo build). `uv sync` alone does **not** install data-platform.
 
+**Local stack:** Docker only, see [docs/how-to/development/installation.md](./docs/how-to/development/installation.md). Node, Python and uv versions come from `.tool-versions`.
+
 ```sh
-# Full local install (webapp + data-platform + all dependency groups)
-uv sync --all-packages --all-groups
-npm ci
+make setup   # build the images, start the stack, migrate, populate an empty DB
+make up      # after a git pull
 ```
 
-Webapp-only: `uv sync --group dev --group webapp-dev`. Data-platform tests (as in CI): `uv sync --all-packages --group dev`. Targeting a member with `cd webapp && uv sync` / `cd data-platform && uv sync` also works, but still needs the relevant `--group` flags for pytest/ruff.
+On the host (pre-commit hooks, editor), webapp-only: `uv sync --group dev --group webapp-dev`. Data-platform tests (as in CI): `uv sync --all-packages --group dev`. Targeting a member with `cd webapp && uv sync` / `cd data-platform && uv sync` also works, but still needs the relevant `--group` flags for pytest/ruff.
 
-**JavaScript:** npm workspace (`webapp/` is the only workspace). Install once from the repo root with `npm ci`. Node 20.
+**JavaScript:** npm workspace (`webapp/` is the only workspace). Node 24, `npm ci` runs in the `assets` container.
 
 Project-specific Make targets live in `webapp/Makefile` and `data-platform/Makefile`. The root `Makefile` exposes prefixed aliases (`webapp-unit-test`, `data-platform-dags-test`, …). Unprefixed targets (`unit-test`, `dags-test`) only exist inside those directories.
 
 ## Common commands
 
-| Task                                             | Directory               | Command                               |
-| ------------------------------------------------ | ----------------------- | ------------------------------------- |
-| Django + `db_worker`                             | `webapp/`               | `make runserver`                      |
-| Parcel watch                                     | `webapp/`               | `npm run watch`                       |
-| Webapp DBs + local nginx                         | repo root               | `docker compose --profile lvao up -d` |
-| Airflow stack                                    | repo root               | `make run-airflow`                    |
-| Format (Black + Ruff; SqlFluff in data-platform) | repo root or subproject | `make format` / `make check-format`   |
-| Webapp unit tests                                | `webapp/`               | `make unit-test`                      |
-| Webapp integration tests                         | `webapp/`               | `make integration-test`               |
-| Webapp JS tests (Jest)                           | `webapp/`               | `make js-test`                        |
-| Webapp e2e (Playwright)                          | `webapp/`               | `make e2e-test`                       |
-| DAG tests                                        | `data-platform/`        | `make dags-test`                      |
-| TypeScript lint / Prettier                       | `webapp/`               | `npm run lint` / `npm run format`     |
+| Task                                             | Directory               | Command                             |
+| ------------------------------------------------ | ----------------------- | ----------------------------------- |
+| Whole local stack                                | repo root               | `make setup` / `make up`            |
+| Django + `db_worker` + Parcel watch              | `webapp/`               | `make runserver`                    |
+| Airflow stack                                    | repo root               | `make run-airflow`                  |
+| Format (Black + Ruff; SqlFluff in data-platform) | repo root or subproject | `make format` / `make check-format` |
+| Webapp unit tests                                | `webapp/`               | `make unit-test`                    |
+| Webapp integration tests                         | `webapp/`               | `make integration-test`             |
+| Webapp JS tests (Jest)                           | `webapp/`               | `make js-test`                      |
+| Webapp e2e (Playwright)                          | `webapp/`               | `make e2e-test`                     |
+| DAG tests                                        | `data-platform/`        | `make dags-test`                    |
+| TypeScript lint / Prettier                       | `webapp/`               | `npm run lint` / `npm run format`   |
 
 Equivalent from repo root: `make webapp-unit-test`, `make webapp-integration-test`, `make webapp-e2e-test`, `make webapp-js-test`, `make data-platform-dags-test`.
 
-Django management commands: `uv run python manage.py …` from `webapp/` (or `make migrate`, `make shell`, … in that Makefile).
+Django management commands run in the containers: `make migrate`, `make shell`, … from `webapp/`.
 
 ## Using English or French
 
@@ -93,7 +93,7 @@ Use English in code and technical markdown. Details: [docs/reference/coding/READ
 │   ├── data/                # Backoffice data / suggestions
 │   ├── infotri/             # Infotri widget
 │   ├── stats/               # Stats API
-│   ├── nginx/               # Local nginx + mkcert certs
+│   ├── nginx/               # Local nginx
 │   ├── static/
 │   │   ├── to_compile/      # TypeScript / CSS sources (Parcel)
 │   │   ├── to_collect/      # Extra static assets

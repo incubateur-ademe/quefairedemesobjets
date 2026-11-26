@@ -17,6 +17,7 @@ describe("SearchSolutionFormController", () => {
                 <div data-search-solution-form-target="jai"></div>
                 <div data-search-solution-form-target="jecherche"></div>
                 <input data-search-solution-form-target="actionList" />
+                <input type="checkbox" data-search-solution-form-target="reparerInput" />
             </div>
         `
     const application = Application.start()

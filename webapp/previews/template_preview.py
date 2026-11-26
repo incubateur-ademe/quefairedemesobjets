@@ -442,7 +442,7 @@ class ComponentsPreview(LookbookPreview):
     @component_docs("ui/components/code/code.md")
     def code(self, **kwargs):
         context = {
-            "script": '<script src="https://quefairedemesdechets.ademe.local/iframe.js"></script>',
+            "script": f'<script src="{base_url}/iframe.js"></script>',
         }
         return render_to_string("ui/components/code/code.html", context)
 

@@ -32,43 +32,15 @@ git rebase --continue
 
 ## Mise en place du poste developpeur
 
-### Je n'arrive pas a accéder à l'interface via une url \*.local
+### Je n'arrive pas a accéder à l'interface via une url \*.localhost
 
-L'interface sur un poste développeur doit-être accessible via les URLs:
+L'interface sur un poste développeur est accessible sur [http://quefairedemesdechets.localhost](http://quefairedemesdechets.localhost), sans configuration de `/etc/hosts`.
 
-- http://quefairedemesdechets.ademe.local/
-- http://quefairedemesobjets.ademe.local/
-- http://lvao.ademe.local/ : redirigé vers le site institutionnel
+Si tel n'est pas le cas :
 
-Si tel n'est pas le cas, voici quelques configuration à vérifier
-
-#### /etc/hosts
-
-Dans la configuration `/etc/hosts`, vérifier la présence des lignes
-
-```
-127.0.0.1       lvao.ademe.local
-127.0.0.1       quefairedemesdechets.ademe.local
-127.0.0.1       quefairedemesobjets.ademe.local
-```
-
-#### Vérifier la présence des certificats ssl
-
-Si les certificats ne sont pas présents, les logs du serveur nginx affichent une erreur type
-
-```
-lvao-proxy-1  | 2025/05/20 10:47:25 [emerg] 1#1: cannot load certificate "/etc/nginx/ssl/lvao.ademe.local+1.pem": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/ssl/lvao.ademe.local+1.pem, r) error:10000080:BIO routines::no such file)
-```
-
-Dans ce cas, (re-)générer les certificats
-
-```
-make init-certs
-```
-
-#### .env
-
-Enfin, vérifier les variables d'environnement en prenant exemple sur le fichier `.env.template`
+- vérifier que la stack est démarrée et saine : `docker compose ps`
+- vérifier que le port 80 n'est pas déjà pris sur la machine ; sinon, définir `HTTP_PORT` dans `.env`
+- Django répond aussi directement sur [http://localhost:8000](http://localhost:8000)
 
 ## Bases de données / postgres_fdw
 
@@ -118,9 +90,9 @@ Cela signifie que la clé secrète JWT pour valider les tokens d'accès aux logs
 
 1. Générer une nouvelle clé secrète avec `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
 
-2. Remplacer la clé dans `data-platform/dags/.env` en localisant la ligne `AIRFLOW__API_AUTH__JWT_SECRET` et en la remplaçant avec la clé générée
+2. Définir `AIRFLOW__API_AUTH__JWT_SECRET` avec la clé générée dans le `.env` à la racine du dépôt
 
-3. Redémarrer Airflow avec `docker-compose --profile airflow down` puis `docker-compose --profile airflow up -d`
+3. Redémarrer Airflow avec `make down` puis `make run-airflow`
 
 ### Visualiser les logs d'un DAG en échec
 
@@ -231,7 +203,7 @@ Si une image docker ne démarre pas, par exemple si elle ne trouve pas ses libra
 Build:
 
 ```sh
-docker build --no-cache -f airflow-webserver.Dockerfile -t airflow-webserver .
+docker build --no-cache $(make -s versions | sed 's/^/--build-arg /') -f data-platform/Dockerfile --target webserver -t airflow-webserver .
 ```
 
 Executer un shell sur l'image:
@@ -279,8 +251,6 @@ SCALEWAY_REGISTRY="rg.fr-par.scw.cloud"
 SCALEWAY_NAMESPACE="ns-qfdmo"
 TAG="hotfix-vX.Y.Z"
 SCALEWAY_DOCKER_SECRET=$(scw config get secret-key)
-# Version de apache-airflow dans data-platform/pyproject.toml, requise par les Dockerfiles
-AIRFLOW_VERSION=$(make -s airflow-version)
 ```
 
 ### 1. Connexion au registre Scaleway
@@ -292,21 +262,21 @@ echo $SCALEWAY_DOCKER_SECRET | docker login $SCALEWAY_REGISTRY -u nologin --pass
 ### 2. Construction et push de l'image airflow-scheduler
 
 ```sh
-docker build --platform=linux/amd64 --build-arg AIRFLOW_VERSION=$AIRFLOW_VERSION -f ./data-platform/airflow-scheduler.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG .
+docker build --platform=linux/amd64 $(make -s versions | sed 's/^/--build-arg /') -f data-platform/Dockerfile --target scheduler -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG .
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-scheduler:$TAG
 ```
 
 ### 3. Construction et push de l'image airflow-webserver
 
 ```sh
-docker build --platform=linux/amd64 --build-arg AIRFLOW_VERSION=$AIRFLOW_VERSION -f ./data-platform/airflow-webserver.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG .
+docker build --platform=linux/amd64 $(make -s versions | sed 's/^/--build-arg /') -f data-platform/Dockerfile --target webserver -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG .
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-webserver:$TAG
 ```
 
 ### 4. Construction et push de l'image airflow-dag-processor
 
 ```sh
-docker build --platform=linux/amd64 --build-arg AIRFLOW_VERSION=$AIRFLOW_VERSION -f ./data-platform/airflow-dag-processor.Dockerfile -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG .
+docker build --platform=linux/amd64 $(make -s versions | sed 's/^/--build-arg /') -f data-platform/Dockerfile --target dag-processor -t $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG .
 docker push $SCALEWAY_REGISTRY/$SCALEWAY_NAMESPACE/airflow-dag-processor:$TAG
 ```
 

@@ -73,32 +73,12 @@ def _create_schema_public_in_db(
 
 
 def create_schema_webapp_public_in_warehouse_db():
-    # This command usually runs locally, where postgres runs in Docker.
-    # Locally, the postgres port set for Django is different than the
-    # one exposed by the container as we expose the 5432 port on 6543
-    # port on the machine.
-    # As the django server does not run in docker, we cannot use the same port
-    # as the postgres server uses 5432 port internally.
-    #
-    # This logic could be removed if the django server was running in docker, but
-    # this is not planned at the moment.
-    db_port = (
-        5432
-        if settings.DATABASES["default"]["HOST"] == "localhost"
-        else settings.DATABASES["default"]["PORT"]
-    )
-    db_host = (
-        "lvao-webapp-db"
-        if settings.DATABASES["default"]["HOST"] == "localhost"
-        else settings.DATABASES["default"]["HOST"]
-    )
-
     return _create_schema_public_in_db(
         current_db_connection_name="warehouse",
         remote_server_name=settings.REMOTE_WEBAPP_SERVERNAME,
         remote_schema_name=settings.REMOTE_WEBAPP_SCHEMANAME,
-        db_host=db_host,
-        db_port=db_port,
+        db_host=settings.DATABASES["default"]["HOST"],
+        db_port=settings.DATABASES["default"]["PORT"],
         db_name=settings.DATABASES["default"]["NAME"],
         db_user=settings.DATABASES["default"]["USER"],
         db_password=settings.DATABASES["default"]["PASSWORD"],
@@ -106,23 +86,12 @@ def create_schema_webapp_public_in_warehouse_db():
 
 
 def create_schema_warehouse_public_in_webapp_db():
-    db_port = (
-        5432
-        if settings.DATABASES["warehouse"]["HOST"] == "localhost"
-        else settings.DATABASES["warehouse"]["PORT"]
-    )
-    db_host = (
-        "lvao-warehouse-db"
-        if settings.DATABASES["warehouse"]["HOST"] == "localhost"
-        else settings.DATABASES["warehouse"]["HOST"]
-    )
-
     return _create_schema_public_in_db(
         current_db_connection_name="default",
         remote_server_name=settings.REMOTE_WAREHOUSE_SERVERNAME,
         remote_schema_name=settings.REMOTE_WAREHOUSE_SCHEMANAME,
-        db_host=db_host,
-        db_port=db_port,
+        db_host=settings.DATABASES["warehouse"]["HOST"],
+        db_port=settings.DATABASES["warehouse"]["PORT"],
         db_name=settings.DATABASES["warehouse"]["NAME"],
         db_user=settings.DATABASES["warehouse"]["USER"],
         db_password=settings.DATABASES["warehouse"]["PASSWORD"],

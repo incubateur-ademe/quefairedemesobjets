@@ -6,6 +6,9 @@
     "build:revue": "npm -w webapp/revue-front run build",
     "scalingo-postbuild": "npm run build && npm run build:revue"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "workspaces": [
     "webapp",
     "webapp/revue-front"

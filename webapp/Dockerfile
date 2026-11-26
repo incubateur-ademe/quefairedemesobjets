@@ -1,7 +1,25 @@
+# The versions come from .tool-versions, through make (versions.mk)
+ARG NODE_VERSION
+ARG PYTHON_VERSION
+ARG UV_VERSION
+
+FROM ghcr.io/astral-sh/uv:${UV_VERSION:?build_through_make_which_reads_.tool-versions} AS uv
+
+
 ############################################
-# Stage 1: build frontend assets (Node)
+# Stage 1: Node, then the frontend assets build
 ############################################
-FROM node:24-slim AS node_build
+# Also the image of the local `assets` service (docker-compose.yml)
+FROM node:${NODE_VERSION:?build_through_make_which_reads_.tool-versions}-slim AS node_base
+
+# Mount points of the node_modules volumes of the `assets` service: a volume
+# takes the ownership of the directory it is first mounted on, and the service
+# runs as the host user.
+ENV HOME=/tmp
+RUN install -d -m 0777 /app/node_modules /app/webapp/node_modules /app/webapp/revue-front/node_modules
+
+
+FROM node_base AS node_build
 
 WORKDIR /build
 
@@ -20,7 +38,7 @@ RUN npm -w webapp/revue-front run build
 ############################################
 # Compiles servers.conf.erb — the same template Scalingo uses — with
 # preview-appropriate values baked in at build time.
-FROM ruby:alpine AS nginx_config
+FROM ruby:4.0.10-alpine AS nginx_config
 
 WORKDIR /build
 COPY servers.conf.erb .
@@ -42,7 +60,7 @@ RUN NGINX_ALLOW_ALL_HOSTS=1 \
 ############################################
 # Stage 3: system packages needed at runtime
 ############################################
-FROM python:3.12-slim-bookworm AS runtime_base
+FROM python:${PYTHON_VERSION:?build_through_make_which_reads_.tool-versions}-slim-bookworm AS runtime_base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -60,6 +78,44 @@ RUN apt-get update \
 
 
 ############################################
+# Local development image (docker-compose.yml)
+############################################
+# Same system packages and Python as the runtime image. The repository is
+# bind-mounted on /app, so the virtualenv lives outside of it.
+FROM runtime_base AS dev
+
+# UV_PYTHON: the Python of the image, whatever the mounted .python-version says
+ENV UV_LINK_MODE=copy \
+    UV_PYTHON=/usr/local/bin/python \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_CACHE_DIR=/tmp/uv-cache \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:${PATH}" \
+    HOME=/tmp
+
+# gettext for compilemessages, git for uv to install django-dsfr from its git
+# fork (tool.uv.sources)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=uv /uv /bin/
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+COPY webapp/pyproject.toml webapp/pyproject.toml
+COPY data-platform/pyproject.toml data-platform/pyproject.toml
+# Group-writable: the container runs as the host user, in group 0
+RUN UV_NO_CACHE=1 uv sync --frozen --group dev --group webapp-dev \
+    && chmod -R g=u /opt/venv
+
+COPY webapp/bin/dev-entrypoint.sh /usr/local/bin/dev-entrypoint.sh
+WORKDIR /app/webapp
+ENTRYPOINT ["dev-entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+############################################
 # Stage 4: Python dependencies and static files
 ############################################
 FROM runtime_base AS python_build
@@ -73,7 +129,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gettext git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
+COPY --from=uv /uv /bin/
 
 WORKDIR /app
 
@@ -88,12 +144,12 @@ COPY webapp/ /app/webapp
 # Internationalisation and customisation of Wagtail messages.
 # This must be ran from git repo root for some obscure reason.
 # Running it from webapp subdirectory causes issues
-RUN SECRET_KEY=dummy python /app/webapp/manage.py compilemessages -l fr
+RUN SECRET_KEY=dummy DATABASE_URL=postgis://build python /app/webapp/manage.py compilemessages -l fr
 
 WORKDIR /app/webapp
 # Copy built frontend assets, then collect them
 COPY --from=node_build /build/webapp/static/compiled/ static/compiled/
-RUN SECRET_KEY=dummy python manage.py collectstatic --noinput
+RUN SECRET_KEY=dummy DATABASE_URL=postgis://build python manage.py collectstatic --noinput
 
 
 ############################################
