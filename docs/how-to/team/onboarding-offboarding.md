@@ -37,7 +37,7 @@ Légende :
 | **Airflow UI** (`webserver`)                                                                          | Admin                  | Admin                  | —                      | —      | —      |
 | **Scaleway Container Registry** `ns-qfdmo`                                                            | —                      | Push/Pull              | —                      | —      | —      |
 | **Scaleway Object Storage** (`qfdmo-interface`, `lvao-opendata`…)                                     | Read (opendata)        | Admin                  | —                      | —      | —      |
-| **OpenTofu / Terragrunt** (`terraform.tfvars`, bucket `lvao-terraform-state`)                         | —                      | Admin                  | —                      | —      | —      |
+| **OpenTofu / Terragrunt** (Secret Manager `/terraform`, bucket `lvao-terraform-state`)                | —                      | Admin                  | —                      | —      | —      |
 | **Sentry** (beta.gouv — projet `que-faire-de-mes-objets`)                                             | Read                   | Admin                  | Read                   | —      | —      |
 | **PostHog EU**                                                                                        | Read                   | Admin                  | Read                   | —      | Read   |
 | **Matomo** (`stats.beta.gouv.fr`)                                                                     | Read                   | Read                   | Read                   | Read   | Read   |

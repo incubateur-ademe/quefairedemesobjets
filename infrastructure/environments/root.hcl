@@ -1,3 +1,17 @@
+locals {
+  environment = basename(dirname(get_terragrunt_dir()))
+  stack       = basename(get_terragrunt_dir())
+
+  # A stack that ships a secrets.example.json takes the inputs listed there
+  # from Scaleway Secret Manager: secret <stack> at path /terraform/<environment>,
+  # a JSON object written by `make -C infrastructure secrets-push`.
+  secrets = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "${get_parent_terragrunt_dir()}/../../scripts/infrastructure/stack_secrets.sh",
+    local.environment, local.stack,
+  ))
+}
+
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite"
@@ -44,9 +58,16 @@ generate "common_variables" {
   contents  = file("variables.tf")
 }
 
-inputs = {
-  prefix          = "lvao"
-  environment     = "${basename(dirname(get_terragrunt_dir()))}"
-  project_id      = "[project_id]"
-  organization_id = "[organization_id]"
-}
+# The Scaleway credentials come from the SCW_* environment variables, like the
+# provider's. A stack's own inputs win over its secret.
+inputs = merge(
+  {
+    prefix          = "lvao"
+    environment     = local.environment
+    access_key      = get_env("SCW_ACCESS_KEY", "")
+    secret_key      = get_env("SCW_SECRET_KEY", "")
+    project_id      = get_env("SCW_DEFAULT_PROJECT_ID", "")
+    organization_id = get_env("SCW_DEFAULT_ORGANIZATION_ID", "")
+  },
+  local.secrets,
+)
